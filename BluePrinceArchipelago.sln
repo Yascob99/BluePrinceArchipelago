@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluePrinceArchipelago", "BluePrinceArchipelago\BluePrinceArchipelago.csproj", "{3255FA69-A60E-D6C6-F5FE-2C6DF42574D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3255FA69-A60E-D6C6-F5FE-2C6DF42574D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3255FA69-A60E-D6C6-F5FE-2C6DF42574D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3255FA69-A60E-D6C6-F5FE-2C6DF42574D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3255FA69-A60E-D6C6-F5FE-2C6DF42574D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A8BE7883-BED5-4F2B-91BE-8DF65BC3806F}
+	EndGlobalSection
+EndGlobal

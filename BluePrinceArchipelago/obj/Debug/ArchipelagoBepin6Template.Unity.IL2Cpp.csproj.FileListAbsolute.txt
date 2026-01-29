@@ -1,0 +1,11 @@
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ArchipelagoBepin6Template.Unity.IL2Cpp.csproj.AssemblyReference.cache
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ArchipelagoBepin6Template.Unity.IL2Cpp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ArchipelagoBepin6Template.Unity.IL2Cpp.csproj.CoreCompileInputs.cache
+C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.deps.json
+C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.dll
+C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.pdb
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.dll
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\refint\BluePrinceArchipelago.dll
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.pdb
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ref\BluePrinceArchipelago.dll
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\Archipel.C0D13BB9.Up2Date
