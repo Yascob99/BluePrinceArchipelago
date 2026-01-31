@@ -35,7 +35,7 @@
     </Target>
 
     <ItemGroup>
-        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0" />
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0" IncludeAssets="compile" />
         <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="2.0.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -50,6 +50,9 @@
     <ItemGroup>
       <Reference Include="Assembly-CSharp">
         <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="Assembly-CSharp-firstpass">
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp-firstpass.dll</HintPath>
       </Reference>
       <Reference Include="Il2Cppmscorlib">
         <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "g/JDLPpeszo=",
+  "dgSpecHash": "Vt24YiNnKGw=",
   "success": true,
   "projectFilePath": "D:\\Github\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
   "expectedPackageFiles": [
@@ -97,5 +97,15 @@
     "C:\\Users\\Chase\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.36\\microsoft.netcore.app.ref.6.0.36.nupkg.sha512",
     "C:\\Users\\Chase\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.36\\microsoft.aspnetcore.app.ref.6.0.36.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "message": "Problem reading the cache file D:\\Github\\BluePrinceArchipelago\\BluePrinceArchipelago\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0.",
+      "projectPath": "D:\\Github\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\Github\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
+      "targetGraphs": []
+    }
+  ]
 }

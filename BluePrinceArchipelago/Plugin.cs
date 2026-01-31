@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using BepInEx.Unity.IL2CPP.Utils;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.ModRooms;
 using BluePrinceArchipelago.Utils;

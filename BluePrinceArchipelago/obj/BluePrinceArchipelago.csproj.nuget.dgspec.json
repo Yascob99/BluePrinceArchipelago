@@ -52,6 +52,7 @@
           "targetAlias": "net6.0",
           "dependencies": {
             "Archipelago.MultiClient.Net": {
+              "include": "Compile",
               "target": "Package",
               "version": "[6.7.0, )"
             },

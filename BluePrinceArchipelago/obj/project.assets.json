@@ -11,10 +11,9 @@
           "lib/net6.0/Newtonsoft.Json.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Archipelago.MultiClient.Net.dll": {
+          "lib/net6.0/_._": {
             "related": ".pdb;.xml"
-          },
-          "lib/net6.0/Newtonsoft.Json.dll": {}
+          }
         }
       },
       "Archipelago.MultiClient.Net.Analyzers/2.0.1": {
@@ -4782,6 +4781,7 @@
         "targetAlias": "net6.0",
         "dependencies": {
           "Archipelago.MultiClient.Net": {
+            "include": "Compile",
             "target": "Package",
             "version": "[6.7.0, )"
           },
@@ -4829,5 +4829,13 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file D:\\Github\\BluePrinceArchipelago\\BluePrinceArchipelago\\obj\\project.nuget.cache : '<' is an invalid start of a property name. Expected a '\"'. Path: $ | LineNumber: 2 | BytePositionInLine: 0."
+    }
+  ]
 }
