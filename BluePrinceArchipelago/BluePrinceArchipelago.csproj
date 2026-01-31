@@ -18,7 +18,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>C:\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\plugins\$(AssemblyName)</OutputPath>
+        <OutputPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\$(AssemblyName)</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
@@ -40,7 +40,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.753" IncludeAssets="compile" />
+        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.753" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -49,28 +49,28 @@
 
     <ItemGroup>
       <Reference Include="Assembly-CSharp">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp.dll</HintPath>
       </Reference>
       <Reference Include="Il2Cppmscorlib">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
       </Reference>
       <Reference Include="Il2CppSystem">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.dll</HintPath>
       </Reference>
       <Reference Include="PlayMaker">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\PlayMaker.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\PlayMaker.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine.CoreModule">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine.IMGUIModule">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine.TextRenderingModule">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
       </Reference>
     </ItemGroup>
 
