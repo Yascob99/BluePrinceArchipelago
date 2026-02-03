@@ -1,11 +1,10 @@
 ﻿using BluePrinceArchipelago.Utils;
-using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace BluePrinceArchipelago.ModRooms
+namespace BluePrinceArchipelago.Core
 {
     public class ModRoomManager {
         private List<ModRoom> _Rooms = [];
@@ -43,6 +42,7 @@ namespace BluePrinceArchipelago.ModRooms
             }
 
         }
+        // Updates the count of how many of each room is in the house.
         public void UpdateRoomsInHouse()
         {
             PlayMakerArrayListProxy rooms = ModInstance.RoomsInHouse?.GetComponent<PlayMakerArrayListProxy>();
@@ -54,7 +54,7 @@ namespace BluePrinceArchipelago.ModRooms
                 }
             }
         }
-
+        // Returns the ModRoom object by it's name.
         public ModRoom GetRoomByName(string name)
         {
             foreach (ModRoom room in _Rooms) { 
@@ -62,9 +62,8 @@ namespace BluePrinceArchipelago.ModRooms
             }
             return null;
         }
-
-        public void AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool isRandomizable = true) {
-            AddRoom(new ModRoom(name, GameObject.Find("__SYSTEM/The Room Engines/" + name), pickerArrays, isUnlocked, isRandomizable));
+        public void AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
+            AddRoom(new ModRoom(name, GameObject.Find("__SYSTEM/The Room Engines/" + name), pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
         }
 
         public void UpdateRoomPools() {
@@ -75,7 +74,7 @@ namespace BluePrinceArchipelago.ModRooms
             }
         }
     }
-    public class ModRoom(String name, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = true)
+    public class ModRoom(String name, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false)
     {
         private string _Name = name;
         public string Name { get { return _Name; } set { _Name = value; } }
@@ -102,8 +101,19 @@ namespace BluePrinceArchipelago.ModRooms
         }
 
         // Stores if the room has been drafted for tracking checks.
-        private bool _HasBeenDrafted = false;
-        public bool HasBeenDrafted { get { return _HasBeenDrafted; } set { _HasBeenDrafted = value; } }
+        private bool _HasBeenDrafted = hasBeenDrafted;
+        public bool HasBeenDrafted { 
+            get { return _HasBeenDrafted; } 
+            set {
+                //Send the room drafted event on the first time this room is drafted only.
+                if (!_HasBeenDrafted && value)
+                {
+                        ModInstance.Instance.ModEventHandler.OnFirstDrafted(this);
+                        _HasBeenDrafted = value;
+                }
+                // No changes to value once the room has been drafted once, or if someone is not trying to set this to true for some stupid reason.
+            }     
+        }
 
 
         // For handling special rooms. Defaults to things that are not in the randomizable pool.

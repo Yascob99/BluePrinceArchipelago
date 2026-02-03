@@ -1,7 +1,8 @@
 ﻿using BepInEx;
 using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.ModRooms;
+using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Events;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using System;
@@ -13,8 +14,17 @@ namespace BluePrinceArchipelago
 {
     internal class ModInstance : MonoBehaviour
     {
+        public ModEventHandler ModEventHandler = new ModEventHandler(); //Initialize event handler
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
         private static GameObject _PlanPicker = new();
+        public static ModInstance Instance;
+
+        private static bool _IsInRun;
+        public static bool IsInRun {
+            get { return _IsInRun; }
+            set { _IsInRun = value; }
+        }
+
         public static GameObject PlanPicker {
             get { return _PlanPicker; }
             set { _PlanPicker = value; }
@@ -39,6 +49,7 @@ namespace BluePrinceArchipelago
         }
         public ModInstance(IntPtr ptr) : base(ptr)
         {
+            Instance = this; //Set the modInstance for easy access.
         }
         private void Start()
         {
@@ -56,6 +67,7 @@ namespace BluePrinceArchipelago
                 LoadArrays();
                 InitializeRooms();
                 HasInitializedRooms = true;
+                ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
                 Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches");
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
@@ -82,7 +94,7 @@ namespace BluePrinceArchipelago
                     targetName = targetObj.name;
                 }
             }
-            Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}");
+            //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}");
         }
         //Called by the item patch whenever an item is spawned.
         public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
@@ -99,6 +111,37 @@ namespace BluePrinceArchipelago
                     Plugin.BepinLogger.LogMessage($"SpawnedObj: {spawnedObj.value.name} - {transformObj.transform.position.ToString()}");
                 }
             }
+        }
+        public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
+            if (obj != null)
+            {
+                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
+            }
+            if (transformObj != null)
+            {
+                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+            }
+            ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
+            if (room != null) {
+                if (!room.HasBeenDrafted)
+                {
+                    room.HasBeenDrafted = true;
+                }
+            }
+        }
+        public static void OnOtherSpawn(GameObject obj, string poolName, GameObject transformObj) {
+            Plugin.BepinLogger.LogMessage($"Pool Name: {poolName}");
+            if (obj != null)
+            {
+                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
+            }
+            if (transformObj != null) {
+                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+            }
+        }
+        // handles Day start code. Currently unsure if this is good timing for things.
+        public static void OnDayStart(int dayNum) {
+            Plugin.ModItemManager.StartOfDay();
         }
 
         // Handles initializing rooms.
@@ -172,6 +215,10 @@ namespace BluePrinceArchipelago
             }
             
         }
+        public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e) {
+            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of {e.LocationType}");
+        }
+
         //TODO add Archipelago seed logic to this function. Also should be used to handle recconnects.
         private static void InitializeRooms()
         {
@@ -231,7 +278,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("LIBRARY", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("LOCKER ROOM", ["FRONT - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "CENTER - Tier 2 G"], false);
                 Plugin.ModRoomManager.AddRoom("LOCKSMITH", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
-                Plugin.ModRoomManager.AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], true);
+                Plugin.ModRoomManager.AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], false);
                 Plugin.ModRoomManager.AddRoom("MAID'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("MAIL ROOM", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 3", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("MASTER BEDROOM", ["EDGE ADVANCE EASTWING - G", "EDGE RETREAT EASTTWING -  G"], true);
@@ -261,7 +308,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
                 Plugin.ModRoomManager.AddRoom("SHOWROOM", ["FRONTBACK G - RARE", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "Center Rare G"], true);
                 Plugin.ModRoomManager.AddRoom("SHRINE", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
-                Plugin.ModRoomManager.AddRoom("SOLARIUM", ["CORNER - RARE G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G", "CENTER - Tier 2 G"], true);
+                Plugin.ModRoomManager.AddRoom("SOLARIUM", ["CORNER - RARE G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G", "CENTER - Tier 2 G"], false);
                 Plugin.ModRoomManager.AddRoom("SPARE ROOM", ["FRONTBACK - RARE", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST"], true);
                 Plugin.ModRoomManager.AddRoom("STOREROOM", ["FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("STUDY", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE", "Center Rare"], true);

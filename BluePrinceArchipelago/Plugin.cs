@@ -1,16 +1,12 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using BepInEx.Unity.IL2CPP.Utils;
 using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.ModRooms;
+using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
 using Il2CppInterop.Runtime.Injection;
-using System;
-using System.Xml.Serialization;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Collections.Generic;
+using BluePrinceArchipelago.Events;
 
 namespace BluePrinceArchipelago {
 
@@ -30,6 +26,7 @@ namespace BluePrinceArchipelago {
         public static ArchipelagoClient ArchipelagoClient;
         public static GameObject ModObject;
         public static ModRoomManager ModRoomManager;
+        public static ModItemManager ModItemManager;
         public override void Load()
         {
             // Plugin startup logic
@@ -39,7 +36,6 @@ namespace BluePrinceArchipelago {
             ArchipelagoConsole.Awake();
             _instance = this;
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
-
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();
             ModObject = new GameObject("Archipelago");

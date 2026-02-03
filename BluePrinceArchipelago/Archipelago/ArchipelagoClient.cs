@@ -53,7 +53,6 @@ public class ArchipelagoClient
         session.Items.ItemReceived += OnItemReceived;
         session.Socket.ErrorReceived += OnSessionErrorReceived;
         session.Socket.SocketClosed += OnSessionSocketClosed;
-        EventHandlers.LocationFound += OnLocalItemFound; //subscribe to local items found.
     }
 
 
@@ -172,8 +171,5 @@ public class ArchipelagoClient
     {
         Plugin.BepinLogger.LogError($"Connection to Archipelago lost: {reason}");
         Disconnect();
-    }
-    private void OnLocalItemFound(LocationEventArgs e) { 
-
     }
 }

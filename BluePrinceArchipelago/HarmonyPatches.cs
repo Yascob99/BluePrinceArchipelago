@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using System;
-using System.Reflection;
 using UnityEngine;
 
 namespace BluePrinceArchipelago
@@ -24,12 +22,12 @@ namespace BluePrinceArchipelago
                     ModInstance.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }
+                else if (poolName == "Rooms") {
+                    ModInstance.OnRoomSpawned(obj, transformObj);
+                }
                 else
                 {
-                    //TODO replace this with a similar method to above
-                    //MelonLogger.Msg($"PoolName: {poolName}");
-                    //MelonLogger.Msg($"Item: {obj.name}");
-                    //MelonLogger.Msg($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+                    ModInstance.OnOtherSpawn(obj, poolName, transformObj);
                 }
             }
         }
@@ -43,20 +41,25 @@ namespace BluePrinceArchipelago
         }
     }
     public class EventPatches {
-            [HarmonyPatch(typeof(SendEvent), "OnEnter")]
-            [HarmonyPrefix]
-            static void PreFix(SendEvent __instance)
-            {
-                FsmEventTarget target = __instance.eventTarget;
-                FsmEvent sendEvent = __instance.sendEvent;
-                string targetType = target.target.ToString();
-                DelayedEvent delayedEvent = __instance.delayedEvent;
-                FsmFloat delay = __instance.delay;
-                bool isDelayed = false;
-                if (delay.value > 0) {
-                    isDelayed = true;
-                }
-                ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
+        [HarmonyPatch(typeof(SendEvent), "OnEnter")]
+        [HarmonyPrefix]
+        static void PreFix(SendEvent __instance)
+        {
+            FsmEventTarget target = __instance.eventTarget;
+            FsmEvent sendEvent = __instance.sendEvent;
+            string targetType = target.target.ToString();
+            DelayedEvent delayedEvent = __instance.delayedEvent;
+            FsmFloat delay = __instance.delay;
+            bool isDelayed = false;
+            if (delay.value > 0) {
+                isDelayed = true;
             }
+            ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
         }
+        [HarmonyPatch(typeof(StatsLogger), "BeginDay")]
+        [HarmonyPrefix]
+        static void Prefix(int dayNum) { 
+            ModInstance.OnDayStart(dayNum);
+        }
+    }
 }
