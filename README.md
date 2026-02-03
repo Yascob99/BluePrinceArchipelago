@@ -56,8 +56,6 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -67,7 +65,7 @@
 ## About The Project
 
 
-This is an in development Archipelago mod for the 2025 roguelite puzzle game Blue Prince. Please note that the mod is not currently working yet and is still being created.
+This is an in development Archipelago mod for the 2025 roguelite puzzle game Blue Prince. **Please note that the mod is not currently playable yet** and is still being developped.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -84,10 +82,11 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 * [Bepinex 6](https://docs.bepinex.dev/master/articles/user_guide/installation/index.html)
 
 ### Installation
+
 1. Install [Bepinex 6](https://docs.bepinex.dev/master/articles/user_guide/installation/index.html)
 2. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/Yascob99/BluePrinceArchipelago.git
    ```
 3. Change git remote url to avoid accidental pushes to base project
    ```sh
@@ -95,10 +94,10 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
    git remote -v # confirm the changes
    ```
 4. If nuget didn't install the required dependencies, you will need to run the following to install these packages by running these commands in the **project** folder.
-```
-dotnet add package BepInEx.Unity.IL2CPP --version 6.0.0-be.753
-dotnet add package Archipelago.MultiClient.Net -- version 6.7.0
-```
+    ```
+    dotnet add package BepInEx.Unity.IL2CPP --version 6.0.0-be.753
+    dotnet add package Archipelago.MultiClient.Net -- version 6.7.0
+    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -116,14 +115,36 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 
 <!-- ROADMAP -->
-## Roadmap
+## Development Roadmap
 
-- [x] Ability to change initial draft pool and dynamically add back in rooms to the pool.
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- Rooms
+    - [✓] Ability to change initial draft pool and dynamically add back in rooms to the pool.
+    - [✓] Add ability to add extra copies of rooms to the pool
+    - [ ] Add better handling of certain rooms that rely on other events to be added to the pool (eg. Morning Room)
+    - [ ] Add ways of better handling upgraded rooms.
+- Items
+    - [ ] Create AP assets for replacement unique item locations
+    - [ ] Handle recieving items mid-run and remove it from the appropriate inventories.
+    - [ ] Handle Junk item rewards.
+- Reverse Engineering
+    - [ ] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
+    - [ ] Find out how shops choose their inventory and how to change it based on our items.
+        - [ ] Find out how to add checks that can be bought at a randomized price (for other players).
+    - [ ] Look into how the trading post functions and how to handle replacing the tradeable items with AP versions when appropriate.
+    - [ ] Find a place to hook for trunk goals.
+- Goals
+    - [ ] Find where to hook for specific goals being achieved.
+- Archipelago
+    - [ ] Create the logic for handling events from the AP server.
+    - [ ] Create a reconnect logic that will reconstruct as much of the state as possible from the Data from the AP Server.
+    - [ ] Create a way of storing run specific data in case of a game crash. (eg which save file, any queued checks, any temporary effects applied to the current day)
+- UI
+    - [ ] Create a better looking UI
+    - [ ] Add a menu option for Archipelago Mode on creating a new file.
+- Potential Long Term Goals
+    - [ ] Check the ease of changing puzzles like the Mora Jai puzzles for use in future optional modes.
+    - [ ] Add in the ability to swap in first enter room checks for a physical item hidden inside each room.
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -144,41 +165,13 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Top contributors:
-
-<a href="https://github.com/github_username/repo_name/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
-</a>
-
-
 
 <!-- LICENSE -->
 ## License
 
-Distributed under the project_license. See `LICENSE.MD` for more information.
+Distributed under the MIT. See `LICENSE.MD` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Project Link: [https://github.com/Yascob99/BluePrinceArchipelago](https://github.com/Yascob99/BluePrinceArchipelago)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-<!-- * []()
-* []()
-* []() -->
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
