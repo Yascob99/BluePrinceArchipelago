@@ -118,8 +118,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Development Roadmap
 
 - Rooms
-    - [✓] Ability to change initial draft pool and dynamically add back in rooms to the pool.
-    - [✓] Add ability to add extra copies of rooms to the pool
+    - [x] Ability to change initial draft pool and dynamically add back in rooms to the pool.
+    - [x] Add ability to add extra copies of rooms to the pool
     - [ ] Add better handling of certain rooms that rely on other events to be added to the pool (eg. Morning Room)
     - [ ] Add ways of better handling upgraded rooms.
 - Items
