@@ -126,6 +126,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Create AP assets for replacement unique item locations
     - [ ] Handle recieving items mid-run and remove it from the appropriate inventories.
     - [ ] Handle Junk item rewards.
+    - [ ] Handle Permanent items (rewards that persist between days).
 - Reverse Engineering
     - [ ] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
     - [ ] Find out how shops choose their inventory and how to change it based on our items.
