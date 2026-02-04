@@ -7,6 +7,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Packets;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Events;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -53,6 +54,7 @@ public class ArchipelagoClient
         session.Socket.ErrorReceived += OnSessionErrorReceived;
         session.Socket.SocketClosed += OnSessionSocketClosed;
     }
+
 
     /// <summary>
     /// attempt to connect to the server with our connection info
