@@ -65,7 +65,7 @@
 ## About The Project
 
 
-This is an in development Archipelago mod for the 2025 roguelite puzzle game Blue Prince. **Please note that the mod is not currently playable yet** and is still being developped.
+This is an in development Archipelago mod for the 2025 roguelite puzzle game Blue Prince. **Please note that the mod is not currently playable yet** and is still being developed.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
