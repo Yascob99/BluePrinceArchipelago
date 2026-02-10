@@ -18,6 +18,12 @@ namespace BluePrinceArchipelago
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
         private static GameObject _PlanPicker = new();
         public static ModInstance Instance;
+        private static bool _SceneLoaded = false;
+
+        public static bool SceneLoaded { 
+            get { return _SceneLoaded; } 
+            set { _SceneLoaded = value; }
+        }
 
         private static bool _IsInRun;
         public static bool IsInRun {
@@ -61,6 +67,7 @@ namespace BluePrinceArchipelago
             Plugin.BepinLogger.LogMessage($"Scene: {scene.name} loaded in {mode}");
             if (scene.name.Equals("Mount Holly Estate"))
             {
+                _SceneLoaded = true;
                 _PlanPicker = GameObject.Find("PLAN PICKER").gameObject;
                 _Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
                 _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
@@ -71,6 +78,10 @@ namespace BluePrinceArchipelago
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
                 Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches");
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
+            }
+            else {
+                // hackish, but based on my knowledge only one scene is loaded at a time.
+                _SceneLoaded = false;
             }
         }
         // Handles the mod object being destroyed somehow.
@@ -94,7 +105,7 @@ namespace BluePrinceArchipelago
                     targetName = targetObj.name;
                 }
             }
-            //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}");
+            //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         //Called by the item patch whenever an item is spawned.
         public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
@@ -142,6 +153,11 @@ namespace BluePrinceArchipelago
         // handles Day start code. Currently unsure if this is good timing for things.
         public static void OnDayStart(int dayNum) {
             Plugin.ModItemManager.StartOfDay(dayNum);
+            _IsInRun = true;
+        }
+        // handles end of day code, Currently unsure if this is good timing.
+        public static void OnDayEnd() {
+            _IsInRun = false;
         }
 
         // Handles initializing rooms.
@@ -153,6 +169,16 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.UpdateRoomPools();
             }
             else {
+                Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
+            }
+        }
+        public static void OnOuterDraftStart(OuterDraftManager draftManager) {
+            if (HasInitializedRooms) {
+                Plugin.BepinLogger.LogMessage("Updating Rooms");
+                Plugin.ModRoomManager.UpdateRoomPools();
+            }
+            else
+            {
                 Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
             }
         }

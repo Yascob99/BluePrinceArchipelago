@@ -40,6 +40,13 @@ namespace BluePrinceArchipelago
         {
             ModInstance.OnDraftInitialize(__instance);
         }
+        [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
+        [HarmonyPostfix]
+        static void PostFix(OuterDraftManager __instance)
+        {
+            ModInstance.OnOuterDraftStart(__instance);
+        }
+
     }
     public class EventPatches {
         [HarmonyPatch(typeof(SendEvent), "OnEnter")]
@@ -57,10 +64,19 @@ namespace BluePrinceArchipelago
             }
             ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
         }
+
+        // Should be called after all the 
         [HarmonyPatch(typeof(StatsLogger), "BeginDay", [typeof(int)])]
-        [HarmonyPrefix]
-        static void PreFix(int dayNum) { 
+        [HarmonyPostfix]
+        static void PostFix(int dayNum) { 
             ModInstance.OnDayStart(dayNum);
+        }
+
+        [HarmonyPatch(typeof(StatsLogger), "EndDayGUI")]
+        [HarmonyPostfix]
+        static void Postfix()
+        {
+            ModInstance.OnDayEnd();
         }
     }
 }
