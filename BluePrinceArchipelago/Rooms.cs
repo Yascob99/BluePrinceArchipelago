@@ -122,7 +122,7 @@ namespace BluePrinceArchipelago.Core
         public bool UseVanilla { get {return _UseVanilla;} set { _UseVanilla = value; } }
 
 
-        // The number of this room that can bein the pool
+        // The number of this room that can be in the pool
         private int _RoomPoolCount = 1;
         public int RoomPoolCount 
         {

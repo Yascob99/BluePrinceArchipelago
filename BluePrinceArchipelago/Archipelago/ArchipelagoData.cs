@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Archipelago.MultiClient.Net.Models;
 using Newtonsoft.Json;
 
 namespace BluePrinceArchipelago.Archipelago;
@@ -11,6 +12,9 @@ public class ArchipelagoData
     public int Index;
 
     public List<long> CheckedLocations;
+    public Dictionary<long, string> LocationDict; //Stores all locationids and what name that represents.
+    public Dictionary<long, string> ItemDict; //Stores all items that are in this game, and their name.
+    public Dictionary<long, ScoutedItemInfo> LocationItemMap; //Maps the location id to it's associated item reward.
 
     /// <summary>
     /// seed for this archipelago data. Can be used when loading a file to verify the session the player is trying to

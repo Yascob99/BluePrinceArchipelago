@@ -1,13 +1,17 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using Archipelago.MultiClient.Net;
+﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
-using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Events;
+using BluePrinceArchipelago.Utils;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -18,6 +22,7 @@ public class ArchipelagoClient
 
     public static bool Authenticated;
     private bool attemptingConnection;
+    private bool IsReconnect;
 
     public static ArchipelagoData ServerData = new();
     private DeathLinkHandler DeathLinkHandler;
@@ -53,6 +58,7 @@ public class ArchipelagoClient
         session.Items.ItemReceived += OnItemReceived;
         session.Socket.ErrorReceived += OnSessionErrorReceived;
         session.Socket.SocketClosed += OnSessionSocketClosed;
+        session.Locations.CheckedLocationsUpdated += OnRemoteLocationChecked;
     }
 
 
@@ -92,31 +98,61 @@ public class ArchipelagoClient
         string outText;
         if (result.Successful)
         {
-            var success = (LoginSuccessful)result;
+            //TODO Add check to confirm the client is reconnecting.
+            if (IsReconnect)
+            {
+                Reconnect();
+            }
+            else
+            {
+                var success = (LoginSuccessful)result;
 
-            ServerData.SetupSession(success.SlotData, session.RoomState.Seed);
-            Authenticated = true;
+                ServerData.SetupSession(success.SlotData, session.RoomState.Seed);
+                Authenticated = true;
 
-            DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
-            session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
-            outText = $"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!";
-
-            ArchipelagoConsole.LogMessage(outText);
+                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
+                session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
+                CreateLocationDicts(session.Locations.AllLocations.ToArray());
+                ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
+            }
         }
         else
         {
             var failure = (LoginFailure)result;
             outText = $"Failed to connect to {ServerData.Uri} as {ServerData.SlotName}.";
-            outText = failure.Errors.Aggregate(outText, (current, error) => current + $"\n    {error}");
+            outText += "\n" + failure.Errors.Aggregate(outText, (current, error) => current + $"\n    {error}");
 
             Plugin.BepinLogger.LogError(outText);
 
             Authenticated = false;
             Disconnect();
         }
-
-        ArchipelagoConsole.LogMessage(outText);
         attemptingConnection = false;
+    }
+    private void Reconnect() { 
+    }
+
+    private void CreateLocationDicts(long[] locationIds)
+    {
+        for (int i = 0; i < locationIds.Count(); i++)
+        {
+            long location = locationIds[i];
+            string locationName = session.Locations.GetLocationNameFromId(location);
+            ServerData.LocationDict[location] = locationName; 
+        }
+        //Asynchronously gather the data for all items stored in all the active locations, then wait for a response.
+        Task<Dictionary<long, ScoutedItemInfo>> scoutTask = session.Locations
+                .ScoutLocationsAsync(locationIds);
+        scoutTask.Wait();
+        Dictionary<long, ScoutedItemInfo> scoutResult = scoutTask.Result;
+        foreach (KeyValuePair<long, ScoutedItemInfo> scout in scoutResult)
+        {
+            long locationId = scout.Key;
+            long itemId = scout.Value.ItemId;
+            string itemName = scout.Value.ItemName ?? $"?Item {itemId}";
+            ServerData.ItemDict[itemId] = itemName;
+            ServerData.LocationItemMap[locationId] = scout.Value;
+        }
     }
 
     /// <summary>
@@ -141,7 +177,7 @@ public class ArchipelagoClient
     /// <param name="helper">item helper which we can grab our item from</param>
     private void OnItemReceived(ReceivedItemsHelper helper)
     {
-        var receivedItem = helper.DequeueItem();
+        ItemInfo receivedItem = helper.DequeueItem();
 
         if (helper.Index <= ServerData.Index) return;
 
@@ -150,6 +186,7 @@ public class ArchipelagoClient
         // TODO reward the item here
         // if items can be received while in an invalid state for actually handling them, they can be placed in a local
         // queue/collection to be handled later
+        Plugin.ModItemManager.OnItemCheckRecieved(receivedItem);
     }
 
     /// <summary>
@@ -171,5 +208,32 @@ public class ArchipelagoClient
     {
         Plugin.BepinLogger.LogError($"Connection to Archipelago lost: {reason}");
         Disconnect();
+    }
+
+    /// <summary>
+    /// Whenever a local location(s) are checked remotely (like via a server command)
+    /// </summary>
+    /// <param name="newCheckedLocations">the ids of the locations that were checked.</param>
+    private void OnRemoteLocationChecked(ReadOnlyCollection<long> newCheckedLocations) { 
+    }
+    /// <summary>
+    /// Sends to the server that the location has been checked.
+    /// </summary>
+    /// <param name="locationName">the name of the location to complete</param>
+    public void CheckLocation(string locationName) {
+        long locationid = session.Locations.GetLocationIdFromName("Blue Prince", locationName);
+        session.Locations.CompleteLocationChecks([locationid]);
+    }
+    /// <summary>
+    /// Sends to the server that the location has been checked.
+    /// </summary>
+    /// <param name="locationName">the name of the location to complete</param>
+    public void CheckLocation(int locationid)
+    {
+        session.Locations.CompleteLocationChecks([locationid]);
+    }
+    public void GoalCompleted()
+    {
+        session.SetGoalAchieved();
     }
 }

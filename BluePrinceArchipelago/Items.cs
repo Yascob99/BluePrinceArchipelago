@@ -1,4 +1,6 @@
-﻿using HutongGames.PlayMaker.Actions;
+﻿using Archipelago.MultiClient.Net.Models;
+using HutongGames.PlayMaker.Actions;
+using Iced.Intel;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -16,6 +18,7 @@ namespace BluePrinceArchipelago.Core
         public static List<ModItem> GenericItemList = new();
         public static List<UniqueItem> UniqueItemList = new();
         public static List<JunkItem> JunkItemList = new();
+        public static Dictionary<string, string> ItemDict = new(); //Item name is the key, the type of item is the value.
 
 
         public ModItemManager()
@@ -32,6 +35,7 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
+            ItemDict[itemToAdd.Name] = "Generic";
             GenericItemList.Add(itemToAdd);
         }
         // Adds a unique item if it doesn't already exist.
@@ -50,6 +54,7 @@ namespace BluePrinceArchipelago.Core
             }
             if (!found)
             {
+                ItemDict[item.Name] = "Unique";
                 UniqueItemList.Add(item);
             }
             else
@@ -66,6 +71,7 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
+            ItemDict[itemToAdd.Name] = "Junk";
             JunkItemList.Add(itemToAdd);
         }
         public void AddItem(PermanentItem itemToAdd, int count = 1) {
@@ -77,21 +83,94 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
+            ItemDict[itemToAdd.Name] = "Permanent";
             PermanentItemList.Add(itemToAdd);
         }
-        public void AddItem(string name, GameObject gameObject, bool isUnlocked, bool isUnique = false, bool isJunk = false, int count = 1, string itemType = null) {
+        public void AddItem(string name, GameObject gameObject, bool isUnlocked, bool isUnique = false, bool isJunk = false, bool isPermanent = false,int count = 1, string itemType = null) {
             if (isUnique)
             {
-                if (isJunk || itemType != null || count > 1 || count < 1)
+                if (isJunk || isPermanent || itemType != null || count > 1 || count < 1)
                 {
                     Plugin.BepinLogger.LogMessage($"{name} could not be added as a Unique item, invalid parameters");
                     return;
                 }
-                UniqueItemList.Add(new UniqueItem(name, gameObject, isUnlocked));
+                UniqueItem item = new UniqueItem(name, gameObject, isUnlocked);
+                ItemDict[item.Name] = "Unique";
+                UniqueItemList.Add(item);
             }
-            else if (isJunk) { 
+            else if (isJunk)
+            {
+                if (itemType == null || count == 0 || isPermanent)
+                {
+                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Junk/Trap item, invalid parameters");
+                    return;
+                }
+                JunkItem item = new JunkItem(name, gameObject, isUnlocked, itemType, count);
+                ItemDict[item.Name] = "Junk";
+                JunkItemList.Add(item);
+            }
+            else if (isPermanent)
+            {
+                if (itemType == null || count < 1)
+                {
+                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Permanent Item, invalid parameters");
+                    return;
+                }
+                PermanentItem item = new PermanentItem(name, gameObject, isUnlocked, itemType);
+                ItemDict[item.Name] = "Permanent";
+                PermanentItemList.Add(item);
+            }
+            else {
+                if (itemType == null || count < 1) {
+                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Generic Item, invalid parameters");
+                    return;
+                }
+                ModItem item = new ModItem(name, gameObject, isUnlocked);
+                ItemDict[item.Name] = "Generic";
+                GenericItemList.Add(item);
+            }
+        }
+        public ModItem getGenericItem(string name) {
+            foreach (ModItem item in GenericItemList)
+            {
+                if (!item.Name.Equals(name)) {
+                    return item;
+                }
+            }
+            return null;
+        }
+        public UniqueItem getUniqueItem(string name)
+        {
+            foreach (UniqueItem item in UniqueItemList)
+            {
+                if (!item.Name.Equals(name))
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
 
+        public JunkItem getJunkItem(string name) {
+            foreach (JunkItem item in JunkItemList)
+            {
+                if (!item.Name.Equals(name))
+                {
+                    return item;
+                }
             }
+            return null;
+        }
+        public PermanentItem getPermanentItem(string name)
+        {
+            foreach (PermanentItem item in PermanentItemList)
+            {
+                if (!item.Name.Equals(name))
+                {
+                    return item;
+                }
+            }
+            return null;
         }
 
         public void StartOfDay(int dayNum) {
@@ -126,6 +205,7 @@ namespace BluePrinceArchipelago.Core
             }
             return false;
         }
+
         // Adds all permanent items to inventory, meant to be run at start of day.
         public void AddAllPermanenentItems() {
             if (PermanentItemList.Count > 0) {
@@ -137,12 +217,19 @@ namespace BluePrinceArchipelago.Core
             }
         }
 
-        public void OnItemCheckRecieved(string itemCheck) { 
+        public void OnItemCheckRecieved(ItemInfo item) {
             // Handle the code for recieving an item check that results in receiving an item.
+            if (ModInstance.IsInRun) {
+                if (ItemDict.ContainsKey(item.ItemName)) { 
+
+                }
+            }
         }
+
+
     }
 
-    public class ModItem( string name, GameObject gameObject = null, bool isUnlocked, int count = 1){
+    public class ModItem( string name, GameObject gameObject, bool isUnlocked, int count = 1){
         private string _Name = name;
         public string Name { get { return _Name; } set { _Name = value; } }
 
@@ -194,7 +281,7 @@ namespace BluePrinceArchipelago.Core
     }
 
     // handles junk and trap items (as inverse traps).
-    public class JunkItem(string name, GameObject gameObject = null, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked) {
+    public class JunkItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked) {
 
         private string _ItemType = itemType;
         public string Itemtype 
@@ -204,7 +291,7 @@ namespace BluePrinceArchipelago.Core
         }
 
         private int _Count = count;
-        public int Count { 
+        public new int Count { 
             get { return _Count; } 
             set 
             {
@@ -227,7 +314,7 @@ namespace BluePrinceArchipelago.Core
         public override void AddItemToInventory() { }
     }
 
-    public class PermanentItem(string name, GameObject gameObject = null, bool isUnlocked, string itemType) : ModItem(name, gameObject, isUnlocked)
+    public class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType) : ModItem(name, gameObject, isUnlocked)
     {
         private string _ItemType = itemType;
 
