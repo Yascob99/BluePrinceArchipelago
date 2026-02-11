@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Archipelago.MultiClient.Net.Models;
 
 namespace BluePrinceArchipelago
 {
@@ -19,6 +20,7 @@ namespace BluePrinceArchipelago
         private static GameObject _PlanPicker = new();
         public static ModInstance Instance;
         private static bool _SceneLoaded = false;
+        public static Queue<ItemInfo> ReceivedItemQueue = new();
 
         public static bool SceneLoaded { 
             get { return _SceneLoaded; } 
@@ -152,6 +154,21 @@ namespace BluePrinceArchipelago
         }
         // handles Day start code. Currently unsure if this is good timing for things.
         public static void OnDayStart(int dayNum) {
+
+            // Attempt to recieve items that were recieved before the game was loaded.
+            if (ReceivedItemQueue.Count > 0)
+            {
+                for (int i = 0; i < ReceivedItemQueue.Count; i++)
+                {
+                    ItemInfo item = ReceivedItemQueue.Dequeue();
+                    if (!Plugin.ArchipelagoClient.RecieveItem(item))
+                    {
+                        ModInstance.ReceivedItemQueue.Enqueue(item);
+                    }
+                }
+            }
+
+            // Handle Start of day code for Permanent items (and maybe curses later).
             Plugin.ModItemManager.StartOfDay(dayNum);
             _IsInRun = true;
         }

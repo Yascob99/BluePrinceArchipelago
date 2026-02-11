@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
+using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Utils;
 using System;
@@ -183,10 +184,27 @@ public class ArchipelagoClient
 
         ServerData.Index++;
 
-        // TODO reward the item here
-        // if items can be received while in an invalid state for actually handling them, they can be placed in a local
-        // queue/collection to be handled later
-        Plugin.ModItemManager.OnItemCheckRecieved(receivedItem);
+        //Attempt to receive item, if it fails, try again.
+        if (!RecieveItem(receivedItem))
+        {
+            ModInstance.ReceivedItemQueue.Enqueue(receivedItem);
+        }
+        
+    }
+    public bool RecieveItem(ItemInfo item) {
+        if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms)
+        {
+            if (ModRoomManager.VanillaRooms.Contains(item.ItemName.ToUpper()))
+            {
+                ModRoom room = Plugin.ModRoomManager.GetRoomByName(item.ItemName.ToUpper());
+                room.IsUnlocked = true;
+                if (room.RoomPoolCount == 0) room.RoomPoolCount++;
+                return true;
+            }
+            Plugin.ModItemManager.OnItemCheckRecieved(item);
+            return true;
+        }
+        return false;
     }
 
     /// <summary>
