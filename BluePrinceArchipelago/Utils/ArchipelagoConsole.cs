@@ -3,6 +3,7 @@ using BepInEx;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using HutongGames.PlayMaker.Actions;
+using Il2CppSystem;
 using StableNameDotNet;
 using System;
 using System.Collections.Generic;
@@ -538,6 +539,7 @@ public class ItemCommand(string name) : Command(name) {
                             return;
                         }
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} Has already been spawned.");
+                        return;
                     }
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");
                     return;
@@ -553,24 +555,45 @@ public class ItemCommand(string name) : Command(name) {
                 {
                     itemName += Args[i];
                 }
-                GameObject item = Plugin.ModItemManager.GetPreSpawnItem(itemName);
+                GameObject item = Plugin.ModItemManager.GetPickedUpItem(itemName);
                 if (item == null)
                 {
-                    ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");
+                    ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
                     return;
                 }
-                string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName.ToLower()) + " Icon";
-                GameObject icon = GameObject.Find(iconName).gameObject;
-                if (icon != null)
+                string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName.ToLower()) + " Icon(Clone)001";
+                
+                PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
+                if (InventoryIcons != null)
                 {
-                    //TODO add a check for if the item should be added to the PreSpawn pool.
-                    if (ModItemManager.PickedUp.Remove(item, "GameObject"))
+                    GameObject icon = new();
+                    bool found = false;
+                    int i = 0;
+                    while (!found && i < InventoryIcons.GetCount()) 
                     {
-                        ModItemManager.PreSpawn.Add(item, "GameObject");
-                        icon.SetActive(false);
-                        ArchipelagoConsole.LogMessage($"Added {itemName} to inventory.");
+                        icon = InventoryIcons.arrayList[i].TryCast<GameObject>();
+                        if (icon == null) {
+                            if (icon.name == iconName) {
+                                found = true;
+                            }
+                        }
+                        i++;
+                    }
+                    if (!found) {
+                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName}'s Icon could not be found.");
                         return;
                     }
+                    //TODO add a check for if the item should be added to the PreSpawn pool.
+                    if (ModItemManager.PickedUp.Contains(item))
+                        {
+                            ModItemManager.PickedUp.Remove(item, "GameObject");
+                            ModItemManager.PreSpawn.Add(item, "GameObject");
+                            InventoryIcons.Remove(icon, "GameObject");
+                            ArchipelagoConsole.LogMessage($"Removed Item from {itemName} inventory.");
+                            return;
+                        }
+                    ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} Has already been spawned.");
+                    return;
                 }
 
                 ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} can't be removed from inventory.");
