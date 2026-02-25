@@ -541,7 +541,12 @@ namespace BluePrinceArchipelago.Core
             {
                 AdjustStars(_Count);
             }
-            else if (_IsTrap) {
+            else if (_ItemType == "Luck")
+            {
+                AdjustLuck(_Count);
+            }
+            else if (_IsTrap)
+            {
                 if (_ItemType == "freeze")
                 {
                     //TODO add freeze trap handler.
@@ -550,7 +555,8 @@ namespace BluePrinceArchipelago.Core
                 {
                     //TODO add eod trap handler (worst case just make it set steps to 0).
                 }
-                else if (_ItemType == "item") { 
+                else if (_ItemType == "item")
+                {
                     //TODO add lose item trap handler
                 }
             }
@@ -594,6 +600,17 @@ namespace BluePrinceArchipelago.Core
                 ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
             }
         }
+        private void AdjustLuck(int count = 1) { 
+            int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
+            if (luck + count > 0)
+            {
+                ModInstance.LuckManager.FindIntVariable("LUCK").Value += count;
+            }
+            else
+            {
+                ModInstance.LuckManager.FindIntVariable("Luck").Value = 0;
+            }
+        }
     }
 
     public class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType,int count = 1) : ModItem(name, gameObject, isUnlocked)
@@ -634,7 +651,7 @@ namespace BluePrinceArchipelago.Core
             {
                 AdjustGold(_Count);
             }
-            else if (_ItemType == "Allowance") 
+            else if (_ItemType == "Allowance")
             {
                 //TODO Replace with a proper allowance function.
                 AdjustGold(_Count * 2);
@@ -646,6 +663,9 @@ namespace BluePrinceArchipelago.Core
             else if (_ItemType == "Keys")
             {
                 AdjustKeys(_Count);
+            }
+            else if (_ItemType == "Luck") {
+                AdjustLuck(_Count);
             }
             else
             {
@@ -681,7 +701,19 @@ namespace BluePrinceArchipelago.Core
         {
             ModInstance.KeyManager.FindIntVariable("Adjustment Amount").Value = count;
             ModInstance.KeyManager.SendEvent("Update");
-        }     
+        }
+        private void AdjustLuck(int count = 1)
+        {
+            int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
+            if (luck + count > 0)
+            {
+                ModInstance.LuckManager.FindIntVariable("LUCK").Value = luck + count;
+            }
+            else
+            {
+                ModInstance.LuckManager.FindIntVariable("Luck").Value = 0;
+            }
+        }
     }
     public static class RegisterItems
     {

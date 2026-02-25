@@ -1,19 +1,14 @@
-﻿using AsmResolver.PE.DotNet.ReadyToRun;
-using BepInEx;
+﻿using BepInEx;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
-using HutongGames.PlayMaker.Actions;
-using Il2CppSystem;
 using StableNameDotNet;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityStandardAssets.ImageEffects;
 
 namespace BluePrinceArchipelago.Utils;
 
-// shamelessly stolen from oc2-modding https://github.com/toasterparty/oc2-modding/blob/main/OC2Modding/GameLog.cs
+// shamelessly stolen from oc2-modding https://github.com/toasterparty/oc2-modding/blob/main/OC2Modding/GameLog.cs with modifications for Blue Prince.
 public static class ArchipelagoConsole
 {
     public static bool Hidden = true;
@@ -48,6 +43,7 @@ public static class ArchipelagoConsole
         {
             logLines.RemoveAt(0);
         }
+        //Handle multiline messages.
         if (message.Contains("\n"))
         {
             foreach (string submessage in message.Split("\n"))
@@ -118,7 +114,6 @@ public static class ArchipelagoConsole
         {
             for (var i = 0; i < logLines.Count; i++)
             {
-                scrollText += "";
                 scrollText += logLines.ElementAt(i);
                 if (i < logLines.Count - 1)
                 {
@@ -192,6 +187,7 @@ public static class CommandManager {
         string commandName = parsedCommand.Command.ToLower();
         if (_LocalCommands.ContainsKey(commandName))
         {
+            ArchipelagoConsole.LogMessage(command);
             _LocalCommands[commandName].Run(parsedCommand.Args);
             return;
         }
@@ -354,7 +350,7 @@ public class AdjustCommand(string name) : Command(name)
     {
         get { return _Description; }
     }
-    private string _Syntax = "Usage:\n\t/Adjust Gems <Adjustment_Amount>\n\t/Adjust Keys <Adjustment_Amount>\n\t/Adjust Dice <Adjustment_Amount>\n\t/Adjust Stars <Adjustment_Amount>\n\t/Adjust Steps <Adjustment_Amount>\n\t/Adjust Gold <Adjustment_Amount>";
+    private string _Syntax = "Usage:\n\t/Adjust Gems <Adjustment_Amount>\n\t/Adjust Keys <Adjustment_Amount>\n\t/Adjust Dice <Adjustment_Amount>\n\t/Adjust Stars <Adjustment_Amount>\n\t/Adjust Steps <Adjustment_Amount>\n\t/Adjust Gold <Adjustment_Amount>\n\tAdjust Luck <Adjustment_Amount>";
     public override string Syntax
     {
         get { return _Syntax; }
@@ -463,7 +459,7 @@ public class AdjustCommand(string name) : Command(name)
                     int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
                     if (totalStars + count > 0)
                     {
-                        ModInstance.StarManager.FindIntVariable("TotalStars").Value = count;
+                        ModInstance.StarManager.FindIntVariable("TotalStars").Value = totalStars + count;
                         
                     }
                     else
@@ -471,6 +467,31 @@ public class AdjustCommand(string name) : Command(name)
                         ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
                     }
                     ArchipelagoConsole.LogMessage($"Adjusted Stars by {count}.");
+                    return;
+                }
+                catch
+                {
+                    ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
+                    return;
+                }
+
+            }
+            else if (subcommand.ToLower() == "luck")
+            {
+                try
+                {
+                    int count = int.Parse(Args[1]);
+                    int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
+                    if (luck + count > 0)
+                    {
+                        ModInstance.LuckManager.FindIntVariable("LUCK").Value = luck + count;
+
+                    }
+                    else
+                    {
+                        ModInstance.LuckManager.FindIntVariable("LUCK").Value = 0;
+                    }
+                    ArchipelagoConsole.LogMessage($"Adjusted Luck by {count}.");
                     return;
                 }
                 catch
@@ -493,7 +514,7 @@ public class ItemCommand(string name) : Command(name) {
     {
         get { return _Description; }
     }
-    private string _Syntax = "Usage\n/Item Add <Room>\n/Item Remove <Room>";
+    private string _Syntax = "Usage\n/Item Add <Item>\n/Item Remove <Item>";
     public override string Syntax
     {
         get { return _Syntax; }
@@ -608,7 +629,7 @@ public class ItemCommand(string name) : Command(name) {
 }
 public class HelpCommand(string name) : Command(name) {
     public string Name = name;
-    private readonly string _Description = "Displays all Local Commands";
+    private string _Description = "Displays all Local Commands";
     public override string Description
     {
         get { return _Description; }

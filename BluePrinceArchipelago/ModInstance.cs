@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using BluePrinceArchipelago.COre;
 
 namespace BluePrinceArchipelago
 {
@@ -27,7 +28,18 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM DiceManager = new();
         public static PlayMakerFSM KeyManager = new();
         public static PlayMakerFSM StarManager = new();
+        public static PlayMakerFSM LuckManager = new();
+        public static TrunkTracker TrunkTracker = new();
+        
         public static int SaveSlot = 5;
+        private static bool _IsArchipelagoMode = false;
+        public static bool IsArchipelagoMode {
+            get { return _IsArchipelagoMode; }
+            set 
+            {
+                _IsArchipelagoMode = value; 
+            }
+        }
 
         public static bool StateLoaded { 
             get { return _StateLoaded; }
@@ -88,10 +100,12 @@ namespace BluePrinceArchipelago
                 DiceManager = GameObject.Find("__SYSTEM/HUD/Bones")?.GetFsm("Bone Manager");
                 KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
                 StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("Stars");
+                LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
                 LoadArrays();
                 InitializeRooms();
                 RegisterItems.Register(); // Register the initial state of the items.
                 _HasInitializedRooms = true;
+                TrunkTracker.Initialize();
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
@@ -125,7 +139,10 @@ namespace BluePrinceArchipelago
                     targetName = targetObj.name;
                 }
             }
-            //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
+            if (targetName == "Trunk Counter" && eventName == "Update Subtract") {
+                TrunkTracker.OnTrunkOpen();
+            }
+            Plugin.BepinLogger.LogMessage($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         //Called by the item patch whenever an item is spawned.
         public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
