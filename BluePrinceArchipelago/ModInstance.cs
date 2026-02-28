@@ -5,6 +5,7 @@ using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Events;
 using HarmonyLib;
 using HutongGames.PlayMaker;
+using PathologicalGames;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,8 +30,14 @@ namespace BluePrinceArchipelago
             get { return _PlanPicker; }
             set { _PlanPicker = value; }
         }
-        private static GameObject _Inventory = new();
-        public static GameObject Inventory {
+        private static Transform _PickupPool = new();
+        public static Transform PickupPool
+        {
+            get { return _PickupPool; }
+            set { _PickupPool = value; }
+        }
+        private static Transform _Inventory = new();
+        public static Transform Inventory {
             get { return _Inventory; }
             set { _Inventory = value;  }
         }
@@ -47,13 +54,20 @@ namespace BluePrinceArchipelago
             get { return _HasInitializedRooms; }
             set { _HasInitializedRooms = value; }
         }
+
+
+        public static GameObject sledge;
+
         public ModInstance(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
         }
         private void Start()
         {
+            Plugin.BepinLogger.LogMessage(ModInstance.sledge);
+
             SceneManager.sceneLoaded += (Action<Scene, LoadSceneMode>)OnSceneLoaded;
+            Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
         }
         // Called whenver a scene is loaded (triggered by the scene manager).
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -62,10 +76,12 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Mount Holly Estate"))
             {
                 _PlanPicker = GameObject.Find("PLAN PICKER").gameObject;
-                _Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
+                _Inventory = GameObject.Find("/__SYSTEM/Inventory").transform;
+                _PickupPool = GameObject.Find("/__SYSTEM/Pickup Spawn Pools").transform;
                 _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
                 LoadArrays();
-                InitializeRooms();
+                //InitializeRooms();
+                Invoke("PostSceneLoad", 1);
                 HasInitializedRooms = true;
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
@@ -73,6 +89,12 @@ namespace BluePrinceArchipelago
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
             }
         }
+
+        private void PostSceneLoad()
+        {
+            // Runs 1 second after the scene is loaded
+        }
+
         // Handles the mod object being destroyed somehow.
         private void OnDestroy()
         {
@@ -97,20 +119,10 @@ namespace BluePrinceArchipelago
             //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}");
         }
         //Called by the item patch whenever an item is spawned.
-        public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
-            if (obj != null)
-            {
-                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
-            }
-            if (transformObj != null)
-            {
-                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
-            }
-            if (spawnedObj != null) {
-                if (spawnedObj.value != null) {
-                    Plugin.BepinLogger.LogMessage($"SpawnedObj: {spawnedObj.value.name} - {transformObj.transform.position.ToString()}");
-                }
-            }
+        public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj) {
+            Plugin.BepinLogger.LogMessage($"Item: {obj?.name}");
+            Plugin.BepinLogger.LogMessage($"Transform: {transformObj?.name} - {transformObj?.transform.position.ToString()}");
+            Plugin.BepinLogger.LogMessage($"SpawnedObj: {spawnedObj?.name} - {transformObj?.transform.position.ToString()}");
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
             if (obj != null)

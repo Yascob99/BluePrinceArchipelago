@@ -6,6 +6,10 @@ using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
 using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using BluePrinceArchipelago.Events;
 
 namespace BluePrinceArchipelago {
@@ -16,12 +20,15 @@ namespace BluePrinceArchipelago {
         public const string PluginGUID = "com.Yascob.BluePrinceArchipelago";
         public const string PluginName = "BluePrinceArchipelago";
         public const string PluginVersion = "0.1.0";
+        public static string AssetsFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Assets");
+
 
         private static Plugin _instance;
         public static Plugin Instance => _instance;
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         public const string APDisplayInfo = $"Archipelago v{ArchipelagoClient.APVersion}";
+        public static AssetBundle AssetBundle { get; private set; }
         public static ManualLogSource BepinLogger;
         public static ArchipelagoClient ArchipelagoClient;
         public static GameObject ModObject;
@@ -35,6 +42,7 @@ namespace BluePrinceArchipelago {
             ModRoomManager = new ModRoomManager();
             ArchipelagoConsole.Awake();
             _instance = this;
+            AssetBundle = AssetBundle.LoadFromFile(Path.Combine(AssetsFolderPath, "blueprinceapassets"));
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();

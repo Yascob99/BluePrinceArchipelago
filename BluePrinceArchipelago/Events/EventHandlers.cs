@@ -1,5 +1,5 @@
 ﻿using BluePrinceArchipelago.Core;
-using CirrusPlay.PortalLibrary;
+//using CirrusPlay.PortalLibrary;
 using System;
 
 namespace BluePrinceArchipelago.Events
