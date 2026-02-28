@@ -83,4 +83,10 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="blueprinceapassets">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

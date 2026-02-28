@@ -20,7 +20,7 @@ namespace BluePrinceArchipelago {
         public const string PluginGUID = "com.Yascob.BluePrinceArchipelago";
         public const string PluginName = "BluePrinceArchipelago";
         public const string PluginVersion = "0.1.0";
-        public static string AssetsFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Assets");
+        public static string AssetsFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 
         private static Plugin _instance;
