@@ -40,6 +40,7 @@ namespace BluePrinceArchipelago {
             BepinLogger = Log;
             ArchipelagoClient = new ArchipelagoClient();
             ModRoomManager = new ModRoomManager();
+            ModItemManager = new ModItemManager();
             ArchipelagoConsole.Awake();
             _instance = this;
             AssetBundle = AssetBundle.LoadFromFile(Path.Combine(AssetsFolderPath, "blueprinceapassets"));
@@ -51,6 +52,9 @@ namespace BluePrinceArchipelago {
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
             ModObject.AddComponent<ModInstance>();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
+            State.Initialize();
+            CommandManager.initializeLocalCommands();
+            ArchipelagoClient.LoadStateData();
         }
     }
 

@@ -30,7 +30,14 @@
         <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
 
+	<ItemGroup>
+		<_Assets Include="$(MSBuildProjectDirectory)\assets\*.*" />
+		<_Libs Include ="$(MSBuildProjectDirectory)\libs\*.*" />
+	</ItemGroup>
+
     <Target Name="ZipMod" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<Copy SourceFiles="@(Assets)" DestinationFolder="bin\Release\$(AssemblyName)\assets" />
+		<Copy SourceFiles="@(Libs)" DestinationFolder="bin\Release\$(AssemblyName)" />
         <ZipDirectory SourceDirectory="bin\Release\$(AssemblyName)" DestinationFile="bin\Release\$(AssemblyName)-$(Version).zip" Overwrite="true" />
     </Target>
 
@@ -49,37 +56,40 @@
 
     <ItemGroup>
       <Reference Include="Assembly-CSharp">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="Assembly-CSharp-firstpass">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp-firstpass.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Assembly-CSharp-firstpass.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="Il2Cppmscorlib">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="Il2CppSystem">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="PlayMaker">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\PlayMaker.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\PlayMaker.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.dll</HintPath>
-      </Reference>
-      <Reference Include="UnityEngine.AssetBundleModule">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.AssetBundleModule.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.CoreModule">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.IMGUIModule">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
-      </Reference>
-      <Reference Include="UnityEngine.PhysicsModule">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.PhysicsModule.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+        <Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine.TextRenderingModule">
-        <HintPath>E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+        <Private>False</Private>
       </Reference>
     </ItemGroup>
 

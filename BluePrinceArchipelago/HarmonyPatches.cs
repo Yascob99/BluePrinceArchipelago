@@ -1,6 +1,8 @@
-﻿using HarmonyLib;
+﻿using BluePrinceArchipelago.Utils;
+using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using System.Runtime.InteropServices;
 using PathologicalGames;
 using System;
 using System.Reflection;
@@ -78,6 +80,13 @@ namespace BluePrinceArchipelago
         {
             ModInstance.OnDraftInitialize(__instance);
         }
+        [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
+        [HarmonyPostfix]
+        static void PostFix(OuterDraftManager __instance)
+        {
+            ModInstance.OnOuterDraftStart(__instance);
+        }
+
     }
     public class EventPatches {
         [HarmonyPatch(typeof(SendEvent), "OnEnter")]
@@ -95,10 +104,34 @@ namespace BluePrinceArchipelago
             }
             ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
         }
-        [HarmonyPatch(typeof(StatsLogger), "BeginDay")]
-        [HarmonyPrefix]
-        static void Prefix(int dayNum) { 
+
+        // Should be called after all the 
+        [HarmonyPatch(typeof(StatsLogger), "BeginDay", [typeof(int)])]
+        [HarmonyPostfix]
+        static void PostFix(int dayNum) { 
             ModInstance.OnDayStart(dayNum);
+        }
+
+        [HarmonyPatch(typeof(StatsLogger), "EndDayGUI")]
+        [HarmonyPostfix]
+        static void Postfix()
+        {
+            ModInstance.OnDayEnd();
+        }
+        [HarmonyPatch(typeof(GameObject), "SetActive")]
+        [HarmonyPostfix]
+        static void Postfix(GameObject __instance, bool value)
+        {
+            string name = __instance.name;
+            if (name == null) {
+                if (name.Contains("LOADING") && value) { 
+                    GameObject currSave = GameObject.Find(name);
+                    if (currSave != null) {
+                        int saveSlot = currSave.GetComponent<PlayMakerFSM>()?.GetIntVariable("current save")?.Value ?? 5;
+                        ModInstance.SaveSlot = saveSlot; //Set the saveSlot to the correct slot.
+                    }
+                }
+            }
         }
     }
 }

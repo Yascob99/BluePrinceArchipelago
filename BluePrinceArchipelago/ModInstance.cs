@@ -10,25 +10,53 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using BluePrinceArchipelago.COre;
 
 namespace BluePrinceArchipelago
 {
     internal class ModInstance : MonoBehaviour
     {
         public ModEventHandler ModEventHandler = new ModEventHandler(); //Initialize event handler
+        public ArchipelagoQueueManager QueueManager = new ArchipelagoQueueManager();
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
         private static GameObject _PlanPicker = new();
         public static ModInstance Instance;
+        private static bool _SceneLoaded = false;
+        private static bool _StateLoaded = false;
+        public static PlayMakerFSM GemManager = new();
+        public static PlayMakerFSM StepManager = new();
+        public static PlayMakerFSM GoldManager = new();
+        public static PlayMakerFSM DiceManager = new();
+        public static PlayMakerFSM KeyManager = new();
+        public static PlayMakerFSM StarManager = new();
+        public static PlayMakerFSM LuckManager = new();
+        public static TrunkTracker TrunkTracker = new();
+        
+        public static int SaveSlot = 5;
+        private static bool _IsArchipelagoMode = false;
+        public static bool IsArchipelagoMode {
+            get { return _IsArchipelagoMode; }
+            set 
+            {
+                _IsArchipelagoMode = value; 
+            }
+        }
+
+        public static bool StateLoaded { 
+            get { return _StateLoaded; }
+        }
+
+        public static bool SceneLoaded { 
+            get { return _SceneLoaded; } 
+        }
 
         private static bool _IsInRun;
         public static bool IsInRun {
             get { return _IsInRun; }
-            set { _IsInRun = value; }
         }
 
         public static GameObject PlanPicker {
             get { return _PlanPicker; }
-            set { _PlanPicker = value; }
         }
         private static Transform _PickupPool = new();
         public static Transform PickupPool
@@ -39,20 +67,17 @@ namespace BluePrinceArchipelago
         private static Transform _Inventory = new();
         public static Transform Inventory {
             get { return _Inventory; }
-            set { _Inventory = value;  }
         }
         private static GameObject _RoomsInHouse = new();
 
         public static GameObject RoomsInHouse{
             get { return _RoomsInHouse; }
-            set { _RoomsInHouse = value; }
         }
 
         private static bool _HasInitializedRooms = false;
         public static bool HasInitializedRooms
         {
             get { return _HasInitializedRooms; }
-            set { _HasInitializedRooms = value; }
         }
 
 
@@ -73,26 +98,40 @@ namespace BluePrinceArchipelago
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Plugin.BepinLogger.LogMessage($"Scene: {scene.name} loaded in {mode}");
+            if (scene.name.Equals("Main Menu"))
+            {
+                Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches"); //Apply event patches on the main menu to get some data that is not accessible later.  
+            }
             if (scene.name.Equals("Mount Holly Estate"))
             {
+                _SceneLoaded = true;
                 _PlanPicker = GameObject.Find("PLAN PICKER").gameObject;
                 _Inventory = GameObject.Find("/__SYSTEM/Inventory").transform;
                 _PickupPool = GameObject.Find("/__SYSTEM/Pickup Spawn Pools").transform;
                 _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
+                GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
+                StepManager = GameObject.Find("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
+                GoldManager = GameObject.Find("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");
+                DiceManager = GameObject.Find("__SYSTEM/HUD/Bones")?.GetFsm("Bone Manager");
+                KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
+                StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("Stars");
+                LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
                 LoadArrays();
-                //InitializeRooms();
-                Invoke("PostSceneLoad", 1);
-                HasInitializedRooms = true;
+                InitializeRooms();
+                RegisterItems.Register(); // Register the initial state of the items.
+                _HasInitializedRooms = true;
+                TrunkTracker.Initialize();
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
-                Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches");
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
+                if (!verifySaveSlot()) {
+                    ArchipelagoConsole.LogMessage("Save Slot doesn't match expected saveslot");
+                }
             }
-        }
-
-        private void PostSceneLoad()
-        {
-            // Runs 1 second after the scene is loaded
+            else {
+                // hackish, but based on my knowledge only one scene is loaded at a time.
+                _SceneLoaded = false;
+            }
         }
 
         // Handles the mod object being destroyed somehow.
@@ -116,7 +155,10 @@ namespace BluePrinceArchipelago
                     targetName = targetObj.name;
                 }
             }
-            //Plugin.BepinLogger.LogMessage($"Sending {sendEvent.name} to {targetType}: {targetName}");
+            if (targetName == "Trunk Counter" && eventName == "Update Subtract") {
+                TrunkTracker.OnTrunkOpen();
+            }
+            Plugin.BepinLogger.LogMessage($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         //Called by the item patch whenever an item is spawned.
         public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj) {
@@ -153,7 +195,16 @@ namespace BluePrinceArchipelago
         }
         // handles Day start code. Currently unsure if this is good timing for things.
         public static void OnDayStart(int dayNum) {
-            Plugin.ModItemManager.StartOfDay();
+            _IsInRun = true;
+            // Attempt to recieve items that were recieved before the game was loaded.
+            Instance.QueueManager.ReleaseAllQueuedItems();
+            // Handle Start of day code for Permanent items (and maybe curses later).
+            ModItemManager.LoadInventories();
+            Plugin.ModItemManager.StartOfDay(dayNum);
+        }
+        // handles end of day code, Currently unsure if this is good timing.
+        public static void OnDayEnd() {
+            _IsInRun = false;
         }
 
         // Handles initializing rooms.
@@ -165,6 +216,16 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.UpdateRoomPools();
             }
             else {
+                Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
+            }
+        }
+        public static void OnOuterDraftStart(OuterDraftManager draftManager) {
+            if (HasInitializedRooms) {
+                Plugin.BepinLogger.LogMessage("Updating Rooms");
+                Plugin.ModRoomManager.UpdateRoomPools();
+            }
+            else
+            {
                 Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
             }
         }
@@ -218,6 +279,18 @@ namespace BluePrinceArchipelago
             }
             // this is a good place to create and add a bunch of debug buttons
         }
+        public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
+        {
+            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of {e.LocationType}");
+            if (ArchipelagoClient.Authenticated)
+            {
+                Plugin.ArchipelagoClient.CheckLocation(e.LocationName);
+            }
+        }
+        public static void OnGoalComplete() {
+            Plugin.ArchipelagoClient.GoalCompleted();
+        }
+
         // loads the list of picker arrays the rooms can be added to. May rewrite to use names instead of the id of the child for better forward compatibility.
         private static void LoadArrays() {
             List<int> childIDs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55, 56, 58, 59, 60, 61];
@@ -227,11 +300,28 @@ namespace BluePrinceArchipelago
             }
             
         }
-        public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e) {
-            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of {e.LocationType}");
+        public static bool verifySaveSlot() {
+            //Check if the client was reconnected, and if the save slot is a valid slot.
+            if (ArchipelagoClient.Authenticated && ArchipelagoClient.Reconnected && SaveSlot > 0 && SaveSlot < 5)
+            {
+                if (State.ContainsKey("SaveSlot")) {
+                    int stateSlot = State.GetData<int>("SaveSlot");
+                    if (stateSlot == 5)
+                    {
+                        SaveSlot.Store<int>("SaveSlot");
+                        return true;
+                    }
+                    else if (stateSlot == SaveSlot) {
+                        return true;
+                    }
+                    Plugin.BepinLogger.LogMessage("Save Slot doesn't match expected saveslot");
+                    return false;
+                }
+            }
+            // defaulting to true for now to avoid issues while testing.
+            return true;
         }
-
-        //TODO add Archipelago seed logic to this function. Also should be used to handle recconnects.
+        
         private static void InitializeRooms()
         {
             Plugin.BepinLogger.LogMessage("Initializing Rooms");

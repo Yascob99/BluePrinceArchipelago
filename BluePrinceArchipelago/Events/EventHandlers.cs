@@ -1,5 +1,4 @@
 ﻿using BluePrinceArchipelago.Core;
-//using CirrusPlay.PortalLibrary;
 using System;
 
 namespace BluePrinceArchipelago.Events
@@ -16,11 +15,34 @@ namespace BluePrinceArchipelago.Events
         }
     }
 
+    public class ItemQueueEventArgs : EventArgs
+    {
+        public string EventType;
+        public object Data;
+        public Type Type;
+
+        public ItemQueueEventArgs(string eventType, object data) { 
+            EventType = eventType;
+            Data = data;
+            Type = data.GetType();
+        }
+        public ItemQueueEventArgs(string eventType, object data, Type type)
+        {
+            EventType = eventType;
+            Data = data;
+            Type = type;
+        }
+    }
+
     public class ModEventHandler
     {
         public delegate void LocationHandler(System.Object sender, LocationEventArgs args);
 
         public event LocationHandler LocationFound;
+
+        public delegate void QueueHanlder(string senderName, ItemQueueEventArgs args);
+
+        public event QueueHanlder QueueEvent;
 
         //Triggers the OnFirstDrafted Event
         public void OnFirstDrafted(ModRoom room)
@@ -30,5 +52,14 @@ namespace BluePrinceArchipelago.Events
         public void OnFirstFound(ModItem item) {
             LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name.ToLower())} First Pickup", "Item First Pickup"));
         }
+        public void OnQueueEvent(string senderName,string eventType, object data) {
+            QueueEvent.Invoke(senderName, new ItemQueueEventArgs(eventType, data));
+        }
+        public void OnQueueEvent(string senderName, string eventType, object data, Type type)
+        {
+            QueueEvent.Invoke(senderName, new ItemQueueEventArgs(eventType, data, type));
+        }
     }
+
+
 }

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace BluePrinceArchipelago.Core
 {
     public class ModRoomManager {
@@ -42,6 +41,11 @@ namespace BluePrinceArchipelago.Core
             }
 
         }
+        public void RemoveRoom(ModRoom room)
+        {
+            room.RoomPoolCount -= 1;
+            room.IsUnlocked = false;
+        }
         // Updates the count of how many of each room is in the house.
         public void UpdateRoomsInHouse()
         {
@@ -58,7 +62,7 @@ namespace BluePrinceArchipelago.Core
         public ModRoom GetRoomByName(string name)
         {
             foreach (ModRoom room in _Rooms) { 
-                if (room.Name == name) { return room; }
+                if (room.Name == name.ToUpper()) { return room; }
             }
             return null;
         }
@@ -94,7 +98,7 @@ namespace BluePrinceArchipelago.Core
                     GameObject.Find("__SYSTEM/The Room Engines/" + _Name)?.GetFsm(_Name)?.GetBoolVariable("POOL REMOVAL")?.Value = false;
                 }
                 else {
-                    GameObject.Find("__SYSTEM/The Room Engines/" + _Name)?.GetFsm(_Name)?.GetBoolVariable("POOL REMOVAL")?.Value = false; //make it unavailabe for draft if it's not unlocked.
+                    GameObject.Find("__SYSTEM/The Room Engines/" + _Name)?.GetFsm(_Name)?.GetBoolVariable("POOL REMOVAL")?.Value = true; //make it unavailabe for draft if it's not unlocked.
                 }
                 _IsUnlocked = value;
             }
@@ -122,7 +126,7 @@ namespace BluePrinceArchipelago.Core
         public bool UseVanilla { get {return _UseVanilla;} set { _UseVanilla = value; } }
 
 
-        // The number of this room that can bein the pool
+        // The number of this room that can be in the pool
         private int _RoomPoolCount = 1;
         public int RoomPoolCount 
         {
@@ -154,7 +158,7 @@ namespace BluePrinceArchipelago.Core
         }
 
         //Adds a copy(s) of this room to the pool array
-        private void AddToPool(PlayMakerArrayListProxy array, int count) {
+        private void AddToPool(PlayMakerArrayListProxy array, int count = 1) {
             for (int i = 0; i < count; i++)
             {
                 array.Add(_GameObj, "GameObject");
@@ -162,7 +166,7 @@ namespace BluePrinceArchipelago.Core
             }
         }
         //Removes copy(s) of this room from the pool array
-        private void RemoveFromPool(PlayMakerArrayListProxy array, int count) {
+        private void RemoveFromPool(PlayMakerArrayListProxy array, int count = 1) {
             for (int i = 0; i < count; i++)
             {
                 if (array.Contains(_GameObj))
@@ -173,24 +177,6 @@ namespace BluePrinceArchipelago.Core
                 else {
                     Plugin.BepinLogger.LogMessage($"{_Name} doesn't exist in the pool {array.name}");
                 }
-            }
-        }
-        //Adds copy(s) of this room to all of it's listed pool arrays
-        private void AddToPools(int count = 1)
-        {
-            foreach (string arrayName in _PickerArrays)
-            {
-                PlayMakerArrayListProxy array = ModInstance.PickerDict[arrayName];
-                AddToPool(array, count);
-            }
-        }
-        //Removes copy(s) of this room from all of it's listed pool arrays 
-        private void RemoveFromPools(int count = 1)
-        {
-            foreach (string arrayName in _PickerArrays)
-            {
-                PlayMakerArrayListProxy array = ModInstance.PickerDict[arrayName];
-                RemoveFromPool(array, count);
             }
         }
         //Set the FSMBools in the appropriate room to ensure that the correct rooms show up in draft.
