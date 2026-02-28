@@ -92,7 +92,6 @@ namespace BluePrinceArchipelago
             Plugin.BepinLogger.LogMessage(ModInstance.sledge);
 
             SceneManager.sceneLoaded += (Action<Scene, LoadSceneMode>)OnSceneLoaded;
-            Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
         }
         // Called whenver a scene is loaded (triggered by the scene manager).
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

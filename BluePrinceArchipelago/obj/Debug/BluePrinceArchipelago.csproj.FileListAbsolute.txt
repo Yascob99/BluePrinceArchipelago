@@ -9,3 +9,18 @@ C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debu
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\refint\BluePrinceArchipelago.dll
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.pdb
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ref\BluePrinceArchipelago.dll
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\blueprinceapassets
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.deps.json
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.dll
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\BluePrinceArchipelago.pdb
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.csproj.AssemblyReference.cache
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.GeneratedMSBuildEditorConfig.editorconfig
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.csproj.CoreCompileInputs.cache
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.sourcelink.json
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrin.43B963E3.Up2Date
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.dll
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\refint\BluePrinceArchipelago.dll
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.pdb
+D:\Github\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ref\BluePrinceArchipelago.dll
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\libs\Archipelago.MultiClient.Net.dll
+E:\SteamLibrary\steamapps\common\Blue Prince\BepInEx\plugins\BluePrinceArchipelago\libs\Newtonsoft.Json.dll

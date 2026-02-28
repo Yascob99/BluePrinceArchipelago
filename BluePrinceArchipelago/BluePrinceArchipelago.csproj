@@ -97,6 +97,12 @@
       <None Update="blueprinceapassets">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="libs\Archipelago.MultiClient.Net.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="libs\Newtonsoft.Json.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
