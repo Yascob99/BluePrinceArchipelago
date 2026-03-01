@@ -69,6 +69,10 @@ namespace BluePrinceArchipelago
             get { return _Inventory; }
         }
         private static GameObject _RoomsInHouse = new();
+        private static Transform _YouFoundText = new();
+        public static Transform YouFoundText {
+            get { return _YouFoundText; }
+        }
 
         public static GameObject RoomsInHouse{
             get { return _RoomsInHouse; }
@@ -108,6 +112,7 @@ namespace BluePrinceArchipelago
                 _Inventory = GameObject.Find("/__SYSTEM/Inventory").transform;
                 _PickupPool = GameObject.Find("/__SYSTEM/Pickup Spawn Pools").transform;
                 _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
+                _YouFoundText = GameObject.Find("/UI OVERLAY CAM/You Found Text").transform;
                 GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
                 StepManager = GameObject.Find("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
                 GoldManager = GameObject.Find("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");

@@ -48,14 +48,36 @@ namespace BluePrinceArchipelago
                 {
                     ModInstance.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
-                    if (obj)
+                    if (obj)   // && object has not been found before
                     {
                         if(Plugin.AssetBundle.Contains(obj.name))
                         {
                             GameObject prefab = Plugin.AssetBundle.LoadAsset<GameObject>(obj.name);
+
+                            // Instantiate our prefab and reparent the original object to ours
                             GameObject apObject = GameObject.Instantiate(prefab, transformObj.transform.position, transformObj.transform.rotation);
                             spawnedObj.transform.parent = apObject.transform;
                             spawnedObj.GetComponentInChildren<Collider>().enabled = false;
+
+                            // Add the AP Swirlie to the item that appears on the "You Found" UI
+                            string youFoundName = GetYouFoundName(obj.name);
+                            Transform youFoundParent = ModInstance.YouFoundText.Find("You Found" + youFoundName);
+                            if(youFoundParent != null)
+                            {
+                                Transform youFoundModel = youFoundParent.FindRecursive(obj.name);
+                                if (youFoundModel != null)
+                                {
+                                    GameObject.Instantiate(prefab, youFoundModel.transform.position, youFoundModel.transform.rotation, youFoundModel);
+                                }
+                                else
+                                {
+                                    Plugin.BepinLogger.LogError("No 'You Found' object model found for: " + obj.name);
+                                }
+                            }
+                            else
+                            {
+                                Plugin.BepinLogger.LogError("No 'You Found' parent found for: " + obj.name);
+                            }
                         }
                         else
                         {
@@ -70,6 +92,23 @@ namespace BluePrinceArchipelago
                 {
                     ModInstance.OnOtherSpawn(obj, poolName, transformObj);
                 }
+            }
+        }
+
+        private static string GetYouFoundName(string objectName)
+        {
+            switch(objectName)
+            {
+                case "SLEEPING MASK":
+                    return " Sleep Mask";
+                default:
+                    string[] wordsInName = objectName.Split(" ");
+                    string normalCapsName = "";
+                    for (int i = 0; i < wordsInName.Length; i++)
+                    {
+                        normalCapsName += " " + wordsInName[i].Substring(0, 1).ToUpper() + wordsInName[i].Substring(1).ToLower();
+                    }
+                    return normalCapsName;
             }
         }
     }

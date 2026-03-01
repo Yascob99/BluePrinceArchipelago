@@ -30,14 +30,7 @@
         <ErrorReport>prompt</ErrorReport>
     </PropertyGroup>
 
-	<ItemGroup>
-		<_Assets Include="$(MSBuildProjectDirectory)\assets\*.*" />
-		<_Libs Include ="$(MSBuildProjectDirectory)\libs\*.*" />
-	</ItemGroup>
-
     <Target Name="ZipMod" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<Copy SourceFiles="@(Assets)" DestinationFolder="bin\Release\$(AssemblyName)\assets" />
-		<Copy SourceFiles="@(Libs)" DestinationFolder="bin\Release\$(AssemblyName)" />
         <ZipDirectory SourceDirectory="bin\Release\$(AssemblyName)" DestinationFile="bin\Release\$(AssemblyName)-$(Version).zip" Overwrite="true" />
     </Target>
 
@@ -95,7 +88,7 @@
 
     <ItemGroup>
       <None Update="blueprinceapassets">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="libs\Archipelago.MultiClient.Net.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
