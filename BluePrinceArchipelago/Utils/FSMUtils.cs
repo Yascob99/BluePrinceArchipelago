@@ -18,8 +18,10 @@ namespace BluePrinceArchipelago.Utils
         /// <returns>The found PlayMakerArrayListProxy, null if it isn't found</returns>
         public static PlayMakerArrayListProxy GetArrayListProxy(this GameObject go, string arrayListProxyName)
         {
-            foreach (PlayMakerArrayListProxy arrayListProxy in go.GetComponents<PlayMakerArrayListProxy>()) {
-                if (arrayListProxy.name == arrayListProxyName) {
+            foreach (PlayMakerArrayListProxy arrayListProxy in go.GetComponents<PlayMakerArrayListProxy>())
+            {
+                if (arrayListProxy.name == arrayListProxyName)
+                {
                     return arrayListProxy;
                 }
             }
@@ -31,9 +33,11 @@ namespace BluePrinceArchipelago.Utils
         /// </summary>
         /// <param name="arrayListProxy">The PlayMakerArrayListProxy</param>
         /// <returns>Returns the Count of the PlayMakerArrayListProxy, 0 if it isn't found</returns>
-        public static int GetCount(this PlayMakerArrayListProxy arrayListProxy) {
+        public static int GetCount(this PlayMakerArrayListProxy arrayListProxy)
+        {
             Il2CppSystem.Collections.ArrayList arrayList = arrayListProxy.arrayList;
-            if (arrayList != null) {
+            if (arrayList != null)
+            {
                 return arrayList.Count;
             }
             return 0;
@@ -44,7 +48,8 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="arrayListProxy">The PlayMakerArrayListProxy</param>
         /// <param name="value">The Object to add to the Array</param>
         /// <returns>Returns if the given item is in an ArrayListProxy, false if the array can't be retrieved.</returns>
-        public static bool Contains(this PlayMakerArrayListProxy arrayListProxy, Il2CppSystem.Object value) {
+        public static bool Contains(this PlayMakerArrayListProxy arrayListProxy, Il2CppSystem.Object value)
+        {
             Il2CppSystem.Collections.ArrayList arrayList = arrayListProxy.arrayList;
             if (arrayList != null)
             {
@@ -73,9 +78,11 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="arrayListProxy">The PlayMakerArrayListProxy</param>
         /// <param name="index">The index to retrieve</param>
         /// <returns>Returns an item from the index of the ArrayListProxy, returns null if the index is out of range.</returns>
-        public static Il2CppSystem.Object GetItemAt(this PlayMakerArrayListProxy arrayListProxy, int index) {
+        public static Il2CppSystem.Object GetItemAt(this PlayMakerArrayListProxy arrayListProxy, int index)
+        {
             Il2CppSystem.Collections.ArrayList arrayList = arrayListProxy.arrayList;
-            if (arrayList != null && arrayList.Count > index && index > -1) { 
+            if (arrayList != null && arrayList.Count > index && index > -1)
+            {
                 return arrayList[index];
             }
             return null;
@@ -1077,7 +1084,16 @@ namespace BluePrinceArchipelago.Utils
         /// <inheritdoc cref="RemoveActionsOfType{TAction}(PlayMakerFSM, string)"/>
         /// <param name="state">The fsm state</param>
 
-        public static void RemoveActionsOfType<TAction>(this FsmState state) => state.Actions = RemoveItemsFromArray<FsmStateAction>(state.Actions, x => x is TAction);
+        public static void RemoveActionsOfType<TAction>(this FsmState state)
+        {
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
+            {
+                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName) //A bit hacky, but it works.
+                {
+                    state.RemoveAction(i);
+                }
+            }
+        }
 
         /// <summary>
         ///     Removes first action of a given type in an FsmState.  
@@ -1098,9 +1114,9 @@ namespace BluePrinceArchipelago.Utils
         public static void RemoveFirstActionOfType<TAction>(this FsmState state)
         {
             int firstActionIndex = -1;
-            for (int i = 0; i < state.Actions.Length; i++)
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
             {
-                if (state.Actions[i] is TAction)
+                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName)
                 {
                     firstActionIndex = i;
                     break;
@@ -1131,9 +1147,9 @@ namespace BluePrinceArchipelago.Utils
         public static void RemoveLastActionOfType<TAction>(this FsmState state)
         {
             int lastActionIndex = -1;
-            for (int i = state.Actions.Length - 1; i >= 0; i--)
+            for (int i = state.ActionData.ActionNames.Count - 1; i >= 0; i--)
             {
-                if (state.Actions[i] is TAction)
+                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName)
                 {
                     lastActionIndex = i;
                     break;
@@ -1239,12 +1255,14 @@ namespace BluePrinceArchipelago.Utils
 
         public static void DisableActionsOfType<TAction>(this FsmState state)
         {
-            foreach (FsmStateAction action in state.Actions)
+            int i = 0;
+            foreach (string actionName in state.ActionData.ActionNames)
             {
-                if (action is TAction)
+                if (actionName == typeof(TAction).FullName)
                 {
-                    action.Enabled = false;
+                    state.DisableAction(i);
                 }
+                i++;
             }
         }
 
