@@ -61,8 +61,20 @@ namespace BluePrinceArchipelago
                             spawnedObj.transform.parent = apObject.transform;
                             spawnedObj.GetComponentInChildren<Collider>().enabled = false;
 
-                            // Make the necessary changes to the "You Found" UI
+                            // Disable the Global Manager FSM states to not give this item in inventory
                             string youFoundName = GetYouFoundName(obj.name);
+                            string stateName = GetGlobalManagerStateName(youFoundName.Trim());
+                            FsmState state = ModInstance.GlobalManager.GetState(stateName);
+                            if (state != null)
+                            {
+                                state.RemoveActionsOfType<ArrayListAdd>(); 
+                            }
+                            else
+                            {
+                                Plugin.BepinLogger.LogError($"No FSM state {stateName} found for: {obj.name}");
+                            }
+
+                            // Make the necessary changes to the "You Found" UI
                             Transform youFoundParent = ModInstance.YouFoundText.Find("You Found" + youFoundName);
                             if(youFoundParent != null)
                             {
@@ -155,8 +167,6 @@ namespace BluePrinceArchipelago
                                             else
                                             {
                                                 int objectIndex = child.name[child.name.IndexOf("(") + 1].ParseDigit() - 1;
-                                                Plugin.BepinLogger.LogMessage(objectIndex);
-                                                Plugin.BepinLogger.LogMessage(itemWordList.Count);
 
                                                 if (child.name.StartsWith("First Letter"))
                                                 {
@@ -241,6 +251,15 @@ namespace BluePrinceArchipelago
                         normalCapsName += " " + wordsInName[i].Substring(0, 1).ToUpper() + wordsInName[i].Substring(1).ToLower();
                     }
                     return normalCapsName;
+            }
+        }
+
+        private static string GetGlobalManagerStateName(string youFoundName)
+        {
+            switch (youFoundName)
+            {
+                default:
+                    return youFoundName + " Pickup";
             }
         }
     }

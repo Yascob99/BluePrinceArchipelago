@@ -30,6 +30,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM KeyManager = new();
         public static PlayMakerFSM StarManager = new();
         public static PlayMakerFSM LuckManager = new();
+        public static PlayMakerFSM GlobalManager = new();
         public static TrunkTracker TrunkTracker = new();
         
         public static int SaveSlot = 5;
@@ -116,6 +117,7 @@ namespace BluePrinceArchipelago
                 KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
                 StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("Stars");
                 LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
+                GlobalManager = GameObject.Find("Global Manager")?.GetFsm("FSM");
                 LoadArrays();
                 InitializeRooms();
                 RegisterItems.Register(); // Register the initial state of the items.
