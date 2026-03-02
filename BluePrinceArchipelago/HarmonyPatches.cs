@@ -7,7 +7,10 @@ using PathologicalGames;
 using System;
 using System.Reflection;
 using UnityEngine;
+using TMPro;
 using static UnityEngine.RectTransform;
+using Il2CppSystem.Collections.Generic;
+using LibCpp2IL;
 
 namespace BluePrinceArchipelago
 {
@@ -47,7 +50,6 @@ namespace BluePrinceArchipelago
                 if (poolName == "Pickup")
                 {
                     ModInstance.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
-                    //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                     if (obj)   // && object has not been found before
                     {
                         if(Plugin.AssetBundle.Contains(obj.name))
@@ -59,11 +61,12 @@ namespace BluePrinceArchipelago
                             spawnedObj.transform.parent = apObject.transform;
                             spawnedObj.GetComponentInChildren<Collider>().enabled = false;
 
-                            // Add the AP Swirlie to the item that appears on the "You Found" UI
+                            // Make the necessary changes to the "You Found" UI
                             string youFoundName = GetYouFoundName(obj.name);
                             Transform youFoundParent = ModInstance.YouFoundText.Find("You Found" + youFoundName);
                             if(youFoundParent != null)
                             {
+                                // Add the AP Swirlie to the item that appears on the "You Found" UI
                                 Transform youFoundModel = youFoundParent.FindRecursive(obj.name);
                                 if (youFoundModel != null)
                                 {
@@ -72,6 +75,135 @@ namespace BluePrinceArchipelago
                                 else
                                 {
                                     Plugin.BepinLogger.LogError("No 'You Found' object model found for: " + obj.name);
+                                }
+
+                                // Add special text for what you found
+                                Transform textGameObject = youFoundParent.Find("Text/GameObject");
+                                if (textGameObject != null)
+                                {
+                                    GameObject textPrefab = Plugin.AssetBundle.LoadAsset<GameObject>("You Found Text Template");
+                                    GameObject textObject = GameObject.Instantiate(textPrefab, textGameObject.position, textGameObject.rotation, textGameObject.parent);
+
+                                    // Get the string of the item found
+                                    string playerName = "chaseoqueso";
+                                    string itemName = "Mothwing Cloak";
+                                    string description = "Hope it un-BK's them!";
+
+                                    // Get correct font assets for our prefab
+                                    TMP_FontAsset prescFont = null;
+                                    TMP_FontAsset mainFont = null;
+                                    TMP_FontAsset descFont = null;
+                                    for (int i = 0; i < textGameObject.childCount; i++)
+                                    {
+                                        TextMeshPro text;
+                                        Transform child = textGameObject.GetChild(i);
+                                        if (child.TryGetComponent<TextMeshPro>(out text))
+                                        {
+                                            if(child.name.ToLower().Contains("prescription"))
+                                            {
+                                                prescFont = text.font;
+                                            }
+                                            else if(child.name.ToLower().Contains("first"))
+                                            {
+                                                mainFont = text.font;
+                                            }
+                                            else if (child.name.ToLower().Contains("description"))
+                                            {
+                                                descFont = text.font;
+                                            }
+                                        }
+                                    }
+                                    GameObject.Destroy(textGameObject.gameObject);
+
+                                    // Break up the item name into exactly 3 strings
+                                    List<String> itemWordList = new();
+                                    string[] itemWords = itemName.Split(" ");
+                                    for (int i = 0; i < Math.Min(3, itemWords.Length); i++)
+                                    {
+                                        if(i < 2)
+                                        {
+                                            itemWordList.Add(itemWords[i].ToUpper());
+                                        }
+                                        else
+                                        {
+                                            string lastWord = "";
+                                            while(i < itemWords.Length)
+                                            {
+                                                lastWord += itemWords[i].ToUpper();
+                                                i++;
+                                                if(i < itemWords.Length)
+                                                {
+                                                    lastWord += " ";
+                                                }
+                                            }
+                                            itemWordList.Add(lastWord);
+                                        }
+                                    }
+
+                                    // Update all the fonts and words to be correct
+                                    for (int i = 0; i < textObject.transform.childCount; i++)
+                                    {
+                                        TextMeshPro text;
+                                        Transform child = textObject.transform.GetChild(i);
+                                        if (child.TryGetComponent<TextMeshPro>(out text))
+                                        {
+                                            if (child.name == "Prescription")
+                                            {
+                                                text.font = prescFont;
+                                                text.text = playerName + "'s";
+                                            }
+                                            else
+                                            {
+                                                int objectIndex = child.name[child.name.IndexOf("(") + 1].ParseDigit() - 1;
+                                                Plugin.BepinLogger.LogMessage(objectIndex);
+                                                Plugin.BepinLogger.LogMessage(itemWordList.Count);
+
+                                                if (child.name.StartsWith("First Letter"))
+                                                {
+                                                    if (objectIndex >= itemWordList.Count)
+                                                    {
+                                                        GameObject.Destroy(child.gameObject);
+                                                        continue;
+                                                    }
+
+                                                    text.font = mainFont;
+                                                    text.text = itemWordList[objectIndex].Substring(0, 1);
+                                                }
+                                                else if(child.name.StartsWith("Item Name"))
+                                                {
+                                                    if (objectIndex >= itemWordList.Count)
+                                                    {
+                                                        GameObject.Destroy(child.gameObject);
+                                                        continue;
+                                                    }
+
+                                                    text.font = mainFont;
+                                                    text.text = itemWordList[objectIndex].Substring(1);
+                                                }
+                                                else if(child.name.StartsWith("Description"))
+                                                {
+                                                    if(objectIndex == itemWordList.Count - 1)
+                                                    {
+                                                        text.font = descFont;
+                                                        text.text = description;
+                                                    }
+                                                    else
+                                                    {
+                                                        GameObject.Destroy(child.gameObject);
+                                                        continue;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    Plugin.BepinLogger.LogError("Something weird happened with the 'You Found Text' prefab (check its child objects?)");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Plugin.BepinLogger.LogError("No 'You Found' text found for: " + obj.name);
                                 }
                             }
                             else

@@ -85,16 +85,12 @@ namespace BluePrinceArchipelago
         }
 
 
-        public static GameObject sledge;
-
         public ModInstance(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
         }
         private void Start()
         {
-            Plugin.BepinLogger.LogMessage(ModInstance.sledge);
-
             SceneManager.sceneLoaded += (Action<Scene, LoadSceneMode>)OnSceneLoaded;
         }
         // Called whenver a scene is loaded (triggered by the scene manager).
