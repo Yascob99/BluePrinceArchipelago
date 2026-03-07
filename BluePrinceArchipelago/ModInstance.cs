@@ -30,7 +30,9 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM StarManager = new();
         public static PlayMakerFSM LuckManager = new();
         public static TrunkTracker TrunkTracker = new();
-        
+        public static PlayMakerFSM GlobalPersistentManager = new();
+        public static PlayMakerFSM GlobalManager = new();
+
         public static int SaveSlot = 5;
         private static bool _IsArchipelagoMode = false;
         public static bool IsArchipelagoMode {
@@ -101,6 +103,8 @@ namespace BluePrinceArchipelago
                 KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
                 StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("Stars");
                 LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
+                GlobalPersistentManager = GameObject.Find("Global Persistent Manager")?.GetComponent<PlayMakerFSM>();
+                GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
                 LoadArrays();
                 InitializeRooms();
                 RegisterItems.Register(); // Register the initial state of the items.
@@ -275,7 +279,8 @@ namespace BluePrinceArchipelago
         }
         public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
         {
-            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of {e.LocationType}");
+            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of the location type: {e.LocationType}");
+            Plugin.BepinLogger.LogMessage(ArchipelagoClient.Authenticated);
             if (ArchipelagoClient.Authenticated)
             {
                 Plugin.ArchipelagoClient.CheckLocation(e.LocationName);

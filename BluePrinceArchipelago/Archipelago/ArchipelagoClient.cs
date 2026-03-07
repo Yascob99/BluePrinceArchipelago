@@ -12,14 +12,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static ES3;
 
 namespace BluePrinceArchipelago.Archipelago;
 
 public class ArchipelagoClient
 {
-    public const string APVersion = "0.5.0";
-    private const string Game = "My Game";
+    public const string APVersion = "0.6.4";
+    private const string Game = "Blue Prince";
 
     public static bool Authenticated;
     private bool _AttemptingConnection;
@@ -31,7 +30,44 @@ public class ArchipelagoClient
 
     public ArchipelagoClient() {
     }
-
+    /// <summary>
+    /// assigns the slot data and seed to our data handler. any necessary setup using this data can be done here.
+    /// </summary>
+    /// <param name="roomSlotData">slot data of your slot from the room</param>
+    /// <param name="roomSeed">seed name of this session</param>
+    public void SetupServerDataSession(Dictionary<string, object> roomSlotData, string roomSeed)
+    {
+        ServerData.slotData = roomSlotData;
+        ServerData.seed = roomSeed;
+    }
+    //Returns the locationid from the name or -1 if It can't be found.
+    public long GetLocationFromName(string locationName)
+    {
+        return ServerData.LocationDict?.FirstOrDefault(x => x.Value == locationName).Key ?? -1;
+    }
+    public void DisplayServerData()
+    {
+        Plugin.BepinLogger.LogMessage("Checked Locations:");
+        foreach (long locationid in ServerData.CheckedLocations)
+        {
+            Plugin.BepinLogger.LogMessage($"\t{locationid}");
+        }
+        Plugin.BepinLogger.LogMessage("Location Dict:");
+        foreach (var entry in ServerData.LocationDict)
+        {
+            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+        }
+        Plugin.BepinLogger.LogMessage("Item Dict:");
+        foreach (var entry in ServerData.ItemDict)
+        {
+            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+        }
+        Plugin.BepinLogger.LogMessage("Location Item Map:");
+        foreach (var entry in ServerData.LocationItemMap)
+        {
+            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+        }
+    }
     public void LoadStateData()
     {
         ServerData = State.GetData<ArchipelagoData>("ServerData") ?? new(); // Restore ServerData from State Data, if it doesn't exist it will be set to the default.
@@ -110,23 +146,27 @@ public class ArchipelagoClient
             //TODO Add check to confirm the client is reconnecting.
 
             var success = (LoginSuccessful)result;
+            bool isReconnect = false;
 
-            ServerData.SetupSession(success.SlotData, session.RoomState.Seed);
+            SetupServerDataSession(success.SlotData, session.RoomState.Seed);
             Authenticated = true;
             DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
-            if (CheckReconnect())
+            if (CheckReconnect() && CheckStateMatches())
             {
                 Reconnect();
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
+                isReconnect = true;
             }
             else
             {
                 session.RoomState.Seed.Store<string>("Seed");
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 CreateLocationDicts(session.Locations.AllLocations.ToArray());
-                ServerData.Store<ArchipelagoData>("ServerData"); 
+                ServerData.Store<ArchipelagoData>("ServerData");
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
+            DequeueItems(isReconnect);
+            DisplayServerData();
         }
         else
         {
@@ -141,12 +181,73 @@ public class ArchipelagoClient
         }
         _AttemptingConnection = false;
     }
+    private void DequeueItems(bool isReconnect = false) {
+        // Handle Queue as normal if reconnect.
+        if (isReconnect) {
+            foreach (ItemInfo item in session.Items.AllItemsReceived)
+            {
+                session.Items.DequeueItem();
+                if (!ModInstance.Instance.QueueManager.RecieveItem(item))
+                {
+                    ModInstance.Instance.QueueManager.AddItemToQueue(item);
+                }
+            }
+        }
+        foreach (ItemInfo item in session.Items.AllItemsReceived) {
+
+            if (item.LocationName == "Server")
+            {
+                Plugin.BepinLogger.LogMessage($"Attempting to receive Item: {item.ItemName}");
+                // Checks if the item recieved is an item.
+                if (ModRoomManager.VanillaRooms.Contains(item.ItemName.ToUpper()))
+                {
+                    if (!ModInstance.HasInitializedRooms)
+                    {
+                        ModInstance.Instance.QueueManager.AddItemToQueue(item);
+                        session.Items.DequeueItem();
+                    }
+                    ModRoom room = Plugin.ModRoomManager.GetRoomByName(item.ItemName.ToUpper());
+                    room.IsUnlocked = true;
+                    if (room.RoomPoolCount == 0) room.RoomPoolCount++;
+                    session.Items.DequeueItem();
+                }
+                else
+                {
+                    //TODO add item unlock code (Should not grant the unique items).
+                    session.Items.DequeueItem();
+                }
+            }
+            else {
+                //Handle non-server items normally.
+                session.Items.DequeueItem();
+                if (!ModInstance.Instance.QueueManager.RecieveItem(item))
+                {
+                    ModInstance.Instance.QueueManager.AddItemToQueue(item);
+                }
+            }
+        }
+
+    }
+
     //Checks the seed to see if the data matches.
     private bool CheckReconnect() {
         string seed = State.GetData<string>("Seed") ?? "";
+        
         if (seed == session.RoomState.Seed) { 
             return true;
         }
+        return false;
+    }
+    // Checks the state to ensure it was initialized correctly and has correct data.
+    private bool CheckStateMatches()
+    {
+        ArchipelagoData serverData = State.GetData<ArchipelagoData>("ServerData");
+        if (serverData != null) {
+            if (serverData.CheckedLocations.Count > 0 && serverData.ItemDict.Count > 0 && serverData.LocationDict.Count > 0 && serverData.LocationItemMap.Count > 0) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -175,7 +276,7 @@ public class ArchipelagoClient
             }
             if (!found) {
                 //If the server has locations checked that the local game didn't send while disconnected, add them to the checked locationlist.
-                ServerData.CheckedLocations.Add(location);
+                //ServerData.CheckedLocations.Add(location); // Might be handled via the dequeu
                 updated = true;
             }
             if (found) { 
@@ -292,11 +393,12 @@ public class ArchipelagoClient
     /// </summary>
     /// <param name="locationName">the name of the location to complete</param>
     public void CheckLocation(string locationName) {
-        long locationid = session.Locations.GetLocationIdFromName("Blue Prince", locationName);
+        long locationid = GetLocationFromName(locationName);
         // verify the location has not already been sent to prevent sending duplicate locations.
-        if (!ServerData.CheckedLocations.Contains(locationid))
+        Plugin.BepinLogger.LogMessage($"Attempting to send {locationName} as location id: {locationid}");
+        if (!ServerData.CheckedLocations.Contains(locationid) && locationid != -1)
         {
-            session.Locations.CompleteLocationChecks([locationid]);
+            session.Locations.CompleteLocationChecks(locationid);
             ServerData.CheckedLocations.Add(locationid);
         }
         else {
@@ -391,6 +493,7 @@ public class ArchipelagoQueueManager {
     }
     public bool RecieveItem(ItemInfo item)
     {
+        Plugin.BepinLogger.LogMessage($"Attempting to receive Item: {item.ItemName}");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms)
         {
             // Checks if the item recieved is an item.

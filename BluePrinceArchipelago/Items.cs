@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Utils;
+using Rewired.Integration.PlayMaker;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using UnityEngine;
@@ -205,17 +206,16 @@ namespace BluePrinceArchipelago.Core
             string[] itemParams = [];
             if (ItemDict.ContainsKey(itemInfo.ItemName))
             {
-                Plugin.BepinLogger.LogMessage($"Unable to find item: {itemInfo.ItemName}");
-                return;
-            }
-            if (ItemDict.ContainsKey(itemInfo.ItemName))
-            {
                 itemType = ItemDict[itemInfo.ItemName];
                 // Permanent items are added at start of day, add them to the list, then don't worry about them.
                
             }
             else {
                 itemParams = TryGetItemParamsFromCheckData(itemInfo);
+                if (itemParams == null)
+                {
+                    return;
+                }
                 itemType = itemParams[0];
                 if (itemType == null)
                 {
@@ -326,48 +326,58 @@ namespace BluePrinceArchipelago.Core
         private string[] TryGetItemParamsFromCheckData(ItemInfo item) {
             if (item.ItemName != null)
             {
+                Plugin.BepinLogger.LogMessage($"{item.ItemName}");
                 string[] itemNameParts = item.ItemName.Split(' ');
-                if (itemNameParts[2] == "Coin")
-                if (item.ItemName.Contains("Extra"))
+                if (itemNameParts.Length > 2)
                 {
-                    if (itemNameParts.Length == 3)
-                    {
-                        if (itemNameParts[1] == "Allowance") {
-                            return ["Permanent", itemNameParts[1], itemNameParts[2]];
+                    if (itemNameParts[2] == "Coin")
+                        if (item.ItemName.Contains("Extra"))
+                        {
+                            if (itemNameParts.Length == 3)
+                            {
+                                if (itemNameParts[1] == "Allowance")
+                                {
+                                    return ["Permanent", itemNameParts[1], itemNameParts[2]];
+                                }
+
+                                return ["Junk", itemNameParts[1], itemNameParts[2]];
+                            }
+                            else if (itemNameParts.Length == 4)
+                            {
+                                return ["Permanent", itemNameParts[2], itemNameParts[3]];
+                            }
+                            //else { //Could be either a generic item, or Unque item. Unable to differentiate right now.
+
+                            //}
+                        }
+                        else if (item.ItemName.Contains("Trap"))
+                        {
+                            if (itemNameParts.Length == 3)
+                            {
+                                if (itemNameParts[1] == "End")
+                                {
+                                    return ["Junk", "EOD", "-1"];
+                                }
+                                else if (itemNameParts[1] == "Lose")
+                                {
+                                    return ["Junk", "Item", "-1"];
+                                }
+
+                                return ["Junk", itemNameParts[1], "-1"];
+                            }
+                            else if (itemNameParts.Length == 4)
+                            {
+                                return ["Junk", itemNameParts[2], itemNameParts[3]];
+                            }
                         }
 
-                        return ["Junk", itemNameParts[1], itemNameParts[2]];
-                    }
-                    else if (itemNameParts.Length == 4)
-                    {
-                        return ["Permanent", itemNameParts[2], itemNameParts[3]];
-                    }
-                    //else { //Could be either a generic item, or Unque item. Unable to differentiate right now.
-                    
-                    //}
                 }
-                else if (item.ItemName.Contains("Trap"))
-                {
-                    if (itemNameParts.Length == 3)
-                    {
-                        if (itemNameParts[1] == "End")
-                        {
-                            return ["Junk", "EOD", "-1"];
-                        }
-                        else if (itemNameParts[1] == "Lose") {
-                            return ["Junk", "Item", "-1"];
-                        }
-                           
-                        return ["Junk", itemNameParts[1], "-1"];
-                    }
-                    else if (itemNameParts.Length == 4)
-                    {
-                        return ["Junk", itemNameParts[2], itemNameParts[3]];
-                    }
+                else {
+                    Plugin.BepinLogger.LogMessage($"{item.ItemName} is not currently supported or doesn't exist.");
+                    return null;
                 }
-                    
             }
-            Plugin.BepinLogger.LogMessage($"Unable to get item type for {item.ItemName}");
+            Plugin.BepinLogger.LogMessage($"Item was invalid. Unable to retreive Item.");
             return null;
         }
         public bool IsItemSpawnable(GameObject item)
@@ -420,6 +430,14 @@ namespace BluePrinceArchipelago.Core
                 }
             }
             return null;
+        }
+        public void LoseRandomItem() {
+            //We don't care if this fails, since it's a trap, and I'm too lazy to handle the edgecase where you are not in a run, and you spawn without an item.
+            int count = PickedUp.arrayList.Count;
+            if (count > 0 && ModInstance.IsInRun) { 
+                int index = Random.Range(0, count);
+                PickedUp.RemoveAt(index);
+            }
         }
     }
 
@@ -537,10 +555,6 @@ namespace BluePrinceArchipelago.Core
             {
                 AdjustKeys(_Count);
             }
-            else if (_ItemType == "Stars")
-            {
-                AdjustStars(_Count);
-            }
             else if (_ItemType == "Luck")
             {
                 AdjustLuck(_Count);
@@ -587,18 +601,6 @@ namespace BluePrinceArchipelago.Core
         private void AdjustKeys(int count = 1) {
             ModInstance.KeyManager.FindIntVariable("Adjustment Amount").Value = count;
             ModInstance.KeyManager.SendEvent("Update");
-        }
-        private void AdjustStars(int count = 1)
-        {
-            int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
-            if (totalStars + count > 0)
-            {
-                ModInstance.StarManager.FindIntVariable("TotalStars").Value += count;
-            }
-            else
-            {
-                ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
-            }
         }
         private void AdjustLuck(int count = 1) { 
             int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
@@ -667,6 +669,10 @@ namespace BluePrinceArchipelago.Core
             else if (_ItemType == "Luck") {
                 AdjustLuck(_Count);
             }
+            else if (_ItemType == "Stars")
+            {
+                AdjustStars(_Count);
+            }
             else
             {
                 Plugin.BepinLogger.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
@@ -714,6 +720,18 @@ namespace BluePrinceArchipelago.Core
                 ModInstance.LuckManager.FindIntVariable("Luck").Value = 0;
             }
         }
+        private void AdjustStars(int count = 1)
+        {
+            int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
+            if (totalStars + count > 0)
+            {
+                ModInstance.StarManager.FindIntVariable("TotalStars").Value += count;
+            }
+            else
+            {
+                ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
+            }
+        }
     }
     public static class RegisterItems
     {
@@ -735,6 +753,15 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Steps 2", null, false, "Steps", 2));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Gems 1", null, false, "Gems", 1));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Gems 2", null, false, "Gems", 2));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Luck 1", null, false, "Luck", 1));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Luck 2", null, false, "Luck", 2));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Steps 5", null, false, "Steps", 5));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 1", null, false, "Stars", 1));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 2", null, false, "Stars", 2));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 5", null, false, "Stars", 5));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 1", null, false, "Stars", 1));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 2", null, false, "Stars", 2));
+            Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 5", null, false, "Stars", 5));
             //Junk Items
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 1", null, true, "Gold", 1));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 2", null, true, "Gold", 2));
@@ -749,10 +776,11 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Keys 3", null, true, "Keys", 3));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Steps 1", null, true, "Steps", 1));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Steps 2", null, true, "Steps", 2));
-            Plugin.ModItemManager.AddItem(new JunkItem("Extra Steps 5", null, true, "Steps", 5));
-            Plugin.ModItemManager.AddItem(new JunkItem("Extra Stars 1", null, true, "Stars", 1));
-            Plugin.ModItemManager.AddItem(new JunkItem("Extra Stars 2", null, true, "Stars", 2));
-            Plugin.ModItemManager.AddItem(new JunkItem("Extra Stars 5", null, true, "Stars", 5));
+            
+            //Traps
+            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 1", null, true, "Steps", -1));
+            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 2", null, true, "Steps", -2));
+            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 5", null, true, "Steps", -5));
         }
     }
 }

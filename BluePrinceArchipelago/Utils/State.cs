@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using AsmResolver.PE.DotNet.ReadyToRun;
+using BepInEx;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Events;
 using Newtonsoft.Json;
@@ -93,22 +94,22 @@ namespace BluePrinceArchipelago.Utils
         public static T GetData<T>(string key) {
             if (ContainsKey(key))
             {
-                object value = JsonConvert.DeserializeObject(_Data[key].SerializedObject);
-                if (typeof(T) == _Data[key].SerializedObjectType)
+                try
                 {
-                    try
+                    T value = JsonConvert.DeserializeObject<T>(_Data[key].SerializedObject);
+                    if (typeof(T) == _Data[key].SerializedObjectType)
                     {
-                        T data = (T)value;
-                        return data;
+                        return value;
                     }
-                    catch
-                    {
-                        Plugin.BepinLogger.LogWarning($"Unable to get {key} as {typeof(T).ToString()}.");
-                        return default(T);
-                    }
+                    Plugin.BepinLogger.LogWarning($"Type of {key} does not match expected Type of {_Data[key].SerializedObjectType.ToString()}.");
+                    return default(T);
                 }
-                Plugin.BepinLogger.LogWarning($"Type of {key} does not match expected Type of {_Data[key].SerializedObjectType.ToString()}.");
-                return default(T);
+                catch {
+                    Plugin.BepinLogger.LogWarning($"Error Deserializing {key} as {_Data[key].SerializedObjectType.ToString()}.");
+                    return default(T);
+                }
+      
+                
             }
             Plugin.BepinLogger.LogWarning($"Key {key} does not exist.");
             return default(T);
@@ -159,7 +160,7 @@ namespace BluePrinceArchipelago.Utils
                 UpdateNoSave(key, data, typeof(T));
             }
         }
-        public static void Store<T>(this object data, string key, Type type, bool save = true)
+        public static void Store(this object data, string key, Type type, bool save = true)
         {
             if (save)
             {

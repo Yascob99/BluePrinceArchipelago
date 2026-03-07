@@ -47,7 +47,7 @@ namespace BluePrinceArchipelago.Events
         //Triggers the OnFirstDrafted Event
         public void OnFirstDrafted(ModRoom room)
         {
-            LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(room.Name.ToLower())} First Entering ", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(room.Name.ToLower())} First Entering", "First Draft Room"));
         }
         public void OnFirstFound(ModItem item) {
             LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name.ToLower())} First Pickup", "Item First Pickup"));
