@@ -65,7 +65,7 @@ public class ArchipelagoClient
         Plugin.BepinLogger.LogMessage("Location Item Map:");
         foreach (var entry in ServerData.LocationItemMap)
         {
-            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value.ItemName}");
         }
     }
     public void LoadStateData()
