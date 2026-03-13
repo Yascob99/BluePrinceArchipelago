@@ -56,7 +56,7 @@ public class DeathLinkHandler
     {
         deathLinks.Enqueue(deathLink);
 
-        Plugin.BepinLogger.LogDebug(deathLink.Cause.IsNullOrWhiteSpace()
+        Logging.LogDebug(deathLink.Cause.IsNullOrWhiteSpace()
             ? $"Received Death Link from: {deathLink.Source}"
             : deathLink.Cause);
     }
@@ -75,11 +75,11 @@ public class DeathLinkHandler
             var cause = deathLink.Cause.IsNullOrWhiteSpace() ? GetDeathLinkCause(deathLink) : deathLink.Cause;
 
             //TODO kill the player
-            Plugin.BepinLogger.LogMessage(cause);
+            Logging.Log(cause);
         }
         catch (Exception e)
         {
-            Plugin.BepinLogger.LogError(e);
+            Logging.LogError(e);
         }
     }
 
@@ -102,7 +102,7 @@ public class DeathLinkHandler
         {
             if (!deathLinkEnabled) return;
 
-            Plugin.BepinLogger.LogMessage("sharing your death...");
+            Logging.Log("sharing your death...");
 
             // add the cause here
             var linkToSend = new DeathLink(slotName);
@@ -111,7 +111,7 @@ public class DeathLinkHandler
         }
         catch (Exception e)
         {
-            Plugin.BepinLogger.LogError(e);
+            Logging.LogError(e);
         }
     }
 }

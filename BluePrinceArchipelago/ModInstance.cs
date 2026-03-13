@@ -1,15 +1,16 @@
 ﻿using BepInEx;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
-using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Events;
+using BluePrinceArchipelago.Models;
+using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Utils.Actions;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using BluePrinceArchipelago.COre;
 
 namespace BluePrinceArchipelago
 {
@@ -29,9 +30,11 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM KeyManager = new();
         public static PlayMakerFSM StarManager = new();
         public static PlayMakerFSM LuckManager = new();
-        public static TrunkTracker TrunkTracker = new();
+        public static TrunkManager TrunkManager = new();
         public static PlayMakerFSM GlobalPersistentManager = new();
         public static PlayMakerFSM GlobalManager = new();
+        public static PlayMakerFSM TheGrid = new();
+        public static PlayMakerFSM MasterPicker = new();
 
         public static int SaveSlot = 5;
         private static bool _IsArchipelagoMode = false;
@@ -85,7 +88,7 @@ namespace BluePrinceArchipelago
         // Called whenver a scene is loaded (triggered by the scene manager).
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            Plugin.BepinLogger.LogMessage($"Scene: {scene.name} loaded in {mode}");
+            Logging.Log($"Scene: {scene.name} loaded in {mode}");
             if (scene.name.Equals("Main Menu"))
             {
                 Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches"); //Apply event patches on the main menu to get some data that is not accessible later.  
@@ -93,7 +96,7 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Mount Holly Estate"))
             {
                 _SceneLoaded = true;
-                _PlanPicker = GameObject.Find("PLAN PICKER").gameObject;
+                _PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
                 _Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
                 _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
                 GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
@@ -105,17 +108,17 @@ namespace BluePrinceArchipelago
                 LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
                 GlobalPersistentManager = GameObject.Find("Global Persistent Manager")?.GetComponent<PlayMakerFSM>();
                 GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
+                TheGrid = GameObject.Find("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
+                MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
+                //AddRoomForcer();
                 LoadArrays();
                 InitializeRooms();
+                TrunkManager.Initialize();
                 RegisterItems.Register(); // Register the initial state of the items.
                 _HasInitializedRooms = true;
-                TrunkTracker.Initialize();
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
-                if (!verifySaveSlot()) {
-                    ArchipelagoConsole.LogMessage("Save Slot doesn't match expected saveslot");
-                }
             }
             else {
                 // hackish, but based on my knowledge only one scene is loaded at a time.
@@ -144,34 +147,34 @@ namespace BluePrinceArchipelago
                 }
             }
             if (targetName == "Trunk Counter" && eventName == "Update Subtract") {
-                TrunkTracker.OnTrunkOpen();
+                TrunkManager.OnTrunkOpen();
             }
-            Plugin.BepinLogger.LogMessage($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
+            Logging.Log($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         //Called by the item patch whenever an item is spawned.
         public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
             if (obj != null)
             {
-                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
+                Logging.Log($"Item: {obj.name}");
             }
             if (transformObj != null)
             {
-                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+                Logging.Log($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
             }
             if (spawnedObj != null) {
                 if (spawnedObj.value != null) {
-                    Plugin.BepinLogger.LogMessage($"SpawnedObj: {spawnedObj.value.name} - {transformObj.transform.position.ToString()}");
+                    Logging.Log($"SpawnedObj: {spawnedObj.value.name} - {transformObj.transform.position.ToString()}");
                 }
             }
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
             if (obj != null)
             {
-                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
+                Logging.Log($"Item: {obj.name}");
             }
             if (transformObj != null)
             {
-                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+                Logging.Log($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
             }
             ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
             if (room != null) {
@@ -182,13 +185,13 @@ namespace BluePrinceArchipelago
             }
         }
         public static void OnOtherSpawn(GameObject obj, string poolName, GameObject transformObj) {
-            Plugin.BepinLogger.LogMessage($"Pool Name: {poolName}");
+            Logging.Log($"Pool Name: {poolName}");
             if (obj != null)
             {
-                Plugin.BepinLogger.LogMessage($"Item: {obj.name}");
+                Logging.Log($"Item: {obj.name}");
             }
             if (transformObj != null) {
-                Plugin.BepinLogger.LogMessage($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
+                Logging.Log($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
             }
         }
         // handles Day start code. Currently unsure if this is good timing for things.
@@ -210,21 +213,26 @@ namespace BluePrinceArchipelago
         {
             if (HasInitializedRooms)
             {
-                Plugin.BepinLogger.LogMessage("Updating Rooms");
-                Plugin.ModRoomManager.UpdateRoomPools();
+                // Check for if the room pool needs to be forced, and force the draft if needed. Currently Allows you to draft beyond the normal limit for that room, but should respect that limit on non-forced drafts.
+                if (!Plugin.ModRoomManager.CheckForceRoomDraft()) {
+                    //MasterPicker.FindGameObjectVariable("RoomEngine").value = null; //Might be needed to prevent accidentally forcing drafts later.
+                    Logging.Log("Updating Rooms");
+                    Plugin.ModRoomManager.UpdateRoomPools();
+                }
+                
             }
             else {
-                Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
+                Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
             }
         }
         public static void OnOuterDraftStart(OuterDraftManager draftManager) {
             if (HasInitializedRooms) {
-                Plugin.BepinLogger.LogMessage("Updating Rooms");
+                Logging.Log("Updating Rooms");
                 Plugin.ModRoomManager.UpdateRoomPools();
             }
             else
             {
-                Plugin.BepinLogger.LogMessage("Unable to update Room Pool because Rooms have not been initialized.");
+                Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
             }
         }
 
@@ -272,6 +280,11 @@ namespace BluePrinceArchipelago
                 if (GUI.Button(new Rect(16, 230, 100, 20), "Connect") &&
                     !ArchipelagoClient.ServerData.SlotName.IsNullOrWhiteSpace())
                 {
+                    ConnectionData connData = new ConnectionData();
+                    connData.Uri = ArchipelagoClient.ServerData.Uri;
+                    connData.SlotName = ArchipelagoClient.ServerData.SlotName;
+                    connData.Password = ArchipelagoClient.ServerData.Password;
+                    State.UpdateServerDetails(connData);
                     Plugin.ArchipelagoClient.Connect();
                 }
             }
@@ -279,8 +292,7 @@ namespace BluePrinceArchipelago
         }
         public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
         {
-            Plugin.BepinLogger.LogMessage($"Location sent: {e.LocationName} of the location type: {e.LocationType}");
-            Plugin.BepinLogger.LogMessage(ArchipelagoClient.Authenticated);
+            Logging.Log($"Location sent: {e.LocationName} of the location type: {e.LocationType}");
             if (ArchipelagoClient.Authenticated)
             {
                 Plugin.ArchipelagoClient.CheckLocation(e.LocationName);
@@ -299,31 +311,45 @@ namespace BluePrinceArchipelago
             }
             
         }
-        public static bool verifySaveSlot() {
-            //Check if the client was reconnected, and if the save slot is a valid slot.
-            if (ArchipelagoClient.Authenticated && ArchipelagoClient.Reconnected && SaveSlot > 0 && SaveSlot < 5)
+        //public static bool verifySaveSlot() {
+        //    //Check if the client was reconnected, and if the save slot is a valid slot.
+        //    if (ArchipelagoClient.Authenticated && ArchipelagoClient.Reconnected && SaveSlot > 0 && SaveSlot < 5)
+        //    {
+        //        int stateSlot = ;
+        //        if (stateSlot == 5)
+        //        {
+        //            SaveSlot.Store<int>("SaveSlot");
+        //            return true;
+        //        }
+        //        else if (stateSlot == SaveSlot)
+        //        {
+        //            return true;
+        //        }
+        //        Logging.Log("Save Slot doesn't match expected saveslot");
+        //        return false;
+        //    }
+        //    // defaulting to true for now to avoid issues while testing.
+        //    return true;
+        //}
+        private void AddRoomForcer(PlayMakerFSM fsm) {
+            FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", true);
+            FsmState ForceDraft = fsm.AddState("Force Room Draft");
+            ForceDraft.AddLastAction(new DelegateBoolTest(() => Plugin.ModRoomManager.IsForcingDraft, "Continue Draft", null));
+            ForceDraft.AddLastAction(new Lambda(() =>
             {
-                if (State.ContainsKey("SaveSlot")) {
-                    int stateSlot = State.GetData<int>("SaveSlot");
-                    if (stateSlot == 5)
-                    {
-                        SaveSlot.Store<int>("SaveSlot");
-                        return true;
-                    }
-                    else if (stateSlot == SaveSlot) {
-                        return true;
-                    }
-                    Plugin.BepinLogger.LogMessage("Save Slot doesn't match expected saveslot");
-                    return false;
-                }
-            }
-            // defaulting to true for now to avoid issues while testing.
-            return true;
+                fsm.FindGameObjectVariable("RoomEngine").value = Plugin.ModRoomManager.ForcedRoom.GameObj;
+                fsm.SendEvent("PLAN SELECTED");
+            }));
+            FsmState DraftCodeStart = fsm.GetState("Draft Code Start");
+            DraftCodeStart.RemoveTransitionsOn("FINISHED");
+            ForceDraft.AddTransition("Continue Draft", "Day 1 Draft 1");
+            DraftCodeStart.AddTransition("FINISHED", ForceDraft);
         }
+
         
         private static void InitializeRooms()
         {
-            Plugin.BepinLogger.LogMessage("Initializing Rooms");
+            Logging.Log("Initializing Rooms");
 
             if (Plugin.ModRoomManager != null)
             {

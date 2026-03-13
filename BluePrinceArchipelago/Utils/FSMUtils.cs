@@ -3,6 +3,7 @@ using HutongGames.PlayMaker;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -165,11 +166,6 @@ namespace BluePrinceArchipelago.Utils
             }
             return retArray;
         }
-
-        public static FsmState GetState(this PlayMakerFSM fsm, string stateName)
-        {
-            return GetItemFromArray<FsmState>(fsm.FsmStates, x => x.Name == stateName);
-        }
         public static FsmTransition GetTransition(this PlayMakerFSM fsm, string stateName, string eventName) => fsm.GetState(stateName)!.GetTransition(eventName);
 
         /// <inheritdoc cref="GetTransition(PlayMakerFSM, string, string)"/>
@@ -225,25 +221,6 @@ namespace BluePrinceArchipelago.Utils
         public static FsmStateAction GetStateAction(this FsmState state, int index) => state.Actions[index];
 
         /// <summary>
-        ///     Gets an action in a PlayMakerFSM.
-        /// </summary>
-        /// <typeparam name="TAction">The type of the action that is wanted</typeparam>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state</param>
-        /// <returns>An array of actions</returns>
-
-        public static TAction[] GetActionsOfType<TAction>(this PlayMakerFSM fsm, string stateName) where TAction : FsmStateAction => fsm.GetState(stateName)!.GetActionsOfType<TAction>();
-
-        /// <inheritdoc cref="GetActionsOfType{TAction}(PlayMakerFSM, string)"/>
-
-        public static TAction[] GetActionsOfType<TAction>(this Fsm fsm, string stateName) where TAction : FsmStateAction => fsm.GetState(stateName)!.GetActionsOfType<TAction>();
-
-        /// <inheritdoc cref="GetActionsOfType{TAction}(PlayMakerFSM, string)"/>
-        /// <param name="state">The state</param>
-
-        public static TAction[] GetActionsOfType<TAction>(this FsmState state) where TAction : FsmStateAction => Array.ConvertAll(GetItemsFromArray<FsmStateAction>(state.Actions, x => x is TAction), x => (TAction)x);
-
-        /// <summary>
         ///     Gets first action of a given type in an FsmState.  
         /// </summary>
         /// <typeparam name="TAction">The type of actions to remove</typeparam>
@@ -258,23 +235,6 @@ namespace BluePrinceArchipelago.Utils
 
         /// <inheritdoc cref="GetFirstActionOfType{TAction}(PlayMakerFSM, string)"/>
         /// <param name="state">The fsm state</param>
-
-        public static TAction GetFirstActionOfType<TAction>(this FsmState state) where TAction : FsmStateAction
-        {
-            int firstActionIndex = -1;
-            for (int i = 0; i < state.Actions.Length; i++)
-            {
-                if (state.Actions[i] is TAction)
-                {
-                    firstActionIndex = i;
-                    break;
-                }
-            }
-
-            if (firstActionIndex == -1)
-                return null;
-            return state.GetAction<TAction>(firstActionIndex);
-        }
 
         /// <summary>
         ///     Gets last action of a given type in an FsmState.  
@@ -324,28 +284,208 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="stateName">The name of the state</param>
         /// <returns>The created state</returns>
 
-        public static FsmState AddState(this PlayMakerFSM fsm, string stateName) => fsm.Fsm.AddState(new FsmState(fsm.Fsm) { Name = stateName });
-
-        /// <inheritdoc cref="AddState(PlayMakerFSM, string)"/>
-
-        public static FsmState AddState(this Fsm fsm, string stateName) => fsm.AddState(new FsmState(fsm) { Name = stateName });
-
-        /// <inheritdoc cref="AddState(PlayMakerFSM, string)"/>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="state">The state</param>
-
-        public static FsmState AddState(this PlayMakerFSM fsm, FsmState state) => fsm.Fsm.AddState(state);
-
-        /// <inheritdoc cref="AddState(PlayMakerFSM, FsmState)"/>
-
-        public static FsmState AddState(this Fsm fsm, FsmState state)
+        public static void AddState(this PlayMakerFSM fsm, FsmState state)
         {
-            FsmState[] origStates = fsm.States;
-            FsmState[] states = AddItemToArray(origStates, state);
-            fsm.States = states;
-            // TODO: CHECK: is this necessary? afaik it saves data for each state, which might be needed for copying/applying state changes for other things
-            fsm.SaveActions();
-            return states[origStates.Length];
+            FsmState[] states = new FsmState[fsm.FsmStates.Length + 1];
+
+            fsm.FsmStates.CopyTo(states, 0);
+            states[fsm.FsmStates.Length] = state;
+
+            fsm.Fsm.States = states;
+        }
+
+        public static FsmState AddState(this PlayMakerFSM fsm, string name)
+        {
+            FsmState state = new(fsm.Fsm)
+            {
+                Name = name,
+                Transitions = Array.Empty<FsmTransition>(),
+            };
+            state.ClearActions();
+            AddState(fsm, state);
+
+            return state;
+        }
+
+        public static FsmState GetState(this PlayMakerFSM fsm, string name)
+        {
+            return fsm.FsmStates.FirstOrDefault(s => s.Name == name);
+        }
+
+        public static void AddFirstAction(this FsmState state, FsmStateAction action)
+        {
+            FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
+            actions[0] = action;
+            state.Actions.CopyTo(actions, 1);
+            state.Actions = actions;
+            action.Init(state);
+        }
+
+        public static void AddLastAction(this FsmState state, FsmStateAction action)
+        {
+            FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
+            actions[state.Actions.Length] = action;
+            state.Actions.CopyTo(actions, 0);
+            state.Actions = actions;
+            action.Init(state);
+        }
+
+        public static void InsertAction(this FsmState state, FsmStateAction action, int index)
+        {
+            FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
+            for (int i = 0; i < state.Actions.Length; i++)
+            {
+                if (i < index) actions[i] = state.Actions[i];
+                else actions[i + 1] = state.Actions[i];
+            }
+            actions[index] = action;
+            state.Actions = actions;
+            action.Init(state);
+        }
+
+        public static void RemoveAction(this FsmState state, int index)
+        {
+            FsmStateAction[] actions = new FsmStateAction[state.Actions.Length - 1];
+            for (int i = 0; i < state.Actions.Length - 1; i++)
+            {
+                if (i < index) actions[i] = state.Actions[i];
+                else actions[i] = state.Actions[i + 1];
+            }
+            state.Actions = actions;
+        }
+
+        public static void ReplaceAction(this FsmState state, FsmStateAction action, int index)
+        {
+            state.Actions[index] = action;
+            action.Init(state);
+        }
+
+        public static void ClearActions(this FsmState state) => state.SetActions(Array.Empty<FsmStateAction>());
+
+        public static void SetActions(this FsmState state, params FsmStateAction[] actions)
+        {
+            state.Actions = actions;
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i].Init(state);
+            }
+        }
+
+        public static void RemoveActionsOfType<T>(this FsmState state) where T : FsmStateAction
+        {
+            state.Actions = state.Actions.Where(a => !(a is T)).ToArray();
+        }
+
+        public static void RemoveFirstActionOfType<T>(this FsmState state) where T : FsmStateAction
+        {
+            int i = Array.FindIndex<FsmStateAction>(state.Actions, a => a is T);
+            if (i >= 0) state.RemoveAction(i);
+        }
+
+        public static T[] GetActionsOfType<T>(this FsmState state) where T : FsmStateAction
+        {
+            return state.Actions.OfType<T>().ToArray();
+        }
+
+        public static T GetFirstActionOfType<T>(this FsmState state) where T : FsmStateAction
+        {
+            return state.Actions.OfType<T>().FirstOrDefault();
+        }
+
+        public static FsmBool AddFsmBool(this PlayMakerFSM fsm, string name, bool value)
+        {
+            FsmBool fb = new FsmBool
+            {
+                Name = name,
+                Value = value
+            };
+
+            FsmBool[] bools = new FsmBool[fsm.FsmVariables.BoolVariables.Length + 1];
+            fsm.FsmVariables.BoolVariables.CopyTo(bools, 0);
+            bools[bools.Length - 1] = fb;
+            fsm.FsmVariables.BoolVariables = bools;
+
+            return fb;
+        }
+
+        public static FsmInt AddFsmInt(this PlayMakerFSM fsm, string name, int value)
+        {
+            FsmInt fi = new FsmInt
+            {
+                Name = name,
+                Value = value
+            };
+
+            FsmInt[] ints = new FsmInt[fsm.FsmVariables.IntVariables.Length + 1];
+            fsm.FsmVariables.IntVariables.CopyTo(ints, 0);
+            ints[ints.Length - 1] = fi;
+            fsm.FsmVariables.IntVariables = ints;
+
+            return fi;
+        }
+
+        public static FsmGameObject AddFsmGameObject(this PlayMakerFSM fsm, string name, GameObject value)
+        {
+            FsmGameObject fgo = new FsmGameObject
+            {
+                Name = name,
+                Value = value
+            };
+
+            FsmGameObject[] gos = new FsmGameObject[fsm.FsmVariables.GameObjectVariables.Length + 1];
+            fsm.FsmVariables.GameObjectVariables.CopyTo(gos, 0);
+            gos[gos.Length - 1] = fgo;
+            fsm.FsmVariables.GameObjectVariables = gos;
+
+            return fgo;
+        }
+
+        public static FsmTransition AddTransition(this FsmState state, FsmEvent fsmEvent, FsmState toState)
+        {
+            FsmTransition[] transitions = new FsmTransition[state.Transitions.Length + 1];
+            state.Transitions.CopyTo(transitions, 0);
+
+            FsmTransition t = new FsmTransition
+            {
+                FsmEvent = fsmEvent,
+                ToFsmState = toState,
+                ToState = toState.Name,
+            };
+            transitions[state.Transitions.Length] = t;
+            state.Transitions = transitions;
+
+            return t;
+        }
+
+        public static FsmTransition AddTransition(this FsmState state, string eventName, FsmState toState)
+        {
+            return state.AddTransition(FsmEvent.GetFsmEvent(eventName), toState);
+        }
+
+        public static FsmTransition AddTransition(this FsmState state, string eventName, string toState)
+        {
+            return state.AddTransition(eventName == "FINISHED" ? FsmEvent.Finished : FsmEvent.GetFsmEvent(eventName), state.Fsm.GetState(toState));
+        }
+
+        public static void RemoveTransitionsTo(this FsmState state, string toState)
+        {
+            state.Transitions = state.Transitions.Where(t => (t.ToFsmState?.Name ?? t.ToState) != toState).ToArray();
+        }
+
+        public static void RemoveTransitionsOn(this FsmState state, string eventName)
+        {
+            state.Transitions = state.Transitions.Where(t => t.EventName != eventName).ToArray();
+        }
+
+        public static void SetToState(this FsmTransition transition, FsmState toState)
+        {
+            transition.ToFsmState = toState;
+            transition.ToState = toState.Name;
+        }
+
+        public static void ClearTransitions(this FsmState state)
+        {
+            state.Transitions = Array.Empty<FsmTransition>();
         }
 
         /// <summary>
@@ -356,68 +496,9 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="toState">The name of the new state</param>
         /// <returns>The new state</returns>
 
-        public static FsmState CopyState(this PlayMakerFSM fsm, string fromState, string toState) => fsm.Fsm.CopyState(fromState, toState);
+        public static FsmState CopyState(this PlayMakerFSM fsm, string fromState, string toState) => fsm.CopyState(fromState, toState);
 
         /// <inheritdoc cref="CopyState(PlayMakerFSM, string, string)"/>
-
-        public static FsmState CopyState(this Fsm fsm, string fromState, string toState)
-        {
-            FsmState from = fsm.GetState(fromState);
-            // save the actions before we create a new state from this, as the copy constructor will create the new actions from the saved action data from the state we put in, and that is only updated if we call .SaveActions()
-            from.SaveActions();
-            FsmState copy = new FsmState(from)
-            {
-                Name = toState
-            };
-            foreach (FsmTransition transition in copy.Transitions)
-            {
-                // This is because playmaker is bad, it has to be done extra
-                transition.ToFsmState = fsm.GetState(transition.ToState);
-            }
-            fsm.AddState(copy);
-            return copy;
-        }
-
-        /// <summary>
-        ///     Adds a transition in a PlayMakerFSM.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state from which the transition starts</param>
-        /// <param name="eventName">The name of transition event</param>
-        /// <param name="toState">The name of the new state</param>
-        /// <returns>The event of the transition</returns>
-
-        public static FsmEvent AddTransition(this PlayMakerFSM fsm, string stateName, string eventName, string toState) => fsm.GetState(stateName)!.AddTransition(eventName, toState);
-
-        /// <inheritdoc cref="AddTransition(PlayMakerFSM, string, string, string)"/>
-
-        public static FsmEvent AddTransition(this Fsm fsm, string stateName, string eventName, string toState) => fsm.GetState(stateName)!.AddTransition(eventName, toState);
-
-        /// <inheritdoc cref="AddTransition(PlayMakerFSM, string, string, string)"/>
-        /// <param name="state">The state from which the transition starts</param>
-        /// <param name="eventName">The name of transition event</param>
-        /// <param name="toState">The name of the new state</param>
-
-        public static FsmEvent AddTransition(this FsmState state, string eventName, string toState)
-        {
-            var ret = FsmEvent.GetFsmEvent(eventName);
-            FsmTransition[] transitions = AddItemToArray(state.Transitions, new FsmTransition
-            {
-                ToState = toState,
-                ToFsmState = state.Fsm.GetState(toState),
-                FsmEvent = ret
-            });
-            state.Transitions = transitions;
-            return ret;
-        }
-
-        /// <summary>
-        ///     Adds a global transition in a PlayMakerFSM.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="globalEventName">The name of transition event</param>
-        /// <param name="toState">The name of the new state</param>
-        /// <returns>The event of the transition</returns>
 
         public static FsmEvent AddGlobalTransition(this PlayMakerFSM fsm, string globalEventName, string toState) => fsm.Fsm.AddGlobalTransition(globalEventName, toState);
 
@@ -577,12 +658,6 @@ namespace BluePrinceArchipelago.Utils
 
         public static void InsertAction(this Fsm fsm, string stateName, int index, FsmStateAction action) => fsm.GetState(stateName)!.InsertAction(index, action);
 
-        /// <inheritdoc cref="InsertAction(PlayMakerFSM, string, FsmStateAction, int)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="action">The action</param>
-        /// <param name="index">The index to place the action in</param>
-
-        public static void InsertAction(this FsmState state, FsmStateAction action, int index) => state.InsertAction(index, action);
 
         /// <inheritdoc cref="InsertAction(FsmState, FsmStateAction, int)"/>
 
@@ -777,13 +852,6 @@ namespace BluePrinceArchipelago.Utils
 
         public static void ReplaceAction(this Fsm fsm, string stateName, int index, FsmStateAction action) => fsm.GetState(stateName)!.ReplaceAction(index, action);
 
-        /// <inheritdoc cref="ReplaceAction(PlayMakerFSM, string, FsmStateAction, int)"/>
-        /// <param name="state">The state in which the action is replaced</param>
-        /// <param name="action">The action</param>
-        /// <param name="index">The index of the action</param>
-
-        public static void ReplaceAction(this FsmState state, FsmStateAction action, int index) => state.ReplaceAction(index, action);
-
         /// <inheritdoc cref="ReplaceAction(FsmState, FsmStateAction, int)"/>
 
         public static void ReplaceAction(this FsmState state, int index, FsmStateAction action)
@@ -922,8 +990,6 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="stateName">The name of the state from which the transition starts</param>
         /// <param name="eventName">The event of the transition</param>
 
-        public static void RemoveTransition(this PlayMakerFSM fsm, string stateName, string eventName) => fsm.GetState(stateName)!.RemoveTransition(eventName);
-
         /// <inheritdoc cref="RemoveTransition(PlayMakerFSM, string, string)"/>
 
         public static void RemoveTransition(this Fsm fsm, string stateName, string eventName) => fsm.GetState(stateName)!.RemoveTransition(eventName);
@@ -983,12 +1049,6 @@ namespace BluePrinceArchipelago.Utils
 
         public static void RemoveTransitionsTo(this Fsm fsm, string stateName, string toState) => fsm.GetState(stateName)!.RemoveTransitionsTo(toState);
 
-        /// <inheritdoc cref="RemoveTransitionsTo(PlayMakerFSM, string, string)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="toState">The event of the transition</param>
-
-        public static void RemoveTransitionsTo(this FsmState state, string toState) => state.Transitions = RemoveItemsFromArray<FsmTransition>(state.Transitions, x => x.ToState == toState);
-
         /// <summary>
         ///     Removes all transitions from a state in a PlayMakerFSM.
         /// </summary>
@@ -1009,46 +1069,8 @@ namespace BluePrinceArchipelago.Utils
             state.Transitions = new Il2CppReferenceArray<FsmTransition>([]);
         }
 
-        /// <summary>
-        ///     Removes an action in a PlayMakerFSM.  
-        ///     Trying to remove an action that doesn't exist will result in the actions not being changed.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state with the action</param>
-        /// <param name="index">The index of the action</param>
 
-        public static bool RemoveAction(this PlayMakerFSM fsm, string stateName, int index) => fsm.GetState(stateName)!.RemoveAction(index);
-
-        /// <inheritdoc cref="RemoveAction(PlayMakerFSM, string, int)"/>
-
-        public static bool RemoveAction(this Fsm fsm, string stateName, int index) => fsm.GetState(stateName)!.RemoveAction(index);
-
-        /// <inheritdoc cref="RemoveAction(PlayMakerFSM, string, int)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="index">The index of the action</param>
-
-        public static bool RemoveAction(this FsmState state, int index)
-        {
-            FsmStateAction[] origActions = state.Actions;
-            if (index < 0 || index >= origActions.Length)
-            {
-                return false;
-            }
-            FsmStateAction[] newActions = new FsmStateAction[origActions.Length - 1];
-            int newActionsCount = newActions.Length;
-            int i;
-            for (i = 0; i < index; i++)
-            {
-                newActions[i] = origActions[i];
-            }
-            for (i = index; i < newActionsCount; i++)
-            {
-                newActions[i] = origActions[i + 1];
-            }
-
-            state.Actions = newActions;
-            return true;
-        }
+    
 
         /// <summary>
         ///     Removes all actions of a given type in a PlayMakerFSM.
@@ -1056,77 +1078,7 @@ namespace BluePrinceArchipelago.Utils
         /// <typeparam name="TAction">The type of actions to remove</typeparam>
         /// <param name="fsm">The fsm</param>
 
-        public static void RemoveActionsOfType<TAction>(this PlayMakerFSM fsm) => fsm.Fsm.RemoveActionsOfType<TAction>();
-
-        /// <inheritdoc cref="RemoveActionsOfType{TAction}(PlayMakerFSM)"/>
-
-        public static void RemoveActionsOfType<TAction>(this Fsm fsm)
-        {
-            foreach (FsmState state in fsm.States)
-            {
-                state.RemoveActionsOfType<TAction>();
-            }
-        }
-
-        /// <summary>
-        ///     Removes all actions of a given type in an FsmState.  
-        /// </summary>
-        /// <typeparam name="TAction">The type of actions to remove</typeparam>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state to remove the actions from</param>
-
-        public static void RemoveActionsOfType<TAction>(this PlayMakerFSM fsm, string stateName) => fsm.GetState(stateName)!.RemoveActionsOfType<TAction>();
-
-        /// <inheritdoc cref="RemoveActionsOfType{TAction}(PlayMakerFSM, string)"/>
-
-        public static void RemoveActionsOfType<TAction>(this Fsm fsm, string stateName) => fsm.GetState(stateName)!.RemoveActionsOfType<TAction>();
-
-        /// <inheritdoc cref="RemoveActionsOfType{TAction}(PlayMakerFSM, string)"/>
-        /// <param name="state">The fsm state</param>
-
-        public static void RemoveActionsOfType<TAction>(this FsmState state)
-        {
-            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
-            {
-                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName) //A bit hacky, but it works.
-                {
-                    state.RemoveAction(i);
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Removes first action of a given type in an FsmState.  
-        /// </summary>
-        /// <typeparam name="TAction">The type of actions to remove</typeparam>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state to remove the actions from</param>
-
-        public static void RemoveFirstActionOfType<TAction>(this PlayMakerFSM fsm, string stateName) => fsm.GetState(stateName)!.RemoveFirstActionOfType<TAction>();
-
-        /// <inheritdoc cref="RemoveFirstActionOfType{TAction}(PlayMakerFSM, string)"/>
-
-        public static void RemoveFirstActionOfType<TAction>(this Fsm fsm, string stateName) => fsm.GetState(stateName)!.RemoveFirstActionOfType<TAction>();
-
-        /// <inheritdoc cref="RemoveFirstActionOfType{TAction}(PlayMakerFSM, string)"/>
-        /// <param name="state">The fsm state</param>
-
-        public static void RemoveFirstActionOfType<TAction>(this FsmState state)
-        {
-            int firstActionIndex = -1;
-            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
-            {
-                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName)
-                {
-                    firstActionIndex = i;
-                    break;
-                }
-            }
-
-            if (firstActionIndex == -1)
-                return;
-            state.RemoveAction(firstActionIndex);
-        }
+        public static void RemoveActionsOfType<TAction>(this PlayMakerFSM fsm) => fsm.RemoveActionsOfType<TAction>();
 
         /// <summary>
         ///     Removes last action of a given type in an FsmState.  

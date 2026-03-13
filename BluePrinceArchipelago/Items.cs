@@ -10,10 +10,9 @@ namespace BluePrinceArchipelago.Core
     public class ModItemManager
     {
         public static List<PermanentItem> PermanentItemList = [];
-        public static List<ModItem> GenericItemList = new();
         public static List<UniqueItem> UniqueItemList = new();
         public static List<JunkItem> JunkItemList = new();
-        public static Dictionary<string, string> ItemDict = new(); //Item name is the key, the type of item is the value.
+        public static Dictionary<string, ModItem> ItemDict = new(); //Item name is the key, the type of item is the value.
         public static PlayMakerArrayListProxy PreSpawn = new();
         public static PlayMakerArrayListProxy EstateItems = new();
         public static PlayMakerArrayListProxy PickedUp = new();
@@ -35,17 +34,6 @@ namespace BluePrinceArchipelago.Core
             CoatCheck = GameObject.Find("__SYSTEM/Inventory/Inventory (CoatCheck)")?.GetArrayListProxy("Inventory (CoatCheck)");
             UsedItems = GameObject.Find("__SYSTEM/Inventory/Inventory (UsedItems)")?.GetArrayListProxy("Inventory (UsedItems)");
         }
-        // Adds a generic item, or 1 to it's count if it already exists.
-        public void AddItem(ModItem itemToAdd, int count = 1) {
-            foreach (ModItem item in GenericItemList) {
-                if (item.Name == itemToAdd.Name) {
-                    item.Count+=1;
-                    return;
-                }
-            }
-            ItemDict[itemToAdd.Name] = "Generic";
-            GenericItemList.Add(itemToAdd);
-        }
         // Adds a unique item if it doesn't already exist.
         public void AddItem(UniqueItem item)
         {
@@ -62,12 +50,12 @@ namespace BluePrinceArchipelago.Core
             }
             if (!found)
             {
-                ItemDict[item.Name] = "Unique";
+                ItemDict[item.Name] = item;
                 UniqueItemList.Add(item);
             }
             else
             {
-                Plugin.BepinLogger.LogMessage($"Item {item.Name} already added, can't add multiple copies.");
+                Logging.Log($"Item {item.Name} already added, can't add multiple copies.");
             }
         }
         public void AddItem(JunkItem itemToAdd, int count = 1) {
@@ -79,7 +67,7 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
-            ItemDict[itemToAdd.Name] = "Junk";
+            ItemDict[itemToAdd.Name] = itemToAdd;
             JunkItemList.Add(itemToAdd);
         }
         public void AddItem(PermanentItem itemToAdd, int count = 1) {
@@ -91,7 +79,7 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
-            ItemDict[itemToAdd.Name] = "Permanent";
+            ItemDict[itemToAdd.Name] = itemToAdd;
             PermanentItemList.Add(itemToAdd);
         }
         public void AddItem(string name, GameObject gameObject, bool isUnlocked, bool isUnique = false, bool isJunk = false, bool isPermanent = false, int count = 1, string itemType = null) {
@@ -99,59 +87,44 @@ namespace BluePrinceArchipelago.Core
             {
                 if (isJunk || isPermanent || itemType != null || count > 1 || count < 1)
                 {
-                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Unique item, invalid parameters");
+                    Logging.Log($"{name} could not be added as a Unique item, invalid parameters");
                     return;
                 }
                 UniqueItem item = new UniqueItem(name, gameObject, isUnlocked);
-                ItemDict[item.Name] = "Unique";
+                ItemDict[item.Name] = item;
                 UniqueItemList.Add(item);
             }
             else if (isJunk)
             {
                 if (itemType == null || count == 0 || isPermanent)
                 {
-                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Junk/Trap item, invalid parameters");
+                    Logging.Log($"{name} could not be added as a Junk/Trap item, invalid parameters.");
                     return;
                 }
                 JunkItem item = new JunkItem(name, gameObject, isUnlocked, itemType, count);
-                ItemDict[item.Name] = "Junk";
+                ItemDict[item.Name] = item;
                 JunkItemList.Add(item);
             }
             else if (isPermanent)
             {
                 if (itemType == null || count < 1)
                 {
-                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Permanent Item, invalid parameters");
+                    Logging.Log($"{name} could not be added as a Permanent Item, invalid parameters.");
                     return;
                 }
                 PermanentItem item = new PermanentItem(name, gameObject, isUnlocked, itemType);
-                ItemDict[item.Name] = "Permanent";
+                ItemDict[item.Name] = item;
                 PermanentItemList.Add(item);
             }
             else {
-                if (itemType == null || count < 1) {
-                    Plugin.BepinLogger.LogMessage($"{name} could not be added as a Generic Item, invalid parameters");
-                    return;
-                }
-                ModItem item = new ModItem(name, gameObject, isUnlocked);
-                ItemDict[item.Name] = "Generic";
-                GenericItemList.Add(item);
+                Logging.LogWarning("Item could not be added, invalid parameters.");
             }
-        }
-        public ModItem GetGenericItem(string name) {
-            foreach (ModItem item in GenericItemList)
-            {
-                if (!item.Name.Equals(name)) {
-                    return item;
-                }
-            }
-            return null;
         }
         public UniqueItem GetUniqueItem(string name)
         {
             foreach (UniqueItem item in UniqueItemList)
             {
-                if (!item.Name.Equals(name))
+                if (item.Name.Equals(name))
                 {
                     return item;
                 }
@@ -162,7 +135,7 @@ namespace BluePrinceArchipelago.Core
         public JunkItem GetJunkItem(string name) {
             foreach (JunkItem item in JunkItemList)
             {
-                if (!item.Name.Equals(name))
+                if (item.Name.Equals(name))
                 {
                     return item;
                 }
@@ -173,7 +146,7 @@ namespace BluePrinceArchipelago.Core
         {
             foreach (PermanentItem item in PermanentItemList)
             {
-                if (!item.Name.Equals(name))
+                if (item.Name.Equals(name))
                 {
                     return item;
                 }
@@ -191,7 +164,7 @@ namespace BluePrinceArchipelago.Core
             if (PermanentItemList.Count > 0) {
                 foreach (PermanentItem item in PermanentItemList) {
                     if (item.IsUnlocked) {
-                        Plugin.BepinLogger.LogMessage($"Adding {item.Count} {item.Name}(s)");
+                        Logging.Log($"Adding {item.Count} {item.Name}(s)");
                         item.AddItemToInventory();
                     }
                 }
@@ -204,11 +177,13 @@ namespace BluePrinceArchipelago.Core
             string itemType;
             bool genItem = false;
             string[] itemParams = [];
+            ModItem item = null;
+            //If item exists, retreive it. If not try to generate it.
             if (ItemDict.ContainsKey(itemInfo.ItemName))
             {
-                itemType = ItemDict[itemInfo.ItemName];
-                // Permanent items are added at start of day, add them to the list, then don't worry about them.
-               
+                item = ItemDict[itemInfo.ItemName];
+                item.AddItemToInventory();
+                return;
             }
             else {
                 itemParams = TryGetItemParamsFromCheckData(itemInfo);
@@ -219,95 +194,74 @@ namespace BluePrinceArchipelago.Core
                 itemType = itemParams[0];
                 if (itemType == null)
                 {
-                    Plugin.BepinLogger.LogWarning($"Unable to give {itemInfo.ItemName} as it couldn't be identified.");
+                    Logging.LogWarning($"Unable to give {itemInfo.ItemName} as it couldn't be identified.");
                     return;
                 }
                 genItem = true;
             }
             if (itemType == "Permanent")
             {
-                PermanentItem item;
+                PermanentItem pItem;
                 if (genItem)
                 {
                     int count = int.Parse(itemParams[2]);
-                    item = new PermanentItem(itemInfo.ItemName, null, true, itemParams[1], count);
+                    pItem = new PermanentItem(itemInfo.ItemName, null, true, itemParams[1], count);
                 }
                 else
                 {
-                    item = GetPermanentItem(itemInfo.ItemName);
+                    pItem = GetPermanentItem(itemInfo.ItemName);
                 }
 
-                if (item == null)
+                if (pItem == null)
                 {
-                    PermanentItemList.Add(item);
+                    PermanentItemList.Add(pItem);
                 }
-               
+
             }
             else if (ModInstance.IsInRun)
             {
-
-
-                if (itemType == "Generic")
+                UniqueItem uItem;
+                if (itemType == "Unique")
                 {
-                    ModItem item;
                     if (genItem)
                     {
-                        item = new ModItem(itemInfo.ItemName, null, true);
-                    }
-                    else {
-                        item = GetGenericItem(itemInfo.ItemName);
-                    }
-
-                    if (item == null)
-                    {
-                        item.AddItemToInventory();
-                    }
-                }
-                else if (itemType == "Unique")
-                {
-                    UniqueItem item;
-                    if (genItem)
-                    {
-                        item = new UniqueItem(itemInfo.ItemName, null, true);
+                        uItem = new UniqueItem(itemInfo.ItemName, null, true);
                     }
                     else
                     {
-                        item = GetUniqueItem(itemInfo.ItemName);
+                        uItem = GetUniqueItem(itemInfo.ItemName);
                     }
-                    if (item == null)
+                    if (uItem == null)
                     {
-                        item.AddItemToInventory();
+                        uItem.AddItemToInventory();
                     }
                 }
                 else if (itemType == "Junk")
                 {
-                    JunkItem item;
+                    JunkItem jItem;
                     if (genItem)
                     {
                         int count = int.Parse(itemParams[2]);
-                        item = new JunkItem(itemInfo.ItemName, null, true, itemParams[1], count);
+                        jItem = new JunkItem(itemInfo.ItemName, null, true, itemParams[1], count);
                     }
                     else
                     {
-                        item = GetJunkItem(itemInfo.ItemName);
+                        jItem = GetJunkItem(itemInfo.ItemName);
                     }
-                    if (item == null)
+
+                    if (jItem == null)
                     {
-                        item.AddItemToInventory();
+                        jItem.AddItemToInventory();
                     }
                 }
                 else
                 {
-                    Plugin.BepinLogger.LogMessage($"Invalid item type: {itemType} for {itemInfo.ItemName}.");
+                    Logging.Log($"Invalid item type: {itemType} for {itemInfo.ItemName}.");
                 }
             }
             else
             {
-                if (itemType == "Generic")
-                {
-                    GetGenericItem(itemInfo.ItemName).AddItemToInventory();
-                }
-                else if (itemType == "Unique")
+                if (itemType == "Unique")
                 {
                     GetUniqueItem(itemInfo.ItemName).AddItemToInventory();
                 }
@@ -317,16 +271,15 @@ namespace BluePrinceArchipelago.Core
                 }
                 else
                 {
-                    Plugin.BepinLogger.LogMessage($"Invalid item type: {itemType} for {itemInfo.ItemName}.");
+                    Logging.Log($"Invalid item type: {itemType} for {itemInfo.ItemName}.");
                 }
             }
-
         }
         //Returns a list with the type of ModItem to use, the itemtype for junk/trap/permanent items and the Count of that item (number of that item to add).
         private string[] TryGetItemParamsFromCheckData(ItemInfo item) {
             if (item.ItemName != null)
             {
-                Plugin.BepinLogger.LogMessage($"{item.ItemName}");
+                Logging.Log($"{item.ItemName}");
                 string[] itemNameParts = item.ItemName.Split(' ');
                 if (itemNameParts.Length > 2)
                 {
@@ -373,11 +326,11 @@ namespace BluePrinceArchipelago.Core
 
                 }
                 else {
-                    Plugin.BepinLogger.LogMessage($"{item.ItemName} is not currently supported or doesn't exist.");
+                    Logging.Log($"{item.ItemName} is not currently supported or doesn't exist.");
                     return null;
                 }
             }
-            Plugin.BepinLogger.LogMessage($"Item was invalid. Unable to retreive Item.");
+            Logging.Log($"Item was invalid. Unable to retreive Item.");
             return null;
         }
         public bool IsItemSpawnable(GameObject item)
@@ -576,7 +529,7 @@ namespace BluePrinceArchipelago.Core
             }
             else
             {
-                Plugin.BepinLogger.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
+                Logging.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
             }
         }
         private void AdjustGems(int count = 1) {
@@ -675,7 +628,7 @@ namespace BluePrinceArchipelago.Core
             }
             else
             {
-                Plugin.BepinLogger.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
+                Logging.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
             }
         }
         private void AdjustGems(int count = 1)
@@ -722,6 +675,10 @@ namespace BluePrinceArchipelago.Core
         }
         private void AdjustStars(int count = 1)
         {
+            if (!GameObject.Find("__SYSTEM/HUD/Stars").active) {
+                //Activate stars to ensure it can properly be updated.
+                GameObject.Find("__SYSTEM/HUD/Stars").SetActive(true);
+            }
             int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
             if (totalStars + count > 0)
             {
@@ -741,7 +698,7 @@ namespace BluePrinceArchipelago.Core
             //Unique Items
             //TODO once the replacement item code is working.
             //Generic Items
-            Plugin.ModItemManager.AddItem(new ModItem("Dug Up Nothing", null, true, 1));
+            
             //Permanent Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 1", null, false, "Allowance", 1));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 2", null, false, "Allowance", 2));
@@ -763,6 +720,7 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 2", null, false, "Stars", 2));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 5", null, false, "Stars", 5));
             //Junk Items
+            Plugin.ModItemManager.AddItem(new JunkItem("Dug Up Nothing", null, true, "Nothing",1));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 1", null, true, "Gold", 1));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 2", null, true, "Gold", 2));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 5", null, true, "Gold", 5));

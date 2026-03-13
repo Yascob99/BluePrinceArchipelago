@@ -1,175 +1,327 @@
 ﻿using AsmResolver.PE.DotNet.ReadyToRun;
 using BepInEx;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
+using BluePrinceArchipelago.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using static Il2CppSystem.Globalization.CultureInfo;
 
 namespace BluePrinceArchipelago.Utils
 {
-    public class ObjectStore {
-        public string Name = "";
-        public string SerializedObject = "";
-        public Type SerializedObjectType;
-        public ObjectStore(string name, string serializedObject, Type type)
-        {
-            Name = name;
-            SerializedObject = serializedObject;
-            SerializedObjectType = type;
-        }
-    }
-    public class StateStore {
-        public Dictionary<string, ObjectStore> Objects = [];
-
-        public StateStore() { 
-        }
-        //Adds an indexer to allow writing to the dictionary.
-        public ObjectStore this[string key] { 
-            get { return Objects[key]; }
-            set {
-                if (value.GetType() == typeof(ObjectStore)) {
-                    Objects[key] = value;
-                }
-            }
-        }
-        public bool ContainsKey(string key) { 
-            return Objects.ContainsKey(key);
-        }
-    }
     public static class State
     {
         public static string PluginPath => Paths.PluginPath;
         public static string ModFolder => Path.Combine(PluginPath, Plugin.PluginName);
 
-        public const string StateFile = "State.json";
+        public const string RecievedItemsFile = "RecievedItems.json";
+        public const string SentLocationsFile = "SentLocations.json";
+        public const string SessionDataFile = "SessionData.json";
+        public const string ServerDetailsFile = "ServerDetails.json";
+        public const string ServerOptionsFile = "ServerOptions.json";
+        public const string TrunkCountsFile = "TrunkCounts.json";
 
-        public static string StateFilePath => Path.Combine(ModFolder, StateFile);
+        public static string RecievedItemsPath => Path.Combine(ModFolder, RecievedItemsFile);
+        public static string SentLocationsPath => Path.Combine(ModFolder, SentLocationsFile);
+        public static string SessionDataPath => Path.Combine(ModFolder, SessionDataFile);
+        public static string ServerDetailsPath => Path.Combine(ModFolder, ServerDetailsFile);
+        public static string ServerOptionsPath => Path.Combine(ModFolder, ServerOptionsFile);
+        public static string TrunkCountsPath => Path.Combine(ModFolder, TrunkCountsFile);
 
-        private static StateStore _Data = new();
-
-        public static void Initialize(){
-            _Data = LoadData(); // load data from existing state on start.
-            ModInstance.Instance.ModEventHandler.QueueEvent += OnQueueEvent;
-        }
-        public static void Update(string key, object data) {
-            _Data[key] = new ObjectStore(key, JsonConvert.SerializeObject(data), data.GetType());
-            WriteToState();
-        }
-        public static void Update(string key, object data, Type type)
+        public static void Initialize()
         {
-            _Data[key] = new ObjectStore(key, JsonConvert.SerializeObject(data), type);
-            WriteToState();
-        }
-        public static void UpdateNoSave(string key, object data)
-        {
-            _Data[key] = new ObjectStore(key, JsonConvert.SerializeObject(data), data.GetType());
-        }
-        public static void UpdateNoSave(string key, object data, Type type) {
-            _Data[key] = new ObjectStore(key, JsonConvert.SerializeObject(data), type);
-        }
-        private static void OnQueueEvent(string senderName, ItemQueueEventArgs e) {
-            Update(senderName, e.Data, e.Type); //Sending with type just in case.
+            InitializeReceivedItems();
+            InitializeSentLocations();
+            InitializeSessionData();
+            InitializeServerDetails();
+            InitializeServerOptions();
         }
 
-        public static void Update(string[] keys, object[] data)
-        {
-            // Check that the number of keys and the number of objects is equal.
-            if (keys.Length == data.GetLength(0)) {
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    _Data[keys[i]] = new ObjectStore(keys[i], JsonConvert.SerializeObject(data[i]), data[i].GetType());
-                }
-                WriteToState();
-                return;
-            }
-            Plugin.BepinLogger.LogMessage("Unable to add data to the State, number of keys and objects do not match.");
+        public static void UpdateAll() {
+            UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
+            UpdateLocations(ArchipelagoClient.ServerData.CheckedLocations);
+            SessionData session = new SessionData();
+            session.SaveSlot = ModInstance.SaveSlot;
+            session.Seed = ArchipelagoClient.ServerData.Seed;
+            UpdateSession(session);
         }
-        public static bool ContainsKey(string key)
-        {
-            return _Data.ContainsKey(key);
-        }
-        // Attempts to get data of a type from the data, if unable to returns the default value of that type of object.
-        public static T GetData<T>(string key) {
-            if (ContainsKey(key))
+
+        public static void UpdateLocations(List<long> data) { 
+            using (var writer = new StreamWriter(SentLocationsPath))
             {
-                try
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+        }
+        public static void UpdateItems(List<string> data)
+        {
+            using (var writer = new StreamWriter(RecievedItemsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+        }
+        public static void UpdateServerDetails(List<string> data)
+        {
+            ConnectionData connData = new ConnectionData();
+            connData.Uri = data[0];
+            connData.SlotName = data[1];
+            connData.Password = data[2];
+            UpdateServerDetails(connData);
+        }
+        public static void UpdateServerDetails(ConnectionData data)
+        {
+            using (var writer = new StreamWriter(ServerDetailsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+        }
+        public static void UpdateSession(SessionData data)
+        {
+            using (var writer = new StreamWriter(SessionDataPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+        }
+        internal static void UpdateTrunkCounts()
+        {
+            using (var writer = new StreamWriter(TrunkCountsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(ModInstance.TrunkManager.TrunkCounts));
+                writer.Flush();
+            }
+        }
+
+        private static void InitializeServerDetails()
+        {
+            if (File.Exists(ServerDetailsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(ServerDetailsPath))
                 {
-                    T value = JsonConvert.DeserializeObject<T>(_Data[key].SerializedObject);
-                    if (typeof(T) == _Data[key].SerializedObjectType)
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
                     {
-                        return value;
+                        ConnectionData data = JsonConvert.DeserializeObject<ConnectionData>(jsonData);
+                        ArchipelagoClient.ServerData.Uri = data.Uri;
+                        ArchipelagoClient.ServerData.SlotName = data.SlotName;
+                        ArchipelagoClient.ServerData.Password = data.Password;
                     }
-                    Plugin.BepinLogger.LogWarning($"Type of {key} does not match expected Type of {_Data[key].SerializedObjectType.ToString()}.");
-                    return default(T);
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading ServerData: \n{ex.Message}");
+                    }
                 }
-                catch {
-                    Plugin.BepinLogger.LogWarning($"Error Deserializing {key} as {_Data[key].SerializedObjectType.ToString()}.");
-                    return default(T);
-                }
-      
-                
-            }
-            Plugin.BepinLogger.LogWarning($"Key {key} does not exist.");
-            return default(T);
-        }
-        // Loads the data from the state into an object, if the file cannot be found creates a file and generates an empty state store.
-        private static StateStore LoadData() {
-            if (File.Exists(StateFilePath))
-            {
-                string data = File.ReadAllText(StateFilePath);
-                if (data != null && data.Length != 0)
-                {
-                    return JsonConvert.DeserializeObject<StateStore>(data);
-                }
-            }
-            File.Create(StateFilePath);
-            return new StateStore();
-        }
-        private static void WriteToState() {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(StateFilePath))
-                {
-                    writer.Write(JsonConvert.SerializeObject(_Data));
-                }
-                // The 'using' statement automatically calls Dispose(), which flushes and closes the writer.
-            }
-            catch (IOException e)
-            {
-                Plugin.BepinLogger.LogMessage($"An error occurred: {e.Message}");
-            }
-        }
-        //Resets State to minimal information to ensure it doesn't break on trying to start a new run after completing an Archipelago.
-        public static void Reset() {
-            _Data = new StateStore();
-            // Store the Archipelago settings for the next launch.
-            ArchipelagoData blankData = new ArchipelagoData(ArchipelagoClient.ServerData.Uri, ArchipelagoClient.ServerData.SlotName, ArchipelagoClient.ServerData.Password);
-            // Store the newly created data for next time.
-            blankData.Store<ArchipelagoData>("ServerData");
-        }
-        //Extensions that allow you to store an object in the state file under a given key. Making save false will prevent the State from automatically saving to file.
-        public static void Store<T>(this object data, string key, bool save = true)
-        {
-            if (save)
-            {
-                Update(key, data, typeof(T));
-            }
-            else { 
-                UpdateNoSave(key, data, typeof(T));
-            }
-        }
-        public static void Store(this object data, string key, Type type, bool save = true)
-        {
-            if (save)
-            {
-                Update(key, data, type);
             }
             else
             {
-                UpdateNoSave(key, data, type);
+                using (var writer = new StreamWriter(ServerDetailsPath))
+                {
+                    ConnectionData data = new ConnectionData();
+                    data.Uri = ArchipelagoClient.ServerData.Uri;
+                    data.SlotName = ArchipelagoClient.ServerData.SlotName;
+                    data.Password = ArchipelagoClient.ServerData.Password;
+                    writer.Write(JsonConvert.SerializeObject(data));
+                    writer.Flush();
+                }
             }
+        }
+
+        private static void InitializeSessionData()
+        {
+            if (File.Exists(SessionDataPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(SessionDataPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        SessionData data = JsonConvert.DeserializeObject<SessionData>(jsonData);
+                        ArchipelagoClient.ServerData.Seed = data.Seed;
+                        ModInstance.SaveSlot = data.SaveSlot;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(SessionDataPath))
+                {
+                    SessionData defaultData = new SessionData();
+                    defaultData.Seed = "";
+                    defaultData.SaveSlot = 5;
+                    writer.Write(JsonConvert.SerializeObject(defaultData));
+                    writer.Flush();
+                }
+            }
+        }
+
+        private static void InitializeSentLocations()
+        {
+            if (File.Exists(SentLocationsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(SentLocationsPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        ArchipelagoClient.ServerData.CheckedLocations = JsonConvert.DeserializeObject<List<long>>(jsonData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(SentLocationsPath))
+                {
+                    writer.Write(JsonConvert.SerializeObject(new List<long>()));
+                    writer.Flush();
+                }
+            }
+        }
+
+        private static void InitializeReceivedItems() {
+            if (File.Exists(RecievedItemsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(RecievedItemsPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        ArchipelagoClient.ServerData.ReceivedItems = JsonConvert.DeserializeObject<List<string>>(jsonData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(RecievedItemsPath))
+                {
+                    writer.Write(JsonConvert.SerializeObject(new List<string>()));
+                    writer.Flush();
+                }
+            }
+        }
+        private static void InitializeServerOptions()
+        {
+            if (File.Exists(ServerOptionsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(ServerOptionsPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        ArchipelagoClient.ServerData.Options = JsonConvert.DeserializeObject<SlotData>(jsonData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(ServerOptionsPath))
+                {
+                    writer.Write(JsonConvert.SerializeObject(new SlotData()));
+                    writer.Flush();
+                }
+            }
+        }
+
+        public static void InitializeTrunkCounts()
+        {
+            if (File.Exists(TrunkCountsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(TrunkCountsPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        ModInstance.TrunkManager.TrunkCounts = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(TrunkCountsPath))
+                {
+                    writer.Write(JsonConvert.SerializeObject(new Dictionary<string, int>()));
+                    writer.Flush();
+                }
+            }
+        }
+        public static void Reset() {
+            using (var writer = new StreamWriter(RecievedItemsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(new List<string>()));
+                writer.Flush();
+            }
+            using (var writer = new StreamWriter(SentLocationsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(new List<long>()));
+                writer.Flush();
+            }
+            using (var writer = new StreamWriter(SessionDataPath))
+            {
+                SessionData defaultData = new SessionData();
+                defaultData.Seed = "";
+                defaultData.SaveSlot = 5;
+                writer.Write(JsonConvert.SerializeObject(defaultData));
+                writer.Flush();
+            }
+            using (var writer = new StreamWriter(ServerOptionsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(new SlotData()));
+                writer.Flush();
+            }
+            using (var writer = new StreamWriter(TrunkCountsPath))
+            {
+                writer.Write(JsonConvert.SerializeObject(new Dictionary<string, int>()));
+                writer.Flush();
+            }
+            //Don't reset the connection details since they might be useful.
         }
     }
 }

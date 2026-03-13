@@ -21,7 +21,7 @@ namespace BluePrinceArchipelago {
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         public const string APDisplayInfo = $"Archipelago v{ArchipelagoClient.APVersion}";
-        public static ManualLogSource BepinLogger;
+        public ManualLogSource LogSource => Log;
         public static ArchipelagoClient ArchipelagoClient;
         public static GameObject ModObject;
         public static ModRoomManager ModRoomManager;
@@ -29,11 +29,9 @@ namespace BluePrinceArchipelago {
         public override void Load()
         {
             // Plugin startup logic
-            BepinLogger = Log;
             ArchipelagoClient = new ArchipelagoClient();
             ModRoomManager = new ModRoomManager();
             ModItemManager = new ModItemManager();
-            ArchipelagoConsole.Awake();
             _instance = this;
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
@@ -42,10 +40,10 @@ namespace BluePrinceArchipelago {
             GameObject.DontDestroyOnLoad(ModObject);
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
             ModObject.AddComponent<ModInstance>();
-            ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             State.Initialize();
+            ArchipelagoConsole.Awake();
+            ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             CommandManager.initializeLocalCommands();
-            ArchipelagoClient.LoadStateData();
         }
     }
 

@@ -5,40 +5,33 @@ using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 using BluePrinceArchipelago.Core;
+using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
+using Il2CppSystem.IO;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using static BluePrinceArchipelago.Archipelago.ItemQueue;
 
 namespace BluePrinceArchipelago.Archipelago;
 
 public class ArchipelagoClient
 {
-    public const string APVersion = "0.6.4";
+    public const string APVersion = "0.6.6";
     private const string Game = "Blue Prince";
 
     public static bool Authenticated;
     private bool _AttemptingConnection;
-    public static bool Reconnected;
+    public static bool Reconnected = false;
 
     public static ArchipelagoData ServerData = new();
     private DeathLinkHandler DeathLinkHandler;
     private ArchipelagoSession session;
 
-    public ArchipelagoClient() {
-    }
-    /// <summary>
-    /// assigns the slot data and seed to our data handler. any necessary setup using this data can be done here.
-    /// </summary>
-    /// <param name="roomSlotData">slot data of your slot from the room</param>
-    /// <param name="roomSeed">seed name of this session</param>
-    public void SetupServerDataSession(Dictionary<string, object> roomSlotData, string roomSeed)
+    public ArchipelagoClient()
     {
-        ServerData.slotData = roomSlotData;
-        ServerData.seed = roomSeed;
     }
     //Returns the locationid from the name or -1 if It can't be found.
     public long GetLocationFromName(string locationName)
@@ -47,30 +40,33 @@ public class ArchipelagoClient
     }
     public void DisplayServerData()
     {
-        Plugin.BepinLogger.LogMessage("Checked Locations:");
+        Logging.Log("Options");
+        foreach (var option in ServerData.Options.AsDictionary()) {
+            if (option.Key != null && option.Value != null)
+            {
+                Logging.Log($"\t{option.Key}: {option.Value.ToString()}");
+            }
+        }
+        Logging.Log("Checked Locations:");
         foreach (long locationid in ServerData.CheckedLocations)
         {
-            Plugin.BepinLogger.LogMessage($"\t{locationid}");
+            Logging.Log($"\t{locationid}");
         }
-        Plugin.BepinLogger.LogMessage("Location Dict:");
+        Logging.Log("Location Dict:");
         foreach (var entry in ServerData.LocationDict)
         {
-            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+            Logging.Log($"\t{entry.Key}:{entry.Value}");
         }
-        Plugin.BepinLogger.LogMessage("Item Dict:");
+        Logging.Log("Item Dict:");
         foreach (var entry in ServerData.ItemDict)
         {
-            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value}");
+            Logging.Log($"\t{entry.Key}:{entry.Value}");
         }
-        Plugin.BepinLogger.LogMessage("Location Item Map:");
+        Logging.Log("Location Item Map:");
         foreach (var entry in ServerData.LocationItemMap)
         {
-            Plugin.BepinLogger.LogMessage($"\t{entry.Key}:{entry.Value.ItemName}");
+            Logging.Log($"\t{entry.Key}:{entry.Value.ItemName}");
         }
-    }
-    public void LoadStateData()
-    {
-        ServerData = State.GetData<ArchipelagoData>("ServerData") ?? new(); // Restore ServerData from State Data, if it doesn't exist it will be set to the default.
     }
 
     /// <summary>
@@ -88,7 +84,7 @@ public class ArchipelagoClient
         }
         catch (Exception e)
         {
-            Plugin.BepinLogger.LogError(e);
+            Logging.LogError(e);
         }
 
         TryConnect();
@@ -112,24 +108,44 @@ public class ArchipelagoClient
     /// </summary>
     private void TryConnect()
     {
-        try
-        {
-            // it's safe to thread this function call but unity notoriously hates threading so do not use excessively
-            ThreadPool.QueueUserWorkItem(
-                _ => HandleConnectResult(
-                    session.TryConnectAndLogin(
-                        Game,
-                        ServerData.SlotName,
-                        ItemsHandlingFlags.AllItems, // TODO make sure to change this line
-                        new Version(APVersion),
-                        password: ServerData.Password,
-                        requestSlotData: false // ServerData.NeedSlotData
-                    )));
+
+        LoginResult loginResult = session.TryConnectAndLogin(
+                    Game,
+                    ServerData.SlotName,
+                    ItemsHandlingFlags.AllItems, // TODO make sure to change this line
+                    new Version(APVersion),
+                    password: ServerData.Password,
+                    requestSlotData: false // ServerData.NeedSlotData
+         );
+        if (loginResult is LoginFailure failure) {
+            string errors = string.Join(", ", failure.Errors);
+            Logging.LogError($"Unable to connect to Archipelago because: {errors}");
+            HandleConnectResult(new LoginFailure(errors));
+            _AttemptingConnection = false;
         }
-        catch (Exception e)
+        else if (loginResult is LoginSuccessful success)
         {
-            Plugin.BepinLogger.LogError(e);
-            HandleConnectResult(new LoginFailure(e.ToString()));
+            SlotData slotData = session.DataStorage.GetSlotData<SlotData>();
+            if (ServerData.Options.Equals(slotData) && (ServerData.Seed =="" || ServerData.Seed == session.RoomState.Seed)) {
+                if (!slotData.Equals(new SlotData())) {
+                    Reconnected = true;
+                }
+                HandleConnectResult(loginResult);
+                _AttemptingConnection = false;
+            }
+            else
+            {
+                //TODO once proper Archipelago login has been setup, cause this to assume player attempted to connect to the wrong slot.
+                Logging.LogWarning($"SlotData doesn't match expected slot, assuming a new game was started without previous goal finishing. If you have Connected to the wrong slot, please disconnect now.");
+                State.Reset();
+                State.Initialize();
+                HandleConnectResult(loginResult);
+                _AttemptingConnection = false;
+            }
+        }
+        else
+        {
+            HandleConnectResult(new LoginFailure($"Unexpected LoginResult type when connecting to Archipelago: {loginResult}"));
             _AttemptingConnection = false;
         }
     }
@@ -143,30 +159,28 @@ public class ArchipelagoClient
         string outText;
         if (result.Successful)
         {
-            //TODO Add check to confirm the client is reconnecting.
-
             var success = (LoginSuccessful)result;
-            bool isReconnect = false;
-
-            SetupServerDataSession(success.SlotData, session.RoomState.Seed);
             Authenticated = true;
             DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
-            if (CheckReconnect() && CheckStateMatches())
+            
+            
+            // Checks to see if the state matches or the client recconnecting based on locations already having been checked.
+            if (Reconnected)
             {
                 Reconnect();
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
-                isReconnect = true;
             }
             else
             {
-                session.RoomState.Seed.Store<string>("Seed");
+                ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                ServerData.Seed = session.RoomState.Seed;
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 CreateLocationDicts(session.Locations.AllLocations.ToArray());
-                ServerData.Store<ArchipelagoData>("ServerData");
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
-            DequeueItems(isReconnect);
+            DequeueItems(Reconnected);
             DisplayServerData();
+            State.UpdateAll();
         }
         else
         {
@@ -174,7 +188,7 @@ public class ArchipelagoClient
             outText = $"Failed to connect to {ServerData.Uri} as {ServerData.SlotName}.";
             outText += "\n" + failure.Errors.Aggregate(outText, (current, error) => current + $"\n    {error}");
 
-            Plugin.BepinLogger.LogError(outText);
+            Logging.LogError(outText);
 
             Authenticated = false;
             Disconnect();
@@ -197,7 +211,7 @@ public class ArchipelagoClient
 
             if (item.LocationName == "Server")
             {
-                Plugin.BepinLogger.LogMessage($"Attempting to receive Item: {item.ItemName}");
+                Logging.Log($"Attempting to receive Item: {item.ItemName}");
                 // Checks if the item recieved is an item.
                 if (ModRoomManager.VanillaRooms.Contains(item.ItemName.ToUpper()))
                 {
@@ -229,37 +243,16 @@ public class ArchipelagoClient
 
     }
 
-    //Checks the seed to see if the data matches.
-    private bool CheckReconnect() {
-        string seed = State.GetData<string>("Seed") ?? "";
-        
-        if (seed == session.RoomState.Seed) { 
-            return true;
-        }
-        return false;
-    }
-    // Checks the state to ensure it was initialized correctly and has correct data.
-    private bool CheckStateMatches()
-    {
-        ArchipelagoData serverData = State.GetData<ArchipelagoData>("ServerData");
-        if (serverData != null) {
-            if (serverData.CheckedLocations.Count > 0 && serverData.ItemDict.Count > 0 && serverData.LocationDict.Count > 0 && serverData.LocationItemMap.Count > 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void Reconnect() {
         Reconnected = true;
-        ServerData = State.GetData<ArchipelagoData>("ServerData");
-        RebuildLocations();
+        RebuildCheckedLocations();
+        CreateLocationDicts(session.Locations.AllLocations.ToArray());
     }
-    private void RebuildLocations()
+    //This might be bugged. Need to confirm. Might currently result i
+    private void RebuildCheckedLocations()
     {
         // Make copies of the lists for editing purposes.
-        List<long> serverLocations = [.. session.Locations.AllLocations];
+        List<long> serverLocations = [.. session.Locations.AllLocationsChecked];
         List<long> localLocations = [.. ServerData.CheckedLocations];
         bool found = false;
         bool updated = false;
@@ -276,7 +269,7 @@ public class ArchipelagoClient
             }
             if (!found) {
                 //If the server has locations checked that the local game didn't send while disconnected, add them to the checked locationlist.
-                //ServerData.CheckedLocations.Add(location); // Might be handled via the dequeu
+                ServerData.CheckedLocations.Add(location);
                 updated = true;
             }
             if (found) { 
@@ -286,7 +279,7 @@ public class ArchipelagoClient
         }
         if (updated) {
             // Update server data if there were queued locations from the server.
-            ServerData.Store<ArchipelagoData>("ServerData");
+            //ServerData.StoreData();
         }
         if (localLocations.Count > 0) {
             if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
@@ -329,8 +322,8 @@ public class ArchipelagoClient
     private void Disconnect()
     {
         Reconnected = false;
-        State.Update("ServerData", ServerData);
-        Plugin.BepinLogger.LogDebug("disconnecting from server...");
+        //ServerData.StoreData();
+        Logging.LogDebug("disconnecting from server...");
         session?.Socket.DisconnectAsync();
         session = null;
         Authenticated = false;
@@ -368,7 +361,7 @@ public class ArchipelagoClient
     /// <param name="message">message received from the server</param>
     private void OnSessionErrorReceived(Exception e, string message)
     {
-        Plugin.BepinLogger.LogError(e);
+        Logging.LogError(e);
         ArchipelagoConsole.LogMessage(message);
     }
 
@@ -378,7 +371,7 @@ public class ArchipelagoClient
     /// <param name="reason"></param>
     private void OnSessionSocketClosed(string reason)
     {
-        Plugin.BepinLogger.LogError($"Connection to Archipelago lost: {reason}");
+        Logging.LogError($"Connection to Archipelago lost: {reason}");
         Disconnect();
     }
 
@@ -394,16 +387,7 @@ public class ArchipelagoClient
     /// <param name="locationName">the name of the location to complete</param>
     public void CheckLocation(string locationName) {
         long locationid = GetLocationFromName(locationName);
-        // verify the location has not already been sent to prevent sending duplicate locations.
-        Plugin.BepinLogger.LogMessage($"Attempting to send {locationName} as location id: {locationid}");
-        if (!ServerData.CheckedLocations.Contains(locationid) && locationid != -1)
-        {
-            session.Locations.CompleteLocationChecks(locationid);
-            ServerData.CheckedLocations.Add(locationid);
-        }
-        else {
-            Plugin.BepinLogger.LogMessage($"Unable to send location for {locationName}. Location has already been sent.");
-        }
+        CheckLocation(locationid);
     }
     /// <summary>
     /// Sends to the server that the location has been checked.
@@ -415,9 +399,10 @@ public class ArchipelagoClient
         {
             session.Locations.CompleteLocationChecks([locationid]);
             ServerData.CheckedLocations.Add(locationid);
+            State.UpdateLocations(ServerData.CheckedLocations);
         }
         else {
-            Plugin.BepinLogger.LogMessage($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent.");
+            Logging.Log($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent.");
         }
     }
     public void GoalCompleted()
@@ -427,36 +412,28 @@ public class ArchipelagoClient
     }
 }
 public class ArchipelagoQueueManager {
-    private Queue<ItemInfo> _ReceivedItemQueue = new();
-    private Queue<string> _LocationQueue = new();
-
-    public void LoadFromState() {
-        _ReceivedItemQueue = State.GetData<Queue<ItemInfo>>("ReceivedItemQueue");
-        _LocationQueue = State.GetData<Queue<string>>("LocationQueue");
-    }
+    private ItemQueue _ReceivedItemQueue = new("Received Item Queue");
+    private LocationQueue _LocationQueue = new("Location Queue");
     public void AddItemToQueue(ItemInfo item) { 
         _ReceivedItemQueue.Enqueue(item);
-        _ReceivedItemQueue.OnQueueEvent("ReceivedItemQueue", "Add");
     }
     public void RemoveItemFromQueue() { 
        ItemInfo item = _ReceivedItemQueue.Dequeue();
-        _ReceivedItemQueue.OnQueueEvent("ReceivedItemQueue", "Remove");
     }
     public void AddLocationsToQueue(List<long> locations) {
+        List<string> locationNames = new List<string>();
         foreach (int location in locations) {
             string locationName = ArchipelagoClient.ServerData.LocationDict[location];
-            _LocationQueue.Enqueue(locationName);
+            locationNames.Add(locationName);
         }
-        _LocationQueue.OnQueueEvent("LocationQueue", "Add[]");
+        _LocationQueue.Enqueue(locationNames.ToArray());
     }
 
     public void AddLocationToQueue(string location) { 
         _LocationQueue.Enqueue(location);
-        _LocationQueue.OnQueueEvent("LocationQueue", "Add");
     }
     public void RemoveLocationFromQueue() { 
         string location = _LocationQueue.Dequeue();
-        _LocationQueue.OnQueueEvent("LocationQueue", "Remove");
     }
     public void ReleaseAllQueuedLocations() {
         if (_LocationQueue.Count > 0) {
@@ -485,27 +462,32 @@ public class ArchipelagoQueueManager {
                 {
                     _ReceivedItemQueue.Enqueue(item);
                 }
-                else { 
-                    //TODO handle releasing items. 
-                }
             }
         }
     }
     public bool RecieveItem(ItemInfo item)
     {
-        Plugin.BepinLogger.LogMessage($"Attempting to receive Item: {item.ItemName}");
+        Logging.Log($"Attempting to receive Item: {item.ItemName}");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms)
         {
-            // Checks if the item recieved is an item.
-            if (ModRoomManager.VanillaRooms.Contains(item.ItemName.ToUpper()))
+            // Checks if the item recieved is a Room.
+            if (Plugin.ModRoomManager.Rooms.Contains(Plugin.ModRoomManager.GetRoomByName(item.ItemName.ToUpper().Trim())))
             {
                 ModRoom room = Plugin.ModRoomManager.GetRoomByName(item.ItemName.ToUpper());
                 room.IsUnlocked = true;
-                if (room.RoomPoolCount == 0) room.RoomPoolCount++;
+                if (room.RoomsLeftInPool == 0)
+                {
+                    room.RoomPoolCount++; //Update the rooms in pool count if this item is received and already at it's max number.
+                }
+                ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
+                State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
                 return true;
             }
             // if not handle it as an Item.
             Plugin.ModItemManager.OnItemCheckRecieved(item);
+            //This may need to be moved to a better place once the item code is better implemented.
+            ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
+            State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
             return true;
         }
         return false;
@@ -514,15 +496,59 @@ public class ArchipelagoQueueManager {
         return ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated;
     }
 }
-//Makes sending Queue Related events easier.
-public static class QueueExtensions {
-
-    public static void OnQueueEvent<T>(this Queue<T> queue, string senderName, string eventType)
-    {
-        ModInstance.Instance.ModEventHandler.OnQueueEvent("LocationQueue", "Remove", queue, queue.GetType());
+public class ItemQueue(string name) {
+    private readonly string _Name = name;
+    public string Name { 
+        get { return _Name; }
     }
-    public static void OnQueueEvent<T>(this Queue<T> queue, string senderName, string eventType, Type type)
+    private List<ItemInfo> _Queue = new List<ItemInfo>();
+    public int Count
     {
-        ModInstance.Instance.ModEventHandler.OnQueueEvent("LocationQueue", "Remove", queue, type);
+        get { return _Queue.Count; }
+    }
+    public void Enqueue(ItemInfo item) {
+        _Queue.Add(item);
+    }
+    public void Enqueue(ItemInfo[] items) {
+        _Queue.AddRange(items);
+    }
+    public ItemInfo Dequeue() {
+        if (_Queue.Count == 0) {
+            Logging.LogWarning("No Items in Queue, cannot Dequeue");
+            return null;
+        }
+        ItemInfo temp = _Queue[0];
+        _Queue.RemoveAt(0);
+        return temp;
+    }
+    public class LocationQueue(string name) {
+        private readonly string _Name = name;
+        public string Name
+        {
+            get { return _Name; }
+        }
+        private List<string> _Queue = new List<string>();
+        public int Count
+        {
+            get { return _Queue.Count; }
+        }
+        public void Enqueue(string location)
+        {
+            _Queue.Add(location);
+        }
+        public void Enqueue(string[] locations) {
+            _Queue.AddRange(locations);
+        }
+        public string Dequeue()
+        {
+            if (_Queue.Count == 0)
+            {
+                Logging.LogWarning("No Locations in Queue, cannot Dequeue");
+                return null;
+            }
+            string temp = _Queue[0];
+            _Queue.RemoveAt(0);
+            return temp;
+        }
     }
 }

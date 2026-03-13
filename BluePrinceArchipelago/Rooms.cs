@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using HutongGames.PlayMaker.Actions;
+using HutongGames.PlayMaker;
 
 namespace BluePrinceArchipelago.Core
 {
@@ -11,9 +13,15 @@ namespace BluePrinceArchipelago.Core
             get { return _Rooms; }
             set { _Rooms = value; }
         }
+        public ModRoom ForcedRoom = null;
+        public bool IsForcingDraft = false;
 
         public static List<string> VanillaRooms = [];
         public static List<string> CantCopy = ["ANTECHAMBER", "ENTERANCE HALL", "ROOM 46", "FOUNDATION"];
+
+        public static List<string> CurrentPickerArrays = [];
+
+        public static List<ModRoom> ForceRoomQueue = new(); // Not actually a queue, but is handled like that by the functions that interact with it.
 
         public ModRoomManager() {
         }
@@ -28,7 +36,7 @@ namespace BluePrinceArchipelago.Core
                 }
             }
             if (found) {
-                Plugin.BepinLogger.LogMessage("Room already in Pool, adding more to the pool");
+                Logging.Log("Room already in Pool, adding more to the pool");
                 _Rooms[counter].RoomPoolCount++;
             }
             else
@@ -41,6 +49,62 @@ namespace BluePrinceArchipelago.Core
             }
 
         }
+        public void ForceDraft(string roomname) {
+            ModRoom room = GetRoomByName(roomname);
+            if (room == null)
+            {
+                ForceDraft(room);
+            }
+            Logging.LogWarning($"Error forcing room unable to find the room: {roomname}");
+        }
+        public void ForceDraft(ModRoom room) {
+            if (room == null) { 
+                ForceRoomQueue.Add(room);
+            }
+            Logging.LogWarning("Error forcing room, room can't be null");
+        }
+
+        public bool CheckForceRoomDraft() {
+            // Check if any rooms have been queued for forcing.
+            IsForcingDraft = false; //Pre-reset this.
+            if (ForceRoomQueue.Count > 0)
+            {
+                // Check if those rooms can be drafted at that location (ignoring usual rules).
+                bool draftable = false;
+                int i = -1;
+                int j = 0;
+                ModRoom room = null;
+                UpdateCurrentPickerArrays();
+                while (!draftable && i < ForceRoomQueue.Count - 1)
+                {
+                    i++;
+                    room = ForceRoomQueue[i];
+                    if (room == null)
+                    {
+                        while (!draftable && j < room.PickerArrays.Count)
+                        {
+                            if (CurrentPickerArrays.Contains(room.PickerArrays[j]))
+                            {
+                                draftable = true;
+
+                            }
+                            j++;
+                        }
+                    }
+                    j = 0;
+                }
+                // If no draftable room that is being forced, continue as normal.
+                if (draftable)
+                {
+                    IsForcingDraft = false;
+                    ForcedRoom = room;
+                    ForceRoomQueue.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void RemoveRoom(ModRoom room)
         {
             room.RoomPoolCount -= 1;
@@ -72,9 +136,35 @@ namespace BluePrinceArchipelago.Core
 
         public void UpdateRoomPools() {
             UpdateRoomsInHouse();
-            Plugin.BepinLogger.LogMessage("Updating Room Pools");
+            Logging.Log("Updating Room Pools");
             foreach (ModRoom room in _Rooms) {
                 room.UpdatePools();
+            }
+        }
+        public void EmptyDraftPool()
+        {
+            foreach (ModRoom room in _Rooms) {
+                room.IsUnlocked = false || room.UseVanilla; //Set the room to not unlocked, unless the room is set to use Vanilla Handling.
+            }
+        }
+        public void UpdateCurrentPickerArrays() {
+            PlayMakerFSM grid = ModInstance.TheGrid;
+            PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").Value?.GetComponent<PlayMakerFSM>();
+            CurrentPickerArrays.Clear();
+            //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
+            if (planPicker != null)
+            {
+                foreach (FsmState state in planPicker.FsmStates)
+                {
+                    foreach (SetFsmGameObject action in state.GetActionsOfType<SetFsmGameObject>())
+                    {
+                        //Add the array to the list if it's getting set as a picker array, and it's not already on the list (some pickers use dupe lists).
+                        if (action.variableName.value.Contains("Array") && ! CurrentPickerArrays.Contains(action.setValue.Value.name))
+                        {
+                            CurrentPickerArrays.Add(action.setValue.Value.name);
+                        }
+                    }
+                }
             }
         }
     }
@@ -125,7 +215,6 @@ namespace BluePrinceArchipelago.Core
 
         public bool UseVanilla { get {return _UseVanilla;} set { _UseVanilla = value; } }
 
-
         // The number of this room that can be in the pool
         private int _RoomPoolCount = 1;
         public int RoomPoolCount 
@@ -135,15 +224,19 @@ namespace BluePrinceArchipelago.Core
                 if (value < 0)
                 {
                     _RoomPoolCount = 0;
-                    Plugin.BepinLogger.LogWarning("Cannot set roomcount to below 0");
+                    Logging.LogWarning("Cannot set roomcount to below 0");
                 }
-                else if (value == 1 && (ModRoomManager.CantCopy.Contains(_Name)) ) {
-                    Plugin.BepinLogger.LogWarning($"Cannot have more than 1 copy of the {_Name}, it will break your save file/run.");
+                else if (value > 1 && (ModRoomManager.CantCopy.Contains(_Name)))
+                {
+                    Logging.LogWarning($"Cannot have more than 1 copy of the {_Name}, it will break your save file/run.");
+                }
+                else {
+                    _RoomPoolCount = value;
                 }
             }
         }
 
-        // tracks how many copies of the
+        // tracks how many copies of the room are in the house.
         private int _RoomInHouseCount = 0;
 
         public int RoomInHouseCount {
@@ -162,7 +255,7 @@ namespace BluePrinceArchipelago.Core
             for (int i = 0; i < count; i++)
             {
                 array.Add(_GameObj, "GameObject");
-                Plugin.BepinLogger.LogMessage($"Added {_Name} to {array.name}");
+                Logging.Log($"Added {_Name} to {array.name}");
             }
         }
         //Removes copy(s) of this room from the pool array
@@ -172,10 +265,10 @@ namespace BluePrinceArchipelago.Core
                 if (array.Contains(_GameObj))
                 {
                     array.Remove(_GameObj, "GameObject");
-                    Plugin.BepinLogger.LogMessage($"Removed {_Name} from {array.name}");
+                    Logging.Log($"Removed {_Name} from {array.name}");
                 }
                 else {
-                    Plugin.BepinLogger.LogMessage($"{_Name} doesn't exist in the pool {array.name}");
+                    Logging.Log($"{_Name} doesn't exist in the pool {array.name}");
                 }
             }
         }
@@ -243,8 +336,32 @@ namespace BluePrinceArchipelago.Core
             }
         }
 
-        public void UpdatePools() {
-            foreach (string arrayName in _PickerArrays) {
+        public bool CanDraft() {
+            PlayMakerFSM grid = ModInstance.TheGrid;
+            PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").Value?.GetComponent<PlayMakerFSM>();
+            //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker Arrays, 
+            if (planPicker != null) {
+                foreach (FsmState state in planPicker.FsmStates) {
+                    foreach (SetFsmGameObject action in state.GetActionsOfType<SetFsmGameObject>()) {
+                        if (action.variableName.value.Contains("Array")) {
+                            if (_PickerArrays.Contains(action.setValue.value.name)) {
+                                return true;
+                            }
+
+                        }
+                    }
+                }
+
+
+                return true;
+            }
+            return false;
+        }
+
+        public void UpdatePools()
+        {
+            foreach (string arrayName in _PickerArrays)
+            {
                 if (arrayName != "")
                 {
                     PlayMakerArrayListProxy array = ModInstance.PickerDict[arrayName];

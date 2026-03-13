@@ -49,7 +49,7 @@ public static class ArchipelagoConsole
             foreach (string submessage in message.Split("\n"))
             {
                 logLines.Add(submessage);
-                Plugin.BepinLogger.LogMessage(message);
+                Logging.Log(message);
                 lastUpdateTime = Time.time;
                 UpdateWindow();
             }
@@ -57,7 +57,7 @@ public static class ArchipelagoConsole
         else
         {
             logLines.Add(message);
-            Plugin.BepinLogger.LogMessage(message);
+            Logging.Log(message);
             lastUpdateTime = Time.time;
             UpdateWindow();
         }
@@ -273,6 +273,8 @@ public static class CommandManager {
 }
 public abstract class Command(string name)
 {
+    public string Name = name;
+
     public abstract string Description {
         get;
     }
@@ -285,7 +287,6 @@ public abstract class Command(string name)
 }
 public class RoomCommand(string name): Command(name)
 {
-    public string Name = name;
     private readonly string _Description = "Adds or removes rooms from the pool";
     public override string Description { 
         get { return _Description; }
@@ -344,7 +345,6 @@ public class RoomCommand(string name): Command(name)
 }
 public class AdjustCommand(string name) : Command(name)
 {
-    public string Name = name;
     private string _Description = "Allows you to Adjust the ammount of certain run resources";
     public override string Description
     {
@@ -508,7 +508,6 @@ public class AdjustCommand(string name) : Command(name)
     }
 }
 public class ItemCommand(string name) : Command(name) {
-    public string Name = name;
     private string _Description = "Adds or Removes Items from the inventory.";
     public override string Description
     {
@@ -628,7 +627,6 @@ public class ItemCommand(string name) : Command(name) {
     }
 }
 public class HelpCommand(string name) : Command(name) {
-    public string Name = name;
     private string _Description = "Displays all Local Commands";
     public override string Description
     {

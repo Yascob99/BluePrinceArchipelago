@@ -32,7 +32,7 @@
 
 	<ItemGroup>
 		<_Assets Include="$(MSBuildProjectDirectory)\assets\*.*" />
-		<_Libs Include ="$(MSBuildProjectDirectory)\libs\*.*" />
+		<_Libs Include="$(MSBuildProjectDirectory)\libs\*.*" />
 	</ItemGroup>
 
     <Target Name="ZipMod" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
