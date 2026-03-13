@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using UnityEngine;
+using System.Globalization;
 
 namespace BluePrinceArchipelago.Utils
 {
@@ -33,6 +32,38 @@ namespace BluePrinceArchipelago.Utils
                 propInfo => propInfo.GetValue(source, null)
             );
 
+        }
+    }
+    public static class AssetExtensions {
+
+        //Fix for older versions of Bepinex where this version of the function isn't available.
+        public static T LoadAsset<T>(this AssetBundle bundle, string assetPath) where T : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
+        { 
+            return bundle.LoadAsset(assetPath).TryCast<T>();
+        }
+    }
+    public static class TransformExtensions
+    {
+        public static Transform FindRecursive(this Transform transform, string name)
+        {
+            Queue<Transform> queue = new Queue<Transform>();
+            queue.Enqueue(transform);
+            while (queue.Count > 0)
+            {
+                Transform current = queue.Dequeue();
+                if (current.name == name && current != transform)
+                    return current;
+
+                for (int i = 0; i < current.childCount; i++)
+                    queue.Enqueue(current.GetChild(i));
+            }
+            return null;
+        }
+    }
+    public static class StringExtensions {
+
+        public static string ToTitleCase(this string str) {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
         }
     }
 }

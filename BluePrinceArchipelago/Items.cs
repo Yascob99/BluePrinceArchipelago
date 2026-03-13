@@ -124,7 +124,7 @@ namespace BluePrinceArchipelago.Core
         {
             foreach (UniqueItem item in UniqueItemList)
             {
-                if (item.Name.Equals(name))
+                if (item.Name.ToLower().Equals(name.ToLower()))
                 {
                     return item;
                 }
@@ -135,7 +135,7 @@ namespace BluePrinceArchipelago.Core
         public JunkItem GetJunkItem(string name) {
             foreach (JunkItem item in JunkItemList)
             {
-                if (item.Name.Equals(name))
+                if (item.Name.ToLower().Equals(name.ToLower()))
                 {
                     return item;
                 }
@@ -146,7 +146,7 @@ namespace BluePrinceArchipelago.Core
         {
             foreach (PermanentItem item in PermanentItemList)
             {
-                if (item.Name.Equals(name))
+                if (item.Name.ToLower().Equals(name.ToLower()))
                 {
                     return item;
                 }
@@ -426,13 +426,13 @@ namespace BluePrinceArchipelago.Core
             get { return _HasBeenFound; }
             set
             {
-                //Send the room drafted event on the first time this room is drafted only.
+                //Send the item found event on the first time it is found.
                 if (!_HasBeenFound && value)
                 {
                     ModInstance.Instance.ModEventHandler.OnFirstFound(this);
                     _HasBeenFound = value;
                 }
-                // No changes to value once the room has been drafted once, or if someone is not trying to set this to true for some stupid reason.
+                // No changes to value once the item has been found once, or if someone is not trying to set this to true for some stupid reason.
             }
         }
 
@@ -440,19 +440,27 @@ namespace BluePrinceArchipelago.Core
             //TODO add code handling adding the item.
         }
     }
-    public class UniqueItem(string name, GameObject gameObject, bool isUnlocked) : ModItem(name, gameObject, isUnlocked) {
+    public class UniqueItem(string name, GameObject gameObject, bool isUnlocked, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
+    {
         
         private bool _IsUnique = true;
         public new bool IsUnique { 
             get { return _IsUnique; } 
             set { _IsUnique = value; }
         }
+        private bool _IsPrespawn = isPreSpawn;
+
+        public bool IsPrespawn { get; set; }
 
         public override void AddItemToInventory() {
             if (!IsUnlocked) { 
                 IsUnlocked = true;
             }
             //Todo add code handling adding the item.
+        }
+
+        private bool InPool() {
+            return false;
         }
     }
 
@@ -696,9 +704,53 @@ namespace BluePrinceArchipelago.Core
         public static void Register()
         {
             //Unique Items
+            Plugin.ModItemManager.AddItem(new UniqueItem("CAR KEYS", Plugin.ModItemManager.GetPreSpawnItem("CAR KEYS"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEYCARD", Plugin.ModItemManager.GetPreSpawnItem("KEYCARD"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SILVER KEY", Plugin.ModItemManager.GetPreSpawnItem("SILVER KEY"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEY 8", Plugin.ModItemManager.GetPreSpawnItem("KEY 8"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("BASEMENT KEY", Plugin.ModItemManager.GetPreSpawnItem("BASEMENT KEY"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 149", Plugin.ModItemManager.GetPreSpawnItem("VAULT KEY 149"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 233", Plugin.ModItemManager.GetPreSpawnItem("VAULT KEY 233"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 304", Plugin.ModItemManager.GetPreSpawnItem("VAULT KEY 304"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 370", Plugin.ModItemManager.GetPreSpawnItem("VAULT KEY 370"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DIARY KEY", Plugin.ModItemManager.GetPreSpawnItem("DIARY KEY"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("PRISM KEY_0", Plugin.ModItemManager.GetPreSpawnItem("PRISM KEY_0"), false, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", null, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SECRET GARDEN KEY", Plugin.ModItemManager.GetPreSpawnItem("SECRET GARDEN KEY"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 1", Plugin.ModItemManager.GetPreSpawnItem("MICROCHIP 1"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 2", Plugin.ModItemManager.GetPreSpawnItem("MICROCHIP 2"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 3", Plugin.ModItemManager.GetPreSpawnItem("MICROCHIP 3"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 1", Plugin.ModItemManager.GetPreSpawnItem("CABINET KEY 1"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 2", Plugin.ModItemManager.GetPreSpawnItem("CABINET KEY 2"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 3", Plugin.ModItemManager.GetPreSpawnItem("CABINET KEY 3"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("BATTERY PACK", Plugin.ModItemManager.GetPreSpawnItem("BATTERY PACK"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("BROKEN LEVER", Plugin.ModItemManager.GetPreSpawnItem("BROKEN LEVER"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MAGNIFYING GLASS", Plugin.ModItemManager.GetPreSpawnItem("MAGNIFYING GLASS"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("METAL DETECTOR", Plugin.ModItemManager.GetPreSpawnItem("METAL DETECTOR"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SHOVEL", Plugin.ModItemManager.GetPreSpawnItem("SHOVEL"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SLEDGE HAMMER", Plugin.ModItemManager.GetPreSpawnItem("SLEDGE HAMMER"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("TELESCOPE", Plugin.ModItemManager.GetPreSpawnItem("TELESCOPE"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("RUNNING SHOES", Plugin.ModItemManager.GetPreSpawnItem("RUNNING SHOES"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SALT SHAKER", Plugin.ModItemManager.GetPreSpawnItem("SALT SHAKER"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SLEEPING MASK", Plugin.ModItemManager.GetPreSpawnItem("SLEEPING MASK"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("COIN PURSE", Plugin.ModItemManager.GetPreSpawnItem("COIN PURSE"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("COUPON BOOK", Plugin.ModItemManager.GetPreSpawnItem("COUPON BOOK"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LOCK PICK KIT", Plugin.ModItemManager.GetPreSpawnItem("LOCK PICK KIT"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", Plugin.ModItemManager.GetPreSpawnItem("LUCKY RABBIT'S FOOT"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("TREASURE MAP", Plugin.ModItemManager.GetPreSpawnItem("TREASURE MAP"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("STOPWATCH", Plugin.ModItemManager.GetPreSpawnItem("STOPWATCH"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", null, false, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("WATERING CAN", Plugin.ModItemManager.GetPreSpawnItem("WATERING CAN"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", null, false, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", null, false, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CROWN", Plugin.ModItemManager.GetPreSpawnItem("CROWN"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetPreSpawnItem("PAPER CROWN"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetPreSpawnItem("GEAR WRENCH"), false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("COMPASS", Plugin.ModItemManager.GetPreSpawnItem("COMPASS"), false));
+
             //TODO once the replacement item code is working.
             //Generic Items
-            
+
             //Permanent Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 1", null, false, "Allowance", 1));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 2", null, false, "Allowance", 2));

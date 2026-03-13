@@ -185,7 +185,7 @@ namespace BluePrinceArchipelago.Utils
         public static FsmTransition GetGlobalTransition(this PlayMakerFSM fsm, string globalEventName) => fsm.Fsm.GetGlobalTransition(globalEventName);
 
         /// <inheritdoc cref="GetGlobalTransition(PlayMakerFSM, string)"/>
-        public static FsmTransition GetGlobalTransition(this Fsm fsm, string globalEventName) => GetItemFromArray<FsmTransition>(fsm.GlobalTransitions, x => x.EventName == globalEventName);
+        public static FsmTransition GetGlobalTransition(this Fsm fsm, string globalEventName) => GetItemFromArray<FsmTransition>(fsm.GlobalTransitions, x => x.ToState == globalEventName);
 
         /// <summary>
         ///     Gets an action in a PlayMakerFSM.
@@ -373,7 +373,13 @@ namespace BluePrinceArchipelago.Utils
 
         public static void RemoveActionsOfType<T>(this FsmState state) where T : FsmStateAction
         {
-            state.Actions = state.Actions.Where(a => !(a is T)).ToArray();
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
+            {
+                if (state.ActionData.ActionNames[i] == typeof(T).FullName) //A bit hacky, but it works.
+                {
+                    state.RemoveAction(i);
+                }
+            }
         }
 
         public static void RemoveFirstActionOfType<T>(this FsmState state) where T : FsmStateAction

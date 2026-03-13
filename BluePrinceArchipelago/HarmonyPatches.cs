@@ -10,27 +10,36 @@ namespace BluePrinceArchipelago
     public class ItemPatches
     {
         [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
-        [HarmonyPrefix]
-        static void PreFix(PmtSpawn __instance)
+        [HarmonyPostfix]
+        static void PostFix(PmtSpawn __instance)
         {
             if (__instance != null)
             {
-                GameObject obj = __instance.gameObject.value;
-                string poolName = __instance.poolName.value;
-                GameObject transformObj = __instance.spawnTransform.value;
-                FsmGameObject spawnedObj = __instance.spawnedGameObject;
+                GameObject obj = __instance.gameObject?.value;
+                string poolName = __instance.poolName?.value;
+                GameObject transformObj = __instance.spawnTransform?.value;
+                GameObject spawnedObj = __instance.spawnedGameObject?.value;
                 if (poolName == "Pickup")
                 {
-                    ModInstance.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
+                    Plugin.UniqueItemManager.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }
-                else if (poolName == "Rooms") {
-                    ModInstance.OnRoomSpawned(obj, transformObj);
-                }
-                else
-                {
-                    ModInstance.OnOtherSpawn(obj, poolName, transformObj);
-                }
+            }
+        }
+        [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
+        [HarmonyPrefix]
+        static void PreFix(PmtSpawn __instance) {
+            GameObject obj = __instance.gameObject?.value;
+            string poolName = __instance.poolName?.value;
+            GameObject transformObj = __instance.spawnTransform?.value;
+            GameObject spawnedObj = __instance.spawnedGameObject?.value;
+            if (poolName == "Rooms")
+            {
+                ModInstance.OnRoomSpawned(obj, transformObj);
+            }
+            else
+            {
+                ModInstance.OnOtherSpawn(obj, poolName, transformObj);
             }
         }
     }

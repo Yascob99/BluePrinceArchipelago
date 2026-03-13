@@ -1,4 +1,5 @@
 ﻿using BluePrinceArchipelago.Core;
+using BluePrinceArchipelago.Utils;
 using System;
 
 namespace BluePrinceArchipelago.Events
@@ -24,13 +25,13 @@ namespace BluePrinceArchipelago.Events
         //Triggers the OnFirstDrafted Event
         public void OnFirstDrafted(ModRoom room)
         {
-            LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(room.Name.ToLower())} First Entering", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"{room.Name.ToTitleCase()} First Entering", "First Draft Room"));
         }
         public void OnFirstFound(ModItem item) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name.ToLower())} First Pickup", "Item First Pickup"));
+            LocationFound.Invoke(this, new LocationEventArgs($"{item.Name.ToTitleCase()} First Pickup", "Item First Pickup"));
         }
         public void OnTrunkOpened(string roomName, int trunkCount) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(roomName)} Locked Trunk {trunkCount}", "Locked Trunk Unlocked"));
+            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} Locked Trunk {trunkCount}", "Locked Trunk Unlocked"));
         }
     }
 

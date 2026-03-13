@@ -9,3 +9,4 @@ C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debu
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\refint\BluePrinceArchipelago.dll
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrinceArchipelago.pdb
 C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\ref\BluePrinceArchipelago.dll
+C:\Users\Jacob\source\repos\BluePrinceArchipelago\BluePrinceArchipelago\obj\Debug\BluePrin.43B963E3.Up2Date

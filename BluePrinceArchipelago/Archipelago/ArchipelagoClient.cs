@@ -36,7 +36,7 @@ public class ArchipelagoClient
     //Returns the locationid from the name or -1 if It can't be found.
     public long GetLocationFromName(string locationName)
     {
-        return ServerData.LocationDict?.FirstOrDefault(x => x.Value == locationName).Key ?? -1;
+        return ServerData.LocationDict?.FirstOrDefault(x => x.Value.ToLower() == locationName.ToLower()).Key ?? -1;
     }
     public void DisplayServerData()
     {

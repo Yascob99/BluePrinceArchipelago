@@ -35,6 +35,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM GlobalManager = new();
         public static PlayMakerFSM TheGrid = new();
         public static PlayMakerFSM MasterPicker = new();
+        public static Transform YouFoundText = new();
 
         public static int SaveSlot = 5;
         private static bool _IsArchipelagoMode = false;
@@ -105,6 +106,7 @@ namespace BluePrinceArchipelago
                 DiceManager = GameObject.Find("__SYSTEM/HUD/Bones")?.GetFsm("Bone Manager");
                 KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
                 StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("Stars");
+                YouFoundText = GameObject.Find("/UI OVERLAY CAM/You Found Text").transform;
                 LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
                 GlobalPersistentManager = GameObject.Find("Global Persistent Manager")?.GetComponent<PlayMakerFSM>();
                 GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
@@ -149,23 +151,14 @@ namespace BluePrinceArchipelago
             if (targetName == "Trunk Counter" && eventName == "Update Subtract") {
                 TrunkManager.OnTrunkOpen();
             }
-            Logging.Log($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
-        }
-        //Called by the item patch whenever an item is spawned.
-        public static void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, FsmGameObject spawnedObj) {
-            if (obj != null)
-            {
-                Logging.Log($"Item: {obj.name}");
-            }
-            if (transformObj != null)
-            {
-                Logging.Log($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
-            }
-            if (spawnedObj != null) {
-                if (spawnedObj.value != null) {
-                    Logging.Log($"SpawnedObj: {spawnedObj.value.name} - {transformObj.transform.position.ToString()}");
+            if (targetName == "Global Manager" && eventName.Contains("Pickup")) {
+                UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
+                if (item != null)
+                {
+                    item.HasBeenFound = true;
                 }
             }
+            Logging.Log($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
             if (obj != null)
@@ -206,6 +199,7 @@ namespace BluePrinceArchipelago
         // handles end of day code, Currently unsure if this is good timing.
         public static void OnDayEnd() {
             _IsInRun = false;
+            Plugin.UniqueItemManager.OnDayEnd();
         }
 
         // Handles initializing rooms.
