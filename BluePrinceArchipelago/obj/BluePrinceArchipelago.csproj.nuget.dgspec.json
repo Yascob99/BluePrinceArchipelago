@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj": {}
+    "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago - 1.7 Beta\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj": {
+    "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago - 1.7 Beta\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj": {
       "version": "0.1.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
+        "projectUniqueName": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago - 1.7 Beta\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
         "projectName": "BluePrinceArchipelago",
-        "projectPath": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
+        "projectPath": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago - 1.7 Beta\\BluePrinceArchipelago\\BluePrinceArchipelago.csproj",
         "packagesPath": "C:\\Users\\Jacob\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago\\BluePrinceArchipelago\\obj\\",
+        "outputPath": "C:\\Users\\Jacob\\source\\repos\\BluePrinceArchipelago - 1.7 Beta\\BluePrinceArchipelago\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -27,7 +27,8 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.bepinex.dev/v3/index.json": {}
         },
         "frameworks": {
           "net6.0": {

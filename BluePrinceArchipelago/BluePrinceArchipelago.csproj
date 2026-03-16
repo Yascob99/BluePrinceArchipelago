@@ -71,6 +71,9 @@
         <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.dll</HintPath>
         <Private>False</Private>
       </Reference>
+      <Reference Include="Il2CppSystem.Core">
+        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
+      </Reference>
       <Reference Include="PlayMaker">
         <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\PlayMaker.dll</HintPath>
         <Private>False</Private>

@@ -50,12 +50,18 @@ namespace BluePrinceArchipelago
         {
             ModInstance.OnDraftInitialize(__instance);
         }
+        [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.RedraftCurrentSlot))]
+        [HarmonyPrefix]
+        static void Prefix(RoomDraftHelper __instance) {
+            ModInstance.OnDraftBeforePick(__instance);
+        }
         [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
         [HarmonyPostfix]
         static void PostFix(OuterDraftManager __instance)
         {
             ModInstance.OnOuterDraftStart(__instance);
         }
+
 
     }
     public class EventPatches {

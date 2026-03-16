@@ -63,6 +63,12 @@ namespace BluePrinceArchipelago.Core
             }
             Logging.LogWarning("Error forcing room, room can't be null");
         }
+        public void SetAllVanilla() {
+            foreach (ModRoom room in _Rooms) {
+                room.UseVanilla = true;
+                VanillaRooms.Add(room.Name);
+            }
+        }
 
         public bool CheckForceRoomDraft() {
             // Check if any rooms have been queued for forcing.
@@ -93,10 +99,10 @@ namespace BluePrinceArchipelago.Core
                     }
                     j = 0;
                 }
-                // If no draftable room that is being forced, continue as normal.
+                // If one of the forced rooms is draftable, force it. If not return false and continue as normal.
                 if (draftable)
                 {
-                    IsForcingDraft = false;
+                    IsForcingDraft = true;
                     ForcedRoom = room;
                     ForceRoomQueue.RemoveAt(i);
                     return true;
