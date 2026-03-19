@@ -1,9 +1,12 @@
 ﻿using BluePrinceArchipelago.Utils.Actions;
+using HarmonyLib;
 using HutongGames.PlayMaker;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -11,6 +14,7 @@ namespace BluePrinceArchipelago.Utils
     // Not going to lie alot of this is borrowed from: https://github.com/hk-modding/HK.Core.FsmUtil/ with barely any modification. Full Credit to the HK modding team.
     public static partial class FsmUtil
     {
+
         /// <summary>
         ///     Gets a PlayMakerArrayListProxy.
         /// </summary>
@@ -318,6 +322,8 @@ namespace BluePrinceArchipelago.Utils
             actions[0] = action;
             state.Actions.CopyTo(actions, 1);
             state.Actions = actions;
+            state.actions.CopyTo(actions, 1);
+            state.actions = actions;
             action.Init(state);
         }
 
@@ -327,12 +333,15 @@ namespace BluePrinceArchipelago.Utils
             actions[state.Actions.Length] = action;
             state.Actions.CopyTo(actions, 0);
             state.Actions = actions;
+            state.actions.CopyTo(actions, 0);
+            state.actions = actions;
             action.Init(state);
         }
 
         public static void InsertAction(this FsmState state, FsmStateAction action, int index)
         {
             FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
+            FsmStateAction[] Actions = new FsmStateAction[state.actions.Length + 1];
             for (int i = 0; i < state.Actions.Length; i++)
             {
                 if (i < index) actions[i] = state.Actions[i];
@@ -390,59 +399,75 @@ namespace BluePrinceArchipelago.Utils
 
         public static T[] GetActionsOfType<T>(this FsmState state) where T : FsmStateAction
         {
-            return state.Actions.OfType<T>().ToArray();
+            List<T> actions = [];
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
+            {
+                if (state.ActionData.ActionNames[i] == typeof(T).FullName) //A bit hacky, but it works.
+                {
+                    actions.Add(state.actions[i].TryCast<T>());
+                }
+            }
+            return actions.ToArray();
         }
 
         public static T GetFirstActionOfType<T>(this FsmState state) where T : FsmStateAction
         {
-            return state.Actions.OfType<T>().FirstOrDefault();
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
+            {
+                if (state.ActionData.ActionNames[i] == typeof(T).FullName) //A bit hacky, but it works.
+                {
+                    return state.actions[i].TryCast<T>();
+                }
+            }
+            return null;
         }
 
         public static FsmBool AddFsmBool(this PlayMakerFSM fsm, string name, bool value)
         {
-            FsmBool fb = new FsmBool
+            FsmBool fb = new FsmBool(name)
             {
-                Name = name,
-                Value = value
+                value = value
             };
-
-            FsmBool[] bools = new FsmBool[fsm.FsmVariables.BoolVariables.Length + 1];
-            fsm.FsmVariables.BoolVariables.CopyTo(bools, 0);
+            FsmBool[] Bools = new FsmBool[fsm.FsmVariables.BoolVariables.Length + 1];
+            FsmBool[] bools = new FsmBool[fsm.FsmVariables.boolVariables.Length + 1];
+            fsm.FsmVariables.BoolVariables.CopyTo(Bools, 0);
+            fsm.FsmVariables.boolVariables.CopyTo(bools, 0);
             bools[bools.Length - 1] = fb;
-            fsm.FsmVariables.BoolVariables = bools;
-
+            Bools[Bools.Length - 1] = fb;
+            fsm.FsmVariables.BoolVariables = Bools;
+            fsm.FsmVariables.boolVariables = bools;
             return fb;
         }
 
         public static FsmInt AddFsmInt(this PlayMakerFSM fsm, string name, int value)
         {
-            FsmInt fi = new FsmInt
+            FsmInt fi = new FsmInt(name)
             {
-                Name = name,
-                Value = value
+                value = value
             };
 
-            FsmInt[] ints = new FsmInt[fsm.FsmVariables.IntVariables.Length + 1];
-            fsm.FsmVariables.IntVariables.CopyTo(ints, 0);
+            FsmInt[] Ints = new FsmInt[fsm.FsmVariables.IntVariables.Length + 1];
+            FsmInt[] ints = new FsmInt[fsm.FsmVariables.intVariables.Length + 1];
+            fsm.FsmVariables.IntVariables.CopyTo(Ints, 0);
+            fsm.FsmVariables.intVariables.CopyTo(ints, 0);
+            Ints[ints.Length - 1] = fi;
             ints[ints.Length - 1] = fi;
-            fsm.FsmVariables.IntVariables = ints;
-
+            fsm.FsmVariables.IntVariables = Ints;
+            fsm.FsmVariables.intVariables = ints;
             return fi;
+
         }
 
         public static FsmGameObject AddFsmGameObject(this PlayMakerFSM fsm, string name, GameObject value)
         {
-            FsmGameObject fgo = new FsmGameObject
+            FsmGameObject fgo = new FsmGameObject(name)
             {
-                Name = name,
-                Value = value
+                value = value
             };
-
-            FsmGameObject[] gos = new FsmGameObject[fsm.FsmVariables.GameObjectVariables.Length + 1];
-            fsm.FsmVariables.GameObjectVariables.CopyTo(gos, 0);
+            FsmGameObject[] gos = new FsmGameObject[fsm.FsmVariables.gameObjectVariables.Length + 1];
+            fsm.FsmVariables.gameObjectVariables.CopyTo(gos, 0);
             gos[gos.Length - 1] = fgo;
-            fsm.FsmVariables.GameObjectVariables = gos;
-
+            fsm.FsmVariables.gameObjectVariables = gos;
             return fgo;
         }
 
@@ -454,8 +479,10 @@ namespace BluePrinceArchipelago.Utils
             FsmTransition t = new FsmTransition
             {
                 FsmEvent = fsmEvent,
+                toFsmState = toState,
+                toState = toState.Name,
                 ToFsmState = toState,
-                ToState = toState.Name,
+                ToState = toState.Name
             };
             transitions[state.Transitions.Length] = t;
             state.Transitions = transitions;
@@ -486,7 +513,9 @@ namespace BluePrinceArchipelago.Utils
         public static void SetToState(this FsmTransition transition, FsmState toState)
         {
             transition.ToFsmState = toState;
+            transition.toFsmState = toState;
             transition.ToState = toState.Name;
+            transition.toState = toState.Name;
         }
 
         public static void ClearTransitions(this FsmState state)
@@ -517,7 +546,10 @@ namespace BluePrinceArchipelago.Utils
             {
                 ToState = toState,
                 ToFsmState = fsm.GetState(toState),
-                FsmEvent = ret
+                FsmEvent = ret,
+                toState = toState,
+                toFsmState = fsm.GetState(toState),
+                fsmEvent = ret
             });
             fsm.GlobalTransitions = transitions;
             return ret;
@@ -544,6 +576,7 @@ namespace BluePrinceArchipelago.Utils
         {
             FsmStateAction[] actions = AddItemToArray(state.Actions, action);
             state.Actions = actions;
+            state.actions = actions;
             action.Init(state);
         }
 
@@ -670,7 +703,9 @@ namespace BluePrinceArchipelago.Utils
         public static void InsertAction(this FsmState state, int index, FsmStateAction action)
         {
             FsmStateAction[] actions = InsertItemIntoArray(state.Actions, action, index);
+            FsmStateAction[] Actions = InsertItemIntoArray(state.actions, action, index);
             state.Actions = actions;
+            state.actions = Actions;
             action.Init(state);
         }
 
@@ -863,6 +898,7 @@ namespace BluePrinceArchipelago.Utils
         public static void ReplaceAction(this FsmState state, int index, FsmStateAction action)
         {
             state.Actions[index] = action;
+            state.actions[index] = action;
             action.Init(state);
         }
 
@@ -913,14 +949,31 @@ namespace BluePrinceArchipelago.Utils
 
         public static bool ChangeTransition(this FsmState state, string eventName, string toState)
         {
-            var transition = state.GetTransition(eventName);
-            if (transition == null)
-            {
+            if (state == null) {
                 return false;
             }
-            transition.ToState = toState;
-            transition.ToFsmState = state.Fsm.GetState(toState);
-            return true;
+            FsmTransition[] transitions = state.transitions;
+            FsmTransition[] Transitions = state.Transitions;
+            FsmTransition transition = transitions[0];
+            FsmTransition Transition = Transitions[0];
+            for (int i = 0; i < Transitions.Length; i++)
+            {
+                transition = transitions[i];
+                Transition = Transitions[i];
+                if (transition != null)
+                {
+                    transition.ToState = toState;
+                    transition.ToFsmState = state.fsm.GetState(toState);
+                    transition.toState = toState;
+                    transition.toFsmState = state.fsm.GetState(toState);
+                    Transition.ToState = toState;
+                    Transition.ToFsmState = state.fsm.GetState(toState);
+                    Transition.toState = toState;
+                    Transition.toFsmState = state.fsm.GetState(toState);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -944,6 +997,8 @@ namespace BluePrinceArchipelago.Utils
             }
             transition.ToState = toState;
             transition.ToFsmState = fsm.GetState(toState);
+            transition.toState = toState;
+            transition.toFsmState = fsm.GetState(toState);
             return true;
         }
 

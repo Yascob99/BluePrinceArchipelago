@@ -5,10 +5,14 @@ using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Utils.Actions;
+using CirrusPlay.PortalLibrary;
 using HarmonyLib;
 using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
+using HutongGames.PlayMaker.Ecosystem.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -36,6 +40,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM TheGrid = new();
         public static PlayMakerFSM MasterPicker = new();
         public static Transform YouFoundText = new();
+        public static FsmStateAction DraftValidationAction = new();
 
         public static int SaveSlot = 5;
         private static bool _IsArchipelagoMode = false;
@@ -93,6 +98,22 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Main Menu"))
             {
                 Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches"); //Apply event patches on the main menu to get some data that is not accessible later.  
+                
+                // Menu Logo Skips
+                var menuSystem = GameObject.Find("/Menu System");
+                var fsm = menuSystem.GetComponent<PlayMakerFSM>();
+
+                // Replace the transition to go to State 8 rather than Logo Slates
+                fsm.Fsm.GetState("EnterMainMenu").GetTransition(0).ToFsmState = fsm.Fsm.GetState("State 8");
+                fsm.Fsm.GetState("EnterMainMenu").GetTransition(1).ToFsmState = fsm.Fsm.GetState("State 8");
+
+                // Because we skip Logo Slates we have to copy the music start action here.
+                // This just replaces a fade to black that I would've removed anyway
+                fsm.Fsm.GetState("State 8").actions[0] = fsm.Fsm.GetState("Logo Slates").actions[1];
+
+                // Remove the 3 second delay
+                var wait = fsm.Fsm.GetState("State 8").actions[2].Cast<Wait>();
+                wait.time = new FsmFloat(0f);
             }
             if (scene.name.Equals("Mount Holly Estate"))
             {
@@ -112,14 +133,15 @@ namespace BluePrinceArchipelago
                 GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
                 TheGrid = GameObject.Find("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
                 MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
-                //AddRoomForcer();
+                DraftValidationAction = MasterPicker.GetState("3").GetFirstActionOfType<CallMethod>();
+                AddRoomForcer(MasterPicker);
                 LoadArrays();
                 InitializeRooms();
+                Plugin.ModRoomManager.SetAllVanilla();
                 TrunkManager.Initialize();
                 RegisterItems.Register(); // Register the initial state of the items.
                 _HasInitializedRooms = true;
                 ModEventHandler.LocationFound += OnLocalLocationSent;
-                Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
             }
             else {
@@ -161,9 +183,15 @@ namespace BluePrinceArchipelago
             Logging.Log($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
+
             if (obj != null)
             {
-                Logging.Log($"Item: {obj.name}");
+                Logging.Log($"Room: {obj.name}");
+                if (obj.name == Plugin.ModRoomManager.ForcedRoom.Name) {
+                    MasterPicker.GetBoolVariable("ForceDraft").Value = false;
+                    ModRoomManager.ForceRoomQueue.Remove(Plugin.ModRoomManager.ForcedRoom);
+                    Plugin.ModRoomManager.ForcedRoom = null;
+                }
             }
             if (transformObj != null)
             {
@@ -201,19 +229,18 @@ namespace BluePrinceArchipelago
             _IsInRun = false;
             Plugin.UniqueItemManager.OnDayEnd();
         }
+        public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
+        {
+        }
 
         // Handles initializing rooms.
         public static void OnDraftInitialize(RoomDraftHelper helper) 
         {
             if (HasInitializedRooms)
             {
-                // Check for if the room pool needs to be forced, and force the draft if needed. Currently Allows you to draft beyond the normal limit for that room, but should respect that limit on non-forced drafts.
-                if (!Plugin.ModRoomManager.CheckForceRoomDraft()) {
-                    //MasterPicker.FindGameObjectVariable("RoomEngine").value = null; //Might be needed to prevent accidentally forcing drafts later.
-                    Logging.Log("Updating Rooms");
-                    Plugin.ModRoomManager.UpdateRoomPools();
-                }
-                
+               Plugin.ModRoomManager.CheckForceRoomDraft();
+               Logging.Log("Updating Rooms");
+               Plugin.ModRoomManager.UpdateRoomPools();
             }
             else {
                 Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
@@ -292,10 +319,16 @@ namespace BluePrinceArchipelago
                 Plugin.ArchipelagoClient.CheckLocation(e.LocationName);
             }
         }
+        public static void OnDraftBeforePick(RoomDraftHelper instance)
+        {
+            
+        }
+
         public static void OnGoalComplete() {
             Plugin.ArchipelagoClient.GoalCompleted();
         }
 
+        //TODO update this to be less hacky.
         // loads the list of picker arrays the rooms can be added to. May rewrite to use names instead of the id of the child for better forward compatibility.
         private static void LoadArrays() {
             List<int> childIDs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55, 56, 58, 59, 60, 61];
@@ -305,41 +338,29 @@ namespace BluePrinceArchipelago
             }
             
         }
-        //public static bool verifySaveSlot() {
-        //    //Check if the client was reconnected, and if the save slot is a valid slot.
-        //    if (ArchipelagoClient.Authenticated && ArchipelagoClient.Reconnected && SaveSlot > 0 && SaveSlot < 5)
-        //    {
-        //        int stateSlot = ;
-        //        if (stateSlot == 5)
-        //        {
-        //            SaveSlot.Store<int>("SaveSlot");
-        //            return true;
-        //        }
-        //        else if (stateSlot == SaveSlot)
-        //        {
-        //            return true;
-        //        }
-        //        Logging.Log("Save Slot doesn't match expected saveslot");
-        //        return false;
-        //    }
-        //    // defaulting to true for now to avoid issues while testing.
-        //    return true;
-        //}
-        private void AddRoomForcer(PlayMakerFSM fsm) {
-            FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", true);
-            FsmState ForceDraft = fsm.AddState("Force Room Draft");
-            ForceDraft.AddLastAction(new DelegateBoolTest(() => Plugin.ModRoomManager.IsForcingDraft, "Continue Draft", null));
-            ForceDraft.AddLastAction(new Lambda(() =>
-            {
-                fsm.FindGameObjectVariable("RoomEngine").value = Plugin.ModRoomManager.ForcedRoom.GameObj;
-                fsm.SendEvent("PLAN SELECTED");
-            }));
-            FsmState DraftCodeStart = fsm.GetState("Draft Code Start");
-            DraftCodeStart.RemoveTransitionsOn("FINISHED");
-            ForceDraft.AddTransition("Continue Draft", "Day 1 Draft 1");
-            DraftCodeStart.AddTransition("FINISHED", ForceDraft);
-        }
 
+        private void AddRoomForcer(PlayMakerFSM fsm)
+        {
+            FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", false);
+            FsmState ForceDraft = fsm.AddState("Force Room Draft");
+            FsmState DraftForcedCheck = fsm.AddState("Draft Forced Check");
+            FsmGameObject ForcedRoom = fsm.AddFsmGameObject("ForcedRoom", null);
+            DraftForcedCheck.RemoveTransitionsTo("FINISHED");
+            DraftForcedCheck.AddTransition("Continue Draft", "SLOT 2");
+            DraftForcedCheck.AddTransition("Force Draft", "Force Room Draft");
+            DraftForcedCheck.AddLastAction(new BoolTest() { boolVariable = isDraftForced, isFalse = FsmEvent.GetFsmEvent("Continue Draft"), isTrue = FsmEvent.GetFsmEvent("Force Draft"), everyFrame = false });
+            ForceDraft.AddLastAction(new SetGameObject() { everyFrame = false, gameObject = MasterPicker.GetGameObjectVariable("RoomEngine"), variable = ForcedRoom });
+            SendEvent PlanSelected = fsm.GetState("Slot 1").GetFirstActionOfType<SendEvent>();
+            ForceDraft.AddLastAction(PlanSelected);
+            ForceDraft.RemoveTransitionsTo("FINISHED");
+            FsmState DraftCodeStart = fsm.GetState("Draft Code Start");
+            DraftCodeStart.ChangeTransition("FINISHED", "Draft Forced Check");
+            FsmState PickAnother = fsm.GetState("Pick Another ");
+            PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
+        }
+        public static void OnConnectToArchipelago() {
+            Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
+        }
         
         private static void InitializeRooms()
         {

@@ -2,6 +2,7 @@
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using HutongGames.PlayMaker.Ecosystem.Utils;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -50,12 +51,18 @@ namespace BluePrinceArchipelago
         {
             ModInstance.OnDraftInitialize(__instance);
         }
+        [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.StartDraft))]
+        [HarmonyPrefix]
+        static void Prefix(RoomDraftHelper __instance) {
+            ModInstance.OnDraftBeforeInitialize(__instance);
+        }
         [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
         [HarmonyPostfix]
         static void PostFix(OuterDraftManager __instance)
         {
             ModInstance.OnOuterDraftStart(__instance);
         }
+
 
     }
     public class EventPatches {
@@ -65,7 +72,7 @@ namespace BluePrinceArchipelago
         {
             FsmEventTarget target = __instance.eventTarget;
             FsmEvent sendEvent = __instance.sendEvent;
-            string targetType = target.target.ToString();
+            string targetType = target == null ? "" : target.target.ToString();
             DelayedEvent delayedEvent = __instance.delayedEvent;
             FsmFloat delay = __instance.delay;
             bool isDelayed = false;

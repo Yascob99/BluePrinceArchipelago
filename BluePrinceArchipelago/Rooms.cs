@@ -51,55 +51,69 @@ namespace BluePrinceArchipelago.Core
         }
         public void ForceDraft(string roomname) {
             ModRoom room = GetRoomByName(roomname);
-            if (room == null)
+            if (room != null)
             {
                 ForceDraft(room);
+                return;
             }
             Logging.LogWarning($"Error forcing room unable to find the room: {roomname}");
         }
         public void ForceDraft(ModRoom room) {
-            if (room == null) { 
+            if (room != null) { 
                 ForceRoomQueue.Add(room);
+                return;
             }
             Logging.LogWarning("Error forcing room, room can't be null");
+        }
+        public void SetAllVanilla() {
+            foreach (ModRoom room in _Rooms) {
+                room.UseVanilla = true;
+                VanillaRooms.Add(room.Name);
+            }
         }
 
         public bool CheckForceRoomDraft() {
             // Check if any rooms have been queued for forcing.
-            IsForcingDraft = false; //Pre-reset this.
+            //Pre-reset this.
             if (ForceRoomQueue.Count > 0)
             {
+                Logging.Log("Checking if rooms can be forced.");
                 // Check if those rooms can be drafted at that location (ignoring usual rules).
                 bool draftable = false;
                 int i = -1;
                 int j = 0;
                 ModRoom room = null;
-                UpdateCurrentPickerArrays();
-                while (!draftable && i < ForceRoomQueue.Count - 1)
+                if (ForcedRoom == null)
                 {
-                    i++;
-                    room = ForceRoomQueue[i];
-                    if (room == null)
+                    UpdateCurrentPickerArrays();
+                    while (!draftable && i < ForceRoomQueue.Count - 1)
                     {
-                        while (!draftable && j < room.PickerArrays.Count)
+                        i++;
+                        room = ForceRoomQueue[i];
+                        if (room != null)
                         {
-                            if (CurrentPickerArrays.Contains(room.PickerArrays[j]))
+                            while (!draftable && j < room.PickerArrays.Count)
                             {
-                                draftable = true;
+                                if (CurrentPickerArrays.Contains(room.PickerArrays[j]))
+                                {
+                                    draftable = true;
 
+                                }
+                                j++;
                             }
-                            j++;
                         }
+                        j = 0;
                     }
-                    j = 0;
-                }
-                // If no draftable room that is being forced, continue as normal.
-                if (draftable)
-                {
-                    IsForcingDraft = false;
-                    ForcedRoom = room;
-                    ForceRoomQueue.RemoveAt(i);
-                    return true;
+                    // If one of the forced rooms is draftable, force it. If not return false and continue as normal.
+                    if (draftable)
+                    {
+                        Logging.Log($"Forcing Room Draft for: {room.Name}");
+                        ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = true;
+                        ModInstance.MasterPicker.GetGameObjectVariable("ForcedRoom").Value = room.GameObj;
+                        ModInstance.MasterPicker.GetGameObjectVariable("RoomEngine").Value = room.GameObj;
+                        ForcedRoom = room;
+                        return true;
+                    }
                 }
             }
             return false;
@@ -125,8 +139,10 @@ namespace BluePrinceArchipelago.Core
         // Returns the ModRoom object by it's name.
         public ModRoom GetRoomByName(string name)
         {
-            foreach (ModRoom room in _Rooms) { 
-                if (room.Name == name.ToUpper()) { return room; }
+            foreach (ModRoom room in _Rooms) {
+                if (room.Name.ToUpper().Trim() == name.ToUpper().Trim()) {
+                    return room; 
+                }
             }
             return null;
         }
@@ -149,7 +165,7 @@ namespace BluePrinceArchipelago.Core
         }
         public void UpdateCurrentPickerArrays() {
             PlayMakerFSM grid = ModInstance.TheGrid;
-            PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").Value?.GetComponent<PlayMakerFSM>();
+            PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").value?.GetComponent<PlayMakerFSM>();
             CurrentPickerArrays.Clear();
             //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
             if (planPicker != null)

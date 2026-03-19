@@ -91,7 +91,7 @@ public static class ArchipelagoConsole
             if (CommandText.Trim()[0] == '/') { 
                 CommandManager.RunLocalCommand(CommandText);
             }
-            if (ArchipelagoClient.Authenticated)
+            else if (ArchipelagoClient.Authenticated)
             {
                 Plugin.ArchipelagoClient.SendMessage(CommandText);
                 CommandText = "";
@@ -220,6 +220,7 @@ public static class CommandManager {
         _LocalCommands["adjust"] = new AdjustCommand("Adjust");
         _LocalCommands["item"] = new ItemCommand("Item");
         _LocalCommands["help"] = new HelpCommand("Help");
+        _LocalCommands["force"] = new ForceCommand("Force");
     }
     private static ParsedCommand ParseCommand(string command)
     {
@@ -639,6 +640,26 @@ public class HelpCommand(string name) : Command(name) {
     }
     public override void Run(List<string> Args) {
         CommandManager.PrintHelpText();
+    }
+}
+public class ForceCommand(string name) : Command(name) {
+        private readonly string _Description = "Forces a draft of the room when next possible";
+    public override string Description
+    {
+        get { return _Description; }
+    }
+    private readonly string _Syntax = "Usage\n\t/Force <Room>\n\t/Force <Room>";
+    public override string Syntax
+    {
+        get { return _Syntax; }
+    }
+    public override void Run(List<string> Args)
+    {
+        string roomName = string.Join(" ", Args);
+        ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomName);
+        if (room != null) {
+            ModRoomManager.ForceRoomQueue.Add(room);
+        }
     }
 }
 

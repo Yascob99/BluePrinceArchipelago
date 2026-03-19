@@ -5,6 +5,9 @@ using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem.IO;
+using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -23,7 +26,7 @@ namespace BluePrinceArchipelago {
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         public const string APDisplayInfo = $"Archipelago v{ArchipelagoClient.APVersion}";
-        public static string AssetsFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        public static string AssetsFolderPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public static AssetBundle AssetBundle { get; private set; }
         public ManualLogSource LogSource => Log;
         public static ArchipelagoClient ArchipelagoClient;
@@ -39,7 +42,7 @@ namespace BluePrinceArchipelago {
             ModItemManager = new ModItemManager();
             UniqueItemManager = new UniqueItemManager();
             _instance = this;
-            AssetBundle = AssetBundle.LoadFromFile(Path.Combine(AssetsFolderPath, "blueprinceapassets"));
+            AssetBundle = AssetBundle.LoadFromFile(System.IO.Path.Combine(AssetsFolderPath, "blueprinceapassets"));
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();

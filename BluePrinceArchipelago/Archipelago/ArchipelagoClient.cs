@@ -181,6 +181,7 @@ public class ArchipelagoClient
             DequeueItems(Reconnected);
             DisplayServerData();
             State.UpdateAll();
+            ModInstance.OnConnectToArchipelago();
         }
         else
         {
