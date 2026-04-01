@@ -42,12 +42,12 @@
     </Target>
 
     <ItemGroup>
-        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0" IncludeAssets="compile" />
-        <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="2.0.1">
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" IncludeAssets="compile" />
+        <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="2.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.753" IncludeAssets="compile" />
+        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.755" IncludeAssets="compile" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
