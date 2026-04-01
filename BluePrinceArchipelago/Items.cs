@@ -18,6 +18,7 @@ namespace BluePrinceArchipelago.Core
         public static PlayMakerArrayListProxy PickedUp = new();
         public static PlayMakerArrayListProxy CoatCheck = new();
         public static PlayMakerArrayListProxy UsedItems = new();
+        public static List<Trap> TrapList = new();
         
 
         public ModItemManager()
@@ -58,6 +59,10 @@ namespace BluePrinceArchipelago.Core
                 Logging.Log($"Item {item.Name} already added, can't add multiple copies.");
             }
         }
+        public void AddTrap(Trap trap) { 
+            TrapList.Add(trap);
+        }
+
         public void AddItem(JunkItem itemToAdd, int count = 1) {
             foreach (ModItem item in JunkItemList)
             {
@@ -309,18 +314,21 @@ namespace BluePrinceArchipelago.Core
                             {
                                 if (itemNameParts[1] == "End")
                                 {
-                                    return ["Junk", "EOD", "-1"];
+                                    return ["Trap", "EOD", "-1"];
                                 }
                                 else if (itemNameParts[1] == "Lose")
                                 {
-                                    return ["Junk", "Item", "-1"];
+                                    return ["Trap", "Item", "-1"];
+                                }
+                                else if (itemNameParts[1] == "Freeze") {
+                                    return ["Trap", "Freeze", "-1"];
                                 }
 
                                 return ["Junk", itemNameParts[1], "-1"];
                             }
                             else if (itemNameParts.Length == 4)
                             {
-                                return ["Junk", itemNameParts[2], itemNameParts[3]];
+                                return ["Junk", itemNameParts[2], "-" + itemNameParts[3], itemNameParts[1]];
                             }
                         }
 
@@ -788,9 +796,17 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Steps 2", null, true, "Steps", 2));
             
             //Traps
-            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 1", null, true, "Steps", -1));
-            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 2", null, true, "Steps", -2));
-            Plugin.ModItemManager.AddItem(new JunkItem("Trap Take Steps 5", null, true, "Steps", -5));
+
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 1","Steps", -1));
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 2", "Steps", -2));
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 5", "Steps", -5));
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 1", "Stars", -1));
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 2", "Stars", -2));
+            Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 5", "Stars", -5));
+            Plugin.ModItemManager.AddTrap(new EndOfDayTrap("Trap End Day", "EOD"));
+            Plugin.ModItemManager.AddTrap(new FreezeTrap("Trap Freeze Items", "Freeze"));
+            Plugin.ModItemManager.AddTrap(new LoseItemTrap("Trap Lose Item", "Lose Item"));
+
         }
     }
 }

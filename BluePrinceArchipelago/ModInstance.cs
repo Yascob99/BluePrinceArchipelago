@@ -4,14 +4,12 @@ using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
-using BluePrinceArchipelago.Utils.Actions;
-using CirrusPlay.PortalLibrary;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using HutongGames.PlayMaker.Ecosystem.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -143,6 +141,7 @@ namespace BluePrinceArchipelago
                 _HasInitializedRooms = true;
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
+                //Item Patches are under authenticating with archipelago for now due to having adverse effects when not connected. Will properly implement soon.
             }
             else {
                 // hackish, but based on my knowledge only one scene is loaded at a time.
@@ -180,17 +179,21 @@ namespace BluePrinceArchipelago
                     item.HasBeenFound = true;
                 }
             }
-            Logging.Log($"Sending {eventName} to {targetType}: {targetName}"); // Currently commented out due to clogging up the log. Good for finding hookable events.
+            Logging.Log($"Sending {eventName} to {targetType}: {targetName}");
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
 
             if (obj != null)
             {
                 Logging.Log($"Room: {obj.name}");
-                if (obj.name == Plugin.ModRoomManager.ForcedRoom.Name) {
-                    MasterPicker.GetBoolVariable("ForceDraft").Value = false;
-                    ModRoomManager.ForceRoomQueue.Remove(Plugin.ModRoomManager.ForcedRoom);
-                    Plugin.ModRoomManager.ForcedRoom = null;
+                if (Plugin.ModRoomManager.ForcedRoom != null)
+                {
+                    if (obj.name.ToUpper() == Plugin.ModRoomManager.ForcedRoom.Name.ToUpper())
+                    {
+                        MasterPicker.GetBoolVariable("ForceDraft").Value = false;
+                        ModRoomManager.ForceRoomQueue.Remove(Plugin.ModRoomManager.ForcedRoom);
+                        Plugin.ModRoomManager.ForcedRoom = null;
+                    }
                 }
             }
             if (transformObj != null)
@@ -274,7 +277,7 @@ namespace BluePrinceArchipelago
             if (ArchipelagoClient.Authenticated)
             {
                 // if your game doesn't usually show the cursor this line may be necessary
-                // Cursor.visible = false;
+                Cursor.visible = false;
 
                 statusMessage = " Status: Connected";
                 GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
@@ -282,7 +285,7 @@ namespace BluePrinceArchipelago
             else
             {
                 // if your game doesn't usually show the cursor this line may be necessary
-                // Cursor.visible = true;
+                Cursor.visible = true;
 
                 statusMessage = " Status: Disconnected";
                 GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
@@ -309,7 +312,6 @@ namespace BluePrinceArchipelago
                     Plugin.ArchipelagoClient.Connect();
                 }
             }
-            // this is a good place to create and add a bunch of debug buttons
         }
         public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
         {
@@ -411,7 +413,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("GUEST BEDROOM", ["FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("GYMNASIUM", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("HALLWAY", ["FRONTBACK - RARE", "SOUTH PIERCE", "CENTER - Tier 1"], true);
-                Plugin.ModRoomManager.AddRoom("HER LADYSHIP'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
+                Plugin.ModRoomManager.AddRoom("HER LADYSHIPS CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
                 Plugin.ModRoomManager.AddRoom("HOVEL", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
                 Plugin.ModRoomManager.AddRoom("KITCHEN", ["FRONT - Tier 1 G", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
                 Plugin.ModRoomManager.AddRoom("LABORATORY", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
@@ -475,7 +477,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("WEST WING HALL", ["EDGECREEP WEST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("WINE CELLAR", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 1", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("WORKSHOP", ["FRONTBACK - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "Center Rare"], true);
-                Plugin.ModRoomManager.AddRoom("ANTECHAMPER", [], true, false);
+                Plugin.ModRoomManager.AddRoom("ANTECHAMBER", [], true, false);
                 Plugin.ModRoomManager.AddRoom("ROOM 46", [], true, false);
                 Plugin.ModRoomManager.AddRoom("ENTRANCE HALL", [], true, false);
             }

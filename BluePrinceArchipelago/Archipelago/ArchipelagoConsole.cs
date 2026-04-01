@@ -1,12 +1,14 @@
 ﻿using BepInEx;
-using BluePrinceArchipelago.Archipelago;
+using BepInEx.Unity.IL2CPP.UnityEngine;
 using BluePrinceArchipelago.Core;
+using BluePrinceArchipelago.Utils;
+using HutongGames.PlayMaker.Actions;
 using StableNameDotNet;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace BluePrinceArchipelago.Utils;
+namespace BluePrinceArchipelago.Archipelago;
 
 // shamelessly stolen from oc2-modding https://github.com/toasterparty/oc2-modding/blob/main/OC2Modding/GameLog.cs with modifications for Blue Prince.
 public static class ArchipelagoConsole
@@ -23,12 +25,13 @@ public static class ArchipelagoConsole
     private static GUIStyle textStyle = new();
     private static string scrollText = "";
     private static float lastUpdateTime = Time.time;
-    private const int MaxLogLines = 80;
     private const float HideTimeout = 15f;
 
     private static string CommandText = "/help";
     private static Rect CommandTextRect;
     private static Rect SendCommandButton;
+    private static List<string> PreviousCommands = [];
+    private static int PreviousCommandPointer = -1;
 
     public static void Awake()
     {
@@ -38,11 +41,6 @@ public static class ArchipelagoConsole
     public static void LogMessage(string message)
     {
         if (message.IsNullOrWhiteSpace()) return;
-
-        if (logLines.Count == MaxLogLines)
-        {
-            logLines.RemoveAt(0);
-        }
         //Handle multiline messages.
         if (message.Contains("\n"))
         {
@@ -65,7 +63,31 @@ public static class ArchipelagoConsole
 
     public static void OnGUI()
     {
+        //TODO add keyboard shortcut for hidding/unhidding. Prevent the input from causing the player to move until input has been submitted or window has been rehidden.
         if (logLines.Count == 0) return;
+        Event e = Event.current;
+        //Shows the Input Window
+        if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash)) {
+            Hidden = !Hidden;
+            UpdateWindow();
+        }
+        if (!Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Escape)) {
+            Hidden = !Hidden;
+            UpdateWindow();
+        }
+        if (!Hidden && e.type == EventType.KeyDown) {
+            if (e.keyCode == UnityEngine.KeyCode.UpArrow) {
+                if (PreviousCommandPointer > 0)
+                {
+                    PreviousCommandPointer--;
+                    CommandText = PreviousCommands[PreviousCommandPointer];
+                }
+                else {
+                    PreviousCommandPointer = PreviousCommands.Count - 1;
+
+                }
+            }
+        }
 
         if (!Hidden || Time.time - lastUpdateTime < HideTimeout)
         {
@@ -83,18 +105,22 @@ public static class ArchipelagoConsole
         
         // draw client/server commands entry if not hidden.
         if (Hidden) return;
-
         CommandText = GUI.TextField(CommandTextRect, CommandText);
-        if (!CommandText.IsNullOrWhiteSpace() && GUI.Button(SendCommandButton, "Send"))
+        if (!CommandText.IsNullOrWhiteSpace() && (GUI.Button(SendCommandButton, "Send") || e.type == EventType.KeyDown && (e.keyCode == UnityEngine.KeyCode.Return || e.character == '\n')))
         {   
             //local command
             if (CommandText.Trim()[0] == '/') { 
                 CommandManager.RunLocalCommand(CommandText);
+                PreviousCommands.Add(CommandText);
+                CommandText = "";
+                PreviousCommandPointer = -1;
             }
             else if (ArchipelagoClient.Authenticated)
             {
                 Plugin.ArchipelagoClient.SendMessage(CommandText);
+                PreviousCommands.Add(CommandText);
                 CommandText = "";
+                PreviousCommandPointer = -1;
             }
         }
     }
@@ -553,7 +579,7 @@ public class ItemCommand(string name) : Command(name) {
 
                         if (ModItemManager.PreSpawn.Contains(item))
                         {
-                            ModItemManager.PreSpawn.Remove(item, "GameObject");
+                            //ModItemManager.PreSpawn.Remove(item, "GameObject");
                             ModItemManager.PickedUp.Add(item, "GameObject");
                             InventoryIcons.Add(icon, "GameObject");
                             ArchipelagoConsole.LogMessage($"Added {itemName} to inventory.");
