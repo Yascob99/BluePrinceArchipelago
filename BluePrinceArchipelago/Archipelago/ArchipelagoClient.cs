@@ -256,7 +256,6 @@ public class ArchipelagoClient
         List<long> serverLocations = [.. session.Locations.AllLocationsChecked];
         List<long> localLocations = [.. ServerData.CheckedLocations];
         bool found = false;
-        bool updated = false;
         int i = 0;
 
         foreach (long location in serverLocations) {
@@ -269,18 +268,13 @@ public class ArchipelagoClient
                 i++;
             }
             if (!found) {
-                //If the server has locations checked that the local game didn't send while disconnected, add them to the checked locationlist.
+                //If the server has locations checked that the local game didn't send while disconnected, add them to the checked locationlist. No need to add to state data until 
                 ServerData.CheckedLocations.Add(location);
-                updated = true;
             }
             if (found) { 
                 localLocations.RemoveAt(i); //Remove the value from the list so we can send the checks that occurred while disconnected.
             }
 
-        }
-        if (updated) {
-            // Update server data if there were queued locations from the server.
-            //ServerData.StoreData();
         }
         if (localLocations.Count > 0) {
             if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
@@ -323,7 +317,6 @@ public class ArchipelagoClient
     private void Disconnect()
     {
         Reconnected = false;
-        //ServerData.StoreData();
         Logging.LogDebug("disconnecting from server...");
         session?.Socket.DisconnectAsync();
         session = null;

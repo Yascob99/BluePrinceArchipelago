@@ -341,7 +341,7 @@ namespace BluePrinceArchipelago.Core
             Logging.Log($"Item was invalid. Unable to retreive Item.");
             return null;
         }
-        public bool IsItemSpawnable(GameObject item)
+        public bool IsItemSpawnable(GameObject item, bool isPrespawn = true)
         {
             if (CoatCheck.Contains(item))
             {
@@ -359,7 +359,11 @@ namespace BluePrinceArchipelago.Core
             {
                 return false;
             }
-            else if (PreSpawn.Contains(item)) {
+            else if (PreSpawn.Contains(item))
+            {
+                return true;
+            }
+            else if (!isPrespawn) {
                 return true;
             }
 
@@ -434,41 +438,18 @@ namespace BluePrinceArchipelago.Core
             get { return _HasBeenFound; }
             set
             {
-                //Send the item found event on the first time it is found.
+                // Send the item found event on the first time it is found.
                 if (!_HasBeenFound && value)
                 {
                     ModInstance.Instance.ModEventHandler.OnFirstFound(this);
                     _HasBeenFound = value;
                 }
-                // No changes to value once the item has been found once, or if someone is not trying to set this to true for some stupid reason.
+                // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
             }
         }
 
         public virtual void AddItemToInventory() { 
             //TODO add code handling adding the item.
-        }
-    }
-    public class UniqueItem(string name, GameObject gameObject, bool isUnlocked, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
-    {
-        
-        private bool _IsUnique = true;
-        public new bool IsUnique { 
-            get { return _IsUnique; } 
-            set { _IsUnique = value; }
-        }
-        private bool _IsPrespawn = isPreSpawn;
-
-        public bool IsPrespawn { get; set; }
-
-        public override void AddItemToInventory() {
-            if (!IsUnlocked) { 
-                IsUnlocked = true;
-            }
-            //Todo add code handling adding the item.
-        }
-
-        private bool InPool() {
-            return false;
         }
     }
 
@@ -723,7 +704,7 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 370", Plugin.ModItemManager.GetPreSpawnItem("VAULT KEY 370"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("DIARY KEY", Plugin.ModItemManager.GetPreSpawnItem("DIARY KEY"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("PRISM KEY_0", Plugin.ModItemManager.GetPreSpawnItem("PRISM KEY_0"), false, false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", null, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", null, false, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("SECRET GARDEN KEY", Plugin.ModItemManager.GetPreSpawnItem("SECRET GARDEN KEY"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 1", Plugin.ModItemManager.GetPreSpawnItem("MICROCHIP 1"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 2", Plugin.ModItemManager.GetPreSpawnItem("MICROCHIP 2"), false));

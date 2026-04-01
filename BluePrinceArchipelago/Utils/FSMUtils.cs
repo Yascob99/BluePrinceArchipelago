@@ -1200,6 +1200,7 @@ namespace BluePrinceArchipelago.Utils
                 return false;
             }
             state.Actions[index].Enabled = false;
+            state.Actions[index].enabled = false;
             return true;
         }
 
@@ -1277,6 +1278,41 @@ namespace BluePrinceArchipelago.Utils
                 }
                 i++;
             }
+        }
+
+        public static void DisableFirstActionOfType<TAction>(this FsmState state) {
+            int i = 0;
+            foreach (string actionName in state.ActionData.ActionNames)
+            {
+                if (actionName == typeof(TAction).FullName)
+                {
+                    state.DisableAction(i);
+                    return;
+                }
+                i++;
+            }
+        }
+        public static void EnableActionsOfType<TAction>(this FsmState state)
+        {
+            int i = 0;
+            foreach (string actionName in state.ActionData.ActionNames)
+            {
+                if (actionName == typeof(TAction).FullName)
+                {
+                    state.DisableAction(i);
+                }
+                i++;
+            }
+        }
+        public static bool EnableAction(this FsmState state, int index)
+        {
+            if (index < 0 || index >= state.Actions.Length)
+            {
+                return false;
+            }
+            state.Actions[index].Enabled = true;
+            state.Actions[index].enabled = true;
+            return true;
         }
 
         private static TVar[] MakeNewVariableArray<TVar>(TVar[] orig, string name) where TVar : NamedVariable, new()

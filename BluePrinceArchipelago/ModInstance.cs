@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,13 +19,17 @@ namespace BluePrinceArchipelago
 {
     internal class ModInstance : MonoBehaviour
     {
+        // Handlers and Managers.
         public ModEventHandler ModEventHandler = new ModEventHandler(); //Initialize event handler
         public ArchipelagoQueueManager QueueManager = new ArchipelagoQueueManager();
-        public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
-        private static GameObject _PlanPicker = new();
-        public static ModInstance Instance;
-        private static bool _SceneLoaded = false;
-        private static bool _StateLoaded = false;
+        public static TrunkManager TrunkManager = new();
+
+        // Game Objects
+        public static GameObject PlanPicker = new();
+        public static GameObject Inventory = new();
+        public static GameObject RoomsInHouse = new();
+
+        // FSMs
         public static PlayMakerFSM GemManager = new();
         public static PlayMakerFSM StepManager = new();
         public static PlayMakerFSM GoldManager = new();
@@ -32,55 +37,30 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM KeyManager = new();
         public static PlayMakerFSM StarManager = new();
         public static PlayMakerFSM LuckManager = new();
-        public static TrunkManager TrunkManager = new();
         public static PlayMakerFSM GlobalPersistentManager = new();
         public static PlayMakerFSM GlobalManager = new();
         public static PlayMakerFSM TheGrid = new();
         public static PlayMakerFSM MasterPicker = new();
+
+        // Transforms
         public static Transform YouFoundText = new();
+
+        // FSM actions.
         public static FsmStateAction DraftValidationAction = new();
 
+        // Bools
+        public static bool IsArchipelagoMode { get; private set; } = false;
+        public static bool StateLoaded { get; private set; } = false;
+        public static bool SceneLoaded { get; private set; } = false;
+        public static bool IsInRun { get; private set; } = false;
+        public static bool HasInitializedRooms { get; private set; } = false;
+
+        // Other
+        public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
+        public static ModInstance Instance;
         public static int SaveSlot = 5;
-        private static bool _IsArchipelagoMode = false;
-        public static bool IsArchipelagoMode {
-            get { return _IsArchipelagoMode; }
-            set 
-            {
-                _IsArchipelagoMode = value; 
-            }
-        }
 
-        public static bool StateLoaded { 
-            get { return _StateLoaded; }
-        }
-
-        public static bool SceneLoaded { 
-            get { return _SceneLoaded; } 
-        }
-
-        private static bool _IsInRun;
-        public static bool IsInRun {
-            get { return _IsInRun; }
-        }
-
-        public static GameObject PlanPicker {
-            get { return _PlanPicker; }
-        }
-        private static GameObject _Inventory = new();
-        public static GameObject Inventory {
-            get { return _Inventory; }
-        }
-        private static GameObject _RoomsInHouse = new();
-
-        public static GameObject RoomsInHouse{
-            get { return _RoomsInHouse; }
-        }
-
-        private static bool _HasInitializedRooms = false;
-        public static bool HasInitializedRooms
-        {
-            get { return _HasInitializedRooms; }
-        }
+        
         public ModInstance(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
@@ -106,7 +86,7 @@ namespace BluePrinceArchipelago
                 fsm.Fsm.GetState("EnterMainMenu").GetTransition(1).ToFsmState = fsm.Fsm.GetState("State 8");
 
                 // Because we skip Logo Slates we have to copy the music start action here.
-                // This just replaces a fade to black that I would've removed anyway
+                // This just replaces a fade to black that would've been removed anyway
                 fsm.Fsm.GetState("State 8").actions[0] = fsm.Fsm.GetState("Logo Slates").actions[1];
 
                 // Remove the 3 second delay
@@ -115,10 +95,11 @@ namespace BluePrinceArchipelago
             }
             if (scene.name.Equals("Mount Holly Estate"))
             {
-                _SceneLoaded = true;
-                _PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
-                _Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
-                _RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
+                SceneLoaded = true;
+                //Initialize all of the GameObjects
+                PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
+                Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
+                RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
                 GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
                 StepManager = GameObject.Find("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
                 GoldManager = GameObject.Find("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");
@@ -138,14 +119,14 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.SetAllVanilla();
                 TrunkManager.Initialize();
                 RegisterItems.Register(); // Register the initial state of the items.
-                _HasInitializedRooms = true;
+                HasInitializedRooms = true;
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
-                //Item Patches are under authenticating with archipelago for now due to having adverse effects when not connected. Will properly implement soon.
+                Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
             }
             else {
                 // hackish, but based on my knowledge only one scene is loaded at a time.
-                _SceneLoaded = false;
+                SceneLoaded = false;
             }
         }
         // Handles the mod object being destroyed somehow.
@@ -176,6 +157,15 @@ namespace BluePrinceArchipelago
                 UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
                 if (item != null)
                 {
+                    // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
+                    if (item.IsUnlocked) {
+                        // Re-enable the logic that adds the item to inventory. (will not cause issues if already enabled).
+                        FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                        if (state != null)
+                        {
+                            state.EnableActionsOfType<ArrayListAdd>();
+                        }
+                    }
                     item.HasBeenFound = true;
                 }
             }
@@ -204,7 +194,7 @@ namespace BluePrinceArchipelago
             if (room != null) {
                 if (!room.HasBeenDrafted)
                 {
-                    room.HasBeenDrafted = true;
+                    room.HasBeenDrafted = true; //This triggers the Location found Event.
                 }
             }
         }
@@ -220,7 +210,7 @@ namespace BluePrinceArchipelago
         }
         // handles Day start code. Currently unsure if this is good timing for things.
         public static void OnDayStart(int dayNum) {
-            _IsInRun = true;
+            IsInRun = true;
             // Attempt to recieve items that were recieved before the game was loaded.
             Instance.QueueManager.ReleaseAllQueuedItems();
             // Handle Start of day code for Permanent items (and maybe curses later).
@@ -229,7 +219,7 @@ namespace BluePrinceArchipelago
         }
         // handles end of day code, Currently unsure if this is good timing.
         public static void OnDayEnd() {
-            _IsInRun = false;
+            IsInRun = false;
             Plugin.UniqueItemManager.OnDayEnd();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
@@ -335,12 +325,11 @@ namespace BluePrinceArchipelago
         private static void LoadArrays() {
             List<int> childIDs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55, 56, 58, 59, 60, 61];
             for (int i = 0; i < childIDs.Count; i++) {
-                PlayMakerArrayListProxy array = _PlanPicker.transform.GetChild(childIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
+                PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(childIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
                 PickerDict[array.name.Trim()] = array;
             }
             
         }
-
         private void AddRoomForcer(PlayMakerFSM fsm)
         {
             FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", false);
@@ -361,7 +350,7 @@ namespace BluePrinceArchipelago
             PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
         }
         public static void OnConnectToArchipelago() {
-            Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches"); //Specify type of patches so they can be applied and removed as required.
+            
         }
         
         private static void InitializeRooms()
