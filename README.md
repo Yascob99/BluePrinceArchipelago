@@ -67,6 +67,11 @@
 
 This is an in development Archipelago mod for the 2025 roguelite puzzle game Blue Prince. **Please note that the mod is not currently playable yet** and is still being developed.
 
+Special Thanks to: 
+- ChaseoQueso for the item code and archipelago version of items
+- deefdragon and BatemenzDW for their work on the APword.
+- The Silksong/HK community for a lot of great tools which made modding so much easier.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -88,7 +93,7 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
    ```sh
    git clone https://github.com/Yascob99/BluePrinceArchipelago.git
    ```
-3. Change git remote url to avoid accidental pushes to base project
+3. Change git remote url to avoid accidental pushes to base project or check out <a href=#contributing>Contributing</a> if you want to help contribute instead.
    ```sh
    git remote set-url origin github_username/repo_name
    git remote -v # confirm the changes
