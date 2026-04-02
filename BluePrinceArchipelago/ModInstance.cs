@@ -137,17 +137,24 @@ namespace BluePrinceArchipelago
             Harmony.UnpatchID("EventPatches");
             Harmony.UnpatchID("RoomPatches");
         }
-        // Fires off when an event is sent from an FSM to an FSM or GameObject. Currently just for testing. It is pretty buggy.
+        // Fires off when an event is sent from an FSM to an FSM or GameObject. Sometime fails,
         public static void OnEventSend(FsmEventTarget target, FsmEvent sendEvent, FsmFloat delay, DelayedEvent delayedEvent, GameObject owner, bool isDelayed) {
             string eventName = sendEvent.name;
-            string targetType = target.target.ToString();
-            string targetName = target.gameObject.gameObject.name;
+            string targetType = target?.target.ToString() ?? "";
+            string targetName = target?.gameObject?.gameObject?.name ?? "";
+            // Attempt to find the name of the GameObject being targetted.
             if (targetName.Trim() == "")
             {
-                GameObject targetObj = target.gameObject.gameObject.value;
+                GameObject targetObj = target?.gameObject?.gameObject?.value;
                 if (targetObj != null && ! isDelayed)
                 {
                     targetName = targetObj.name;
+                }
+                else if (isDelayed) {
+                    targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.name ?? "";
+                    if (targetName.Trim() == "") {
+                        targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.value?.name ?? "";
+                    }
                 }
             }
             if (targetName == "Trunk Counter" && eventName == "Update Subtract") {
@@ -159,7 +166,7 @@ namespace BluePrinceArchipelago
                 {
                     // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
                     if (item.IsUnlocked) {
-                        // Re-enable the logic that adds the item to inventory. (will not cause issues if already enabled).
+                        // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
                         FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
                         if (state != null)
                         {
@@ -169,7 +176,9 @@ namespace BluePrinceArchipelago
                     item.HasBeenFound = true;
                 }
             }
-            Logging.Log($"Sending {eventName} to {targetType}: {targetName}");
+
+            string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
+            Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}");
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
 
@@ -208,19 +217,25 @@ namespace BluePrinceArchipelago
                 Logging.Log($"Transform: {transformObj.name} - {transformObj.transform.position.ToString()}");
             }
         }
-        // handles Day start code. Currently unsure if this is good timing for things.
+        // Handles Day start events.
         public static void OnDayStart(int dayNum) {
             IsInRun = true;
-            // Attempt to recieve items that were recieved before the game was loaded.
-            Instance.QueueManager.ReleaseAllQueuedItems();
-            // Handle Start of day code for Permanent items (and maybe curses later).
+            // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
-            Plugin.ModItemManager.StartOfDay(dayNum);
+            if (ArchipelagoClient.Authenticated)
+            {
+                // Attempt to recieve items that were recieved before the game was loaded.
+                Instance.QueueManager.ReleaseAllQueuedItems();
+                
+                // Handle Start of day code for Permanent items (and maybe curses later).
+                Plugin.ModItemManager.StartOfDay(dayNum);
+                Plugin.UniqueItemManager.StartOfDay();
+            }
         }
-        // handles end of day code, Currently unsure if this is good timing.
+        // Handles End of Day code, Currently unsure if this is good timing.
         public static void OnDayEnd() {
             IsInRun = false;
-            Plugin.UniqueItemManager.OnDayEnd();
+            Plugin.UniqueItemManager.EndOfDay();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
         {
@@ -330,6 +345,8 @@ namespace BluePrinceArchipelago
             }
             
         }
+
+        //This additionally prevents the Day 1 Draft 1 forced draft.
         private void AddRoomForcer(PlayMakerFSM fsm)
         {
             FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", false);

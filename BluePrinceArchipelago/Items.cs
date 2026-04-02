@@ -19,8 +19,6 @@ namespace BluePrinceArchipelago.Core
         public static PlayMakerArrayListProxy CoatCheck = new();
         public static PlayMakerArrayListProxy UsedItems = new();
         public static List<Trap> TrapList = new();
-        
-
         public ModItemManager()
         {
         }

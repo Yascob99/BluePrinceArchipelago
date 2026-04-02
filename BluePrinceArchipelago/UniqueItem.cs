@@ -323,11 +323,11 @@ namespace BluePrinceArchipelago.Core
             }
         }
 
-        public void OnDayEnd() {
+        public void EndOfDay() {
             SpawnedItems = new List<UniqueItem>();
         }
-        public void OnDayStart() { 
-
+        public void StartOfDay() {
+            RemoveItemsFromPool();
         }
 
         private void RemoveItemsFromPool() {
