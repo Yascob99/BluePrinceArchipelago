@@ -324,6 +324,7 @@ namespace BluePrinceArchipelago.Core
         }
 
         public void EndOfDay() {
+            //Reset the list of spawned items.
             SpawnedItems = new List<UniqueItem>();
         }
         public void StartOfDay() {
