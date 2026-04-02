@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Utils;
 using Rewired.Integration.PlayMaker;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
 
@@ -174,6 +175,18 @@ namespace BluePrinceArchipelago.Core
 
             }
         }
+        public void OnTrapReceived(ItemInfo itemInfo) {
+            // Get the first matching item.
+            Trap trap = TrapList.FirstOrDefault(trap => trap.Name.ToLower() == itemInfo.ItemName.ToLower());
+            if (trap != null)
+            {
+                trap.ActivateTrap();
+            }
+            else {
+                Logging.LogError($"Error receiving {itemInfo.ItemName}: No Trap with that name could be found.");
+            }
+        }
+        
 
         public void OnItemCheckRecieved(ItemInfo itemInfo) {
             // Handle the code for recieving an item check that results in receiving an item.
@@ -202,7 +215,10 @@ namespace BluePrinceArchipelago.Core
                 }
                 genItem = true;
             }
-            if (itemType == "Permanent")
+            if (itemType == "Trap") {
+                OnTrapReceived(itemInfo);
+            }
+            else if (itemType == "Permanent")
             {
                 PermanentItem pItem;
                 if (genItem)
@@ -306,7 +322,7 @@ namespace BluePrinceArchipelago.Core
 
                             //}
                         }
-                        else if (item.ItemName.Contains("Trap"))
+                        else if (item.ItemName.Contains("Trap "))
                         {
                             if (itemNameParts.Length == 3)
                             {
@@ -322,11 +338,11 @@ namespace BluePrinceArchipelago.Core
                                     return ["Trap", "Freeze", "-1"];
                                 }
 
-                                return ["Junk", itemNameParts[1], "-1"];
+                                return ["Trap", itemNameParts[1], "-1"];
                             }
                             else if (itemNameParts.Length == 4)
                             {
-                                return ["Junk", itemNameParts[2], "-" + itemNameParts[3], itemNameParts[1]];
+                                return ["Trap", itemNameParts[2], "-" + itemNameParts[3], itemNameParts[1]];
                             }
                         }
 
@@ -738,8 +754,6 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 233", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 233"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 304", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 304"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 370", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 370"), false));
-            //TODO once the replacement item code is working.
-            //Generic Items
 
             //Permanent Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 1", null, false, "Allowance", 1));
@@ -761,6 +775,7 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 1", null, false, "Stars", 1));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 2", null, false, "Stars", 2));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Stars 5", null, false, "Stars", 5));
+            
             //Junk Items
             Plugin.ModItemManager.AddItem(new JunkItem("Dug Up Nothing", null, true, "Nothing",1));
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Gold 1", null, true, "Gold", 1));
@@ -778,7 +793,6 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Steps 2", null, true, "Steps", 2));
             
             //Traps
-
             Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 1","Steps", -1));
             Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 2", "Steps", -2));
             Plugin.ModItemManager.AddTrap(new LoseTrap("Trap Take Steps 5", "Steps", -5));
@@ -789,6 +803,7 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddTrap(new FreezeTrap("Trap Freeze Items", "Freeze"));
             Plugin.ModItemManager.AddTrap(new LoseItemTrap("Trap Lose Item", "Lose Item"));
 
+            //TODO Add PermanentUnlocks (Eg. Orchard)
         }
     }
 }

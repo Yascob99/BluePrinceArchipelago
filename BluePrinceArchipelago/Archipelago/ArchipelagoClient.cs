@@ -498,6 +498,13 @@ public class ArchipelagoQueueManager {
                 State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
                 return true;
             }
+            if (item.Flags.HasFlag(ItemFlags.Trap))
+            {
+                Plugin.ModItemManager.OnTrapReceived(item);
+                ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
+                State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
+                return true;
+            }
             // if not handle it as an Item.
             Plugin.ModItemManager.OnItemCheckRecieved(item);
             //This may need to be moved to a better place once the item code is better implemented.
