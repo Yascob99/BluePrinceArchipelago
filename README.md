@@ -69,7 +69,8 @@ This is an in development Archipelago mod for the 2025 roguelite puzzle game Blu
 
 Special Thanks to: 
 - ChaseoQueso for the item code and archipelago version of items
-- deefdragon and BatemenzDW for their work on the APword.
+- Mac for helping out on the mod and APworld
+- deefdragon and BatemenzDW for their work on the APworld.
 - The Silksong/HK community for a lot of great tools which made modding so much easier.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
