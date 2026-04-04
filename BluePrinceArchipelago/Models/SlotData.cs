@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Models
 {
@@ -16,9 +17,6 @@ namespace BluePrinceArchipelago.Models
         [JsonProperty("locked_trunks_complex")]
         public int LockedTrunksComplex { get; set; }
 
-        [JsonProperty("item_logic_mode")]
-        public ItemLogicMode ItemLogicMode { get; set; }
-
         [JsonProperty("standard_item_sanity")]
         public bool StandardItemSanity { get; set; }
 
@@ -30,6 +28,13 @@ namespace BluePrinceArchipelago.Models
 
         [JsonProperty("key_sanity")]
         public bool KeySanity { get; set; }
+
+        [JsonProperty("special_shop_sanity")]
+        public bool SpecialShopSanity { get; set; }
+
+        //TODO remove this once the APworld is no longer sending it.
+        [JsonProperty("item_logic_mode")]
+        public ItemLogicMode ItemLogicMode { get; set; }
 
         [JsonProperty("death_link_type")]
         public DeathLinkType DeathLinkType { get; set; }
@@ -45,5 +50,8 @@ namespace BluePrinceArchipelago.Models
 
         [JsonProperty("goal_sanctum_solves")]
         public int GoalSanctumSolves { get; set; }
+
+        [JsonProperty("start_inventory")]
+        public Dictionary<string, int> StartInventory { get; set; }
     }
 }

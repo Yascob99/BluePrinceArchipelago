@@ -7,6 +7,7 @@ using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Rewired.Integration.PlayMaker;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,6 +45,8 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM GlobalManager = new();
         public static PlayMakerFSM TheGrid = new();
         public static PlayMakerFSM MasterPicker = new();
+        public static PlayMakerFSM CommissaryMenu = new();
+        public static PlayMakerFSM TradingPostSelection = new();
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -114,6 +117,7 @@ namespace BluePrinceArchipelago
                 GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
                 TheGrid = GameObject.Find("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
                 MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
+                CommissaryMenu = GameObject.Find("UI OVERLAY CAM/Commissary Menu/")?.GetComponent<PlayMakerFSM>();
                 DraftValidationAction = MasterPicker.GetState("3").GetFirstActionOfType<CallMethod>();
                 AddRoomForcer(MasterPicker);
                 LoadArrays();
@@ -125,6 +129,9 @@ namespace BluePrinceArchipelago
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
+                if (ArchipelagoClient.Authenticated) {
+                    Plugin.UniqueItemManager.ReplaceCommissaryItemsWithAP();
+                }
             }
             else {
                 // hackish, but based on my knowledge only one scene is loaded at a time.

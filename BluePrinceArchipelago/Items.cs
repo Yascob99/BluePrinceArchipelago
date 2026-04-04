@@ -315,22 +315,6 @@ namespace BluePrinceArchipelago.Core
             set { _IsUnique = value; }
         }
 
-        private bool _HasBeenFound = false;
-
-        public bool HasBeenFound {
-            get { return _HasBeenFound; }
-            set
-            {
-                // Send the item found event on the first time it is found.
-                if (!_HasBeenFound && value)
-                {
-                    ModInstance.ModEventHandler.OnFirstFound(this);
-                    _HasBeenFound = value;
-                }
-                // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
-            }
-        }
-
         public virtual void AddItemToInventory() {
             // Put out an error if this method was not properly overriden. There should be no base moditems.
             Logging.LogError("Error: The Base Moditem.AddItemToInventory method should be overriden.");

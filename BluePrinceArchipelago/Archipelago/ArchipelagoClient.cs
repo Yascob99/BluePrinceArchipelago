@@ -438,7 +438,7 @@ public class ArchipelagoClient
             State.UpdateLocations(ServerData.CheckedLocations);
         }
         else {
-            Logging.Log($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent.");
+            Logging.Log($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent or is not being used for this seed.");
         }
     }
     // Sends the goal completed notification to the server.

@@ -121,7 +121,9 @@ namespace BluePrinceArchipelago.Core
 
         public void RemoveRoom(ModRoom room)
         {
-            room.RoomPoolCount -= 1;
+            if (room.RoomPoolCount > 0) {
+                room.RoomPoolCount -= 1;
+            }
             room.IsUnlocked = false;
         }
         // Updates the count of how many of each room is in the house.

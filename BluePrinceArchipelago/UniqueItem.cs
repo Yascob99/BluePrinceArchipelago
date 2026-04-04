@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using static Rewired.UI.ControlMapper.ControlMapper;
 
 
 namespace BluePrinceArchipelago.Core
@@ -26,6 +27,23 @@ namespace BluePrinceArchipelago.Core
         private bool _IsPrespawn = isPreSpawn;
 
         public bool IsPrespawn { get; set; }
+
+        private bool _HasBeenFound = false;
+
+        public bool HasBeenFound
+        {
+            get { return _HasBeenFound; }
+            set
+            {
+                // Send the item found event on the first time it is found.
+                if (!_HasBeenFound && value)
+                {
+                    ModInstance.ModEventHandler.OnFirstFound(this);
+                    _HasBeenFound = value;
+                }
+                // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
+            }
+        }
 
         public void RemoveFromPool() {
             //If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
@@ -84,6 +102,17 @@ namespace BluePrinceArchipelago.Core
     {
         public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
+        public Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
+            {"MAGNIFYING GLASS", "Mag Glass" },
+            {"SHOVEL", "Shovel Purchase"},
+            {"SALT SHAKER", "Salt Shaker Purchase"},
+            {"COMPASS", "Compass Purchase"},
+            {"SLEDGE HAMMER", "Sledge Hammer Purchase"},
+            {"SLEEPING MASK", "Sleep Mask Purchase"},
+            {"RUNNING SHOES", "Running Shoes Purchase"},
+            {"METAL DETECTOR", "MEtal Detector Purchase"}
+         };
+
         public void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj)
         {
             UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
@@ -112,23 +141,31 @@ namespace BluePrinceArchipelago.Core
                 }
             }
         }
-        private void ReplaceWithAPItem(GameObject obj, GameObject transformObj, GameObject spawnedObj, UniqueItem item) {
-            GameObject prefab = null;
-            //If we currently have a prefab for this item, instantiate and replace the spawned model with our object. 
-            if (Plugin.AssetBundle.Contains(obj.name)){
-                prefab = Plugin.AssetBundle.LoadAsset(obj.name).TryCast<GameObject>();
-                if (prefab != null)
+        public void ReplaceCommissaryItemsWithAP() {
+            foreach (var item in ComissaryStates)
+            {
+                UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item.Key);
+                if (!uniqueItem.HasBeenFound)
                 {
-                    // Instantiate our prefab and reparent the original object to ours
-                    GameObject apObject = GameObject.Instantiate(prefab, transformObj.transform.position, transformObj.transform.rotation);
-                    spawnedObj.transform.parent = apObject.transform;
-                    spawnedObj.GetComponentInChildren<Collider>().enabled = false;
+                    ReplaceComissaryItemWithAP(uniqueItem, item.Value);
+                }
+                else if (uniqueItem.IsUnlocked)
+                {
+                    EnableCommissaryPurchase(uniqueItem, item.Value);
                 }
             }
+        }
+        private void ReplaceComissaryItemWithAP(UniqueItem item, string stateName) {
+            FsmState state = ReplaceCommissaryPurchase(item, stateName);
+            if (state != null)
+            {
+                ReplaceYouFoundText(state, item);
+            }
+        }
 
-            // Disable the Global Manager FSM states to not give this item in inventory
-            
-            FsmState state = GetPickupState(obj.name);
+        //Finds the associated Pickup State and replaces the item.
+        private FsmState ReplacePickup(UniqueItem item) {
+            FsmState state = GetPickupState(item.Name);
             if (state != null)
             {
                 //If the item is not unlocked, prevent it from being added to inventory.
@@ -137,21 +174,61 @@ namespace BluePrinceArchipelago.Core
                     //Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
                 }
-                SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(obj.name));
+                SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
+                return state;
             }
-            else
+            // If the item pickup state was not found output an error.
+            Logging.LogError($"No FSM state {item.Name.Trim().ToTitleCase() + " Pickup"} found for: {item.Name}");
+            return null;
+        }
+
+        private FsmState ReplaceCommissaryPurchase(UniqueItem item, string stateName) { 
+            FsmState state = ModInstance.CommissaryMenu.GetState(stateName);
+            if (state != null)
             {
-                // If the item pickup state was not found output an error.
-                Logging.LogError($"No FSM state {obj.name.Trim().ToTitleCase() + " Pickup"} found for: {obj.name}");
+                //If the item is not unlocked, prevent it from being added to inventory.
+                if (!item.IsUnlocked)
+                {
+                    //Disable the actions that add the item to inventory.
+                    state.DisableActionsOfType<ArrayListAdd>();
+                }
+                SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
+                return state;
+            }
+            // If the item pickup state was not found output an error.
+            Logging.LogError($"No FSM state {stateName} found for: {item.Name}");
+            return null;
+        }
+        public void EnableCommissaryPurchase(UniqueItem item, string stateName) {
+            FsmState state = ModInstance.CommissaryMenu.GetState(stateName);
+            if (state != null)
+            {
+                //If the item is not unlocked, prevent it from being added to inventory.
+                if (!item.IsUnlocked)
+                {
+                    //Disable the actions that add the item to inventory.
+                    state.EnableActionsOfType<ArrayListAdd>();
+                }
+                SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
                 return;
+            }
+        }
+
+        private void ReplaceYouFoundText(FsmState state, UniqueItem item, GameObject prefab = null) {
+            if (prefab == null)
+            {
+                if (Plugin.AssetBundle.Contains(item.Name))
+                {
+                    prefab = Plugin.AssetBundle.LoadAsset(item.Name).TryCast<GameObject>();
+                }
             }
             Transform youFoundParent = GetYouFoundParent(state);
             // Make the necessary changes to the "You Found" UI
             if (youFoundParent != null)
             {
                 // Add the AP Swirlie to the item that appears on the "You Found" UI
-                    //Find the model in the You Found UI (location differs item to item).
-                Transform youFoundModel = youFoundParent.FindRecursive(obj.name);
+                //Find the model in the You Found UI (location differs item to item).
+                Transform youFoundModel = youFoundParent.FindRecursive(item.Name);
                 if (youFoundModel != null)
                 {
                     //If the custom model exists
@@ -159,16 +236,15 @@ namespace BluePrinceArchipelago.Core
                     {
                         // Insantiate the AP item in the you found model's location.
                         GameObject.Instantiate(prefab, youFoundModel.transform.position, youFoundModel.transform.rotation, youFoundModel);
-                        // Unsure if this will cause an issue, but the original model is not destroyed and this one isn't destroyed.
                     }
                 }
                 else
                 {
-                    Logging.LogError("No 'You Found' object model found for: " + obj.name);
+                    Logging.LogError("No 'You Found' object model found for: " + item.Name);
                 }
 
                 // Add special text for what you found
-                    // Find the transform of the text.
+                // Find the transform of the text.
                 Transform textGameObject = youFoundParent.Find("Text/GameObject");
                 if (textGameObject != null)
                 {
@@ -177,12 +253,16 @@ namespace BluePrinceArchipelago.Core
                     GameObject textObject = GameObject.Instantiate(textPrefab, textGameObject.position, textGameObject.rotation, textGameObject.parent);
 
                     // Get the location ID of our it's first pickup.
-                    long locationid = Plugin.ArchipelagoClient.GetLocationFromName(obj.name + " First Pickup");
+                    long locationid = Plugin.ArchipelagoClient.GetLocationFromName(item.Name + " First Pickup");
                     // Find the the details of the item that will be sent on pickup.
-                    ScoutedItemInfo scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
+                    ScoutedItemInfo scout = null;
+                    if (locationid != -1)
+                    {
+                        scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
+                    }
                     // Get the variables for creating our custom pickup message.
-                    string playerName = scout.Player.Name;
-                    string itemName = scout.ItemName;
+                    string playerName = scout?.Player?.Name ?? "";
+                    string itemName = scout?.ItemName ?? "";
                     //TODO add logic for the descriptions to be different based on item importance.
                     string description = "Hope it un-BK's them!";
 
@@ -315,12 +395,35 @@ namespace BluePrinceArchipelago.Core
                 }
                 else
                 {
-                    Logging.LogError("No 'You Found' text found for: " + obj.name);
+                    Logging.LogError("No 'You Found' text found for: " + item.Name);
                 }
             }
             else
             {
-                Logging.LogError("No 'You Found' parent found for: " + obj.name);
+                Logging.LogError("No 'You Found' parent found for: " + item.Name);
+            }
+        }
+
+
+        private void ReplaceWithAPItem(GameObject obj, GameObject transformObj, GameObject spawnedObj, UniqueItem item) {
+            GameObject prefab = null;
+            //If we currently have a prefab for this item, instantiate and replace the spawned model with our object. 
+            if (Plugin.AssetBundle.Contains(obj.name)){
+                prefab = Plugin.AssetBundle.LoadAsset(obj.name).TryCast<GameObject>();
+                if (prefab != null)
+                {
+                    // Instantiate our prefab and reparent the original object to ours
+                    GameObject apObject = GameObject.Instantiate(prefab, transformObj.transform.position, transformObj.transform.rotation);
+                    spawnedObj.transform.parent = apObject.transform;
+                    spawnedObj.GetComponentInChildren<Collider>().enabled = false;
+                }
+            }
+
+            // Disable the Global Manager FSM states to not give this item in inventory
+            FsmState state = ReplacePickup(item);
+            if (state != null)
+            {
+                ReplaceYouFoundText(state, item, prefab);
             }
         }
 
