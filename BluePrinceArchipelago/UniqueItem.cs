@@ -8,6 +8,7 @@ using HutongGames.PlayMaker.Actions;
 using LibCpp2IL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using static Rewired.UI.ControlMapper.ControlMapper;
@@ -72,9 +73,11 @@ namespace BluePrinceArchipelago.Core
                     GameObj = Plugin.ModItemManager.GetPreSpawnItem(Name);
                 }
             }
-            if (Plugin.UniqueItemManager.SpawnedItems.Contains(this)) {
+            if (Plugin.UniqueItemManager.SpawnedItems.Contains(this))
+            {
                 isSpawned = true;
             }
+
             // If the item is spawned or is not in the prespawn list.
             if (Plugin.ModItemManager.IsItemSpawnable(GameObj, isSpawned ? false : IsPrespawn)) {
                 string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name.ToLower()) + " Icon(Clone)001";
@@ -90,7 +93,11 @@ namespace BluePrinceArchipelago.Core
                     if (state != null)
                     {
                         state.EnableActionsOfType<ArrayListAdd>();
-                    }
+                        if (Plugin.UniqueItemManager.ComissaryStates.Keys.Contains(Name))
+                        {
+                            //Re-enable commisary purchases of the item.
+                            UniqueItemManager.EnableCommissaryPurchase(this, Plugin.UniqueItemManager.ComissaryStates[Name]);
+                        }
                     ModItemManager.PickedUp.Add(GameObj, "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
                     ArchipelagoConsole.LogMessage($"Added {Name} to inventory.");    
@@ -104,6 +111,7 @@ namespace BluePrinceArchipelago.Core
     {
         public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
+        // A Map of item names to the states in the Comissary.
         public Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
             {"MAGNIFYING GLASS", "Mag Glass" },
             {"SHOVEL", "Shovel Purchase"},
@@ -149,7 +157,9 @@ namespace BluePrinceArchipelago.Core
                 UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item.Key);
                 if (!uniqueItem.HasBeenFound)
                 {
-                    ReplaceComissaryItemWithAP(uniqueItem, item.Value);
+                    ReplaceCommissaryPurchase(uniqueItem, item.Value);
+                    //This likely will not work cleanly without a massive rewrite. I plan on just stopping the "you found message."
+                    //ReplaceComissaryItemWithAP(uniqueItem, item.Value);
                 }
                 else if (uniqueItem.IsUnlocked)
                 {
@@ -193,6 +203,8 @@ namespace BluePrinceArchipelago.Core
                 {
                     //Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
+                    //Disables the You found Text (for now).
+                    state.DisableFirstActionOfType<ActivateGameObject>();
                 }
                 SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
                 return state;
@@ -210,6 +222,8 @@ namespace BluePrinceArchipelago.Core
                 {
                     //Disable the actions that add the item to inventory.
                     state.EnableActionsOfType<ArrayListAdd>();
+                    //Disables the You found Text (for now).
+                    state.DisableFirstActionOfType<ActivateGameObject>();
                 }
                 SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
                 return;
@@ -435,6 +449,7 @@ namespace BluePrinceArchipelago.Core
         }
         public void StartOfDay() {
             RemoveItemsFromPool();
+            ReplaceCommissaryItemsWithAP();
         }
 
         private void RemoveItemsFromPool() {
