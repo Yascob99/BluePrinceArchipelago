@@ -4,6 +4,7 @@ using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Utils.Actions;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,6 +34,7 @@ namespace BluePrinceArchipelago
         public static GameObject PlanPicker = new();
         public static GameObject Inventory = new();
         public static GameObject RoomsInHouse = new();
+        public static GameObject StatsLogger = new();
 
         // FSMs
         public static PlayMakerFSM GemManager = new();
@@ -47,6 +50,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM MasterPicker = new();
         public static PlayMakerFSM CommissaryMenu = new();
         public static PlayMakerFSM TradingPostSelection = new();
+        public static PlayMakerFSM EndGameClicker = new();
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -105,6 +109,7 @@ namespace BluePrinceArchipelago
                 PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
                 Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
                 RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
+                StatsLogger = GameObject.Find("StatsLogger").gameObject;
                 GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
                 StepManager = GameObject.Find("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
                 GoldManager = GameObject.Find("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");
@@ -118,6 +123,7 @@ namespace BluePrinceArchipelago
                 TheGrid = GameObject.Find("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
                 MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
                 CommissaryMenu = GameObject.Find("UI OVERLAY CAM/Commissary Menu/")?.GetComponent<PlayMakerFSM>();
+                EndGameClicker = GameObject.Find("ROOMS/Antechamber/NON STATIC/DOOR 46/grey door/End Game Clicker")?.GetComponent<PlayMakerFSM>();//TODO get the full proper path name for this GameObject.
                 DraftValidationAction = MasterPicker.GetState("3").GetFirstActionOfType<CallMethod>();
                 AddRoomForcer(MasterPicker);
                 LoadArrays();
@@ -130,7 +136,6 @@ namespace BluePrinceArchipelago
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
-
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
                 if (ArchipelagoClient.Authenticated)
@@ -198,7 +203,7 @@ namespace BluePrinceArchipelago
             }
 
             string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
-            Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}");
+            //Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}");
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
 
@@ -514,8 +519,15 @@ namespace BluePrinceArchipelago
             
         }
 
-        public static void OnGoalComplete() {
-            Plugin.ArchipelagoClient.GoalCompleted();
+        public static void OnRecordEvent(EventID id)
+        {
+            Logging.Log($"Stats being recorded for {id.ToString()}.");
+            if (ArchipelagoClient.Authenticated && id == EventID.Room_46_reached)
+            {
+                if (ArchipelagoOptions.GoalType == GoalType.option_room46) {
+                    Plugin.ArchipelagoClient.GoalCompleted();
+                }
+            }
         }
 
         //TODO update this to be less hacky.
@@ -620,7 +632,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("GUEST BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("GYMNASIUM", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("HALLWAY", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CENTER - Tier 1"], true);
-                Plugin.ModRoomManager.AddRoom("HER LADYSHIPS CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
+                Plugin.ModRoomManager.AddRoom("HER LADYSHIP'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
                 Plugin.ModRoomManager.AddRoom("HOVEL", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
                 Plugin.ModRoomManager.AddRoom("KITCHEN", ["FRONT - Tier 1 G", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
                 Plugin.ModRoomManager.AddRoom("LABORATORY", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);

@@ -20,8 +20,10 @@ namespace BluePrinceArchipelago
                 string poolName = __instance.poolName?.value;
                 GameObject transformObj = __instance.spawnTransform?.value;
                 GameObject spawnedObj = __instance.spawnedGameObject?.value;
-                if (poolName == "Pickup")
+                // Unsure why this results in a null object in some instances.
+                if (poolName == "Pickup" && obj != null)
                 {
+                    
                     Plugin.UniqueItemManager.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }
@@ -88,6 +90,13 @@ namespace BluePrinceArchipelago
         static void PostFix(int dayNum) { 
             ModInstance.OnDayStart(dayNum);
         }
+        [HarmonyPatch(typeof(StatsLogger), "Record_Event", [typeof(EventID), typeof(EventFilter)])]
+        [HarmonyPostfix]
+        static void RecordEventPostFix(EventID id)
+        {
+            ModInstance.OnRecordEvent(id);
+        }
+
 
         [HarmonyPatch(typeof(StatsLogger), "EndDayGUI")]
         [HarmonyPostfix]

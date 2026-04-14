@@ -318,12 +318,11 @@ namespace BluePrinceArchipelago.Utils
 
         public static void AddFirstAction(this FsmState state, FsmStateAction action)
         {
-            FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
-            actions[0] = action;
-            state.Actions.CopyTo(actions, 1);
-            state.Actions = actions;
-            state.actions.CopyTo(actions, 1);
-            state.actions = actions;
+            FsmStateAction[] Actions = new FsmStateAction[state.Actions.Length + 1];
+            Actions[0] = action;
+            state.Actions.CopyTo(Actions, 1);
+            state.Actions = Actions;
+            state.actions = Actions;
             action.Init(state);
         }
 
@@ -333,7 +332,6 @@ namespace BluePrinceArchipelago.Utils
             actions[state.Actions.Length] = action;
             state.Actions.CopyTo(actions, 0);
             state.Actions = actions;
-            state.actions.CopyTo(actions, 0);
             state.actions = actions;
             action.Init(state);
         }
@@ -341,7 +339,6 @@ namespace BluePrinceArchipelago.Utils
         public static void InsertAction(this FsmState state, FsmStateAction action, int index)
         {
             FsmStateAction[] actions = new FsmStateAction[state.Actions.Length + 1];
-            FsmStateAction[] Actions = new FsmStateAction[state.actions.Length + 1];
             for (int i = 0; i < state.Actions.Length; i++)
             {
                 if (i < index) actions[i] = state.Actions[i];

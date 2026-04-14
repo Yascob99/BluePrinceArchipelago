@@ -584,7 +584,7 @@ namespace BluePrinceArchipelago.Core
             }
         }
     }
-    public class ProgressiveItems(string name, GameObject gameObject, bool isUnlocked, int count = 0, List<string> locations = null, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
+    public class ProgressiveItems(string name, GameObject gameObject, bool isUnlocked, int count = 0, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
     {
         private int _Count = count;
         public new int Count
@@ -598,7 +598,7 @@ namespace BluePrinceArchipelago.Core
         //If it's in the prespawn list
         public bool IsPreSpawn = isPreSpawn;
         // The names of the locations where it is found.
-        public List<string> Locations = locations ?? new List<string>();
+        public List<string> Locations = new List<string>();
         // The locations at which it has been found.
         public List<string> FoundLocations = new List<string>();
         // The locations to which the upgrade disk received has been found at.
@@ -610,19 +610,32 @@ namespace BluePrinceArchipelago.Core
                 return Locations.Count - FoundLocations.Count;
             }
         }
-
-        public override void AddItemToInventory()
-        {
-           //TODO
-        }
     }
     // Controls the upgrade disks. Disks should persist accross days.
-    public class UpgradeDisks(string name, GameObject gameObject, int count = 0, List<string> locations = null) : ProgressiveItems(name, gameObject, false, 1, locations, true) { 
+    public class UpgradeDisks(GameObject gameObject) : ProgressiveItems("UPGRADE DISK", gameObject, false, 16, true)
+    {
+        public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
 
+        public void OnFind(string location)
+        {
+            if (! FoundLocations.Contains(location.ToUpper())) { 
+                FoundLocations.Add(location.ToUpper());
+                if (RecievedLocations.Contains(location.ToUpper())) { 
+
+                }
+            }
+        }
+
+        public void AddItemToInventory(string location)
+        {
+            if (!RecievedLocations.Contains(location.ToUpper())) { 
+                RecievedLocations.Add(location.ToUpper());
+            }
+        }
     }
 
     //TODO Later for a later goal. The locations they are found at is different from where they can be used. Should not persist across days
-    public class SanctumKeys(string name, GameObject gameObject, int count = 0, List<string> locations = null) : ProgressiveItems(name, gameObject, false, 1, locations, true){ 
+    public class SanctumKeys(string name, GameObject gameObject, int count = 0) : ProgressiveItems(name, gameObject, false, 1, true){ 
     
     }
 
@@ -675,10 +688,7 @@ namespace BluePrinceArchipelago.Core
             Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetPreSpawnItem("PAPER CROWN"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetPreSpawnItem("GEAR WRENCH"), false));
             Plugin.ModItemManager.AddItem(new UniqueItem("COMPASS", Plugin.ModItemManager.GetPreSpawnItem("COMPASS"), false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 149", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 149"), false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 233", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 233"), false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 304", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 304"), false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SAFTEY DEPOSIT KEY 370", Plugin.ModItemManager.GetPreSpawnItem("SAFTEY DEPOSIT KEY 370"), false));
+
 
             //Permanent Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Allowance 1", null, false, "Allowance", 1));

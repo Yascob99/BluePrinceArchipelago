@@ -76,6 +76,7 @@
       </Reference>
       <Reference Include="Il2CppSystem.Core">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="PlayMaker">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\PlayMaker.dll</HintPath>
@@ -83,6 +84,7 @@
       </Reference>
       <Reference Include="Unity.TextMeshPro">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="UnityEngine">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.dll</HintPath>

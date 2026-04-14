@@ -87,6 +87,18 @@ namespace BluePrinceArchipelago.Core
             {
                 string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name.ToLower()) + " Icon(Clone)001";
                 GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                // Some icons are spelled with icon as lower case
+                if (icon == null)
+                {
+                    iconName = iconName.ToTitleCase() + " icon(Clone)001";
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                }
+                // Some icons are spelled without the word icon.
+                if (icon == null)
+                {
+                    iconName = iconName.ToTitleCase() + " (Clone)001";
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                }
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                 if (icon != null && InventoryIcons != null)
                 {
@@ -518,11 +530,13 @@ namespace BluePrinceArchipelago.Core
             // Finds the state in the Global Manager associated with the given item's pickup. Returns null if not found.
             public FsmState GetPickupState(string name)
             {
-                //Check each Global Transition in the Global Manager.
+                // Fixes a name difference for the vault keys and puts name into lower case.
+                name = name.ToLower().Replace("vault", "safety deposit");
+                // Check each Global Transition in the Global Manager.
                 foreach (FsmTransition transition in ModInstance.GlobalManager.FsmGlobalTransitions)
                 {
                     // If the transition's event name contains the item name it's the transition we want.
-                    if (transition.EventName.ToLower().Contains(name.ToLower()))
+                    if (transition.EventName.ToLower().Contains(name))
                     {
                         //Return the state the transition found goes to.
                         return transition.ToFsmState;

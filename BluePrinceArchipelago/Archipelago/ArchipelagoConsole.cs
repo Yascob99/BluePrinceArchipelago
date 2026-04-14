@@ -669,8 +669,17 @@ public class ItemCommand(string name) : Command(name) {
                 // Check PreSpawn EstateItems, PickedUp, CoatCheck, UsedItems
                 if (Plugin.ModItemManager.IsItemSpawnable(item)) {
                     
-                    string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName.ToLower()) + " Icon(Clone)001";
+                    string iconName = itemName.ToTitleCase() + " Icon(Clone)001";
                     GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    // Some icons use 
+                    if (icon == null) {
+                        iconName = itemName.ToTitleCase() + " icon(Clone)001";
+                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    }
+                    if (icon == null) {
+                        iconName = itemName.ToTitleCase();
+                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    }
                     PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                     if (icon != null && InventoryIcons != null)
                     {
