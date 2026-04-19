@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Utils;
+using Il2CppSystem.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -60,15 +61,43 @@ namespace BluePrinceArchipelago.Core
             }
         }
 
-        public string ListItems()
+        public string ListItems(string listType)
         {
-            string output = "";
-            foreach (var pickedupItem in PreSpawn.arrayList)
+            if (listType == null)
+                return "";
+            ArrayList itemList;
+            if (listType.ToLower() == "prespawn")
             {
-                GameObject itemAsGO = pickedupItem.TryCast<Gameobject>();
+                itemList = PreSpawn.arrayList;
+            }
+            else if (listType.ToLower() == "estateitems")
+            {
+                itemList = EstateItems.arrayList;
+            }
+            else if (listType.ToLower() == "pickedup")
+            {
+                itemList = PickedUp.arrayList;
+            }
+            else if (listType.ToLower() == "coatcheck")
+            {
+                itemList = CoatCheck.arrayList;
+            }
+            else if (listType.ToLower() == "useditems")
+            {
+                itemList = UsedItems.arrayList;
+
+            }
+            else
+            {
+                return "";
+            }
+            string output = "";
+            foreach (var pickedupItem in itemList)
+            {
+                GameObject itemAsGO = pickedupItem.TryCast<GameObject>();
                 if (pickedupItem != null)
                 {
-                    output += pickedupItem.name;
+                    output += itemAsGO.name;
                     output += "\n";
                 }
             }
@@ -620,9 +649,9 @@ namespace BluePrinceArchipelago.Core
         public List<string> FoundLocations = new List<string>();
         // The locations to which the upgrade disk received has been found at.
         public List<string> RecievedLocations = new List<string>();
-        public int totalFound 
-        { 
-            get 
+        public int totalFound
+        {
+            get
             {
                 return Locations.Count - FoundLocations.Count;
             }
@@ -635,9 +664,11 @@ namespace BluePrinceArchipelago.Core
 
         public void OnFind(string location)
         {
-            if (! FoundLocations.Contains(location.ToUpper())) { 
+            if (!FoundLocations.Contains(location.ToUpper()))
+            {
                 FoundLocations.Add(location.ToUpper());
-                if (RecievedLocations.Contains(location.ToUpper())) { 
+                if (RecievedLocations.Contains(location.ToUpper()))
+                {
 
                 }
             }
@@ -645,15 +676,17 @@ namespace BluePrinceArchipelago.Core
 
         public void AddItemToInventory(string location)
         {
-            if (!RecievedLocations.Contains(location.ToUpper())) { 
+            if (!RecievedLocations.Contains(location.ToUpper()))
+            {
                 RecievedLocations.Add(location.ToUpper());
             }
         }
     }
 
     //TODO Later for a later goal. The locations they are found at is different from where they can be used. Should not persist across days
-    public class SanctumKeys(string name, GameObject gameObject, int count = 0) : ProgressiveItems(name, gameObject, false, 1, true){ 
-    
+    public class SanctumKeys(string name, GameObject gameObject, int count = 0) : ProgressiveItems(name, gameObject, false, 1, true)
+    {
+
     }
 
     public static class RegisterItems
