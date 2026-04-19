@@ -674,6 +674,7 @@ public class ItemCommand(string name) : Command(name)
             if (subcommand.ToLower() == "list")
             {
                 ArchipelagoConsole.LogMessage($"Item List\n{Plugin.ModItemManager.ListItems(Args[1])}");
+                return;
             }
             else if (subcommand.ToLower() == "add")
             {
