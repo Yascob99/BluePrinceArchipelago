@@ -1,0 +1,115 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>BluePrinceArchipelago</AssemblyName>
+        <Description>Blue Prince Archipelago</Description>
+        <Version>0.1.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <!-- you may need this for getting the multiclient dll to output for .net 6 and netstandard 2.0 -->
+        <!--        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <RootNamespace>BluePrinceArchipelago</RootNamespace>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>True</Optimize>
+        <OutputPath>$(BluePrinceDir)\BepInEx\plugins\$(AssemblyName)</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <IsPublishable>False</IsPublishable>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>none</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\$(AssemblyName)</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <IsPublishable>False</IsPublishable>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<_Assets Include="$(MSBuildProjectDirectory)\assets\*.*" />
+		<_Libs Include="$(MSBuildProjectDirectory)\libs\*.*" />
+	</ItemGroup>
+
+    <Target Name="ZipMod" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<Copy SourceFiles="@(Assets)" DestinationFolder="bin\Release\$(AssemblyName)\assets" />
+		<Copy SourceFiles="@(Libs)" DestinationFolder="bin\Release\$(AssemblyName)" />
+        <ZipDirectory SourceDirectory="bin\Release\$(AssemblyName)" DestinationFile="bin\Release\$(AssemblyName)-$(Version).zip" Overwrite="true" />
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" IncludeAssets="compile" />
+        <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="2.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.755" IncludeAssets="compile" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Assembly-CSharp-firstpass">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Assembly-CSharp-firstpass.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Il2Cppmscorlib">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Il2CppSystem">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Il2CppSystem.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Il2CppSystem.Core">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
+		<Private>False</Private>
+      </Reference>
+      <Reference Include="PlayMaker">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\PlayMaker.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Unity.TextMeshPro">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
+		<Private>False</Private>
+      </Reference>
+      <Reference Include="UnityEngine">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="UnityEngine.AssetBundleModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.AssetBundleModule.dll</HintPath>
+		<Private>False</Private>
+	  </Reference>
+      <Reference Include="UnityEngine.CoreModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="UnityEngine.IMGUIModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="UnityEngine.PhysicsModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.PhysicsModule.dll</HintPath>
+		<Private>False</Private>
+	  </Reference>
+      <Reference Include="UnityEngine.TextRenderingModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+    </ItemGroup>
+
+</Project>
