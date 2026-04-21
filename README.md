@@ -71,6 +71,7 @@ Special Thanks to:
 - ChaseoQueso for the item code and archipelago version of items
 - Mac for helping out on the mod and APworld
 - deefdragon and BatemenzDW for their work on the APworld.
+- Shavnir for helping out with the mod.
 - The Silksong/HK community for a lot of great tools which made modding so much easier.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
