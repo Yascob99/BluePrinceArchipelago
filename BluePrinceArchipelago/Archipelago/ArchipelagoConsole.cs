@@ -68,22 +68,27 @@ public static class ArchipelagoConsole
         if (logLines.Count == 0) return;
         Event e = Event.current;
         //Shows the Input Window
-        if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash)) {
+        if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash))
+        {
             Hidden = !Hidden;
             UpdateWindow();
         }
-        if (!Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Escape)) {
+        if (!Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Escape))
+        {
             Hidden = !Hidden;
             UpdateWindow();
         }
-        if (!Hidden && e.type == EventType.KeyDown) {
-            if (e.keyCode == UnityEngine.KeyCode.UpArrow) {
+        if (!Hidden && e.type == EventType.KeyDown)
+        {
+            if (e.keyCode == UnityEngine.KeyCode.UpArrow)
+            {
                 if (PreviousCommandPointer > 0)
                 {
                     PreviousCommandPointer--;
                     CommandText = PreviousCommands[PreviousCommandPointer];
                 }
-                else {
+                else
+                {
                     PreviousCommandPointer = PreviousCommands.Count - 1;
 
                 }
@@ -103,14 +108,15 @@ public static class ArchipelagoConsole
             Hidden = !Hidden;
             UpdateWindow();
         }
-        
+
         // draw client/server commands entry if not hidden.
         if (Hidden) return;
         CommandText = GUI.TextField(CommandTextRect, CommandText);
         if (!CommandText.IsNullOrWhiteSpace() && (GUI.Button(SendCommandButton, "Send") || e.type == EventType.KeyDown && (e.keyCode == UnityEngine.KeyCode.Return || e.character == '\n')))
-        {   
+        {
             //local command
-            if (CommandText.Trim()[0] == '/') { 
+            if (CommandText.Trim()[0] == '/')
+            {
                 CommandManager.RunLocalCommand(CommandText);
                 PreviousCommands.Add(CommandText);
                 CommandText = "";
@@ -199,17 +205,20 @@ public static class ArchipelagoConsole
         SendCommandButton = new Rect(xPos, yPos, width, height);
     }
 }
-public static class CommandManager {
+public static class CommandManager
+{
     private static Dictionary<string, Command> _LocalCommands = new();
     private static Dictionary<string, Command> _ServerCommands = new();
-    public static void AddLocalCommand(string commandName, Command command) {
+    public static void AddLocalCommand(string commandName, Command command)
+    {
         _LocalCommands[commandName.Trim().ToLower()] = command;
     }
     public static void AddServerCommand(string commandName, Command command)
     {
         _ServerCommands[commandName] = command;
     }
-    public static void RunLocalCommand(string command) {
+    public static void RunLocalCommand(string command)
+    {
         ParsedCommand parsedCommand = ParseCommand(command.Substring(1)); //Parse command ignoring the first character which is the command indicator.
         string commandName = parsedCommand.Command.ToLower();
         if (_LocalCommands.ContainsKey(commandName))
@@ -232,17 +241,21 @@ public static class CommandManager {
         }
         ArchipelagoConsole.LogMessage($"{commandName} is not a recognized command.");
     }
-    public static void PrintHelpText() {
+    public static void PrintHelpText()
+    {
         string[] Keys = _LocalCommands.Keys.ToArray();
-        foreach (string key in Keys) {
-            if (key != "help") {
+        foreach (string key in Keys)
+        {
+            if (key != "help")
+            {
                 ArchipelagoConsole.LogMessage("Name:\n\t" + System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key));
                 ArchipelagoConsole.LogMessage("Description:\n\t" + _LocalCommands[key].Description);
                 ArchipelagoConsole.LogMessage(_LocalCommands[key].Syntax);
             }
         }
     }
-    public static void initializeLocalCommands() {
+    public static void initializeLocalCommands()
+    {
         _LocalCommands["room"] = new RoomCommand("Room");
         _LocalCommands["roompool"] = new RoomCommand("RoomPool"); // Alias for room command
         _LocalCommands["adjust"] = new AdjustCommand("Adjust");
@@ -282,7 +295,7 @@ public static class CommandManager {
                         count++;
                         curr = "";
                     }
-                    
+
                 }
                 else
                 {
@@ -298,7 +311,7 @@ public static class CommandManager {
                 args.Add(curr);
             }
 
-                return new ParsedCommand(commandName, args);
+            return new ParsedCommand(commandName, args);
         }
         return new ParsedCommand("", [""]);
     }
@@ -307,7 +320,8 @@ public abstract class Command(string name)
 {
     public string Name = name;
 
-    public abstract string Description {
+    public abstract string Description
+    {
         get;
     }
     public abstract string Syntax
@@ -317,10 +331,11 @@ public abstract class Command(string name)
 
     public abstract void Run(List<string> Args);
 }
-public class RoomCommand(string name): Command(name)
+public class RoomCommand(string name) : Command(name)
 {
     private readonly string _Description = "Manages the room pool - add, remove, list, or clear rooms";
-    public override string Description { 
+    public override string Description
+    {
         get { return _Description; }
     }
     private readonly string _Syntax = "Usage:\n\t/room add <RoomName> - Add a room to the pool\n\t/room remove <RoomName> - Remove a room from the pool\n\t/room list - List all rooms and their pool status\n\t/room list unlocked - List only unlocked rooms\n\t/room clear - Remove all non-vanilla rooms from pool\n\t/room clearall - Clear ALL rooms (for Archipelago mode)";
@@ -328,7 +343,8 @@ public class RoomCommand(string name): Command(name)
     {
         get { return _Syntax; }
     }
-    public override void Run(List<string> Args) {
+    public override void Run(List<string> Args)
+    {
         if (Args.Count < 1)
         {
             ArchipelagoConsole.LogMessage($"Error: No subcommand provided.\n{_Syntax}");
@@ -484,7 +500,8 @@ public class AdjustCommand(string name) : Command(name)
     public override void Run(List<string> Args)
     {
         ArchipelagoConsole.LogMessage(Args.Join(" "));
-        if (!ModInstance.IsInRun) {
+        if (!ModInstance.IsInRun)
+        {
             ArchipelagoConsole.LogMessage("You are not currently in a run, you can only run this command during a run.");
             return;
         }
@@ -501,12 +518,12 @@ public class AdjustCommand(string name) : Command(name)
                     ArchipelagoConsole.LogMessage($"Adjusted Gems by {count}.");
                     return;
                 }
-                catch 
+                catch
                 {
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
                     return;
                 }
-               
+
             }
             else if (subcommand.ToLower() == "gold")
             {
@@ -585,7 +602,7 @@ public class AdjustCommand(string name) : Command(name)
                     if (totalStars + count > 0)
                     {
                         ModInstance.StarManager.FindIntVariable("TotalStars").Value = totalStars + count;
-                        
+
                     }
                     else
                     {
@@ -632,13 +649,14 @@ public class AdjustCommand(string name) : Command(name)
         ArchipelagoConsole.LogMessage($"Error Running Command {Name}: no parameters provided.");
     }
 }
-public class ItemCommand(string name) : Command(name) {
+public class ItemCommand(string name) : Command(name)
+{
     private string _Description = "Adds or Removes Items from the inventory.";
     public override string Description
     {
         get { return _Description; }
     }
-    private string _Syntax = "Usage\n/Item Add <Item>\n/Item Remove <Item>";
+    private string _Syntax = "Usage\n/Item Add <Item>\n/Item Remove <Item>\n/Item List <prespawn|estateitems|pickedup|coatcheck|useditems>";
     public override string Syntax
     {
         get { return _Syntax; }
@@ -653,30 +671,42 @@ public class ItemCommand(string name) : Command(name) {
         if (Args.Count > 1)
         {
             string subcommand = Args[0];
-            if (subcommand.ToLower() == "add")
+            if (subcommand.ToLower() == "list")
+            {
+                ArchipelagoConsole.LogMessage($"Item List\n{Plugin.ModItemManager.ListItems(Args[1])}");
+                return;
+            }
+            else if (subcommand.ToLower() == "add")
             {
                 string itemName = Args[1];
                 for (int i = 2; i < Args.Count; i++)
                 {
                     itemName += " " + Args[i];
                 }
+
+                ArchipelagoConsole.LogMessage($"Attemping to add item {itemName}");
+
                 GameObject item = Plugin.ModItemManager.GetPreSpawnItem(itemName);
-                if (item == null) {
+                if (item == null)
+                {
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} Has already been spawned or is not in the spawn pool");
                     return;
                 }
-                
+
                 // Check PreSpawn EstateItems, PickedUp, CoatCheck, UsedItems
-                if (Plugin.ModItemManager.IsItemSpawnable(item)) {
-                    
+                if (Plugin.ModItemManager.IsItemSpawnable(item))
+                {
+
                     string iconName = itemName.ToTitleCase() + " Icon(Clone)001";
                     GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                     // Some icons use 
-                    if (icon == null) {
+                    if (icon == null)
+                    {
                         iconName = itemName.ToTitleCase() + " icon(Clone)001";
                         icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                     }
-                    if (icon == null) {
+                    if (icon == null)
+                    {
                         iconName = itemName.ToTitleCase();
                         icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                     }
@@ -716,36 +746,39 @@ public class ItemCommand(string name) : Command(name) {
                     return;
                 }
                 string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName.ToLower()) + " Icon(Clone)001";
-                
+
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                 if (InventoryIcons != null)
                 {
                     GameObject icon = new();
                     bool found = false;
                     int i = 0;
-                    while (!found && i < InventoryIcons.GetCount()) 
+                    while (!found && i < InventoryIcons.GetCount())
                     {
                         icon = InventoryIcons.arrayList[i].TryCast<GameObject>();
-                        if (icon == null) {
-                            if (icon.name == iconName) {
+                        if (icon == null)
+                        {
+                            if (icon.name == iconName)
+                            {
                                 found = true;
                             }
                         }
                         i++;
                     }
-                    if (!found) {
+                    if (!found)
+                    {
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName}'s Icon could not be found.");
                         return;
                     }
                     //TODO add a check for if the item should be added to the PreSpawn pool.
                     if (ModItemManager.PickedUp.Contains(item))
-                        {
-                            ModItemManager.PickedUp.Remove(item, "GameObject");
-                            ModItemManager.PreSpawn.Add(item, "GameObject");
-                            InventoryIcons.Remove(icon, "GameObject");
-                            ArchipelagoConsole.LogMessage($"Removed Item from {itemName} inventory.");
-                            return;
-                        }
+                    {
+                        ModItemManager.PickedUp.Remove(item, "GameObject");
+                        ModItemManager.PreSpawn.Add(item, "GameObject");
+                        InventoryIcons.Remove(icon, "GameObject");
+                        ArchipelagoConsole.LogMessage($"Removed Item from {itemName} inventory.");
+                        return;
+                    }
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} Has already been spawned.");
                     return;
                 }
@@ -757,10 +790,12 @@ public class ItemCommand(string name) : Command(name) {
             ArchipelagoConsole.LogMessage($"Error Running Command {Name}: invalid subcommand {subcommand}");
             return;
         }
-        ArchipelagoConsole.LogMessage($"Error Running Command {Name}: no parameters provided.");
+        else
+            ArchipelagoConsole.LogMessage($"Error Running Command {Name}: no parameters provided.");
     }
 }
-public class HelpCommand(string name) : Command(name) {
+public class HelpCommand(string name) : Command(name)
+{
     private string _Description = "Displays all Local Commands";
     public override string Description
     {
@@ -771,12 +806,14 @@ public class HelpCommand(string name) : Command(name) {
     {
         get { return _Syntax; }
     }
-    public override void Run(List<string> Args) {
+    public override void Run(List<string> Args)
+    {
         CommandManager.PrintHelpText();
     }
 }
-public class ForceCommand(string name) : Command(name) {
-        private readonly string _Description = "Forces a draft of the room when next possible";
+public class ForceCommand(string name) : Command(name)
+{
+    private readonly string _Description = "Forces a draft of the room when next possible";
     public override string Description
     {
         get { return _Description; }
@@ -790,7 +827,8 @@ public class ForceCommand(string name) : Command(name) {
     {
         string roomName = string.Join(" ", Args);
         ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomName);
-        if (room != null) {
+        if (room != null)
+        {
             ModRoomManager.ForceRoomQueue.Add(room);
         }
     }
@@ -931,10 +969,12 @@ public class SyncCommand(string name) : Command(name)
     }
 }
 
-public class ParsedCommand {
+public class ParsedCommand
+{
     public string Command;
     public List<string> Args;
-    public ParsedCommand(string command, List<string> args) {
+    public ParsedCommand(string command, List<string> args)
+    {
         Command = command;
         Args = args;
     }

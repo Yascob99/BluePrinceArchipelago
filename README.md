@@ -71,6 +71,7 @@ Special Thanks to:
 - ChaseoQueso for the item code and archipelago version of items
 - Mac for helping out on the mod and APworld
 - deefdragon and BatemenzDW for their work on the APworld.
+- Shavnir for helping out with the mod.
 - The Silksong/HK community for a lot of great tools which made modding so much easier.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -90,6 +91,8 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 ### Installation
 
 1. Install [Bepinex 6](https://docs.bepinex.dev/master/articles/user_guide/installation/index.html)
+* Specifically you will want to get build #755's [BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755+3fab71a.zip](https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip) from the page [here](https://builds.bepinex.dev/projects/bepinex_be)
+* Extract the files inside the  Blue Prince folder (Steam default of `C:\Program Files (x86)\Steam\steamapps\common\Blue Prince` )
 2. Clone the repo
    ```sh
    git clone https://github.com/Yascob99/BluePrinceArchipelago.git
@@ -99,14 +102,17 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
    git remote set-url origin github_username/repo_name
    git remote -v # confirm the changes
    ```
-4. If nuget fails to install the required nuget packages it's probably because you need to add a nuget feed for bepinex packages. Try running this command:
-```dotnet nuget add source https://nuget.bepinex.dev/v3/index.json --name Bepinex```
+4. Add extra nuget package locations
+```dotnet nuget add source https://nuget.bepinex.dev/v3/index.json --name Bepinex
+   dotnet nuget add source https://nuget.samboy.dev/v3/index.json --name Samboy
+ ```
+
 5. If nuget didn't install the required dependencies and the previous step didn't fully fix the issue, you will need to run the following to install these packages by running these commands in the **project** folder.
     ```
     dotnet add package BepInEx.Unity.IL2CPP --version 6.0.0-be.755
     dotnet add package Archipelago.MultiClient.Net --version 6.7.1
     ```
-6. Finally create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BluePrinceHere/" with the path to your Blue Prince Installation:
+6. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BluePrinceHere/" with the path to your Blue Prince Installation:
 ```
 <Project>
 	<PropertyGroup>
@@ -114,10 +120,13 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 	</PropertyGroup>
 </Project>
 ```
-
+7. After you have built for the first time you will need to copy the Archipelago dll into the BluePrinceArchipelago folder.  This will appear by default in `C:\Users\USERNAME\.nuget\packages\archipelago.multiclient.net\6.7.1\lib\net6.0\Archipelago.MultiClientNet.dll`.  Copy this into the Blue Prince\BepInEx\plugins\BluePrinceArchipelago folder
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+### Other Useful Tools
+
+* [Cinematic Unity Explorer](https://github.com/asd9176506911298/CinematicUnityExplorer/tree/master) - download BIE 6.X be.647+ IL2CPP then get the plugin into the `Blue Prince\BepInEx\plugins` folder
 
 <!-- USAGE EXAMPLES -->
 ## Usage
