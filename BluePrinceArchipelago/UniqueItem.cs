@@ -111,10 +111,10 @@ namespace BluePrinceArchipelago.Core
                     if (state != null)
                     {
                         state.EnableActionsOfType<ArrayListAdd>();
-                        if (Plugin.UniqueItemManager.ComissaryStates.Keys.Contains(Name))
+                        if (UniqueItemManager.ComissaryStates.ContainsKey(Name))
                         {
-                            //Re-enable commisary purchases of the item.
-                            Plugin.UniqueItemManager.EnableCommissaryPurchase(this, Plugin.UniqueItemManager.ComissaryStates[Name]);
+                            //Re-enable commissary purchases of the item.
+                            Plugin.UniqueItemManager.EnableCommissaryPurchase(this, UniqueItemManager.ComissaryStates[Name]);
                         }
                         ModItemManager.PickedUp.Add(GameObj, "GameObject");
                         InventoryIcons.Add(icon, "GameObject");
@@ -131,7 +131,7 @@ namespace BluePrinceArchipelago.Core
             public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
             // A Map of item names to the states in the Comissary.
-            public Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
+            public static readonly Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
             {"MAGNIFYING GLASS", "Mag Glass" },
             {"SHOVEL", "Shovel Purchase"},
             {"SALT SHAKER", "Salt Shaker Purchase"},

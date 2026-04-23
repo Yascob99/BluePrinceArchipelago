@@ -352,7 +352,8 @@ namespace BluePrinceArchipelago.Core
         private List<string> _PickerArrays = pickerArrays;
         public List<string> PickerArrays { get { return _PickerArrays; } set { _PickerArrays = value; } }
 
-        public RoomHandler Handler = RoomHandler.CreateRoomHandler(name);
+        private RoomHandler _Handler = RoomHandler.CreateRoomHandler(name);
+        public RoomHandler Handler { get { return _Handler; } set { _Handler = value; } }
 
         private bool _IsUnlocked = isUnlocked;
         public bool IsUnlocked {
@@ -555,7 +556,7 @@ namespace BluePrinceArchipelago.Core
                     FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
                     if (poolRemoval != null)
                     {
-                        GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL")?.Value = false;
+                        poolRemoval.Value = false;
                     } //Set the FSMBool to true so that it removes the room from the pool.
                 }
             }
