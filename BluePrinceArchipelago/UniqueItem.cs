@@ -308,8 +308,7 @@ namespace BluePrinceArchipelago.Core
                         // Get the variables for creating our custom pickup message.
                         string playerName = scout?.Player?.Name ?? "";
                         string itemName = scout?.ItemName ?? "";
-                        //TODO add logic for the descriptions to be different based on item importance.
-                        string description = "Hope it un-BK's them!";
+                        string description = scout?.Flags.ItemFlagDescription();
 
                         // Get correct font assets for our prefab
                         TMP_FontAsset prescFont = null;

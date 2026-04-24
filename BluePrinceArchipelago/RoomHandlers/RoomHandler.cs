@@ -11,7 +11,7 @@ public abstract class RoomHandler
     {
         return roomName switch
         {
-            "COMMISSARY" => new Commissary(4, 1, 10, 0), // Placeholder values, eventually these should be set in the yaml; seed should be day seed
+            "COMMISSARY" => new Commissary(), // Placeholder values, eventually these should be set in the yaml
             _ => null
         };
     }

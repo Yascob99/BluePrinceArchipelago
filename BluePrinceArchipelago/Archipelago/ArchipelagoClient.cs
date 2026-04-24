@@ -339,9 +339,9 @@ public class ArchipelagoClient
     }
 
     // Populates the dictionaries used for looking up location information.
-    private void CreateLocationDicts(long[] locationIds)
+    private void CreateLocationDicts(long[] locationIds, bool hint = false)
     {
-        for (int i = 0; i < locationIds.Count(); i++)
+        for (int i = 0; i < locationIds.Length; i++)
         {
             long location = locationIds[i];
             string locationName = session.Locations.GetLocationNameFromId(location);
@@ -349,7 +349,7 @@ public class ArchipelagoClient
         }
         //Asynchronously gather the data for all items stored in all the active locations, then wait for a response.
         Task<Dictionary<long, ScoutedItemInfo>> scoutTask = session.Locations
-                .ScoutLocationsAsync(locationIds);
+                .ScoutLocationsAsync(hint, locationIds);
         scoutTask.Wait();
         Dictionary<long, ScoutedItemInfo> scoutResult = scoutTask.Result;
         foreach (KeyValuePair<long, ScoutedItemInfo> scout in scoutResult)
@@ -361,6 +361,8 @@ public class ArchipelagoClient
             ServerData.LocationItemMap[locationId] = scout.Value;
         }
     }
+
+    public void ScoutLocationHint(long[] locationIds) => CreateLocationDicts(locationIds, true);
 
     /// <summary>
     /// something went wrong, or we need to properly disconnect from the server. cleanup and re null our session

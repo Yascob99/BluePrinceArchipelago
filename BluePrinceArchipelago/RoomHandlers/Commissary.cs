@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BluePrinceArchipelago.Core;
@@ -12,30 +13,16 @@ namespace BluePrinceArchipelago.RoomHandlers;
 
 public class Commissary : RoomHandler
 {
-    public List<Models.ShopItem> LocationPool { get; set; } = new List<Models.ShopItem>();
-    public Models.ShopItem[] ShopItems { get; set; } = new Models.ShopItem[4];
-    private bool[] ShopItemForSale { get; set; } = new bool[4];
-    private string[] VanillaShopItems = new string[4];
+    public static Dictionary<string, Models.ShopItem> LocationMap { get; set; } = [];
 
     private PlayMakerFSM _ItemsForSaleFsm;
     private GameObject _CommissaryMenuGameObject;
     private PlayMakerFSM _CommissaryMenuFsm;
     private GameObject _ColliderGameObject;
 
-    private readonly int _seed;
-
-    public Commissary(int locationCount, int minPrice, int maxPrice, int seed)
+    public Commissary()
     {
-        Logging.Log($"Initializing Commissary with {locationCount} items, price range {minPrice}-{maxPrice}, seed {seed}.");
-        _seed = seed;
-        for (int i = 0; i < locationCount; i++)
-        {
-            LocationPool.Add(new Models.ShopItem
-            {
-                Name = $"Commissary Purchase {i + 1}",
-                Price = new System.Random(seed + i).Next(minPrice, maxPrice + 1)
-            });
-        }
+        Logging.Log("Initializing Commissary.");
     }
 
     public override void OnRoomDrafted(GameObject roomGameObject)
@@ -50,26 +37,11 @@ public class Commissary : RoomHandler
         }
     
         _ItemsForSaleFsm = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.gameObject?.GetFsm("FSM");
-        _CommissaryMenuGameObject = GameObject.Find("UI OVERLAY CAM/Commissary Menu");
+        _CommissaryMenuGameObject = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.gameObject;
         _CommissaryMenuFsm = _CommissaryMenuGameObject?.GetFsm("FSM");
         _ColliderGameObject = RoomGameObject.transform.Find("_GAMEPLAY/Click Commissary Collider")?.gameObject;
 
-        var rand = new System.Random(_seed);
-        for (int i = 0; i < ShopItems.Length; i++)
-        {
-            if (LocationPool.Count == 0)
-            {
-                Logging.LogWarning("Not enough items in the location pool to fill all shop slots.");
-                break;
-            }
-
-            var item = LocationPool[rand.Next(LocationPool.Count)];
-            LocationPool.Remove(item);
-            ShopItems[i] = item;
-        }
-
         SetupItemsForSale();
-        SetupCommissaryMenu();
     }
 
     // TODO: figure out why "N Items" can't be found
@@ -83,8 +55,6 @@ public class Commissary : RoomHandler
             return;
         }
 
-        var rand = new System.Random(_seed);
-
         foreach (var stateName in ItemStateNames)
         {
             var state = _ItemsForSaleFsm.GetState(stateName);
@@ -96,10 +66,6 @@ public class Commissary : RoomHandler
 
             var actions = state.GetActionsOfType<SetFsmString>();
 
-            bool hasChangedName = false;
-            bool hasAddedItem = false;
-            int i = rand.Next(ShopItems.Length);
-
             foreach (var action in actions)
             {
                 if (action is SetFsmString setFsmString)
@@ -107,72 +73,25 @@ public class Commissary : RoomHandler
                     var varName = setFsmString.variableName;
                     if (varName.Value.StartsWith("ITEM") && varName.Value.EndsWith("NAME"))
                     {
-                        if (UniqueItemManager.ComissaryStates.ContainsKey(setFsmString.setValue.Value) || ShopItems.Any(item => item.Name == setFsmString.setValue.Value))
+                        if (UniqueItemManager.ComissaryStates.ContainsKey(setFsmString.setValue.Value) || setFsmString.setValue.Value.Contains("Upgrade Disk"))
                         {
-                            VanillaShopItems[i] = setFsmString.setValue.Value;
+                            var itemName = setFsmString.setValue.Value;
 
-                            setFsmString.setValue.Value = $"{ShopItems[i]?.Name}: {ShopItems[i]?.GetScoutHint()}" ?? "Empty Archipelago Item Slot";
+                            if (!LocationMap.ContainsKey(itemName))
+                            {
+                                LocationMap.Add(itemName, new Models.ShopItem
+                                {
+                                    Name = itemName
+                                });
+                            }
 
-                            hasChangedName = true;
+                            string apItem = LocationMap[itemName].GetScoutHint();
+
+                            setFsmString.setValue.Value = apItem;
                         }
                     }
-                    else if (varName.Value.StartsWith("ITEM") && varName.Value.EndsWith("PRICE") && hasChangedName)
-                    {
-                        setFsmString.setValue.Value = ShopItems[i]?.Price.ToString() ?? "0";
-                        hasAddedItem = true;
-                        hasChangedName = false;
-                    }
-                    else
-                    {
-                        Logging.Log($"Skipped SetFsmString action with variable '{varName.Value}' in state '{stateName}' because it does not match expected item name or price variable patterns.");
-                    }
-                }
-
-                if (hasAddedItem)
-                {
-                    ShopItemForSale[i] = true;
-                    i = (i + 1) % ShopItems.Length;
-                    hasAddedItem = false;
                 }
             }
-        }
-    }
-
-    private static readonly Dictionary<string, string> ItemToCommisaryMenuState = new Dictionary<string, string>
-    {
-        { "Magnifying Glass", "Manifying Glass" },
-        { "Running Shoes", "Running SHoes" }
-    };
-    private static readonly Dictionary<string, string> ItemToCommisarySaleState = new Dictionary<string, string>
-    {
-        
-    };
-
-    private void SetupCommissaryMenu()
-    {
-        if (_CommissaryMenuFsm == null)
-        {
-            Logging.LogError("Commissary Menu FSM not found, cannot set up menu.");
-            return;
-        }
-
-        for (int i = 0; i < ShopItems.Length; i++)
-        {
-            if (!ShopItemForSale[i])
-            {
-                continue;
-            }
-
-            var vanillaItemName = ItemToCommisaryMenuState.ContainsKey(VanillaShopItems[i]) ? ItemToCommisaryMenuState[VanillaShopItems[i]] : VanillaShopItems[i];
-
-            var state = _CommissaryMenuFsm.GetState(vanillaItemName);
-            if (state == null)
-            {
-                Logging.LogWarning($"State '{vanillaItemName}' not found in Commissary Menu FSM.");
-                continue;
-            }
-
-
         }
     }
 }
