@@ -83,7 +83,7 @@ namespace BluePrinceArchipelago.Core
             }
 
             // If the item is spawned or is not in the prespawn list.
-            if (Plugin.ModItemManager.IsItemSpawnable(GameObj, isSpawned ? false : IsPrespawn))
+            if (Plugin.ModItemManager.IsItemSpawnable(GameObj, !isSpawned && IsPrespawn))
             {
                 string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name.ToLower()) + " Icon(Clone)001";
                 GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);

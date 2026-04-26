@@ -9,10 +9,11 @@ public abstract class RoomHandler
     public abstract void OnRoomDrafted(GameObject roomGameObject);
     public static RoomHandler CreateRoomHandler(string roomName)
     {
-        return roomName switch
+        return roomName switch 
         {
             "COMMISSARY" => new Commissary(),
             "SHOWROOM" => new Showroom(),
+            "THE ARMORY" => new Armory(),
             _ => null
         };
     }
