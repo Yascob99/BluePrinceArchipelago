@@ -12,10 +12,10 @@ public class Armory : RoomHandler
     private Dictionary<string, Models.ShopItem> _ArmoryItemMap = [];
     private readonly Dictionary<string, (string TitlePath, string DescriptionPath1, string DescriptionPath2)> _ArmoryItemUIMap = new()
     {
-        {"Morning Star", ("Morning Star/Pop Up/Title", "Morning Star/Pop Up/Description (2)", "Armory Menu/Morning Star/Pop Up/Description (3)")},
-        {"Torch", ("Torch/Pop Up/Text/Title", "Torch/Pop Up/Text/GameObject/Description (2)", null)},
-        {"Knight's Shield", ("Knight's Shield/Pop Up/Text/Title", "Knight's Shield/Pop Up/Text/Description (2)", "Knight's Shield/Pop Up/Text/Description (3)")},
-        {"The Axe", ("The Axe/Pop Up/Text/Title", "The Axe/Pop Up/Text/Description (2)", "The Axe/Pop Up/Text/Desciption (2)/Description (3)")}
+        {"Morning Star", ("Morning Star/Pop Up/Title", "Morning Star/Pop Up/Description (2)", "Morning Star/Pop Up/Description (3)")},
+        {"Torch", ("Torch/Pop Up/Title", "Torch/Pop Up/Text/GameObject/Description (2)", null)},
+        {"Knight's Shield", ("Knight's Shield/Pop Up/Title", "Knight's Shield/Pop Up/Description (2)", "Knight's Shield/Pop Up/Description (3)")},
+        {"The Axe", ("The Axe/Pop Up/Title", "The Axe/Pop Up/Description (2)", "The Axe/Pop Up/Desciption (2)/Description (3)")}
     };
 
     public Armory()
@@ -35,7 +35,10 @@ public class Armory : RoomHandler
         }
 
         _ArmoryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Armory Menu")?.gameObject;
+    }
 
+    public override void OnAfterRoomDrafted()
+    {
         SetupArmoryItems();
     }
 
@@ -75,36 +78,36 @@ public class Armory : RoomHandler
 
             if (!_ArmoryItemMap.ContainsKey(itemName))
             {
-                string[] descriptionLines;
+                // string[] descriptionLines;
 
-                if (DescriptionPath2 != null)
-                    descriptionLines = [descriptionTMP1.text, descriptionTMP2.text];
-                else
-                    descriptionLines = [descriptionTMP1.text];
+                // if (DescriptionPath2 != null)
+                //     descriptionLines = [descriptionTMP1.text, descriptionTMP2.text];
+                // else
+                //     descriptionLines = [descriptionTMP1.text];
 
                 _ArmoryItemMap.Add(itemName, new Models.ShopItem
                 {
                     Name = itemName,
-                    DescriptionLines = descriptionLines
+                    // DescriptionLines = descriptionLines
                 });
             }
 
             var shopItem = _ArmoryItemMap[itemName];
 
             // var scoutHintParts = shopItem.GetScoutHintParts(DescriptionPath2 != null ? 2 : 1);
-            string[] scoutHintParts = ["PLACEHOLDER", "Description line 1", "Description line 2"];
+            // string[] scoutHintParts = ["PLACEHOLDER", "Description line 1", "Description line 2"];
 
-            titleTMP.text = scoutHintParts[0];
+            titleTMP.text = shopItem.GetScoutHint();
 
-            if (DescriptionPath2 != null)
-            {
-                descriptionTMP1.text = scoutHintParts[1];
-                descriptionTMP2.text = scoutHintParts[2];
-            }
-            else
-            {
-                descriptionTMP1.text = scoutHintParts[1];
-            }
+            // if (DescriptionPath2 != null)
+            // {
+            //     descriptionTMP1.text = scoutHintParts[1];
+            //     descriptionTMP2.text = scoutHintParts[2];
+            // }
+            // else
+            // {
+            //     descriptionTMP1.text = scoutHintParts[1];
+            // }
             
         }
     }

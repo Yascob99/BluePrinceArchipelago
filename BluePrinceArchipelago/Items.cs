@@ -507,6 +507,7 @@ namespace BluePrinceArchipelago.Core
     public class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked)
     {
         private string _ItemType = itemType;
+        private PlayMakerFSM _DayFSM = GameObject.Find("DAY").GetFsm("FSM");
 
         public string ItemType
         {
@@ -546,8 +547,7 @@ namespace BluePrinceArchipelago.Core
             }
             else if (_ItemType == "Allowance")
             {
-                //TODO Replace with a proper allowance function.
-                AdjustGold(_Count * 2);
+                AdjustAllowance(_Count * 2);
             }
             else if (_ItemType == "Dice")
             {
@@ -589,6 +589,12 @@ namespace BluePrinceArchipelago.Core
             ModInstance.GoldManager.FindIntVariable("Adjustment Amount").Value = count;
             ModInstance.GoldManager.SendEvent("Update"); // Might need to be "Add Coins" instead.
         }
+
+        private void AdjustAllowance(int count = 1)
+        {
+            _DayFSM.FindIntVariable("allowance").Value += count;
+        }
+
         //Todo replace with allowance.
         private void AdjustDice(int count = 1)
         {

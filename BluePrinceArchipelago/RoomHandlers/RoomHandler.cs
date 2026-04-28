@@ -7,6 +7,7 @@ public abstract class RoomHandler
     protected GameObject RoomGameObject { get; set; }
 
     public abstract void OnRoomDrafted(GameObject roomGameObject);
+    public virtual void OnAfterRoomDrafted() { }
     public static RoomHandler CreateRoomHandler(string roomName)
     {
         return roomName switch 
