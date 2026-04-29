@@ -226,11 +226,16 @@ namespace BluePrinceArchipelago
             }
             ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
             if (room != null) {
+                room.Handler?.OnRoomDrafted(obj);
                 if (!room.HasBeenDrafted)
                 {
                     room.HasBeenDrafted = true; //This triggers the Location found Event.
                 }
             }
+        }
+        public static void OnAfterRoomSpawned(GameObject obj) {
+            ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
+            room?.Handler?.OnAfterRoomDrafted();
         }
         public static void OnOtherSpawn(GameObject obj, string poolName, GameObject transformObj) {
             Logging.Log($"Pool Name: {poolName}");

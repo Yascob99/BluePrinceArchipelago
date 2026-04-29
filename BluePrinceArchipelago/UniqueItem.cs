@@ -83,7 +83,7 @@ namespace BluePrinceArchipelago.Core
             }
 
             // If the item is spawned or is not in the prespawn list.
-            if (Plugin.ModItemManager.IsItemSpawnable(GameObj, isSpawned ? false : IsPrespawn))
+            if (Plugin.ModItemManager.IsItemSpawnable(GameObj, !isSpawned && IsPrespawn))
             {
                 string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name.ToLower()) + " Icon(Clone)001";
                 GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
@@ -111,10 +111,10 @@ namespace BluePrinceArchipelago.Core
                     if (state != null)
                     {
                         state.EnableActionsOfType<ArrayListAdd>();
-                        if (Plugin.UniqueItemManager.ComissaryStates.Keys.Contains(Name))
+                        if (UniqueItemManager.ComissaryStates.ContainsKey(Name))
                         {
-                            //Re-enable commisary purchases of the item.
-                            Plugin.UniqueItemManager.EnableCommissaryPurchase(this, Plugin.UniqueItemManager.ComissaryStates[Name]);
+                            //Re-enable commissary purchases of the item.
+                            Plugin.UniqueItemManager.EnableCommissaryPurchase(this, UniqueItemManager.ComissaryStates[Name]);
                         }
                         ModItemManager.PickedUp.Add(GameObj, "GameObject");
                         InventoryIcons.Add(icon, "GameObject");
@@ -131,7 +131,7 @@ namespace BluePrinceArchipelago.Core
             public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
             // A Map of item names to the states in the Comissary.
-            public Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
+            public static readonly Dictionary<string, string> ComissaryStates = new Dictionary<string, string>{
             {"MAGNIFYING GLASS", "Mag Glass" },
             {"SHOVEL", "Shovel Purchase"},
             {"SALT SHAKER", "Salt Shaker Purchase"},
@@ -308,8 +308,7 @@ namespace BluePrinceArchipelago.Core
                         // Get the variables for creating our custom pickup message.
                         string playerName = scout?.Player?.Name ?? "";
                         string itemName = scout?.ItemName ?? "";
-                        //TODO add logic for the descriptions to be different based on item importance.
-                        string description = "Hope it un-BK's them!";
+                        string description = scout?.Flags.ItemFlagDescription();
 
                         // Get correct font assets for our prefab
                         TMP_FontAsset prescFont = null;
