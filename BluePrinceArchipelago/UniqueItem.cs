@@ -85,7 +85,7 @@ namespace BluePrinceArchipelago.Core
             // If the item is spawned or is not in the prespawn list.
             if (Plugin.ModItemManager.IsItemSpawnable(GameObj, isSpawned ? false : IsPrespawn))
             {
-                string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name.ToLower()) + " Icon(Clone)001";
+                string iconName = Name.ToTitleCase() + " Icon(Clone)001";
                 GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                 // Some icons are spelled with icon as lower case
                 if (icon == null)
@@ -199,7 +199,6 @@ namespace BluePrinceArchipelago.Core
                     ReplaceYouFoundText(state, item);
                 }
             }
-
             //Finds the associated Pickup State and replaces the item.
             private FsmState ReplacePickup(UniqueItem item)
             {
@@ -249,7 +248,7 @@ namespace BluePrinceArchipelago.Core
                     if (!item.IsUnlocked)
                     {
                         //Disable the actions that add the item to inventory.
-                        state.EnableActionsOfType<ArrayListAdd>();
+                        state.DisableActionsOfType<ArrayListAdd>();
                         //Disables the You found Text (for now).
                         state.DisableFirstActionOfType<ActivateGameObject>();
                     }
@@ -257,14 +256,17 @@ namespace BluePrinceArchipelago.Core
                     return;
                 }
             }
-
+            
+            //TODO Overhaul this code by instead creating a custom you found object and edit it then display it each time a new "you found" is to be displayed. Alternatively create a new "YouFound" for each location programmatically on game start.
             private void ReplaceYouFoundText(FsmState state, UniqueItem item, GameObject prefab = null)
             {
                 if (prefab == null)
                 {
-                    if (Plugin.AssetBundle.Contains(item.Name))
-                    {
-                        prefab = Plugin.AssetBundle.LoadAsset(item.Name).TryCast<GameObject>();
+                    if (Plugin.AssetBundle != null) { 
+                        if (Plugin.AssetBundle.Contains(item.Name))
+                        {
+                            prefab = Plugin.AssetBundle.LoadAsset(item.Name).TryCast<GameObject>();
+                        }
                     }
                 }
                 Transform youFoundParent = GetYouFoundParent(state);
@@ -449,7 +451,6 @@ namespace BluePrinceArchipelago.Core
                 }
             }
 
-
             private void ReplaceWithAPItem(GameObject obj, GameObject transformObj, GameObject spawnedObj, UniqueItem item)
             {
                 GameObject prefab = null;
@@ -482,7 +483,7 @@ namespace BluePrinceArchipelago.Core
             public void StartOfDay()
             {
                 RemoveItemsFromPool();
-                ReplaceCommissaryItemsWithAP();
+                //ReplaceCommissaryItemsWithAP();
             }
 
             private void RemoveItemsFromPool()
@@ -495,7 +496,7 @@ namespace BluePrinceArchipelago.Core
             }
 
             //Finds the "You Found" Event based on the what "You Found" is called in the GlobalManager Pickup FSM State. Returns null if not found.
-            private Transform GetYouFoundParent(FsmState pickupState)
+            public Transform GetYouFoundParent(FsmState pickupState)
             {
                 if (pickupState != null)
                 {
@@ -530,8 +531,9 @@ namespace BluePrinceArchipelago.Core
             // Finds the state in the Global Manager associated with the given item's pickup. Returns null if not found.
             public FsmState GetPickupState(string name)
             {
-                // Fixes a name difference for the vault keys and puts name into lower case.
-                name = name.ToLower().Replace("vault", "safety deposit");
+                
+                // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
+                name = name.ToLower().Replace("vault", "safety deposit").Replace("rabbit's", "rabbbit's");
                 // Check each Global Transition in the Global Manager.
                 foreach (FsmTransition transition in ModInstance.GlobalManager.FsmGlobalTransitions)
                 {

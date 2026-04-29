@@ -45,7 +45,7 @@ namespace BluePrinceArchipelago {
             string assetBundlePath = System.IO.Path.Combine(AssetsFolderPath, "blueprinceapassets");
             if (System.IO.File.Exists(assetBundlePath))
             {
-                AssetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+                //AssetBundle = AssetBundle.LoadFromFile(assetBundlePath);
             }
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
