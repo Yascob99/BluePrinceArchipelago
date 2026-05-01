@@ -18,6 +18,7 @@ public abstract class RoomHandler
             "BOOKSHOP" => new Bookshop(),
             "GIFT SHOP" => new GiftShop(),
             "LOCKSMITH" => new Locksmith(),
+            "TRADING POST" => new TradingPost(),
             _ => null
         };
     }
