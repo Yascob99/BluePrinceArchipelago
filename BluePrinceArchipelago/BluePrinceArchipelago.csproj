@@ -34,7 +34,7 @@
     </PropertyGroup>
 
 	<ItemGroup>
-		<_Assets Include="$(MSBuildProjectDirectory)\assets\*.*" />
+		<_Assets Include="$(MSBuildProjectDirectory)\assets\*" />
 		<_Libs Include="$(MSBuildProjectDirectory)\libs\*.*" />
 	</ItemGroup>
 

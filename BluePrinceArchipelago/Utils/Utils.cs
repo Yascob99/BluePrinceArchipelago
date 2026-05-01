@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using System.Globalization;
 using Archipelago.MultiClient.Net.Enums;
+using System.IO;
 
 namespace BluePrinceArchipelago.Utils
 {
@@ -41,6 +42,22 @@ namespace BluePrinceArchipelago.Utils
         public static T LoadAsset<T>(this AssetBundle bundle, string assetPath) where T : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
         { 
             return bundle.LoadAsset(assetPath).TryCast<T>();
+        }
+
+        public static AssetBundle LoadAssetFile(string filePath)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (FileStream fs = File.OpenRead(filePath))
+                {
+                    fs.CopyTo(ms);
+                }
+                Il2CppSystem.IO.MemoryStream memoryStream = new Il2CppSystem.IO.MemoryStream(ms.ToArray());
+
+                AssetBundle loadFromMemoryInternal = AssetBundle.LoadFromStream(memoryStream);
+                return loadFromMemoryInternal;
+            }
+
         }
     }
     public static class TransformExtensions

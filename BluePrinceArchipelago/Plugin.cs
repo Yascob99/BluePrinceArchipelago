@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using BluePrince;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
@@ -45,7 +46,7 @@ namespace BluePrinceArchipelago {
             string assetBundlePath = System.IO.Path.Combine(AssetsFolderPath, "blueprinceapassets");
             if (System.IO.File.Exists(assetBundlePath))
             {
-                AssetBundle = AssetBundle.LoadFromFile(assetBundlePath);
+                AssetBundle = AssetExtensions.LoadAssetFile(assetBundlePath);
             }
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling

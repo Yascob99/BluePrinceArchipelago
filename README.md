@@ -50,6 +50,7 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+		 <li><a href="#unity-setup">Contributing</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -127,6 +128,126 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 ### Other Useful Tools
 
 * [Cinematic Unity Explorer](https://github.com/asd9176506911298/CinematicUnityExplorer/tree/master) - download BIE 6.X be.647+ IL2CPP then get the plugin into the `Blue Prince\BepInEx\plugins` folder
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+## Unity Setup
+
+### Setting Up Unity Editor
+
+Below are instructions to get access to opening the files in Unity editor.
+1. Install [Unity Hub](https://docs.unity.com/en-us/hub/install-hub). You can continue to the step 3 while this installs.
+2. Install [Unity 6000.0.58f2](https://unity.com/releases/editor/whats-new/6000.0.58f2). You can continue to the step 3 while this installs.
+3. Download (AssetRipper)[https://github.com/AssetRipper/AssetRipper]
+4. Open AssetRipper and Click File > Open Folder and navigate to the root install folder of Blue Prince.
+5. Once AssetRipper has imported all the files click Export > All Files.
+6. Click select folder and choose an output folder.
+7. Click Export UnityProject to export it as a Unity project.
+8. In Unity Hub go to the Projects tab. Click Add > "Add Project From Disk" and navigate to the project you exported via assetRipper.
+9. Open the project. It will launch in safe mode and give you errors.
+10. Navigate to the Project folder and go to ExportedProject\Assets\Plugins\Assembly-Csharp-firstpass\Rewired\Demos and delete the ControlRemappingDemo1.cs.
+11. Navigate to the "ExportedProject\Assets\Plugins\Assembly-CSharp-firstpass\Rewired\UI\ControlMapper\ControlMapper.cs" file and Go to line 152. Change it to:
+```
+public GUIInputField(GameObject gameObject) : base(gameObject)
+```
+12. Change line 156 to:
+```
+public GUIInputField(Button button, TMP_Text label) : base(button, label)
+```
+13. Change line 194 to:
+```
+public GUIToggle(GameObject gameObject) : base(gameObject)
+```
+14. Change line 198 to:
+```
+public GUIToggle(Toggle toggle, TMP_Text label) : base(toggle, label)
+```
+15. Save the file then navigate to ExportedProject\Assets\Plugins\Assembly-CSharp-firstpass\Rewired\Glyphs\UnityUI\UnityUITextMeshProGlyphHelper.cs and go to line 64 and add this line below it:
+```
+protected Tag() { }
+```
+16. Save the file and check for more errors, attempt to solve them in a similar fashion. You can ignore all of the warnings.
+
+17. The project will now attempt to open and will fail to open. Navigate to ExportedProject\Assets\ and open up the MainMenu.Unity file with Unity 6000.0.58f2. You now will be able to open most of the games prefabs by browsing for them in the asset brwoser in the bottom left. Some room prefabs may not open and will cause the scene to crash for unknown reasons.
+
+### Creating Asset Bundles
+
+1. First naviagate to ExportedProject\Assets\Editor then create a file. Call it something on theme that ends with ".cs". It will be a script for creating AssetBundles. Paste the following into it:
+```
+
+using UnityEditor;
+using System.IO;
+using UnityEngine;
+using System.Collections.Generic;
+
+public class BuildSubsetAssetBundles
+{
+    [MenuItem("Assets/Build Selected AssetBundles")]
+    static void BuildSpecificAssetBundles()
+    {
+        string assetBundleDirectory = "Assets/AssetBundles";
+        if (!Directory.Exists(assetBundleDirectory))
+        {
+            Directory.CreateDirectory(assetBundleDirectory);
+        }
+
+        List<AssetBundleBuild> builds = new List<AssetBundleBuild>();
+        string[] allAssetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+
+        // Example: Only build AssetBundles that start with "ap"
+        foreach (string bundleName in allAssetBundleNames)
+        {
+            if (bundleName.StartsWith("ap"))
+            {
+                AssetBundleBuild build = new AssetBundleBuild
+                {
+                    assetBundleName = bundleName,
+                    assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(bundleName)
+                };
+                builds.Add(build);
+            }
+        }
+
+        if (builds.Count > 0)
+        {
+            BuildPipeline.BuildAssetBundles(assetBundleDirectory,
+                                            builds.ToArray(),
+                                            BuildAssetBundleOptions.None,
+                                            BuildTarget.StandaloneWindows);
+            Debug.Log($"Built {builds.Count} specific AssetBundles.");
+        }
+        else
+        {
+            Debug.Log("No AssetBundles matching criteria found to build.");
+        }
+    }
+
+    [MenuItem("Assets/Log All AssetBundle Assignments")]
+    static void LogAllAssetBundleAssignments()
+    {
+        string[] allAssetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+        Debug.Log($"Total AssetBundles Defined: {allAssetBundleNames.Length}");
+        foreach (string bundleName in allAssetBundleNames)
+        {
+            string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(bundleName);
+            Debug.Log($"AssetBundle: {bundleName} (Assets: {assetPaths.Length})");
+            foreach (string path in assetPaths)
+            {
+                Debug.Log($"  - {path}");
+            }
+        }
+    }
+}
+```
+2. Save the file. Unity Editor will reload and recompile the script automatically.
+3. You will need to find a prefab file you want to add to the asset bundle. You can create a new prefab by dragging a game object from the hierarchy into the asset browser. You can then open it and edit as desired.
+4. Once you have chosen a asset bundle right click it in the asset browser and select "properties".
+5. At the bottom of properties select an assetbundle click new. Name it something starting with ap (unless you change the above script to only build assetbundles that start with whatever is relevant to your name). 
+6. Select the menu option Assets > "Build Selected AssetBundles" and the Asset bundle(s) will be build and exported to the ExportedProject\Assets\AssetBundles folder. 
+7. The asset bundle is now ready to import into the mod!
+   
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
