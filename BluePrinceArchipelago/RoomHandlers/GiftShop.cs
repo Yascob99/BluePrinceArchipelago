@@ -60,8 +60,7 @@ public class GiftShop : RoomHandler
 
             var shopItem = LocationMap[itemName];
 
-            // textComponent.text = shopItem.GetScoutHint();
-            textComponent.text = $"Placeholder {i}";
+            textComponent.text = shopItem.GetScoutHint();
 
             Logging.Log($"Set up Gift Shop item: {itemName} as {textComponent.text}");
         }

@@ -65,7 +65,7 @@ public static class ArchipelagoConsole
     public static void OnGUI()
     {
         //TODO add keyboard shortcut for hidding/unhidding. Prevent the input from causing the player to move until input has been submitted or window has been rehidden.
-        if (logLines.Count == 0) return;
+        // if (logLines.Count == 0) return;  
         Event e = Event.current;
         //Shows the Input Window
         if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash))
@@ -265,6 +265,8 @@ public static class CommandManager
         _LocalCommands["sync"] = new SyncCommand("Sync"); // New sync command for Archipelago data
         _LocalCommands["debug"] = new DebugCommand("Debug"); // Debug command for investigating game systems
         _LocalCommands["received"] = new ReceivedCommand("Received"); // Show received Archipelago items
+
+        _LocalCommands["collect"] = new CollectCommand("Collect"); // Collect location from the Archipelago item pool, for testing purposes.
     }
     private static ParsedCommand ParseCommand(string command)
     {
@@ -1008,7 +1010,7 @@ public class ReceivedCommand(string name) : Command(name)
             return;
         }
 
-        string subcommand = Args.Count > 0 ? Args[0].ToLower() : "all";
+        string subcommand = Args.Count > 0 ? Args[1].ToLower() : "all";
 
         if (subcommand == "rooms")
         {
@@ -1449,5 +1451,21 @@ public class DebugCommand(string name) : Command(name)
 
         ArchipelagoConsole.LogMessage($"Summary: {available} available, {removed} removed, {unknown} unknown");
         ArchipelagoConsole.LogMessage($"Total room engines: {roomEngines.transform.childCount}");
+    }
+}
+
+public class CollectCommand(string name) : Command(name)
+{
+    public override string Description => "Collects a location from the Archipelago item pool (for testing purposes).";
+
+    public override string Syntax => "Usage:\n\t/collect <LocationName>\n\nExample:\n\t/collect Closet First Entering";
+
+    public override void Run(List<string> Args)
+    {
+        var locationName = string.Join(" ", Args.Skip(1));
+        if (locationName.StartsWith("\"") && locationName.EndsWith("\""))
+            locationName = locationName[1..^1];
+
+        ModInstance.ModEventHandler.OnOtherLocation(locationName);
     }
 }

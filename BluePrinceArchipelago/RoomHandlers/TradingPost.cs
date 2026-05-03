@@ -1,11 +1,16 @@
-
+using System;
+using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Utils.Actions;
 using HarmonyLib;
+using Il2CppSystem.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.RoomHandlers
 {
     public class TradingPost : RoomHandler
     {
+        private PlayMakerFSM _ClickTradingPostColliderFSM;
+        private PlayMakerFSM _MoreButtonFSM;
         public TradingPost()
         {
             Logging.Log("Initializing Trading Post.");
@@ -13,34 +18,66 @@ namespace BluePrinceArchipelago.RoomHandlers
 
         public override void OnRoomDrafted(GameObject roomGameObject)
         {
-            
+            RoomGameObject = roomGameObject;
+            _ClickTradingPostColliderFSM = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR TRADE/Click Trading Post Collider").gameObject.GetFsm("FSM");
+            _MoreButtonFSM = UIOverlayCam.transform.Find("Trading Post Menu/Menu Buttons/more button").gameObject.GetFsm("FSM");
         }
 
-        [HarmonyPatch(typeof(TradeManager), nameof(TradeManager.RefreshTradingPairs))]
-        [HarmonyPostfix]
-        public static void Postfix(TradeManager __instance) {
-            Logging.Log("TradeManager RefreshTradingPairs Postfix called.");
-        }
-
-        [HarmonyPatch(typeof(TradeManager), nameof(TradeManager.SetTrade))]
-        [HarmonyPostfix]
-        public static void SetTradePostfix(TradeManager __instance)
+        public override void OnAfterRoomDrafted()
         {
-            Logging.Log("TradeManager SetTrade Postfix called.");
+            Logging.Log("Trading Post drafted. Setting up FSM hooks.");
+            SetupTradingPost();
         }
 
-        [HarmonyPatch(typeof(TradeManager), nameof(TradeManager.SetTradeOffer))]
-        [HarmonyPostfix]
-        public static void SetTradeOfferPostfix(TradeManager __instance)
+        private void SetupTradingPost()
         {
-            Logging.Log("TradeManager SetTradeOffer Postfix called.");
+            if (_ClickTradingPostColliderFSM == null || _MoreButtonFSM == null)
+            {
+                Logging.LogError("Trading Post FSMs not found. Cannot set up Trading Post.");
+                return;
+            }
+
+            var clickState = _ClickTradingPostColliderFSM.GetState("Click");
+            if (clickState == null)
+            {
+                Logging.LogError("Click state not found in Click Trading Post Collider FSM.");
+                return;
+            }
+
+            var moreClickState = _MoreButtonFSM.GetState("State 2");
+            if (moreClickState == null)
+            {
+                Logging.LogError("State 2 not found in More Button FSM.");
+                return;
+            }
+
+            clickState.AddLambdaMethod(OnTradingPostClicked);
+
+            for (int i = 0; i < clickState.Actions.Length; i++)
+            {
+                var action = clickState.Actions[i];
+                Logging.Log($"Click Trading Post Collider FSM Action {i}: {action.GetType().FullName}: {(action is MethodAction methodAction ? methodAction.Method?.Method.Name : "N/A")}");
+            }
+
+            moreClickState.AddLambdaMethod(OnMoreClicked);
+
+            for (int i = 0; i < moreClickState.Actions.Length; i++)
+            {
+                var action = moreClickState.Actions[i];
+                Logging.Log($"More Button FSM Action {i}: {action.GetType().FullName}: {(action is MethodAction methodAction ? methodAction.Method?.Method.Name : "N/A")}");
+            }
         }
 
-        [HarmonyPatch(typeof(TradeManager), nameof(TradeManager.GenerateNewOffers))]
-        [HarmonyPostfix]
-        public static void GenerateNewOffersPostfix(TradeManager __instance)
+        public static void OnTradingPostClicked(Action finishAction)
         {
-            Logging.Log("TradeManager GenerateNewOffers Postfix called.");
+            Logging.Log("Trading Post clicked.");
+            Logging.Log($"Finish action: {finishAction?.Method.Name ?? "null"}");
+        }
+
+        public static void OnMoreClicked(Action finishAction)
+        {
+            Logging.Log("Trading Post 'More' button clicked.");
+            Logging.Log($"Finish action: {finishAction?.Method.Name ?? "null"}");
         }
     }
-}
+}   

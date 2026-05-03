@@ -102,6 +102,11 @@ namespace BluePrinceArchipelago.Events
         public void OnCoffersDugUp(string roomName) {
             LocationFound.Invoke(this, new LocationEventArgs($"Dig up The {roomName.ToTitleCase()} Treasure Chest", "Treasure Dug Up"));
         }
+
+        public void OnOtherLocation(string locationName, string locationType = null) {
+            locationType ??= locationName.ToTitleCase();
+            LocationFound.Invoke(this, new LocationEventArgs(locationName.ToTitleCase(), locationType));
+        }
     }
 
 }

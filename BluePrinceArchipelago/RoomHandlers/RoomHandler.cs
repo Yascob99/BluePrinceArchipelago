@@ -4,6 +4,7 @@ namespace BluePrinceArchipelago.RoomHandlers;
 
 public abstract class RoomHandler
 {
+    protected static GameObject UIOverlayCam => GameObject.Find("UI OVERLAY CAM");
     protected GameObject RoomGameObject { get; set; }
 
     public abstract void OnRoomDrafted(GameObject roomGameObject);
