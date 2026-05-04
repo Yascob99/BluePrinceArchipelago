@@ -435,7 +435,14 @@ public class ArchipelagoClient
     /// <param name="locationName">the name of the location to complete</param>
     public void CheckLocation(string locationName) {
         long locationid = GetLocationFromName(locationName);
-        CheckLocation(locationid);
+        if (locationid > 0)
+        {
+            CheckLocation(locationid);
+        }
+        else 
+        {
+            Logging.LogWarning($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
+        }
     }
     /// <summary>
     /// Sends to the server that the location has been checked.

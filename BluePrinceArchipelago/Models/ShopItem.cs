@@ -43,7 +43,7 @@ namespace BluePrinceArchipelago.Models
                 return ScoutHint;
             } catch (Exception ex)
             {
-                Logging.LogError($"Error getting scout hint for '{Name}': {ex}");
+                Logging.LogWarning($"Unable to get scout hint for '{Name}': {ex}");
                 return Name; // Fallback to the original name in case of any errors
             }
         }
@@ -77,7 +77,7 @@ namespace BluePrinceArchipelago.Models
             } 
             catch (Exception ex)
             {
-                Logging.LogError($"Error getting scout hint for '{Name}': {ex}");
+                Logging.LogWarning($"Unable to get scout hint for '{Name}': {ex}");
                 return Name; // Fallback to the original name in case of any errors
             }
         }
@@ -119,7 +119,7 @@ namespace BluePrinceArchipelago.Models
             } 
             catch (Exception ex)
             {
-                Logging.LogError($"Error getting scout hint parts for '{Name}': {ex}");
+                Logging.LogWarning($"Unable to get scout hint parts for '{Name}': {ex}");
                 return [Name, .. DescriptionLines]; // Fallback to the original name and description in case of any errors
             }
         }

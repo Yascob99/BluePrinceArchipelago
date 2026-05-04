@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ namespace BluePrinceArchipelago.RoomHandlers
 {
     public class Bookshop : RoomHandler
     {
+        private static Dictionary<string, Models.BookshopItem> _BookshopItemMap = [];
         private GameObject _BookshopMenu;
         public Bookshop()
         {
@@ -46,15 +48,15 @@ namespace BluePrinceArchipelago.RoomHandlers
 
                 var target = itemNameText.text;
 
-                if (!Showroom.LocationMap.ContainsKey(target))
+                if (!_BookshopItemMap.ContainsKey(target))
                 {
-                    Showroom.LocationMap.Add(target, new Models.BookshopItem
+                    _BookshopItemMap.Add(target, new Models.BookshopItem
                     {
                         Name = target,
                     });
                 }
 
-                var shopItem = Showroom.LocationMap[target];
+                var shopItem = _BookshopItemMap[target];
 
                 itemNameText.text = shopItem.GetScoutHint();
             }
