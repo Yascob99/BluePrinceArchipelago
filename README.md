@@ -121,7 +121,9 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 	</PropertyGroup>
 </Project>
 ```
-7. After you have built for the first time you will need to copy the Archipelago dll into the BluePrinceArchipelago folder.  This will appear by default in `C:\Users\USERNAME\.nuget\packages\archipelago.multiclient.net\6.7.1\lib\net6.0\Archipelago.MultiClientNet.dll`.  Copy this into the Blue Prince\BepInEx\plugins\BluePrinceArchipelago folder
+7. After you have built for the first time you will need to copy the Archipelago dll into the BluePrinceArchipelago folder.  This will appear by default in `C:\Users\USERNAME\.nuget\packages\archipelago.multiclient.net\6.7.1\lib\net6.0\Archipelago.MultiClient.Net.dll`.  Copy this into the Blue Prince\BepInEx\plugins\BluePrinceArchipelago folder
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 
 ### Other Useful Tools
 

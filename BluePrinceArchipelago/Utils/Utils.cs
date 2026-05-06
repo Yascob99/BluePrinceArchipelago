@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using System.Globalization;
+using Archipelago.MultiClient.Net.Enums;
 using System.IO;
 
 namespace BluePrinceArchipelago.Utils
@@ -81,6 +82,28 @@ namespace BluePrinceArchipelago.Utils
 
         public static string ToTitleCase(this string str) {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
+        }
+    }
+
+    public static class EnumExtensions
+    {
+        public static string ItemFlagDescription(this ItemFlags flag)
+        {
+            if (flag == ItemFlags.None)
+                return "Filler";
+            
+            List<string> description = [];
+
+            if (flag.HasFlag(ItemFlags.Advancement))
+                description.Add("Progression");
+            
+            if (flag.HasFlag(ItemFlags.NeverExclude))
+                description.Add("Helpful");
+
+            if (flag.HasFlag(ItemFlags.Trap))
+                description.Add("Trap");
+
+            return string.Join(" ", description);
         }
     }
 }

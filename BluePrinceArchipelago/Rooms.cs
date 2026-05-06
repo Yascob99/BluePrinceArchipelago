@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;
+using BluePrinceArchipelago.RoomHandlers;
 
 namespace BluePrinceArchipelago.Core
 {
@@ -351,6 +352,9 @@ namespace BluePrinceArchipelago.Core
         private List<string> _PickerArrays = pickerArrays;
         public List<string> PickerArrays { get { return _PickerArrays; } set { _PickerArrays = value; } }
 
+        private RoomHandler _Handler = RoomHandler.CreateRoomHandler(name);
+        public RoomHandler Handler { get { return _Handler; } set { _Handler = value; } }
+
         private bool _IsUnlocked = isUnlocked;
         public bool IsUnlocked {
             get { return _IsUnlocked; }
@@ -490,21 +494,15 @@ namespace BluePrinceArchipelago.Core
         //Set the FSMBools in the appropriate room to ensure that the correct rooms show up in draft.
         public void Initialize()
         {
+            var pool = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
+            if (pool == null) return;
             if (!IsUnlocked)
             {
-                FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                if (poolRemoval != null)
-                {
-                    GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL")?.Value = false;
-                }
+                pool.Value = false;
             }
             else
             {
-                FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                if (poolRemoval != null)
-                {
-                    GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL")?.Value = false;
-                }
+                pool.Value = false;
             }
         }
         // Helper function that updates 1 array at a time.
@@ -558,7 +556,7 @@ namespace BluePrinceArchipelago.Core
                     FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
                     if (poolRemoval != null)
                     {
-                        GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL")?.Value = false;
+                        poolRemoval.Value = false;
                     } //Set the FSMBool to true so that it removes the room from the pool.
                 }
             }
