@@ -14,10 +14,11 @@ namespace BluePrinceArchipelago
     {
         [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
         [HarmonyPostfix]
-        static void PostFix(PmtSpawn __instance)
+        static void PostFix(PmtSpawn __instance, ref GameObject __state)
         {
             if (__instance != null)
             {
+                Logging.Log("PmtSpawn OnEnter Postfix called.");
                 GameObject obj = __instance.gameObject?.value;
                 string poolName = __instance.poolName?.value;
                 GameObject transformObj = __instance.spawnTransform?.value;
@@ -29,10 +30,16 @@ namespace BluePrinceArchipelago
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }
             }
+
+            if (__state != null)
+            {
+                Logging.Log("PmtSpawn OnEnter Postfix calling OnAfterRoomSpawned.");
+                ModInstance.OnAfterRoomSpawned(__state);
+            }
         }
         [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
         [HarmonyPrefix]
-        static void PreFix(PmtSpawn __instance) {
+        static void PreFix(PmtSpawn __instance, ref GameObject __state) {
             GameObject obj = __instance.gameObject?.value;
             string poolName = __instance.poolName?.value;
             GameObject transformObj = __instance.spawnTransform?.value;
@@ -40,6 +47,7 @@ namespace BluePrinceArchipelago
             if (poolName == "Rooms")
             {
                 ModInstance.OnRoomSpawned(obj, transformObj);
+                __state = obj; // Store the room GameObject in __state to be used in the Postfix
             }
             else
             {

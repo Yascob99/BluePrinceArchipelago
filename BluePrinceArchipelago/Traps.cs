@@ -22,9 +22,9 @@ namespace BluePrinceArchipelago.Core
     {
         public override void ActivateTrap()
         {
-            FsmBool isFrozen = ModInstance.GlobalPersistentManager.GetBoolVariable("YesterFreezer");
+            FsmBool isFrozen = ModInstance.GlobalPersistentManager?.GetBoolVariable("YesterFreezer");
             //If not in run and not already frozen.
-            if (ModInstance.IsInRun && !isFrozen.Value)
+            if (ModInstance.IsInRun && isFrozen != null && !isFrozen.Value)
             {
                 isFrozen.Value = true;
                 ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value = ModInstance.GemManager.GetIntVariable("Gems").Value;

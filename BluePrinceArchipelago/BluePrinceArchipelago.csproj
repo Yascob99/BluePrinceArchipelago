@@ -53,8 +53,10 @@
         <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.755" IncludeAssets="compile" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
