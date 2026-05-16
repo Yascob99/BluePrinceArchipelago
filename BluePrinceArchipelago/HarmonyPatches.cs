@@ -5,6 +5,7 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker.Ecosystem.Utils;
+using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -81,16 +82,23 @@ namespace BluePrinceArchipelago
         [HarmonyPrefix]
         static void PreFix(SendEvent __instance)
         {
-            FsmEventTarget target = __instance.eventTarget;
-            FsmEvent sendEvent = __instance.sendEvent;
-            string targetType = target == null ? "" : target.target.ToString();
-            DelayedEvent delayedEvent = __instance.delayedEvent;
-            FsmFloat delay = __instance.delay;
-            bool isDelayed = false;
-            if (delay.value > 0) {
-                isDelayed = true;
+            try
+            {
+                FsmEventTarget target = __instance.eventTarget;
+                FsmEvent sendEvent = __instance.sendEvent;
+                string targetType = target == null ? "" : target.target.ToString();
+                DelayedEvent delayedEvent = __instance.delayedEvent;
+                FsmFloat delay = __instance.delay;
+                bool isDelayed = false;
+                if (delay.value > 0) {
+                    isDelayed = true;
+                }
+                ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
             }
-            ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
+            catch (Exception e)
+            {
+                Logging.LogError(e, "EventPatches");
+            }
         }
 
         // Should be called after all the 
@@ -107,12 +115,21 @@ namespace BluePrinceArchipelago
         }
 
 
-        [HarmonyPatch(typeof(StatsLogger), "EndDayGUI")]
+        // [HarmonyPatch(typeof(StatsLogger), nameof(StatsLogger.EndDayGUI))]
+        // [HarmonyPostfix]
+        // static void EndDayGUIPostfix()
+        // {
+        //     Logging.Log("StatsLogger EndDayGUI Postfix called.", "DeathLink");
+        //     ModInstance.OnDayEnd();
+        // }
+        [HarmonyPatch(typeof(StatsLogger), nameof(StatsLogger.EndDay))]
         [HarmonyPostfix]
-        static void Postfix()
+        static void EndDayPostfix()
         {
+            Logging.Log("StatsLogger EndDay Postfix called.", "DeathLink");
             ModInstance.OnDayEnd();
         }
+
         [HarmonyPatch(typeof(GameObject), "SetActive")]
         [HarmonyPostfix]
         static void Postfix(GameObject __instance, bool value)

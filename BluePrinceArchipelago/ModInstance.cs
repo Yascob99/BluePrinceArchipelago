@@ -4,12 +4,14 @@ using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Models;
+using BluePrinceArchipelago.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Utils.Actions;
 using CirrusPlay.PortalLibrary;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Microsoft.Extensions.Logging;
 using Rewired.Integration.PlayMaker;
 using System;
 using System.Collections.Generic;
@@ -73,6 +75,8 @@ namespace BluePrinceArchipelago
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict = [];
         public static int SaveSlot = 5; // Will be used to better confirm the loaded archipelago run.
 
+        public static HashSet<string> SanctumsSolved = [];
+
         
         public ModInstance(IntPtr ptr) : base(ptr)
         {
@@ -129,6 +133,7 @@ namespace BluePrinceArchipelago
                 ModEventHandler.LocationFound += OnLocalLocationSent;
                 Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
                 Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
+                Harmony.CreateAndPatchAll(typeof(FsmRoomPatches), "FsmRoomPatch");
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
                 if (ArchipelagoClient.Authenticated)
@@ -154,6 +159,7 @@ namespace BluePrinceArchipelago
             Harmony.UnpatchID("ItemPatches");
             Harmony.UnpatchID("EventPatches");
             Harmony.UnpatchID("RoomPatches");
+            Harmony.UnpatchID("FsmRoomPatch");
         }
         // Fires off when an event is sent from an FSM to an FSM or GameObject. Sometime fails,
         public static void OnEventSend(FsmEventTarget target, FsmEvent sendEvent, FsmFloat delay, DelayedEvent delayedEvent, GameObject owner, bool isDelayed) {
@@ -273,6 +279,8 @@ namespace BluePrinceArchipelago
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 Plugin.ModItemManager.StartOfDay(dayNum);
                 Plugin.UniqueItemManager.StartOfDay();
+
+                Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
             }
         }
 
@@ -398,6 +406,9 @@ namespace BluePrinceArchipelago
         // Handles End of Day code, Currently unsure if this is good timing.
         public static void OnDayEnd() {
             IsInRun = false;
+            Logging.Log("Day End", "DeathLink");
+            var fsm = GameObject.Find("UI OVERLAY CAM")?.transform?.Find("END OF DAYS CHECKS")?.gameObject?.GetFsm("FSM");
+            Plugin.ArchipelagoClient.DeathLinkHandler.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
@@ -528,21 +539,174 @@ namespace BluePrinceArchipelago
             
         }
 
+        public static string GetPersistentDataString(string key)
+        {
+            return GlobalPersistentManager?.GetStringVariable(key)?.Value;
+        }
+
+        public static int GetPersistentDataInt(string key)
+        {
+            return GlobalPersistentManager?.GetIntVariable(key)?.Value ?? 0;
+        }
+
         public static void OnRecordEvent(EventID id)
         {
-            Logging.Log($"Stats being recorded for {id.ToString()}.");
-            if (ArchipelagoClient.Authenticated && id == EventID.Room_46_reached)
+            Logging.Log($"Stats being recorded for {id}.");
+            if (!ArchipelagoClient.Authenticated) return;
+
+            switch (id)
             {
-                if (ArchipelagoOptions.GoalType == GoalType.option_room46)
-                {
-                    Plugin.ArchipelagoClient.GoalCompleted();
-                }
-            }
-            else if (ArchipelagoClient.Authenticated && id == EventID.Antechamber_entered) {
-                if (ArchipelagoOptions.GoalType == GoalType.option_antechamber)
-                {
-                    Plugin.ArchipelagoClient.GoalCompleted();
-                }
+                case EventID.Room_46_reached:
+                    if (ArchipelagoOptions.GoalType == GoalType.option_room46)
+                    {
+                        Plugin.ArchipelagoClient.GoalCompleted();
+                        DeathLinkHandler.OnRoom46FirstEntered(); // prevent death link from triggering before the goal completion is sent
+                    }
+                    else
+                    {
+                        ModEventHandler.OnFirstDrafted("Room 46");
+                    }
+                    break;
+                case EventID.Antechamber_entered:
+                    if (ArchipelagoOptions.GoalType == GoalType.option_antechamber)
+                    {
+                        Plugin.ArchipelagoClient.GoalCompleted();
+                    }
+                    else
+                    {
+                        ModEventHandler.OnFirstDrafted("Antechamber");
+                    }
+                    break;
+                case EventID.Throne_Room_Event:
+                    if (ArchipelagoOptions.GoalType == GoalType.option_ascend)
+                    {
+                        Plugin.ArchipelagoClient.GoalCompleted();
+                    }
+                    break;
+                case EventID.West_Path_Gate_Unlocked:
+                    ModEventHandler.OnGateOpened("West Gate");
+                    break;
+                case EventID.Gemstone_Cavern_Unlocked:
+                    ModEventHandler.OnVACControlsSolved();
+                    break;
+                case EventID.Orchard_Unlocked:
+                    ModEventHandler.OnGateOpened("Orchard Gate");
+                    break;
+                case EventID.Boudoir_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Boudoir Safe");
+                    break;
+                case EventID.Drawing_Room_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Drawing Room Safe");
+                    break;
+                case EventID.Study_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Study Safe");
+                    break;
+                case EventID.Office_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Office Safe");
+                    break;
+                case EventID.Drafting_Studio_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Drafting Studio Safe");
+                    break;
+                case EventID.Mayait_Opened:
+                    ModEventHandler.OnGateOpened("Underpass Gate");
+                    break;
+                case EventID.Foundation_Elevator_Lowered:
+                    ModEventHandler.OnLowerFoundationElevator();
+                    break;
+                case EventID.Basement_Puzzle_Solved:
+                    ModEventHandler.OnOtherLocation("Open Basement to Reservoir Door", "Solve Basement Puzzle");
+                    break;
+                case EventID.Gas_Orchard:
+                    ModEventHandler.OnGasValveTurned("Orchard");
+                    break;
+                case EventID.Gas_Gemstone:
+                    ModEventHandler.OnGasValveTurned("Gemstone Cavern");
+                    break;
+                case EventID.Gas_Hovel:
+                    ModEventHandler.OnGasValveTurned("Hovel");
+                    break;
+                case EventID.Gas_Schoolhouse:
+                    ModEventHandler.OnGasValveTurned("Schoolhouse");
+                    break;
+                case EventID.Basement_Wall_Knocked:
+                    ModEventHandler.OnWallBreak("Basement to Sealed");
+                    break;
+                case EventID.Secret_Garden_Knocked:
+                    ModEventHandler.OnWallBreak("Secret Garden");
+                    break;
+                case EventID.Greenhouse_Knocked:
+                    ModEventHandler.OnWallBreak("Greenhouse");
+                    break;
+                case EventID.Weight_Room_Knocked:
+                    ModEventHandler.OnWallBreak("Weight Room");
+                    break;
+                case EventID.Cliffside_Knocked:
+                    ModEventHandler.OnWallBreak("Grounds to Sealed Entrance"); // This one is probably the wall in the chess room, but I want to check if its the grounds one, since that's the one we need a hook for.
+                    break;
+                case EventID.Conservatory_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Conservatory");
+                    break;
+                case EventID.Planetarium_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Planetarium");
+                    break;
+                case EventID.Lost_and_Found_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Lost and Found");
+                    break;
+                case EventID.Treasure_Trove_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Treasure Trove");
+                    break;
+                case EventID.Throne_Room_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Throne Room");
+                    break;
+                case EventID.Mechanarium_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Mechanarium");
+                    break;
+                case EventID.Tunnel_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Tunnel");
+                    break;
+                case EventID.Closed_Exhibit_Floorplan_Found:
+                    ModEventHandler.OnFloorplanFound("Closed Exhibit");
+                    break;
+                case EventID.Dovecote_Added:
+                    ModEventHandler.OnFloorplanFound("Dovecote");
+                    break;
+                case EventID.Kennel_Added:
+                    ModEventHandler.OnFloorplanFound("Kennel");
+                    break;
+                case EventID.Casino_Added:
+                    ModEventHandler.OnFloorplanFound("Casino");
+                    break;
+                case EventID.Clocktower_Added:
+                    ModEventHandler.OnFloorplanFound("Clock Tower");
+                    break;
+                case EventID.Classroom_Added:
+                    ModEventHandler.OnFloorplanFound("Classroom");
+                    break;
+                case EventID.Solarium_Added:
+                    ModEventHandler.OnFloorplanFound("Solarium");
+                    break;
+                case EventID.Vestibule_Added:
+                    ModEventHandler.OnFloorplanFound("Vestibule");
+                    break;
+                case EventID.Dormitory_Added:
+                    ModEventHandler.OnFloorplanFound("Dormitory");
+                    break;
+                case EventID.Tomb_Solved:
+                    ModEventHandler.OnTombPuzzleSolved("1");
+                    break;
+                case EventID.Sigil_Solved_Arch_Aries:
+                case EventID.Sigil_Solved_Corarica:
+                case EventID.Sigil_Solved_Eraja:
+                case EventID.Sigil_Solved_Fenn_Aries:
+                case EventID.Sigil_Solved_Mora_Jai:
+                case EventID.Sigil_Solved_Nuance:
+                case EventID.Sigil_Solved_Orinda_Aries:
+                case EventID.Sigil_Solved_Verra:
+                    ModEventHandler.OnSanctumSolve(id.ToString().Replace("Sigil_Solved_", "").Replace("_", " "));
+                    break;
+                case EventID.Torch_Chamber_Lit:
+                    ModEventHandler.OnOtherLocation("Open the Torch Chamber Shortcut", "Torch Chamber Lit");
+                    break;
             }
         }
 
@@ -591,7 +755,12 @@ namespace BluePrinceArchipelago
                 // Checks if the pool is in the house.
                 Func<ModRoom, bool> poolCheck = (room) => { return (Plugin.ModRoomManager.GetRoomByName("THE POOL").RoomInHouseCount > 0); };
                 // Checks if the garage is already in the house and can currently be drafted.
-                Func<ModRoom, bool> garageRankCheck = (room) => { return room.RoomInHouseCount == 0 && TheGrid.GetIntVariable("Taret Rank").Value > 2; };
+                Func<ModRoom, bool> garageRankCheck = (room) => { 
+                    int targetRank = TheGrid.GetIntVariable("Taret Rank").Value;
+                    int currentRank = TheGrid.GetIntVariable("Current Rank").Value;
+                    int targetTile = TheGrid.GetIntVariable("Target Tile").Value;
+                    return room.RoomInHouseCount == 0 && targetRank > 3 && targetRank < 9 && currentRank <= targetRank && targetTile % 5 != 0; // Rank 4-8, not drafted south, and only on the west side of the house.
+                    };
                 // Checks if the player is drafting north or south (not east/west).
                 Func<ModRoom, bool> verticalDraftCheck = (room) => { return TheGrid.GetBoolVariable("NorthSouth").Value; };
                 // Checks if the foundation can be drafted here.
@@ -627,7 +796,8 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("BALLROOM", ["FRONTBACK G - RARE", "CENTER - Tier 2 G", "EDGECREEP - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BILLIARD ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
-                Plugin.ModRoomManager.AddRoom("BOILER ROOM", ["CENTER - Tier 2 G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true);
+                Plugin.ModRoomManager.AddRoom("BOILER ROOM", ["CENTER - Tier 2 G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true)
+                    .AddDependency(poolCheck);
                 Plugin.ModRoomManager.AddRoom("BOOKSHOP", [""], true, false);
                 Plugin.ModRoomManager.AddRoom("BOUDOIR", ["SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BUNK ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
@@ -667,7 +837,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("GUEST BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("GYMNASIUM", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("HALLWAY", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CENTER - Tier 1"], true);
-                Plugin.ModRoomManager.AddRoom("HER LADYSHIP'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
+                Plugin.ModRoomManager.AddRoom("HER LADYSHIP\'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
                 Plugin.ModRoomManager.AddRoom("HOVEL", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
                 Plugin.ModRoomManager.AddRoom("KITCHEN", ["FRONT - Tier 1 G", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
                 Plugin.ModRoomManager.AddRoom("LABORATORY", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
@@ -678,7 +848,7 @@ namespace BluePrinceArchipelago
                     .AddDependency(poolCheck);
                 Plugin.ModRoomManager.AddRoom("LOCKSMITH", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], false);
-                Plugin.ModRoomManager.AddRoom("MAID'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
+                Plugin.ModRoomManager.AddRoom("MAID\'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("MAIL ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 3", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
                 Plugin.ModRoomManager.AddRoom("MASTER BEDROOM", ["EDGE ADVANCE EASTWING - G", "EDGE RETREAT EASTTWING -  G"], true);
                 Plugin.ModRoomManager.AddRoom("MECHANARIUM", ["CENTER - Tier 2"], false);
@@ -706,7 +876,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("SECRET PASSAGE", ["CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "Center Rare G"], true)
                     .AddDependency(secretPassageCheck);
                 Plugin.ModRoomManager.AddRoom("SECURITY", ["NORTH PIERCE G", "CENTER - Tier 1 G", "EDGEPIERCE G"], true);
-                Plugin.ModRoomManager.AddRoom("SERVANT'S QUARTERS", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
+                Plugin.ModRoomManager.AddRoom("SERVANT\'S QUARTERS", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
                 Plugin.ModRoomManager.AddRoom("SHOWROOM", ["FRONTBACK G - RARE", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "Center Rare G"], true);
                 Plugin.ModRoomManager.AddRoom("SHRINE", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);

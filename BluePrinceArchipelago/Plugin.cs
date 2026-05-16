@@ -38,6 +38,16 @@ namespace BluePrinceArchipelago {
         public static UniqueItemManager UniqueItemManager;
         public override void Load()
         {
+            Logging.SetLogLevel("Entrance Hall", LogLevel.Info);
+            Logging.SetLogLevel("Cloister", LogLevel.Info);
+            Logging.SetLogLevel("Basement", LogLevel.Info);
+            Logging.SetLogLevel("The Well", LogLevel.Info);
+            Logging.SetLogLevel("RoomHandler", LogLevel.Info);
+            Logging.SetLogLevel("ArchipelagoOptions", LogLevel.Info);
+            Logging.SetLogLevel("DeathLink", LogLevel.Info);
+            Logging.SetLogLevel("ModRoomManager", LogLevel.Info);
+            Logging.SetLogLevel("Items", LogLevel.Info);
+
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();
             ModRoomManager = new ModRoomManager();

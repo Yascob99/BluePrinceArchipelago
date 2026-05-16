@@ -275,12 +275,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Handle Permanent items (rewards that persist between days).
 - Reverse Engineering
     - [ ] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
-    - [ ] Find out how shops choose their inventory and how to change it based on our items.
+    - [x] Find out how shops choose their inventory and how to change it based on our items.
         - [ ] Find out how to add checks that can be bought at a randomized price (for other players).
     - [ ] Look into how the trading post functions and how to handle replacing the tradeable items with AP versions when appropriate.
-    - [ ] Find a place to hook for trunk goals.
+    - [x] Find a place to hook for trunk goals.
 - Goals
-    - [ ] Find where to hook for specific goals being achieved.
+    - [x] Find where to hook for specific goals being achieved.
 - Archipelago
     - [ ] Create the logic for handling events from the AP server.
     - [ ] Create a reconnect logic that will reconstruct as much of the state as possible from the Data from the AP Server.

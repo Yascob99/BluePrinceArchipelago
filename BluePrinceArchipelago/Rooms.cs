@@ -178,32 +178,36 @@ namespace BluePrinceArchipelago.Core
                     return room; 
                 }
             }
-                    return null;
-            }
+                return null;
+        }
 
-            /// <summary>
-            /// Adds a room with the same name for both the room and its game object path.
-            /// </summary>
-            public ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
-                return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted);
-            }
+        /// <summary>
+        /// Adds a room with the same name for both the room and its game object path.
+        /// </summary>
+        public ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
+            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted);
+        }
 
-            /// <summary>
-            /// Adds a room with a separate game object name (for special cases like classroom variants).
-            /// </summary>
-            /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
-            /// <param name="gameObjectName">The actual name of the game object in Room Engines (e.g., "CLASSROOM")</param>
-            public ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
-                string roomPath = "__SYSTEM/The Room Engines/" + gameObjectName;
-                GameObject roomObj = GameObject.Find(roomPath);
-                if (roomObj == null)
-                {
-                    Logging.LogWarning($"Could not find room GameObject at '{roomPath}' for room '{name}'");
-                }
-                return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
+        /// <summary>
+        /// Adds a room with a separate game object name (for special cases like classroom variants).
+        /// </summary>
+        /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
+        /// <param name="gameObjectName">The actual name of the game object in Room Engines (e.g., "CLASSROOM")</param>
+        public ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
+            string roomPath = "__SYSTEM/The Room Engines/" + gameObjectName;
+            GameObject roomObj = GameObject.Find(roomPath);
+            if (roomObj == null)
+            {
+                Logging.LogWarning($"Could not find room GameObject at '{roomPath}' for room '{name}'", "ModRoomManager");
             }
+            if (name == "CLASSROOM")
+            {
+                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
+            }
+            return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
+        }
 
-            public void UpdateRoomPools() {
+        public void UpdateRoomPools() {
             UpdateRoomsInHouse();
             Logging.Log("Updating Room Pools");
             foreach (ModRoom room in _Rooms) {
@@ -302,7 +306,11 @@ namespace BluePrinceArchipelago.Core
 
             // Add other special mappings here as needed in the future
 
-            return null;
+            return apRoomName switch
+            {
+                "Progressive Classroom" => "CLASSROOM", // Map all classroom variants to the base classroom name
+                _ => null
+            };
         }
 
         public void UpdateCurrentPickerArrays() {
@@ -327,6 +335,29 @@ namespace BluePrinceArchipelago.Core
         }
     }
 
+    public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted)
+    {
+        private int _HighestDrafted = 0;
+        public override bool HasBeenDrafted { 
+            get { return RoomPoolCount <= _HighestDrafted; } 
+            set {
+                var beforeDraftCount = Plugin.ModRoomManager.GetRoomByName("CLASSROOM").RoomInHouseCount;
+                if (beforeDraftCount > _HighestDrafted)
+                {
+                    Logging.LogWarning($"More classrooms in house that highest classroom entered, one of the classrooms was probably missed", "ClassRoom");
+                }
+
+                if (value && RoomPoolCount > _HighestDrafted)
+                {
+                    int classroomNumber = _HighestDrafted + 1;
+                    string classroomNumberStr = classroomNumber < 9 ? classroomNumber.ToString() : "Exam";
+                    ModInstance.ModEventHandler.OnClassroomFirstDrafted(classroomNumberStr);
+                    _HighestDrafted += 1;
+                }
+            }     
+        }
+    }
+
     /// <summary>
     /// Represents a room in the draft pool with all its state.
     /// </summary>
@@ -337,7 +368,7 @@ namespace BluePrinceArchipelago.Core
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
-    public class ModRoom(String name, String gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false)
+    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false)
     {
         private string _Name = name;
         public string Name { get { return _Name; } set { _Name = value; } }
@@ -399,7 +430,7 @@ namespace BluePrinceArchipelago.Core
 
         // Stores if the room has been drafted for tracking checks.
         private bool _HasBeenDrafted = hasBeenDrafted;
-        public bool HasBeenDrafted { 
+        public virtual bool HasBeenDrafted { 
             get { return _HasBeenDrafted; } 
             set {
                 //Send the room drafted event on the first time this room is drafted only.

@@ -16,7 +16,7 @@ using static Rewired.UI.ControlMapper.ControlMapper;
 
 namespace BluePrinceArchipelago.Core
 {
-    public class UniqueItem(string name, GameObject gameObject, bool isUnlocked, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
+    public class UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
     {
 
         private bool _IsUnique = true;
@@ -30,6 +30,13 @@ namespace BluePrinceArchipelago.Core
         public bool IsPrespawn { get; set; }
 
         private bool _HasBeenFound = false;
+
+        private ItemSanityType _SanityType = sanityType;
+        public ItemSanityType SanityType
+        {
+            get { return _SanityType; }
+            set { _SanityType = value; }
+        }
 
         public bool ModelReplaced { get; set; }
 
@@ -50,6 +57,10 @@ namespace BluePrinceArchipelago.Core
 
         public void RemoveFromPool()
         {
+            if (!ApplySanity())
+            {
+                return;
+            }
             //If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
             if (HasBeenFound && !IsUnlocked)
             {
@@ -67,6 +78,10 @@ namespace BluePrinceArchipelago.Core
 
         public override void AddItemToInventory()
         {
+            if (!ApplySanity())
+            {
+                return;
+            }
             bool isSpawned = false;
             if (!IsUnlocked)
             {
@@ -124,6 +139,19 @@ namespace BluePrinceArchipelago.Core
                     }
                 }
             }
+        }
+
+        public bool ApplySanity()
+        {
+            return SanityType switch
+            {
+                ItemSanityType.None => false,
+                ItemSanityType.Standard => ArchipelagoOptions.StandardItemSanity,
+                ItemSanityType.Workshop => ArchipelagoOptions.WorkshopSanity,
+                ItemSanityType.UpgradeDisk => ArchipelagoOptions.UpgradeDiskSanity,
+                ItemSanityType.Key => ArchipelagoOptions.KeySanity,
+                _ => false,
+            };
         }
     }
 
@@ -214,7 +242,7 @@ namespace BluePrinceArchipelago.Core
             if (state != null)
             {
                 //If the item is not unlocked, prevent it from being added to inventory.
-                if (!item.IsUnlocked)
+                if (!item.IsUnlocked && item.ApplySanity())
                 {
                     //Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
@@ -233,7 +261,7 @@ namespace BluePrinceArchipelago.Core
             if (state != null)
             {
                 //If the item is not unlocked, prevent it from being added to inventory.
-                if (!item.IsUnlocked)
+                if (!item.IsUnlocked && item.ApplySanity())
                 {
                     //Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
@@ -252,7 +280,7 @@ namespace BluePrinceArchipelago.Core
             if (state != null)
             {
                 //If the item is not unlocked, prevent it from being added to inventory.
-                if (!item.IsUnlocked)
+                if (!item.IsUnlocked && item.ApplySanity())
                 {
                     //Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
@@ -555,5 +583,15 @@ namespace BluePrinceArchipelago.Core
             }
             return null;
         }
+    }
+
+    public enum ItemSanityType
+    {
+        None,
+        Standard,
+        Workshop,
+        UpgradeDisk,
+        Key,
+        SpecialShop,
     }
 }

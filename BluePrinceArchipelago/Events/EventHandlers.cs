@@ -1,4 +1,5 @@
-﻿using BluePrinceArchipelago.Core;
+﻿using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Utils;
 using System;
 
@@ -23,10 +24,14 @@ namespace BluePrinceArchipelago.Events
         public event LocationHandler LocationFound;
 
         //Triggers the OnFirstDrafted Event
-        public void OnFirstDrafted(ModRoom room)
-        {
-            LocationFound.Invoke(this, new LocationEventArgs($"{room.Name.ToTitleCase()} First Entering", "First Draft Room"));
+        public void OnFirstDrafted(ModRoom room) => OnFirstDrafted(room.Name);
+        public void OnFirstDrafted(string roomName) {
+            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering", "First Draft Room"));
         }
+        public void OnClassroomFirstDrafted(string classroomNumber) {
+            LocationFound.Invoke(this, new LocationEventArgs($"Classroom {classroomNumber} First Entering", "First Draft Room"));
+        }
+
         public void OnFirstFound(ModItem item) {
             LocationFound.Invoke(this, new LocationEventArgs($"{item.Name.ToTitleCase()} First Pickup", "Item First Pickup"));
         }
@@ -101,6 +106,16 @@ namespace BluePrinceArchipelago.Events
         }
         public void OnCoffersDugUp(string roomName) {
             LocationFound.Invoke(this, new LocationEventArgs($"Dig up The {roomName.ToTitleCase()} Treasure Chest", "Treasure Dug Up"));
+        }
+        public void OnSanctumSolve(string sanctumName) {
+            if (ArchipelagoOptions.GoalType == GoalType.option_sanctum) 
+            {
+                ModInstance.SanctumsSolved.Add(sanctumName);
+                if (ModInstance.SanctumsSolved.Count >= ArchipelagoOptions.GoalSanctumSolves) 
+                {
+                    Plugin.ArchipelagoClient.GoalCompleted();
+                }
+            }
         }
 
         public void OnOtherLocation(string locationName, string locationType = null) {
