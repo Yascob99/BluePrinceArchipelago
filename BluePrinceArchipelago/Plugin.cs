@@ -49,7 +49,8 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("DeathLink", LogLevel.Info);
             Logging.SetLogLevel("ModRoomManager", LogLevel.Info);
             Logging.SetLogLevel("Items", LogLevel.Info);
-            Logging.SetLogLevel("Events", LogLevel.Info);
+            //Logging.SetLogLevel("Events", LogLevel.Info);
+            //Logging.SetLogLevel("StatEvents", LogLevel.Info);
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();
@@ -67,6 +68,7 @@ namespace BluePrinceArchipelago {
             GameObject.DontDestroyOnLoad(ModObject);
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
             ModObject.AddComponent<ModInstance>();
+            ModObject.AddComponent<PlayMakerFSM>(); //Add A PlayMakerFSM to be used for Events.
             State.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");

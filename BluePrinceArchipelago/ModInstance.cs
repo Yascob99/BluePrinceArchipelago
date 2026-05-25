@@ -53,6 +53,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM TradingPostSelection = new();
         public static PlayMakerFSM EndGameClicker = new();
         public static PlayMakerFSM RoomText = new();
+        public static PlayMakerFSM APEventFSM = new();
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -82,6 +83,7 @@ namespace BluePrinceArchipelago
         private void Start()
         {
             SceneManager.sceneLoaded += (Action<Scene, LoadSceneMode>)OnSceneLoaded;
+            APEventFSM = Plugin.ModObject.GetComponent<PlayMakerFSM>();
         }
         IEnumerator LoadAllAssets()
         {
@@ -218,8 +220,13 @@ namespace BluePrinceArchipelago
                     ModItemManager.UpgradeDisks.OnPickup();
                 }
             }
-            else if (targetName == "Grotto Trigger" && eventName == "Go") { 
+            else if (targetName == "Grotto Trigger" && eventName == "Go")
+            {
 
+            }
+            else if (targetName == "Plan Picker" && eventName == "Go") {
+                //GameObject Menu = owner.transform.parent.parent.gameObject;
+                //if (owner )
             }
 
             string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
@@ -272,6 +279,8 @@ namespace BluePrinceArchipelago
             IsInRun = true;
             // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
+
+            PermanentUnlocks.Unlocks.AppleOrchard.PreventDefault();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
             Plugin.ModRoomManager.ResetRoomInHouseCounts();
@@ -570,7 +579,7 @@ namespace BluePrinceArchipelago
 
         public static void OnRecordEvent(EventID id)
         {
-            Logging.Log($"Stats being recorded for {id}.");
+            Logging.Log($"Stats being recorded for {id}.", "StatEvents");
             if (!ArchipelagoClient.Authenticated) return;
 
             switch (id)

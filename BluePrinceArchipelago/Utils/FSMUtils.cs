@@ -1378,6 +1378,17 @@ namespace BluePrinceArchipelago.Utils
             return tmp[tmp.Length - 1];
         }
 
+        public static FsmEnum AddEnumVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.AddEnumVariable(name);
+
+        /// <inheritdoc cref="AddFloatVariable(PlayMakerFSM, string)"/>
+
+        public static FsmEnum AddEnumVariable(this Fsm fsm, string name)
+        {
+            var tmp = MakeNewVariableArray<FsmEnum>(fsm.Variables.EnumVariables, name);
+            fsm.Variables.EnumVariables = tmp;
+            return tmp[tmp.Length - 1];
+        }
+
         /// <inheritdoc cref="AddFloatVariable(PlayMakerFSM, string)"/>
 
         public static FsmVector2 AddVector2Variable(this PlayMakerFSM fsm, string name) => fsm.Fsm.AddVector2Variable(name);

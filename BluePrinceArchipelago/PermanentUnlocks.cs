@@ -1,19 +1,24 @@
 ﻿using BluePrinceArchipelago.Utils;
+using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static HutongGames.PlayMaker.FsmEventTarget;
 
 namespace BluePrinceArchipelago.PermanentUnlocks
 {
-
-    public static class PermanentUnlocks {
-        public static AppleOrchard AppleOrchard = new AppleOrchard();
-        public static GemstoneCavern GemstoneCavern = new GemstoneCavern();
-        public static WestGatePath WestGatePath = new WestGatePath();
-        public static BlackBridgeGrotto BlackBridgeGrotto = new BlackBridgeGrotto();
-        public static SatelliteDish SatelliteDish = new SatelliteDish();
-        //public static BlueTents BlueTents = new BlueTents(); Probably to be handled in gift shop code.
+    public static class Unlocks
+    {
+        public static AppleOrchard AppleOrchard = new();
+        public static GemstoneCavern GemstoneCavern = new();
+        public static WestGatePath WestGatePath = new();
+        public static BlackBridgeGrotto BlackBridgeGrotto = new();
+        public static SatelliteDish SatelliteDish = new();
     }
     public abstract class PermanentUnlock
     {
@@ -24,7 +29,7 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         public abstract void PreventDefault();
     }
 
-    public class AppleOrchard :PermanentUnlock
+    public class AppleOrchard:PermanentUnlock
     {
         // Override the Name
         public new string Name = "Apple Orchard";
@@ -46,8 +51,27 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         // Prevents the default Unlock.
         public override void PreventDefault()
         {
-            // Disables the send event of the unlock. May need to update later so I can hook into this for pickups later.
-            GameObject.Find("Letters Click Code (1)").GetComponent<PlayMakerFSM>().GetState("State 4").DisableFirstActionOfType<SendEvent>();
+            PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)").GetComponent<PlayMakerFSM>();
+            SendEvent sendAction = appleOrchard.GetState("State 4").GetFirstActionOfType<SendEvent>();
+            sendAction.eventTarget = new FsmEventTarget()
+            {
+                target = FsmEventTarget.EventTarget.GameObject,
+                gameObject = new FsmOwnerDefault()
+                {
+                    gameObject = Plugin.ModObject,
+                    ownerOption = OwnerDefaultOption.SpecifyGameObject
+                },
+                fsmName = "FSM",
+                sendToChildren = false,
+                excludeSelf = false
+            };
+            sendAction.sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition("OrchardUnlock").FsmEvent;
+
+
+        }
+
+        public void SetUnlocked() { 
+
         }
     }
     public class GemstoneCavern : PermanentUnlock
@@ -58,7 +82,6 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         // Run the unlock code.
         public override void Unlock()
         {
-            ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Gemstone_Cavern_Unlocked);
             // Activate Permanent Additions
             GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS").SetActive(true);
             // Activate Gemstone Caverns Icon
@@ -99,8 +122,7 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void PreventDefault()
         {
-            // Prevents the default from instead hooking the click back into the hover. Hopefully this doesn't break anything.
-            GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>().ChangeTransition("Off", "click", "Hover");
+            
         }
     }
 
@@ -158,125 +180,4 @@ namespace BluePrinceArchipelago.PermanentUnlocks
             //TODO
         }
     }
-
-    public class ConservatoryPickup : PermanentUnlock
-    {
-
-        public new string Name = "Conservatory Pickup";
-
-        public override void Unlock()
-        {
-            ModInstance.GlobalPersistentManager.GetBoolVariable("Treasure Trove Added").Value = true;
-        }
-
-        public override void PreventDefault()
-        {
-            FsmState TreasureTroveAdd = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>().GetState("State 8");
-
-        }
-    }
-
-    public class LostAndFoundPickup : PermanentUnlock
-    {
-        public new string Name = "Lost&Found Pickup";
-
-        public override void Unlock()
-        {
-            //TODO
-        }
-
-        public override void PreventDefault()
-        {
-            //TODO
-        }
-    }
-    public class MechnanariumPickup : PermanentUnlock
-    {
-        public new string Name = "Mechnarium Pickup";
-
-        public override void Unlock()
-        {
-            //TODO
-        }
-
-        public override void PreventDefault()
-        {
-            //TODO
-        }
-    }
-    public class ThroneRoomPickup : PermanentUnlock
-    {
-        public new string Name = "ThroneRoom Pickup";
-
-        public override void Unlock()
-        {
-            //TODO
-        }
-
-        public override void PreventDefault()
-        {
-            //TODO
-        }
-    }
-
-    public class PlanetariumPickup : PermanentUnlock
-    {
-        public new string Name = "Planetarium Pickup";
-
-        public override void Unlock()
-        {
-            //TODO
-        }
-
-        public override void PreventDefault()
-        {
-            //TODO
-        }
-    }
-
-    public class ClosedExhibitickup : PermanentUnlock
-    {
-        public new string Name = "Lost&Found Pickup";
-
-        public override void Unlock()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void PreventDefault()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class TreasureTrovePickup : PermanentUnlock
-    {
-        public new string Name = "Lost&Found Pickup";
-
-        public override void Unlock()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void PreventDefault()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class TunnelPickup : PermanentUnlock
-    {
-        public new string Name = "Lost&Found Pickup";
-
-        public override void Unlock()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void PreventDefault()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }
