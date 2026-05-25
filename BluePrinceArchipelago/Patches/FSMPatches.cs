@@ -100,10 +100,9 @@ namespace BluePrinceArchipelago.Patches
 
                     // Add the Commissary Buy Check
                     CommissaryState.InsertAction(1, new BoolTest() { boolVariable = TombDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    // Needs a Custom "You Bought" UI later
                     CommissaryState.InsertAction(2, activateAction);
-                    CommissaryState.InsertAction(2, addActions[0]);
-                    CommissaryState.InsertAction(3, addActions[1]);
+                    CommissaryState.InsertAction(3, addActions[0]);
+                    CommissaryState.InsertAction(4, addActions[1]);
 
                     // Add the Foundation Pickup Check
                     FoundationState.InsertAction(1, new BoolTest() { boolVariable = FoundationDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });

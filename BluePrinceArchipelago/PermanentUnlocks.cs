@@ -135,12 +135,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
 
@@ -150,12 +150,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
 
@@ -166,12 +166,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            
         }
     }
 
@@ -181,12 +181,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
     public class MechnanariumPickup : PermanentUnlock
@@ -195,12 +195,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
     public class ThroneRoomPickup : PermanentUnlock
@@ -209,12 +209,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
 
@@ -224,12 +224,12 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            throw new NotImplementedException();
+            //TODO
         }
 
         public override void PreventDefault()
         {
-            throw new NotImplementedException();
+            //TODO
         }
     }
 

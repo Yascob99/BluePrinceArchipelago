@@ -9,20 +9,12 @@ using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.RoomHandlers;
 using BluePrinceArchipelago.Utils;
-using BluePrinceArchipelago.Utils.Actions;
-using CirrusPlay.PortalLibrary;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Microsoft.Extensions.Logging;
-using Rewired.Integration.PlayMaker;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -231,7 +223,7 @@ namespace BluePrinceArchipelago
             }
 
             string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
-            Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}");
+            Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}", "Events");
         }
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
 
