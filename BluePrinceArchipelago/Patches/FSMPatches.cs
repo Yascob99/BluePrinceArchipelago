@@ -39,41 +39,40 @@ namespace BluePrinceArchipelago.Patches
             {
                 if (GlobalFSM.GetState("State 35").Actions.Length < 3)
                 {
-                    FsmBool ArchivesDisk = GlobalFSM.AddFsmBool("Archives Disk", false);
+                    // Create a boolean for tracking the current state of the 
+                    FsmBool ArchivesDisk = GlobalFSM.AddFsmBool("Archives Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("ARCHIVES"));
                     FsmState ArchiveState = GlobalFSM.GetState("State 35");
-                    FsmBool TradingPostDisk = GlobalFSM.AddFsmBool("Trading Post Dynamite Disk", false);
+                    FsmBool TradingPostDisk = GlobalFSM.AddFsmBool("Trading Post Dynamite Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("TRADING POST DYNAMITE"));
                     FsmState TradingPostState = GlobalFSM.GetState("State 27");
-                    FsmBool TombDisk = GlobalFSM.AddFsmBool("Tomb Disk", false);
+                    FsmBool TombDisk = GlobalFSM.AddFsmBool("Tomb Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("TOMB"));
                     FsmState TombState = GlobalFSM.GetState("State 23");
-                    FsmBool CommissaryDisk = GlobalFSM.AddFsmBool("Commissary Disk", false);
+                    FsmBool CommissaryDisk = GlobalFSM.AddFsmBool("Commissary Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("COMMISSARY"));
                     FsmState CommissaryState = GlobalFSM.GetState("State 33");
-                    FsmBool FoundationDisk = GlobalFSM.AddFsmBool("Foundation Disk", false);
+                    FsmBool FoundationDisk = GlobalFSM.AddFsmBool("Foundation Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("FOUNDATION"));
                     FsmState FoundationState = GlobalFSM.GetState("State 22");
-                    FsmBool FreezerDisk = GlobalFSM.AddFsmBool("Freezer Disk", false);
+                    FsmBool FreezerDisk = GlobalFSM.AddFsmBool("Freezer Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("FREEZER"));
                     FsmState FreezerState = GlobalFSM.GetState("State 25");
-                    FsmBool GarageDisk = GlobalFSM.AddFsmBool("Garage Disk", false);
+                    FsmBool GarageDisk = GlobalFSM.AddFsmBool("Garage Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("GARAGE"));
                     FsmState GarageState = GlobalFSM.GetState("State 30");
-                    FsmBool GreatHallDisk = GlobalFSM.AddFsmBool("Great Hall Disk", false);
+                    FsmBool GreatHallDisk = GlobalFSM.AddFsmBool("Great Hall Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("GREAT HALL"));
                     FsmState GreatHallState = GlobalFSM.GetState("State 29");
-                    FsmBool LostAndFoundDisk = GlobalFSM.AddFsmBool("Lost and Found Disk", false);
+                    FsmBool LostAndFoundDisk = GlobalFSM.AddFsmBool("Lost and Found Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("LOST AND FOUND"));
                     FsmState LostAndFoundState = GlobalFSM.GetState("State 28");
-                    FsmBool HLCDisk = GlobalFSM.AddFsmBool("Her Ladyships Chamber Disk", false);
+                    FsmBool HLCDisk = GlobalFSM.AddFsmBool("Her Ladyships Chamber Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("HER LADYSHIPS CHAMBER"));
                     FsmState HLCState = GlobalFSM.GetState("State 20");
-                    FsmBool MechanariumDisk = GlobalFSM.AddFsmBool("Mechanarium Disk", false);
+                    FsmBool MechanariumDisk = GlobalFSM.AddFsmBool("Mechanarium Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("MECHANARIUM"));
                     FsmState MechanariumState = GlobalFSM.GetState("State 24");
-                    FsmBool MorningRoomDisk = GlobalFSM.AddFsmBool("Morning Room Disk", false);
+                    FsmBool MorningRoomDisk = GlobalFSM.AddFsmBool("Morning Room Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("MORNING ROOM"));
                     FsmState MorningRoomState = GlobalFSM.GetState("State 21");
-                    FsmBool OfficeDisk = GlobalFSM.AddFsmBool("Office Disk", false);
+                    FsmBool OfficeDisk = GlobalFSM.AddFsmBool("Office Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("OFFICE"));
                     FsmState OfficeState = GlobalFSM.GetState("State 34");
-                    FsmBool VaultDisk = GlobalFSM.AddFsmBool("Vault Disk", false);
+                    FsmBool VaultDisk = GlobalFSM.AddFsmBool("Vault Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("VAULT"));
                     FsmState VaultState = GlobalFSM.GetState("State 26");
-                    FsmBool AbandonedMineDisk = GlobalFSM.AddFsmBool("Abandoned Mine Disk", false);
+                    FsmBool AbandonedMineDisk = GlobalFSM.AddFsmBool("Abandoned Mine Disk", ModItemManager.UpgradeDisks.RecievedLocations.Contains("ABANDONNED MINE"));
                     FsmState AbandonedMineState = GlobalFSM.GetState("State 31");
 
                     FsmState roomCheck = GlobalFSM.GetState("State 19");
                     StringContains[] checks = roomCheck.GetActionsOfType<StringContains>();
-
-                    //TODO replace with custom You Found UI for each Upgrade Disk.
 
                     FsmStateAction[] addActions = state.GetActionsOfType<ArrayListAdd>();
                     checks[0].containsString = "adyship"; // Fix HLC check

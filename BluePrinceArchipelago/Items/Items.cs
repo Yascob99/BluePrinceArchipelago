@@ -556,6 +556,11 @@ namespace BluePrinceArchipelago.Items
         public void StartOfDay(int dayNum)
         {
             AddAllPermanenentItems();
+            // Run upgrade disk start of day code if Upgrade Disk Sanity is on.
+            if (ArchipelagoOptions.UpgradeDiskSanity) {
+                UpgradeDisks.StartOfDay();
+            }
+            
         }
         // returns true if item was released from queue, returns false if no item in queue to release or failed to release the item.
 
@@ -1129,6 +1134,8 @@ namespace BluePrinceArchipelago.Items
 
     public static class RegisterItems
     {
+
+        // Generates the filler items based on the pool settings.
         public static void ParseAndRegisterFillerItems(string itemName, int poolcount)
         {
             if (itemName.ToLower().Contains("trap"))
@@ -1292,18 +1299,14 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetPreSpawnItem("PAPER CROWN"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetPreSpawnItem("GEAR WRENCH"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("COMPASS", Plugin.ModItemManager.GetPreSpawnItem("COMPASS"), false, ItemSanityType.Standard));
-
-            if (ArchipelagoOptions.WorkshopSanity)
-            {
-                Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", GameObjectExtensions.FindGameObject("ELECTROMAGNET"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY PURSE", GameObjectExtensions.FindGameObject("LUCKY PURSE"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("PICK SOUND AMPLIFIER", GameObjectExtensions.FindGameObject("PICK SOUND AMPLIFIER"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("BURNING GLASS", GameObjectExtensions.FindGameObject("BURNING GLASS"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("DETECTOR SHOVEL", GameObjectExtensions.FindGameObject("DETECTOR SHOVEL"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("DOWSING ROD", GameObjectExtensions.FindGameObject("DOWSING ROD"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("JACK HAMMER", GameObjectExtensions.FindGameObject("JACK HAMMER"), false));
-                Plugin.ModItemManager.AddItem(new UniqueItem("POWER HAMMER", GameObjectExtensions.FindGameObject("POWER HAMMER"), false));
-            }
+            Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", GameObjectExtensions.FindGameObject("ELECTROMAGNET"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY PURSE", GameObjectExtensions.FindGameObject("LUCKY PURSE"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("PICK SOUND AMPLIFIER", GameObjectExtensions.FindGameObject("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("BURNING GLASS", GameObjectExtensions.FindGameObject("BURNING GLASS"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DETECTOR SHOVEL", GameObjectExtensions.FindGameObject("DETECTOR SHOVEL"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DOWSING ROD", GameObjectExtensions.FindGameObject("DOWSING ROD"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("JACK HAMMER", GameObjectExtensions.FindGameObject("JACK HAMMER"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("POWER HAMMER", GameObjectExtensions.FindGameObject("POWER HAMMER"), false, ItemSanityType.Workshop));
 
             foreach (var entry in ArchipelagoOptions.FillerItemDistribution) {
                 if (entry.Value > 0) {

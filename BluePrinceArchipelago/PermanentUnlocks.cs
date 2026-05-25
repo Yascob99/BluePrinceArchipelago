@@ -166,12 +166,15 @@ namespace BluePrinceArchipelago.PermanentUnlocks
 
         public override void Unlock()
         {
-            //TODO
+            ModInstance.GlobalPersistentManager.GetBoolVariable("Treasure Trove Added").
         }
 
         public override void PreventDefault()
         {
-            
+            FsmState TreasureTroveAdd = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>().GetState("State 8");
+
+            // Disable the add action.
+            TreasureTroveAdd.GetFirstActionOfType<SetFsmBool>().variableName
         }
     }
 

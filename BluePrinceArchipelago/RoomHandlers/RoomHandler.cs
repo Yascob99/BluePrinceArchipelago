@@ -46,8 +46,6 @@ public abstract class RoomHandler
             "LOCKSMITH" => new Locksmith(),
             "TRADING POST" => new TradingPost(),
             "DRAFTING STUDIO" => new DraftingStudio(),
-            "OBSERVATORY" => new Observatory(),
-            "STUDY" => new Study(),
             "CLOISTER" => new Cloister(),
             "ENTRANCE HALL" => new EntranceHall(),
             "CLOSED EXHIBIT" => new ClosedExhibit(),
