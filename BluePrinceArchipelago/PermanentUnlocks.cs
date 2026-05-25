@@ -2,13 +2,7 @@
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using UnityEngine;
-using static HutongGames.EasingFunction;
 
 namespace BluePrinceArchipelago.PermanentUnlocks
 {
@@ -153,6 +147,125 @@ namespace BluePrinceArchipelago.PermanentUnlocks
     public class BlueTents : PermanentUnlock
     {
         public new string Name = "Blue Tents";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ConservatoryPickup : PermanentUnlock
+    {
+
+        public new string Name = "Conservatory Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class LostAndFoundPickup : PermanentUnlock
+    {
+        public new string Name = "Lost&Found Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class MechnanariumPickup : PermanentUnlock
+    {
+        public new string Name = "Mechnarium Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ThroneRoomPickup : PermanentUnlock
+    {
+        public new string Name = "ThroneRoom Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PlanetariumPickup : PermanentUnlock
+    {
+        public new string Name = "Planetarium Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ClosedExhibitickup : PermanentUnlock
+    {
+        public new string Name = "Lost&Found Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TreasureTrovePickup : PermanentUnlock
+    {
+        public new string Name = "Lost&Found Pickup";
+
+        public override void Unlock()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreventDefault()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TunnelPickup : PermanentUnlock
+    {
+        public new string Name = "Lost&Found Pickup";
 
         public override void Unlock()
         {

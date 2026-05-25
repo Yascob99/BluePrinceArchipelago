@@ -19,8 +19,8 @@ namespace BluePrinceArchipelago.RoomHandlers
         public override void OnRoomDrafted(GameObject roomGameObject)
         {
             RoomGameObject = roomGameObject;
-            _ClickTradingPostColliderFSM = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR TRADE/Click Trading Post Collider").gameObject.GetFsm("FSM");
-            _MoreButtonFSM = UIOverlayCam.transform.Find("Trading Post Menu/Menu Buttons/more button").gameObject.GetFsm("FSM");
+            _ClickTradingPostColliderFSM = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR TRADE/Click Trading Post Collider")?.GetComponent<PlayMakerFSM>(); ;
+            _MoreButtonFSM = UIOverlayCam.transform.Find("Trading Post Menu/Menu Buttons/more button")?.GetComponent<PlayMakerFSM>(); ;
         }
 
         public override void OnAfterRoomDrafted()

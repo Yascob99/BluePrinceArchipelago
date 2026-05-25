@@ -4,6 +4,8 @@ using BepInEx.Unity.IL2CPP;
 using BluePrince;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
+using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
@@ -45,11 +47,8 @@ namespace BluePrinceArchipelago {
             UniqueItemManager = new UniqueItemManager();
             Harmony.CreateAndPatchAll(typeof(ManagerPatches), "ManagerPatches");
             _instance = this;
-            string assetBundlePath = System.IO.Path.Combine(AssetsFolderPath, "apprefabs.ap");
-            if (System.IO.File.Exists(assetBundlePath))
-            {
-                AssetBundle = AssetExtensions.LoadAssetFile(assetBundlePath);
-            }
+            string assetBundlePath = System.IO.Path.Combine(AssetsFolderPath, "apprefabs");
+            AssetBundle = AssetExtensions.LoadAssetFile(assetBundlePath);
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();

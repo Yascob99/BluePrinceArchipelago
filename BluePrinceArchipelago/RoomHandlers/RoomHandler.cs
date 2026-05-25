@@ -20,6 +20,9 @@ public abstract class RoomHandler
             "GIFT SHOP" => new GiftShop(),
             "LOCKSMITH" => new Locksmith(),
             "TRADING POST" => new TradingPost(),
+            "DRAFTING STUDIO" => new DraftingStudio(),
+            "OBSERVATORY" => new Observatory(),
+            "STUDY" => new Study(),
             _ => null
         };
     }

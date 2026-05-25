@@ -1,10 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
+using HutongGames.PlayMaker.Actions;
+using Il2CppInterop.Runtime;
+using StableNameDotNet;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
@@ -41,10 +51,14 @@ namespace BluePrinceArchipelago.Utils
     }
     public static class AssetExtensions {
 
-        //Fix for older versions of Bepinex where this version of the function isn't available.
-        public static T LoadAsset<T>(this AssetBundle bundle, string assetPath) where T : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
-        { 
-            return bundle.LoadAsset(assetPath).TryCast<T>();
+        public static string GetAssetPath(this AssetBundle bundle, string name) {
+            string[] names = bundle.GetAllAssetNames();
+            for (int i = 0; i < names.Length; i++) {
+                if (names[i].Contains("/" + name.ToLower())){
+                    return names[i];
+                }
+            }
+            return "";
         }
 
         public static AssetBundle LoadAssetFile(string filePath)
@@ -65,15 +79,24 @@ namespace BluePrinceArchipelago.Utils
     }
     public static class TransformExtensions
     {
-        public static Transform FindRecursive(this Transform transform, string name)
+        public static Transform FindRecursive(this Transform transform, string name, bool caseinsensitive = false)
         {
             Queue<Transform> queue = new Queue<Transform>();
             queue.Enqueue(transform);
             while (queue.Count > 0)
             {
                 Transform current = queue.Dequeue();
-                if (current.name == name && current != transform)
+                if (caseinsensitive)
+                {
+                    if (current.name.ToLower() == name.ToLower() && current != transform)
+                    {
+                        return current;
+                    }
+                }
+                else if (current.name == name && current != transform)
+                {
                     return current;
+                }
 
                 for (int i = 0; i < current.childCount; i++)
                     queue.Enqueue(current.GetChild(i));
@@ -86,12 +109,71 @@ namespace BluePrinceArchipelago.Utils
         public static string ToTitleCase(this string str) {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
         }
+
+        // Borrowed from https://stackoverflow.com/questions/6426017/word-wrap-to-x-lines-instead-of-maximum-width-least-raggedness. Divides a series of words into their least ragged form.
+        public static string Minragged(this string text, int n = 3)
+        {
+            var words = text.Split();
+
+            var cumwordwidth = new List<int>();
+            cumwordwidth.Add(0);
+
+            foreach (var word in words)
+                cumwordwidth.Add(cumwordwidth[cumwordwidth.Count - 1] + word.Length);
+
+            var totalwidth = cumwordwidth[cumwordwidth.Count - 1] + words.Length - 1;
+
+            var linewidth = (double)(totalwidth - (n - 1)) / n;
+
+            var cost = new Func<int, int, double>((i, j) =>
+            {
+                var actuallinewidth = Math.Max(j - i - 1, 0) + (cumwordwidth[j] - cumwordwidth[i]);
+                return (linewidth - actuallinewidth) * (linewidth - actuallinewidth);
+            });
+
+            var best = new List<List<Tuple<double, int>>>();
+
+            var tmp = new List<Tuple<double, int>>();
+            best.Add(tmp);
+            tmp.Add(new Tuple<double, int>(0.0f, -1));
+            foreach (var word in words)
+                tmp.Add(new Tuple<double, int>(double.MaxValue, -1));
+
+            for (int l = 1; l < n + 1; ++l)
+            {
+                tmp = new List<Tuple<double, int>>();
+                best.Add(tmp);
+                for (int j = 0; j < words.Length + 1; ++j)
+                {
+                    var min = new Tuple<double, int>(best[l - 1][0].Item1 + cost(0, j), 0);
+                    for (int k = 0; k < j + 1; ++k)
+                    {
+                        var loc = best[l - 1][k].Item1 + cost(k, j);
+                        if (loc < min.Item1 || (loc == min.Item1 && k < min.Item2))
+                            min = new Tuple<double, int>(loc, k);
+                    }
+                    tmp.Add(min);
+                }
+            }
+
+            var lines = new List<string>();
+            var b = words.Length;
+
+            for (int l = n; l > 0; --l)
+            {
+                var a = best[l][b].Item2;
+                lines.Add(string.Join(" ", words, a, b - a));
+                b = a;
+            }
+
+            lines.Reverse();
+            return lines.Join("\n");
+        }
     }
     public static class GameObjectExtensions {
 
         public static GameObject FindGameObject(string name)
         {
-            Logging.Log(name);
             foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
             {
                 if (go != null)
@@ -101,9 +183,27 @@ namespace BluePrinceArchipelago.Utils
                         return go;
                     }
                 }
+
             }
+            Logging.Log($"Unable to Find GameObject with name: {name}");
             return null;
 
+        }
+        public static void DestroyAllChildren(this GameObject go) {
+            for (int i = 0; i < go.transform.childCount; i++) { 
+                Transform child = go.transform.GetChild(i);
+                GameObject.Destroy(child.gameObject);
+            }
+        }
+        public static void MoveChildrenTo(this GameObject from, GameObject to) {
+            Transform[] children = new Transform[from.transform.childCount];
+            for (int i = 0; i < from.transform.childCount; i++)
+            {
+                children[i] = from.transform.GetChild(i);
+            }
+            foreach (Transform child in children) {
+                child.parent = to.transform;
+            }
         }
     }
     public static class EnumExtensions

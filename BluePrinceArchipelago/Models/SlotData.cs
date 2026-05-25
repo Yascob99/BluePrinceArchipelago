@@ -32,7 +32,6 @@ namespace BluePrinceArchipelago.Models
         [JsonProperty("special_shop_sanity")]
         public bool SpecialShopSanity { get; set; }
 
-        //TODO remove this once the APworld is no longer sending it.
         [JsonProperty("item_logic_mode")]
         public ItemLogicMode ItemLogicMode { get; set; }
 

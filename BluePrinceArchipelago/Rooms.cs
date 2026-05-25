@@ -18,7 +18,7 @@ namespace BluePrinceArchipelago.Core
         public bool IsForcingDraft = false;
 
         public static List<string> VanillaRooms = [];
-        public static List<string> CantCopy = ["ANTECHAMBER", "ENTERANCE HALL", "ROOM 46", "FOUNDATION", ""];
+        public static List<string> CantCopy = ["ANTECHAMBER", "ENTRANCE HALL", "ROOM 46", "FOUNDATION", ""];
 
         public static List<string> CurrentPickerArrays = [];
 
@@ -535,8 +535,19 @@ namespace BluePrinceArchipelago.Core
                         }
                     }
                 }
+                // Check room drafting dependencies and if the dependencies are not met remove all copies from the pool.
+                foreach (Func<ModRoom, bool> dependency in Dependencies)
+                {
+                    if (!dependency(this))
+                    {
+                        if (count > 0) {
+                            RemoveFromPool(array, count);
+                        }
+                        return;
+                    }
+                }
                 // If the room has at least one copy currently in the pool
-                if (count > 0 && _IsUnlocked && !_UseVanilla)
+                if ((count > 0 && _IsUnlocked && !_UseVanilla))
                 {
                     // check if there are more copies than there should be
                     if (count > RoomsLeftInPool)
