@@ -954,9 +954,9 @@ namespace BluePrinceArchipelago.Items
         private void AdjustAllowance(int count = 1)
         {
             int totalAllowance = ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value;
-            if (totalAllowance + 1 > 0)
+            if (totalAllowance + count > 0)
             {
-                ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value += 1;
+                ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value += count;
             }
             else
             {

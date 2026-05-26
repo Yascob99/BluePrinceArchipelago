@@ -280,7 +280,7 @@ namespace BluePrinceArchipelago
             // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
 
-            PermanentUnlocks.Unlocks.AppleOrchard.PreventDefault();
+            // PermanentUnlocks.Unlocks.AppleOrchard.PreventDefault();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
             Plugin.ModRoomManager.ResetRoomInHouseCounts();
