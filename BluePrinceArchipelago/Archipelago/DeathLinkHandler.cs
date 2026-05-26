@@ -5,9 +5,7 @@ using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using BepInEx;
 using BepInEx.Unity.IL2CPP.Utils;
 using BluePrinceArchipelago.Utils;
-using HutongGames.PlayMaker;
 using System.Collections;
-using UnityEngine;
 
 namespace BluePrinceArchipelago.Archipelago;
 

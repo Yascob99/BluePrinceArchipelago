@@ -1,6 +1,4 @@
-using Archipelago.MultiClient.Net;
 using BluePrinceArchipelago.Models;
-using BluePrinceArchipelago.Utils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

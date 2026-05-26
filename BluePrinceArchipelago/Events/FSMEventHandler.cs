@@ -1,18 +1,21 @@
-﻿using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Utils;
+﻿using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BluePrinceArchipelago.Events
 {
     public static class FSMEventHandler
     {
         public static Dictionary<string, RegisteredFSMEvent> RegisteredEvents = new();
+
+        public static void RegisterEvents() {
+            RegisteredEvents["Apple Orchard Unlock"] = new AppleOrchardUnlock();
+
+            foreach (var REvent in RegisteredEvents){
+                REvent.Value.OnRegister();
+            }
+        }
     }
     public abstract class RegisteredFSMEvent {
 
@@ -39,7 +42,7 @@ namespace BluePrinceArchipelago.Events
                     sendToChildren = false,
                     excludeSelf = false
                 },
-                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(name).FsmEvent,
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
                 everyFrame = false,
                 delay = 0f
             };
@@ -51,12 +54,40 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnRegister()
         {
-            throw new NotImplementedException();
+            
         }
 
         public override void OnTrigger()
         {
-            PermanentUnlocks.Unlocks.AppleOrchard.Unlock();
+            PermanentUnlocks.Unlocks.AppleOrchard.FoundLocation();
+        }
+    }
+    public class WestGatePathUnlock : RegisteredFSMEvent
+    {
+
+        public new string Name = "WestGateUnlock";
+
+        public override void OnRegister()
+        {
+        }
+
+        public override void OnTrigger()
+        {
+            PermanentUnlocks.Unlocks.WestGatePath.FoundLocation();
+        }
+    }
+    public class BlackBridgeGrotto : RegisteredFSMEvent
+    {
+
+        public new string Name = "WestGateUnlock";
+
+        public override void OnRegister()
+        {
+        }
+
+        public override void OnTrigger()
+        {
+            PermanentUnlocks.Unlocks.WestGatePath.FoundLocation();
         }
     }
 }

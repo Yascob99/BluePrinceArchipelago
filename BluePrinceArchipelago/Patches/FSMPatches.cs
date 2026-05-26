@@ -1,7 +1,4 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.Core;
-using BluePrinceArchipelago.Items;
+﻿using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;

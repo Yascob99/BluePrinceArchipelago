@@ -193,7 +193,18 @@ namespace BluePrinceArchipelago
                     }
                 }
             }
-            if (targetName == "Trunk Counter" && eventName == "Update Subtract")
+            // Triggers whenever a custom Archipelago Event is sent to Archipelago FSM.
+            if (targetName == "Archipelago") {
+                // If the Event is registered, trigger the event.
+                if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
+                {
+                    FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
+                }
+                else {
+                    Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
+                }
+            }
+            else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
             {
                 TrunkManager.OnTrunkOpen();
             }
@@ -224,11 +235,6 @@ namespace BluePrinceArchipelago
             {
 
             }
-            else if (targetName == "Plan Picker" && eventName == "Go") {
-                //GameObject Menu = owner.transform.parent.parent.gameObject;
-                //if (owner )
-            }
-
             string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
             Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}", "Events");
         }

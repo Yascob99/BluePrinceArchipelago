@@ -1,13 +1,10 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.Archipelago;
+﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using LibCpp2IL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 
 

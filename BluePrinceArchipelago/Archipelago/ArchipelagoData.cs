@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Models;
-using HutongGames.PlayMaker.Actions;
 namespace BluePrinceArchipelago.Archipelago;
 
 public class ArchipelagoData (string uri = "localhost:38281", string slotName = "Player1", string password = "")

@@ -8,8 +8,6 @@ using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
