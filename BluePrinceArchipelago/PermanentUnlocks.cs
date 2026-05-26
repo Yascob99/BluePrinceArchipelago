@@ -65,7 +65,11 @@ namespace BluePrinceArchipelago.PermanentUnlocks
                 sendToChildren = false,
                 excludeSelf = false
             };
-            sendAction.sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition("OrchardUnlock").FsmEvent;
+            FsmEvent unlockEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>()?.GetGlobalTransition("OrchardUnlock")?.FsmEvent;
+            if (unlockEvent != null)
+            {
+                sendAction.sendEvent = unlockEvent;
+            }
 
 
         }
