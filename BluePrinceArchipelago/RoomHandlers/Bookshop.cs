@@ -12,7 +12,7 @@ namespace BluePrinceArchipelago.RoomHandlers
         public Bookshop()
         {
             Logging.Log("Initializing Bookshop.");
-            _BookshopMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Bookshop Menu")?.gameObject;
+            _BookshopMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.gameObject;
         }
 
         public override void OnRoomDrafted(GameObject roomGameObject)

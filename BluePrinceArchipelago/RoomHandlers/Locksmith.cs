@@ -12,7 +12,7 @@ public class Locksmith : RoomHandler
     public Locksmith()
     {
         Logging.Log("Initializing Locksmith.");
-        _LocksmithMenuGameObject = GameObject.Find("UI OVERLAY CAM").transform.Find("Locksmith Menu")?.gameObject;
+        _LocksmithMenuGameObject = GameObject.Find("UI OVERLAY CAM/Locksmith Menu")?.gameObject;
     }
 
     public override void OnRoomDrafted(GameObject roomGameObject)

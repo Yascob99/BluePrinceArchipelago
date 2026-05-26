@@ -1378,6 +1378,17 @@ namespace BluePrinceArchipelago.Utils
             return tmp[tmp.Length - 1];
         }
 
+        public static FsmEnum AddEnumVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.AddEnumVariable(name);
+
+        /// <inheritdoc cref="AddFloatVariable(PlayMakerFSM, string)"/>
+
+        public static FsmEnum AddEnumVariable(this Fsm fsm, string name)
+        {
+            var tmp = MakeNewVariableArray<FsmEnum>(fsm.Variables.EnumVariables, name);
+            fsm.Variables.EnumVariables = tmp;
+            return tmp[tmp.Length - 1];
+        }
+
         /// <inheritdoc cref="AddFloatVariable(PlayMakerFSM, string)"/>
 
         public static FsmVector2 AddVector2Variable(this PlayMakerFSM fsm, string name) => fsm.Fsm.AddVector2Variable(name);
@@ -1560,7 +1571,7 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="name">The name of the variable</param>
         /// <returns>The variable</returns>
 
-        public static FsmFloat GetFloatVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.GetFloatVariable(name);
+        public static FsmFloat GetFloatVariable(this PlayMakerFSM fsm, string name) => fsm?.Fsm?.GetFloatVariable(name);
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
@@ -1574,7 +1585,7 @@ namespace BluePrinceArchipelago.Utils
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
-        public static FsmInt GetIntVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.GetIntVariable(name);
+        public static FsmInt GetIntVariable(this PlayMakerFSM fsm, string name) => fsm?.Fsm?.GetIntVariable(name);
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
@@ -1588,7 +1599,7 @@ namespace BluePrinceArchipelago.Utils
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
-        public static FsmBool GetBoolVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.GetBoolVariable(name);
+        public static FsmBool GetBoolVariable(this PlayMakerFSM fsm, string name) => fsm?.Fsm?.GetBoolVariable(name);
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
@@ -1602,7 +1613,7 @@ namespace BluePrinceArchipelago.Utils
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 
-        public static FsmString GetStringVariable(this PlayMakerFSM fsm, string name) => fsm.Fsm.GetStringVariable(name);
+        public static FsmString GetStringVariable(this PlayMakerFSM fsm, string name) => fsm?.Fsm?.GetStringVariable(name);
 
         /// <inheritdoc cref="GetFloatVariable(PlayMakerFSM, string)"/>
 

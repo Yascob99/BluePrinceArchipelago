@@ -104,6 +104,17 @@ public static class ArchipelagoOptions
     /// </summary>
     public static int GoalSanctumSolves { get; private set; } = 1;
 
+
+    /// <summary>
+    /// The Ammount of each filler item in the pool.
+    /// </summary>
+    public static Dictionary<string, int> FillerItemDistribution { get; private set; } = new Dictionary<string, int>();
+
+    /// <summary>
+    /// The Ammount of each trap in the pool.
+    /// </summary>
+    public static Dictionary<string, int> TrapTypeDistribution { get; private set; } = new Dictionary<string, int>();
+
     // ============================================================
     // Methods
     // ============================================================
@@ -140,7 +151,8 @@ public static class ArchipelagoOptions
             DeathLinkMonkException = slotData.DeathLinkMonkException;
             GoalType = slotData.GoalType;
             GoalSanctumSolves = slotData.GoalSanctumSolves;
-
+            FillerItemDistribution = slotData.FillerItemDistribution;
+            TrapTypeDistribution = slotData.TrapTypeDistribution;
             IsLoaded = true;
             LogOptions();
         }
@@ -183,7 +195,8 @@ public static class ArchipelagoOptions
             DeathLinkMonkException = GetBool(slotData, "death_link_monk_exception", true);
             GoalType = (GoalType)GetInt(slotData, "goal_type", 0);
             GoalSanctumSolves = GetInt(slotData, "goal_sanctum_solves", 1);
-
+            FillerItemDistribution = GetDictionary<string, int>(slotData, "filler_item_distribution");
+            TrapTypeDistribution = GetDictionary<string, int>(slotData, "trap_type_distribution");
             IsLoaded = true;
             LogOptions();
         }
@@ -213,6 +226,8 @@ public static class ArchipelagoOptions
         DeathLinkMonkException = true;
         GoalType = GoalType.option_sanctum;
         GoalSanctumSolves = 1;
+        FillerItemDistribution = new Dictionary<string, int>();
+        TrapTypeDistribution = new Dictionary<string, int>();
         RawSlotData = null;
         IsLoaded = false;
     }
@@ -222,21 +237,30 @@ public static class ArchipelagoOptions
     /// </summary>
     public static void LogOptions()
     {
-        Logging.Log("=== Archipelago Options ===", "ArchipelagoOptions");
-        Logging.Log($"  RoomDraftSanity: {RoomDraftSanity}", "ArchipelagoOptions");
-        Logging.Log($"  LockedTrunksCommon: {LockedTrunksCommon}", "ArchipelagoOptions");
-        Logging.Log($"  LockedTrunksRare: {LockedTrunksRare}", "ArchipelagoOptions");
-        Logging.Log($"  LockedTrunksComplex: {LockedTrunksComplex}", "ArchipelagoOptions");
-        Logging.Log($"  ItemLogicMode: {ItemLogicMode}", "ArchipelagoOptions");
-        Logging.Log($"  StandardItemSanity: {StandardItemSanity}", "ArchipelagoOptions");
-        Logging.Log($"  WorkshopSanity: {WorkshopSanity}", "ArchipelagoOptions");
-        Logging.Log($"  UpgradeDiskSanity: {UpgradeDiskSanity}", "ArchipelagoOptions");
-        Logging.Log($"  KeySanity: {KeySanity}", "ArchipelagoOptions");
-        Logging.Log($"  DeathLinkType: {DeathLinkType}", "ArchipelagoOptions");
-        Logging.Log($"  DeathLinkGrace: {DeathLinkGrace}", "ArchipelagoOptions");
-        Logging.Log($"  DeathLinkMonkException: {DeathLinkMonkException}", "ArchipelagoOptions");
-        Logging.Log($"  GoalType: {GoalType}", "ArchipelagoOptions");
-        Logging.Log($"  GoalSanctumSolves: {GoalSanctumSolves}", "ArchipelagoOptions");
+        Logging.Log("=== Archipelago Options ===");
+        Logging.Log($"  RoomDraftSanity: {RoomDraftSanity}");
+        Logging.Log($"  LockedTrunksCommon: {LockedTrunksCommon}");
+        Logging.Log($"  LockedTrunksRare: {LockedTrunksRare}");
+        Logging.Log($"  LockedTrunksComplex: {LockedTrunksComplex}");
+        Logging.Log($"  ItemLogicMode: {ItemLogicMode}");
+        Logging.Log($"  StandardItemSanity: {StandardItemSanity}");
+        Logging.Log($"  WorkshopSanity: {WorkshopSanity}");
+        Logging.Log($"  UpgradeDiskSanity: {UpgradeDiskSanity}");
+        Logging.Log($"  KeySanity: {KeySanity}");
+        Logging.Log($"  DeathLinkType: {DeathLinkType}");
+        Logging.Log($"  DeathLinkGrace: {DeathLinkGrace}");
+        Logging.Log($"  DeathLinkMonkException: {DeathLinkMonkException}");
+        Logging.Log($"  GoalType: {GoalType}");
+        Logging.Log($"  GoalSanctumSolves: {GoalSanctumSolves}");
+        Logging.Log($"  Filler Item Distribution:");
+        foreach (var entry in FillerItemDistribution) {
+            Logging.Log($"    {entry.Key} - {entry.Value}");
+        }
+        Logging.Log($"  Trap Distribution:");
+        foreach (var entry in TrapTypeDistribution)
+        {
+            Logging.Log($"    {entry.Key} - {entry.Value}");
+        }
     }
 
     /// <summary>
@@ -289,5 +313,20 @@ public static class ArchipelagoOptions
             return value?.ToString() ?? defaultValue;
         }
         return defaultValue;
+    }
+    // Left variable for if in the future we need additional Dictionary types.
+    private static Dictionary<TKey, TValue> GetDictionary<TKey, TValue>(Dictionary<string, object> data, string key) {
+        if (data.TryGetValue(key, out var value))
+        {
+            try {
+                Dictionary<TKey, TValue> dictValue = (Dictionary<TKey, TValue>)value;
+                return dictValue;
+            }
+            catch {
+                return new Dictionary<TKey, TValue>();
+            }
+           
+        }
+        return new Dictionary<TKey, TValue>();
     }
 }

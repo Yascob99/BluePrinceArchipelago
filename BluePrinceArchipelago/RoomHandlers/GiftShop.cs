@@ -13,7 +13,7 @@ public class GiftShop : RoomHandler
     public GiftShop()
     {
         Logging.Log("Initializing Gift Shop.");
-        _GiftShopMenuGameObject = GameObject.Find("UI OVERLAY CAM").transform.Find("Giftshop Menu")?.gameObject;
+        _GiftShopMenuGameObject = GameObject.Find("UI OVERLAY CAM/Giftshop Menu")?.gameObject;
     }
 
     public override void OnRoomDrafted(GameObject roomGameObject)
