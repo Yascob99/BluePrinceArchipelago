@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using BluePrince;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Items;
@@ -9,10 +8,6 @@ using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem.IO;
-using System;
-using System.IO;
 using System.Reflection;
 using UnityEngine;
 

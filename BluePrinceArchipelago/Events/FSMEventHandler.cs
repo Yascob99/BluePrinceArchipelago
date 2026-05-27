@@ -11,6 +11,8 @@ namespace BluePrinceArchipelago.Events
 
         public static void RegisterEvents() {
             RegisteredEvents["Apple Orchard Unlock"] = new AppleOrchardUnlock();
+            RegisteredEvents["West Gate Path Unlock"] = new WestGatePathUnlock();
+            RegisteredEvents["Blackbridge Grotto Unlock"] = new BlackBridgeGrotto();
 
             foreach (var REvent in RegisteredEvents){
                 REvent.Value.OnRegister();
@@ -65,7 +67,7 @@ namespace BluePrinceArchipelago.Events
     public class WestGatePathUnlock : RegisteredFSMEvent
     {
 
-        public new string Name = "WestGateUnlock";
+        public new string Name = "West Gate Path Unlock";
 
         public override void OnRegister()
         {
@@ -79,7 +81,7 @@ namespace BluePrinceArchipelago.Events
     public class BlackBridgeGrotto : RegisteredFSMEvent
     {
 
-        public new string Name = "WestGateUnlock";
+        public new string Name = "Blackbridge Grotto Unlock";
 
         public override void OnRegister()
         {

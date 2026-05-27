@@ -1,11 +1,8 @@
-﻿using BepInEx;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
-using BluePrince;
+﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.RoomHandlers;
 using BluePrinceArchipelago.Utils;
@@ -75,7 +72,8 @@ namespace BluePrinceArchipelago
 
         public static HashSet<string> SanctumsSolved = [];
 
-        
+        public static string PreviousSceneName { get; private set; } = "";
+
         public ModInstance(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
@@ -84,6 +82,9 @@ namespace BluePrinceArchipelago
         {
             SceneManager.sceneLoaded += (Action<Scene, LoadSceneMode>)OnSceneLoaded;
             APEventFSM = Plugin.ModObject.GetComponent<PlayMakerFSM>();
+            Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
+            Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
+            Harmony.CreateAndPatchAll(typeof(FsmRoomPatches), "FsmRoomPatch");
         }
         IEnumerator LoadAllAssets()
         {
@@ -115,7 +116,7 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Mount Holly Estate"))
             {
                 SceneLoaded = true;
-                StartCoroutine(LoadAllAssets().WrapToIl2Cpp());
+                
                 //Initialize all of the GameObjects
                 PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
                 Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
@@ -143,26 +144,34 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 InitializeRooms();
                 Plugin.ModRoomManager.SetAllVanilla();
-                TrunkManager.Initialize();
-                HasInitializedRooms = true;
-                ModEventHandler.LocationFound += OnLocalLocationSent;
-                Harmony.CreateAndPatchAll(typeof(RoomPatches), "RoomPatches");
-                Harmony.CreateAndPatchAll(typeof(ItemPatches), "ItemPatches");
-                Harmony.CreateAndPatchAll(typeof(FsmRoomPatches), "FsmRoomPatch");
+                
+               
+
+               
+
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
-                if (ArchipelagoClient.Authenticated)
+                if (scene.name != PreviousSceneName)
                 {
-                    RegisterItems.Register(); // Register the initial state of the items.
-                    Logging.Log("Scheduling delayed sync after scene load...");
+                    StartCoroutine(LoadAllAssets().WrapToIl2Cpp());
+                    ModEventHandler.LocationFound += OnLocalLocationSent;
+                    TrunkManager.Initialize();
+                    if (ArchipelagoClient.Authenticated)
+                    {
+                        RegisterItems.Register(); // Register the initial state of the items.
+                        Logging.Log("Scheduling delayed sync after scene load...");
+                    }
                 }
                 // Use Invoke to delay the sync - increased to 1 second for safety
                 Instance.Invoke(nameof(PerformDelayedSync), 1.0f);
+                HasInitializedRooms = true;
             }
             else {
                 // hackish, but based on my knowledge only one scene is loaded at a time.
                 SceneLoaded = false;
             }
+
+            PreviousSceneName = scene.name;
         }
         // Handles the mod object being destroyed somehow.
         private void OnDestroy()
@@ -441,7 +450,8 @@ namespace BluePrinceArchipelago
             IsInRun = false;
             Logging.Log("Day End", "DeathLink");
             var fsm = GameObject.Find("UI OVERLAY CAM")?.transform?.Find("END OF DAYS CHECKS")?.gameObject?.GetFsm("FSM");
-            Plugin.ArchipelagoClient.DeathLinkHandler.SendEndOfDayDeathLink(fsm);
+
+            Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
@@ -509,56 +519,7 @@ namespace BluePrinceArchipelago
 
         private void OnGUI()
         {
-            // show the mod is currently loaded in the corner
-            GUI.Label(new Rect(16, 116, 300, 20), Plugin.ModDisplayInfo);
             ArchipelagoConsole.OnGUI();
-
-            // Prevents tabbing from affecting the GUI fields (Was getting really annoying with alt-tabbing)
-            if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Tab || Event.current.character == '\t'))
-            {
-                Event.current.Use(); // Marks the event as used, stopping propagation
-            }
-
-            string statusMessage;
-            // show the Archipelago Version and whether we're connected or not
-            if (ArchipelagoClient.Authenticated)
-            {
-                // if your game doesn't usually show the cursor this line may be necessary
-                Cursor.visible = false;
-
-                statusMessage = " Status: Connected";
-                GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
-            }
-            else
-            {
-                // if your game doesn't usually show the cursor this line may be necessary
-                Cursor.visible = true;
-
-                statusMessage = " Status: Disconnected";
-                GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
-                GUI.Label(new Rect(16, 170, 150, 20), "Host: ");
-                GUI.Label(new Rect(16, 190, 150, 20), "Player Name: ");
-                GUI.Label(new Rect(16, 210, 150, 20), "Password: ");
-
-                ArchipelagoClient.ServerData.Uri = GUI.TextField(new Rect(150, 170, 150, 20),
-                    ArchipelagoClient.ServerData.Uri);
-                ArchipelagoClient.ServerData.SlotName = GUI.TextField(new Rect(150, 190, 150, 20),
-                    ArchipelagoClient.ServerData.SlotName);
-                ArchipelagoClient.ServerData.Password = GUI.TextField(new Rect(150, 210, 150, 20),
-                    ArchipelagoClient.ServerData.Password);
-
-                // requires that the player at least puts *something* in the slot name
-                if (GUI.Button(new Rect(16, 230, 100, 20), "Connect") &&
-                    !ArchipelagoClient.ServerData.SlotName.IsNullOrWhiteSpace())
-                {
-                    ConnectionData connData = new ConnectionData();
-                    connData.Uri = ArchipelagoClient.ServerData.Uri;
-                    connData.SlotName = ArchipelagoClient.ServerData.SlotName;
-                    connData.Password = ArchipelagoClient.ServerData.Password;
-                    State.UpdateServerDetails(connData);
-                    Plugin.ArchipelagoClient.Connect();
-                }
-            }
         }
         public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
         {
@@ -850,7 +811,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("BILLIARD ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BOILER ROOM", ["CENTER - Tier 2 G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true)
                     .AddDependency(poolCheck);
-                Plugin.ModRoomManager.AddRoom("BOOKSHOP", [""], true, false);
+                Plugin.ModRoomManager.AddRoom("BOOKSHOP", [""], true, true);
                 Plugin.ModRoomManager.AddRoom("BOUDOIR", ["SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BUNK ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("CASINO", ["FRONTBACK G - RARE", "EDGEPIERCE G", "EDGE ADVANCE EASTWING - G", "EDGE ADVANCE WESTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "NORTH PIERCE G", "CENTER - Tier 1 G", "CORNER - Tier 1 G"], false);

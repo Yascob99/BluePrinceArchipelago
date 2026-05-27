@@ -2,6 +2,7 @@
 using BepInEx.Unity.IL2CPP.UnityEngine;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
 using StableNameDotNet;
 using System;
@@ -33,6 +34,9 @@ public static class ArchipelagoConsole
     private static Rect SendCommandButton;
     private static List<string> PreviousCommands = [];
     private static int PreviousCommandPointer = -1;
+    private static CursorLockMode PreviousCursorLockstate = CursorLockMode.None;
+    private static bool PreviousCursorVisiblityState = false;
+    private static List<string> TextFieldNames = ["URI", "SlotName", "Password", "CommandText"];
 
     public static void Awake()
     {
@@ -64,13 +68,17 @@ public static class ArchipelagoConsole
 
     public static void OnGUI()
     {
-        //TODO add keyboard shortcut for hidding/unhidding. Prevent the input from causing the player to move until input has been submitted or window has been rehidden.
+        // Theoretically Should Prevent Keyboard Input when textinputs are focused.
+        
+        //TODO add keyboard shortcut for hiding/unhiding. Prevent the input from causing the player to move until input has been submitted or window has been rehidden.
         // if (logLines.Count == 0) return;  
         Event e = Event.current;
         //Shows the Input Window
         if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash))
         {
             Hidden = !Hidden;
+            PreviousCursorLockstate = Cursor.lockState;
+            PreviousCursorVisiblityState = Cursor.visible;
             UpdateWindow();
         }
         if (!Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Escape))
@@ -106,11 +114,71 @@ public static class ArchipelagoConsole
         if (GUI.Button(hideShowButton, Hidden ? "Show" : "Hide"))
         {
             Hidden = !Hidden;
+            PreviousCursorLockstate = Cursor.lockState;
+            PreviousCursorVisiblityState = Cursor.visible;
             UpdateWindow();
         }
 
         // draw client/server commands entry if not hidden.
-        if (Hidden) return;
+        if (Hidden) {
+            //When the console is hidden make sure keyboard controls are selectable.
+            ToggleKeyboardInput(false);
+            Cursor.lockState = PreviousCursorLockstate;
+            Cursor.visible = PreviousCursorVisiblityState;
+            return;
+        }
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        // show the mod is currently loaded in the corner
+        GUI.Label(new Rect(16, 116, 300, 20), Plugin.ModDisplayInfo);
+
+        // Prevents tabbing from affecting the GUI fields (Was getting really annoying with alt-tabbing)
+        if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == UnityEngine.KeyCode.Tab || Event.current.character == '\t'))
+        {
+            Event.current.Use(); // Marks the event as used, stopping propagation
+        }
+
+        string statusMessage;
+        // show the Archipelago Version and whether we're connected or not
+        if (ArchipelagoClient.Authenticated)
+        {
+            // if your game doesn't usually show the cursor this line may be necessary
+
+            statusMessage = " Status: Connected";
+            GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
+        }
+        else
+        {
+            // if your game doesn't usually show the cursor this line may be necessary
+
+            statusMessage = " Status: Disconnected";
+            GUI.Label(new Rect(16, 150, 300, 20), Plugin.APDisplayInfo + statusMessage);
+            GUI.Label(new Rect(16, 170, 150, 20), "Host: ");
+            GUI.Label(new Rect(16, 190, 150, 20), "Player Name: ");
+            GUI.Label(new Rect(16, 210, 150, 20), "Password: ");
+
+            GUI.SetNextControlName("URI");
+            ArchipelagoClient.ServerData.Uri = GUI.TextField(new Rect(150, 170, 150, 20),
+                ArchipelagoClient.ServerData.Uri);
+            GUI.SetNextControlName("SlotName");
+            ArchipelagoClient.ServerData.SlotName = GUI.TextField(new Rect(150, 190, 150, 20),
+                ArchipelagoClient.ServerData.SlotName);
+            GUI.SetNextControlName("Password");
+            ArchipelagoClient.ServerData.Password = GUI.PasswordField(new Rect(150, 210, 150, 20),
+                ArchipelagoClient.ServerData.Password, '*');
+            // requires that the player at least puts *something* in the slot name
+            if (GUI.Button(new Rect(16, 230, 100, 20), "Connect") &&
+                !ArchipelagoClient.ServerData.SlotName.IsNullOrWhiteSpace())
+            {
+                ConnectionData connData = new ConnectionData();
+                connData.Uri = ArchipelagoClient.ServerData.Uri;
+                connData.SlotName = ArchipelagoClient.ServerData.SlotName;
+                connData.Password = ArchipelagoClient.ServerData.Password;
+                State.UpdateServerDetails(connData);
+                Plugin.ArchipelagoClient.Connect();
+            }
+        }
+        GUI.SetNextControlName("CommandText");
         CommandText = GUI.TextField(CommandTextRect, CommandText);
         if (!CommandText.IsNullOrWhiteSpace() && (GUI.Button(SendCommandButton, "Send") || e.type == EventType.KeyDown && (e.keyCode == UnityEngine.KeyCode.Return || e.character == '\n')))
         {
@@ -130,6 +198,22 @@ public static class ArchipelagoConsole
                 PreviousCommandPointer = -1;
             }
         }
+        ToggleKeyboardInput(TextFieldNames.Contains(GUI.GetNameOfFocusedControl()));
+    }
+    private static void ToggleKeyboardInput(bool focused) {
+        var keyboard = Rewired.ReInput.controllers.Keyboard;
+        
+         if (focused)
+         {
+            if (keyboard.enabled)
+            {
+                keyboard.enabled = false;
+            }
+         }
+         else
+         {
+            keyboard.enabled = true;
+         }
     }
 
     public static void UpdateWindow()
