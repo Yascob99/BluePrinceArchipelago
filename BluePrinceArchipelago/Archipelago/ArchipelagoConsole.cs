@@ -34,8 +34,6 @@ public static class ArchipelagoConsole
     private static Rect SendCommandButton;
     private static List<string> PreviousCommands = [];
     private static int PreviousCommandPointer = -1;
-    private static CursorLockMode PreviousCursorLockstate = CursorLockMode.None;
-    private static bool PreviousCursorVisiblityState = false;
     private static List<string> TextFieldNames = ["URI", "SlotName", "Password", "CommandText"];
 
     public static void Awake()
@@ -77,8 +75,6 @@ public static class ArchipelagoConsole
         if (Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Slash))
         {
             Hidden = !Hidden;
-            PreviousCursorLockstate = Cursor.lockState;
-            PreviousCursorVisiblityState = Cursor.visible;
             UpdateWindow();
         }
         if (!Hidden && Input.GetKeyInt(BepInEx.Unity.IL2CPP.UnityEngine.KeyCode.Escape))
@@ -114,8 +110,7 @@ public static class ArchipelagoConsole
         if (GUI.Button(hideShowButton, Hidden ? "Show" : "Hide"))
         {
             Hidden = !Hidden;
-            PreviousCursorLockstate = Cursor.lockState;
-            PreviousCursorVisiblityState = Cursor.visible;
+            //PreviousCursorLockstate = Cursor.lockState;
             UpdateWindow();
         }
 
@@ -123,8 +118,6 @@ public static class ArchipelagoConsole
         if (Hidden) {
             //When the console is hidden make sure keyboard controls are selectable.
             ToggleKeyboardInput(false);
-            Cursor.lockState = PreviousCursorLockstate;
-            Cursor.visible = PreviousCursorVisiblityState;
             return;
         }
         Cursor.lockState = CursorLockMode.None;
