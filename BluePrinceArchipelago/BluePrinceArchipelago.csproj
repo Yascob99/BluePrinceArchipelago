@@ -83,7 +83,8 @@
         <Private>False</Private>
       </Reference>
       <Reference Include="Rewired_Core">
-        <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Blue Prince\BepInEx\interop\Rewired_Core.dll</HintPath>
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\Rewired_Core.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="Unity.TextMeshPro">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
