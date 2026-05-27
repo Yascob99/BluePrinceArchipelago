@@ -435,7 +435,7 @@ namespace BluePrinceArchipelago
             IsInRun = false;
             Logging.Log("Day End", "DeathLink");
             var fsm = GameObject.Find("UI OVERLAY CAM")?.transform?.Find("END OF DAYS CHECKS")?.gameObject?.GetFsm("FSM");
-            Plugin.ArchipelagoClient.DeathLinkHandler.SendEndOfDayDeathLink(fsm);
+            Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
