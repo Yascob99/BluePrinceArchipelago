@@ -270,7 +270,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - Rooms
     - [x] Ability to change initial draft pool and dynamically add back in rooms to the pool.
     - [x] Add ability to add extra copies of rooms to the pool
-    - [ ] Add better handling of certain rooms that rely on other events to be added to the pool (eg. Morning Room)
+    - [ ] Add better handling of certain rooms that rely on other events to be added to the pool (eg. Morning Room) - partial done
     - [ ] Add ways of better handling upgraded rooms.
 - Items
     - [ ] Create AP assets for replacement unique item locations
@@ -278,7 +278,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Handle Junk item rewards.
     - [ ] Handle Permanent items (rewards that persist between days).
 - Reverse Engineering
-    - [ ] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
+    - [x] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
     - [x] Find out how shops choose their inventory and how to change it based on our items.
         - [ ] Find out how to add checks that can be bought at a randomized price (for other players).
     - [ ] Look into how the trading post functions and how to handle replacing the tradeable items with AP versions when appropriate.

@@ -99,6 +99,10 @@ public class DeathLinkHandler
                 ArchipelagoConsole.LogMessage($"{cause}. Blocked by protection. Blocks remaining until next: {ArchipelagoOptions.DeathLinkProtection - _blockedDeathLinks}", "DeathLink");
                 return;
             }
+            else
+            {
+                _blockedDeathLinks = 0;
+            }
 
             ModInstance.Instance.StartCoroutine(KillPlayer(cause, deathLink));
         }
