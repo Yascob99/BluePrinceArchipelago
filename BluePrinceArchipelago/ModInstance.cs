@@ -95,7 +95,6 @@ namespace BluePrinceArchipelago
             
             Prefabs = GameObject.Instantiate(new GameObject("Prefabs"), Plugin.ModObject.transform);
             Prefabs.name = "prefabs";
-            Instance.StartCoroutine(Instance.LoadAllAssets().WrapToIl2Cpp());
         }
         IEnumerator LoadAllAssets()
         {
@@ -127,6 +126,7 @@ namespace BluePrinceArchipelago
                 if (!AppliedHarmony) {
                     Harmony.CreateAndPatchAll(typeof(FsmRoomPatches), "FsmRoomPatch");
                     Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches"); //Apply event patches on the main menu to get some data that is not accessible later. 
+                    Instance.StartCoroutine(Instance.LoadAllAssets().WrapToIl2Cpp());
                     AppliedHarmony = true;
                 }
                
@@ -335,11 +335,6 @@ namespace BluePrinceArchipelago
             int totalStars = StarManager.GetIntVariable("TotalStars").Value;
 
             State.CurrentDayNum = dayNum;
-            if (!FirstLoad)
-            {
-                // Reset the today's itemList unless this is the first load of today.
-                State.TodaysItems = new List<ItemInfo>();
-            }
             if (ArchipelagoClient.Authenticated)
             {
                 if (FirstLoad)
@@ -487,6 +482,8 @@ namespace BluePrinceArchipelago
 
             Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
+            State.CurrentDayNum += 1;
+            State.TodaysItems = new List<ItemInfo>();
         }
         public static void OnDraftBeforeInitialize(RoomDraftHelper instance)
         {

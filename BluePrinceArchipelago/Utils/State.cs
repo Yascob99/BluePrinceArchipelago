@@ -39,6 +39,10 @@ namespace BluePrinceArchipelago.Utils
 
         public static List<ItemInfo> TodaysItems = new();
 
+        public static List<ItemInfo> TempTodaysItems = new();
+
+        public static bool TodayLoaded = false;
+
         public static int CurrentDayNum = 1;
 
         public static void Initialize()
@@ -128,7 +132,7 @@ namespace BluePrinceArchipelago.Utils
         }
 
         public static void UpdateItemsByDay(ItemInfo item) {
-            State.UpdateItemsByDay(item);
+            ArchipelagoClient.ServerData.ItemsByDay[CurrentDayNum] = TodaysItems;
             UpdateItemsByDay(ArchipelagoClient.ServerData.ItemsByDay);
         }
         private static void UpdateItemsByDay(Dictionary<int, List<ItemInfo>> itemsByDay) {

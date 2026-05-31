@@ -34,13 +34,7 @@
         <IsPublishable>False</IsPublishable>
     </PropertyGroup>
 
-
-	<Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<Copy SourceFiles="$(MSBuildProjectDirectory)\assets\apprefabs" DestinationFolder="$(BluePrinceDir)\BepInEx\plugins\$(AssemblyName)" />
-	</Target>
-
 	<Target Name="ZipMod" AfterTargets="Build" Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <Copy SourceFiles="$(MSBuildProjectDirectory)\assets\apprefabs" DestinationFolder="bin\Release\$(AssemblyName)\assets" />
         <ZipDirectory SourceDirectory="bin\Release\$(AssemblyName)" DestinationFile="bin\Release\$(AssemblyName)-$(Version).zip" Overwrite="true" />
     </Target>
 
@@ -111,6 +105,9 @@
         <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
         <Private>False</Private>
       </Reference>
+      <EmbeddedResource Include="assets/apprefabs" />	
     </ItemGroup>
+
+	
 
 </Project>

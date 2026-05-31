@@ -10,6 +10,7 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago {
@@ -26,7 +27,6 @@ namespace BluePrinceArchipelago {
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         public const string APDisplayInfo = $"Archipelago v{ArchipelagoClient.APVersion}";
-        public static string AssetsFolderPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         public static AssetBundle AssetBundle { get; private set; }
         public ManualLogSource LogSource => Log;
         public static ArchipelagoClient ArchipelagoClient;
@@ -57,8 +57,7 @@ namespace BluePrinceArchipelago {
             ModItemManager = new ModItemManager();
             UniqueItemManager = new UniqueItemManager();
             _instance = this;
-            string assetBundlePath = System.IO.Path.Combine(AssetsFolderPath, "apprefabs");
-            AssetBundle = AssetExtensions.LoadAssetFile(assetBundlePath);
+            AssetBundle = AssetBundle.LoadAssetFromAssembly(AssetExtensions.GetResourceNameFromPath("assets/apprefabs"));
             Log.LogInfo($"Plugin {PluginGUID} is loaded!");
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();

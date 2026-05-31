@@ -567,9 +567,13 @@ public class ArchipelagoQueueManager {
         Logging.Log($"Attempting to receive Item: {item.ItemName}");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms)
         {
-            PermanentUnlock unlock = PermanentUnlocks.Unlocks.GetPermanentUnlock(item.ItemName);
-            if (unlock != null) {
-                unlock.UnlockItem();
+            if (ModInstance.IsInRun)
+            {
+                PermanentUnlock unlock = PermanentUnlocks.Unlocks.GetPermanentUnlock(item.ItemName);
+                if (unlock != null)
+                {
+                    unlock.UnlockItem();
+                }
             }
             // Checks if the item recieved is a Room (includes special mappings like classroom variants)
             if (Plugin.ModRoomManager.IsRoomItem(item.ItemName))
@@ -649,7 +653,7 @@ public class ArchipelagoQueueManager {
                     if (!ignoreState)
                     {
                         State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
-                        State.UpdateItemsByDay(item);
+                        State.TodaysItems.Add(item);
                     }
                     return true;
                 }
@@ -752,7 +756,7 @@ public class ArchipelagoQueueManager {
         ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
         if (!ignoreState)
         {
-            State.UpdateItemsByDay(item);
+            State.TodaysItems.Add(item);
             State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
         }
         
@@ -764,7 +768,7 @@ public class ArchipelagoQueueManager {
         ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
         if (!ignoreState)
         {
-            State.UpdateItemsByDay(item);
+            State.TodaysItems.Add(item);
             State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
         }
     }

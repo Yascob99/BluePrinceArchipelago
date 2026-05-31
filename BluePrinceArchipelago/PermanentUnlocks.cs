@@ -57,20 +57,20 @@ namespace BluePrinceArchipelago.PermanentUnlocks
             ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Orchard_Unlocked);
 
             // Activate Permanent Additions
-            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS").SetActive(true);
+            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
             // Activate Apple Orchard Icon
-            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/Apple Orchard Icon").SetActive(true);
+            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/Apple Orchard Icon")?.SetActive(true);
             // Set the Bool in the global persistent Manager to true.
             ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = true;
             // Unlocks the Gate (this one seems to do it without sounds).
-            GameObject.Find("Letters Click Code (1)").GetComponent<PlayMakerFSM>().GetState("State 4").EnableActionsOfType<SendEvent>();
+            GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>()?.GetState("State 4")?.EnableActionsOfType<SendEvent>();
         }
         // Prevents the default Unlock.
         public override void PreventDefault()
         {
-            PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)").GetComponent<PlayMakerFSM>();
-            appleOrchard.GetState("State 4").DisableActionsOfType<SendEvent>();
-            appleOrchard.GetState("State 4").AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
+            PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
+            appleOrchard.GetState("State 4")?.DisableActionsOfType<SendEvent>();
+            appleOrchard.GetState("State 4")?.AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
         }
         public override void FoundLocation()
         {
@@ -86,21 +86,19 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         // Run the unlock code.
         public override void UnlockItem()
         {
+            GameObject.Find("CULL GRID - GROUNDS/UNDERGROUND/Cull - Gemstone Cavern (once revealed)")?.SetActive(true);
             // Activate Permanent Additions
-            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS").SetActive(true);
+            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
             // Activate Gemstone Caverns Icon
-            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/Gemstone Cavern Icon").SetActive(true);
+            GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/Gemstone Cavern Icon")?.SetActive(true);
             // Activate and deactivate the required game objects.
-            GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/FAR CULL/_GAMEPLAY do not bake/Gemstone DOOR/Cave Door").SetActive(false);
-            GameObject.Find("CULL GRID - GROUNDS/UNDERGROUND/Cull - Gemstone Cavern (once revealed)").SetActive(true);
+            GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/FAR CULL/_GAMEPLAY do not bake/Gemstone DOOR/Cave Door")?.SetActive(false);
+           
             //This is set false by the FSM but needs to be set true. However if the player is too close this will not be rendered properly.
             //May add a proximity check later.
-            GameObject.Find("TERRAIN/EAST SECTOR/_GEM CAVE").SetActive(true); 
-            // Set the Bool in the global persistent Manager to true.
+            GameObject.Find("TERRAIN/EAST SECTOR/_GEM CAVE")?.SetActive(true); 
+            // Set the Bool in the Global Persistent Manager to true.
             ModInstance.GlobalPersistentManager.GetBoolVariable("Gemstone Cavern Open").Value = true;
-
-            // Invokes the regular Gemstone Cavern Add code. (This may cause glitches in it's current state, I will likely need to add a way of checking if there is a UI active and queue the unlock until the unlock is complete).
-            GameObject.Find("Gemstone Cavern Add").SetActive(true);
         }
 
         public override void PreventDefault() {
@@ -126,14 +124,13 @@ namespace BluePrinceArchipelago.PermanentUnlocks
             ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = true;
             
             //Run code to open gate.
-            GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>().SendEvent("Begin");
+            GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>()?.SendEvent("Begin");
         }
 
         public override void PreventDefault()
         {
-            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>();
-            PlayMakerFSM GateClosed = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Closed").GetComponent<PlayMakerFSM>();
-            GateOpened.GetState("Hover").ChangeTransition("click", "Off");
+            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
+            GateOpened?.GetState("Hover")>.ChangeTransition("click", "Off");
             
 
         }
@@ -159,15 +156,15 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         {
             // Needs to be invoked once the lab has loaded.
             // Grotto trigger still needs to be partially run to show the Lab Puzzle Animation. So only disabling the event that activates the adding of the Grotto.
-            FsmState State2 = GameObject.Find("Grotto Trigger").GetComponent<PlayMakerFSM>().GetState("State 2");
-            State2.DisableActionsOfType<SendEvent>();
-            State2.InsertAction(5, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
+            FsmState State2 = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>()?.GetState("State 2");
+            State2?.DisableActionsOfType<SendEvent>();
+            State2?.InsertAction(5, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
             // Lab Machine needs to be modified to still play solve animation even if grotto is unlocked, but not found.
-            PlayMakerFSM LabMachine = GameObject.Find("Lab Machine").GetComponent<PlayMakerFSM>();
-            FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
+            PlayMakerFSM LabMachine = GameObject.Find("Lab Machine")?.GetComponent<PlayMakerFSM>();
+            FsmBool GrottoOpen = LabMachine?.GetBoolVariable("Grotto Open");
             GrottoOpen.Value = _Solved;
             // Get rid of step that pulls the bool from elsewhere.
-            LabMachine.GetState("Chek if Grotto Is Open").DisableActionsOfType<GetFsmBool>();
+            LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
         }
         public override void FoundLocation()
         {

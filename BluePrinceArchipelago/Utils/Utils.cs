@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -50,22 +51,19 @@ namespace BluePrinceArchipelago.Utils
             }
             return "";
         }
-
-        public static AssetBundle LoadAssetFile(string filePath)
-        {
+        public static AssetBundle LoadAssetFromAssembly(this AssetBundle assetBundle, string resourceName) {
             using (MemoryStream ms = new MemoryStream())
             {
-                using (FileStream fs = File.OpenRead(filePath))
-                {
-                    fs.CopyTo(ms);
-                }
+                Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName).CopyTo(ms);
                 Il2CppSystem.IO.MemoryStream memoryStream = new Il2CppSystem.IO.MemoryStream(ms.ToArray());
-
-                AssetBundle loadFromMemoryInternal = AssetBundle.LoadFromStream(memoryStream);
-                return loadFromMemoryInternal;
+                AssetBundle bundle = AssetBundle.LoadFromStream(memoryStream);
+                return bundle;
             }
-
         }
+        public static string GetResourceNameFromPath(string filePath) { 
+            return "BluePrinceArchipelago." + filePath.Replace("\\", "/").Replace("/", ".");
+        }
+
     }
     public static class TransformExtensions
     {

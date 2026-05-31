@@ -193,10 +193,7 @@ namespace BluePrinceArchipelago.Items
                                         if (textChild.name.Contains("Prescription"))
                                         {
                                             textChild.name = "Prescription";
-                                            Vector3 localPos;
-                                            Quaternion localRot;
-                                            Prescription.GetLocalPositionAndRotation(out localPos, out localRot);
-                                            textChild.SetLocalPositionAndRotation(localPos, localRot);
+                                            textChild.SetLocalPositionAndRotation(Prescription.localPosition, Prescription.localRotation);
                                             textChild.transform.localScale = Prescription.transform.localScale;
 
                                             // Handle names ending in s with proper apostrophe convention
@@ -224,10 +221,7 @@ namespace BluePrinceArchipelago.Items
                                                 {
                                                     textChild.name = $"First Letter ({FirstLetterCount + 1})";
                                                     Transform FirstLetter = textObject.transform.FindChild($"First Letter ({FirstLetterCount + 1})");
-                                                    Vector3 localPos;
-                                                    Quaternion localRot;
-                                                    FirstLetter.GetLocalPositionAndRotation(out localPos, out localRot);
-                                                    textChild.SetLocalPositionAndRotation(localPos, localRot);
+                                                    textChild.SetLocalPositionAndRotation(FirstLetter.localPosition, FirstLetter.localRotation);
                                                     textChild.transform.localScale = FirstLetter.localScale;
                                                     FirstFirstLetter = textChild;
                                                     text.text = scoutItemName.Substring(0, 1);
@@ -249,10 +243,7 @@ namespace BluePrinceArchipelago.Items
                                                     textChild.name = $"Item Name ({ItemNameCount + 1})";
 
                                                     Transform ItemName = textObject.transform.FindChild($"Item Name ({ItemNameCount + 1})");
-                                                    Vector3 localPos;
-                                                    Quaternion localRot;
-                                                    ItemName.GetLocalPositionAndRotation(out localPos, out localRot);
-                                                    textChild.SetLocalPositionAndRotation(localPos, localRot);
+                                                    textChild.SetLocalPositionAndRotation(ItemName.localPosition, ItemName.localRotation);
                                                     textChild.transform.localScale = ItemName.localScale;
                                                     text.text = scoutItemName.ToUpper().Substring(1);
                                                     text.horizontalAlignment = HorizontalAlignmentOptions.Left;
@@ -265,11 +256,7 @@ namespace BluePrinceArchipelago.Items
                                             {
 
                                                 textChild.name = "Description";
-
-                                                Vector3 localPos;
-                                                Quaternion localRot;
-                                                Description.GetLocalPositionAndRotation(out localPos, out localRot);
-                                                textChild.SetLocalPositionAndRotation(localPos, localRot);
+                                                textChild.SetLocalPositionAndRotation(Description.transform.localPosition, Description.transform.localRotation);
                                                 textChild.transform.localScale = Description.transform.localScale;
                                                 if (DescriptionCount == 0)
                                                 {
