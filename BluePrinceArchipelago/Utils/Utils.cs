@@ -171,9 +171,13 @@ namespace BluePrinceArchipelago.Utils
                     if (go?.name?.ToUpper()?.Trim() == name.ToUpper().Trim())
                     {
                         // Make sure the object is not our prefab.
-                        if (go.transform?.parent?.name?.ToLower() != "archipelago")
+                        string goName = go?.transform?.parent?.name?.ToLower();
+                        if (goName != null)
                         {
-                            return go;
+                            if (goName != "archipelago")
+                            {
+                                return go;
+                            }
                         }
                     }
                 }
