@@ -89,6 +89,9 @@ namespace BluePrinceArchipelago.Items
                                 }
                                 GameObject.Destroy(APGO);
                             }
+                            else {
+                                Logging.LogWarning($"{item.Name}has already Been Replaced with an AP Item:");
+                            }
                         }
                         else
                         {

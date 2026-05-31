@@ -130,7 +130,7 @@ namespace BluePrinceArchipelago.PermanentUnlocks
         public override void PreventDefault()
         {
             PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
-            GateOpened?.GetState("Hover")>.ChangeTransition("click", "Off");
+            GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
             
 
         }

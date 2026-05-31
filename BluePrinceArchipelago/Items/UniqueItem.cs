@@ -235,7 +235,6 @@ namespace BluePrinceArchipelago.Items
         public void StartOfDay()
         {
             RemoveItemsFromPool();
-            //ReplaceCommissaryItemsWithAP();
         }
 
         private void RemoveItemsFromPool()
