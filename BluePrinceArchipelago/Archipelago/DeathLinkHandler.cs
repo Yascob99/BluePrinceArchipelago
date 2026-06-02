@@ -180,7 +180,9 @@ public class DeathLinkHandler
 
         if (!deathLinkEnabled) return;
 
-        SendDeathLink("Ran out of steps");
+        string deathLinkMsg = $"{slotName} ran out of steps";
+
+        SendDeathLink(deathLinkMsg);
     }
 
     public void SendEndOfDayDeathLink(PlayMakerFSM fsm)
@@ -204,7 +206,9 @@ public class DeathLinkHandler
             _bedroom = true;
         }
 
-        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink("End of Day");
+        string deathLinkMsg = $"{slotName} ended the day in {currentRoom}";
+
+        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
     }
 
     /// <summary>
