@@ -176,7 +176,7 @@ namespace BluePrinceArchipelago.Rooms
         public ModRoom GetRoomByName(string name)
         {
             foreach (ModRoom room in _Rooms) {
-                if (room.Name.ToUpper().Trim() == name.ToUpper().Trim()) {
+                if (room.Name.ToUpper().Trim() == name.ToUpper().Trim() || room.GameObjectName.ToUpper().Trim() == name.ToUpper().Trim()) {
                     return room; 
                 }
             }
@@ -186,8 +186,8 @@ namespace BluePrinceArchipelago.Rooms
         /// <summary>
         /// Adds a room with the same name for both the room and its game object path.
         /// </summary>
-        public ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, string poolAddVar = "") {
-            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted, poolAddVar);
+        public ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
+            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace BluePrinceArchipelago.Rooms
         /// </summary>
         /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
         /// <param name="gameObjectName">The actual name of the game object in Room Engines (e.g., "CLASSROOM")</param>
-        public ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, string poolAddVar = "") {
+        public ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
             string roomPath = "__SYSTEM/The Room Engines/" + gameObjectName;
             GameObject roomObj = GameObject.Find(roomPath);
             if (roomObj == null)
@@ -206,7 +206,7 @@ namespace BluePrinceArchipelago.Rooms
             {
                 return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
             }
-            return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted, poolAddVar));
+            return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
         }
 
         public void UpdateRoomPools()
@@ -385,7 +385,7 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
-    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, string poolAddVar = "")
+    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false)
     {
         private string _Name = name;
         public string Name { get { return _Name; } set { _Name = value; } }
@@ -406,8 +406,6 @@ namespace BluePrinceArchipelago.Rooms
         private bool _IsUnlocked = isUnlocked;
 
         public List<Func<ModRoom,bool>> Dependencies = new List<Func<ModRoom, bool>>();
-
-        public string PoolAddVar = poolAddVar;
 
         public bool IsUnlocked {
             get { return _IsUnlocked; }
@@ -442,10 +440,6 @@ namespace BluePrinceArchipelago.Rooms
                 {
                     // This is expected if scene isn't loaded yet
                     Logging.LogDebug($"Room '{_Name}': Room engine not found at '{roomPath}' (scene may not be loaded)");
-                }
-                // If the value is true and the PoolAddVar is not default
-                if (value && PoolAddVar != "") {
-                    ModInstance.GlobalPersistentManager.GetBoolVariable(PoolAddVar).Value = true;
                 }
                 _IsUnlocked = value;
                 Handler?.OnRoomUnlocked(this);
