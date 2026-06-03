@@ -61,7 +61,7 @@ namespace BluePrinceArchipelago.Items
             //If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
             if (HasBeenFound && !IsUnlocked)
             {
-                if (IsPrespawn && ModItemManager.PreSpawn.Contains(GameObj))
+                if (ModItemManager.PreSpawn.Contains(GameObj))
                 {
                     ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
                 }
@@ -112,7 +112,13 @@ namespace BluePrinceArchipelago.Items
                     ModItemManager.PreSpawn.Add(GameObj, "GameObject");
                     // Disable this game action so it doesn't try and display 2 UIs.
                     state.DisableActionsOfType<ActivateGameObject>();
-                    ModInstance.GlobalManager.SendEvent(GetPickUpEventName(Name));
+                    try
+                    {
+                        ModInstance.GlobalManager.SendEvent(GetPickUpEventName(Name));
+                    }
+                    catch {
+                        Logging.LogWarning($"Error While attempting to add {Name} to inventory.");
+                    }
                 }
             }
         }
@@ -165,6 +171,12 @@ namespace BluePrinceArchipelago.Items
                     if (!item.HasBeenFound)
                     {
                         ReplacePickup(item);
+                    }
+                    else
+                    {
+                        if (!item.IsUnlocked) {
+                            GameObject.Destroy(spawnedObj);
+                        }
                     }
                 }
                 else if (obj.name.ToUpper().Contains("UPGRADE"))

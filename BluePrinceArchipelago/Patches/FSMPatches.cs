@@ -247,17 +247,14 @@ namespace BluePrinceArchipelago.Patches
             //Planetarium
             PlayMakerFSM PlanetariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Planetarium Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState PlanetariumAddState = PlanetariumYesButton.GetState("State 8");
-            PlanetariumAddState.DisableActionsOfType<SetFsmBool>();
-            // Get Both SendEvents. One to copy, one to disable (manually).
+            PlanetariumAddState.DisableFirstActionOfType<SendEvent>();
+            // Get the second Send Event so it can be unfrozen.
             SendEvent[] SendEvents = PlanetariumAddState.GetActionsOfType<SendEvent>();
-            SendEvents[0].Enabled = false;
-            SendEvents[0].enabled = false;
             SendEvent Unfreeze = SendEvents[1];
 
             //Conservatory
             PlayMakerFSM ConservatoryYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Conservatory Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ConservatoryAddState = ConservatoryYesButton.GetState("State 8");
-            ConservatoryAddState.DisableActionsOfType<SetFsmBool>();
             ConservatoryAddState.DisableFirstActionOfType<SendEvent>();
 
             //Tunnel
@@ -268,101 +265,92 @@ namespace BluePrinceArchipelago.Patches
             //Throne Room
             PlayMakerFSM ThroneRoomYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Throne Room Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ThroneRoomAddState = ThroneRoomYesButton.GetState("Tomorrow");
-            ThroneRoomAddState.DisableActionsOfType<SetFsmBool>();
             ThroneRoomAddState.DisableFirstActionOfType<ActivateGameObject>();
+            ThroneRoomAddState.GetFirstActionOfType<SetFsmBool>().variableName = "Throne Room Added";
             // Throne Room normally calls a popup that unfreezes the player movement, however we don't want that to display so we deactivate it
             ThroneRoomAddState.AddAction(Unfreeze);
 
             //Treasure Trove
             PlayMakerFSM TreasureTroveYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TreasureTroveAddState = TreasureTroveYesButton.GetState("State 8");
-            TreasureTroveAddState.DisableActionsOfType<SetFsmBool>();
             TreasureTroveAddState.DisableFirstActionOfType<SendEvent>();
 
             //Mechanarium
             PlayMakerFSM MechanariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/MECHANARIUM Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState MechanariumAddState = MechanariumYesButton.GetState("State 8");
-            MechanariumAddState.DisableActionsOfType<SetFsmBool>();
             MechanariumAddState.DisableFirstActionOfType<SendEvent>();
 
             //Lost & Found
+            FsmBool LostAndFoundBool = ModInstance.GlobalPersistentManager.AddFsmBool("Lost & Found Unlocked", Plugin.ModRoomManager.GetRoomByName("LOST & FOUND").IsUnlocked);
             PlayMakerFSM LostandFoundYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Lost&Found Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState LostandFoundAddState = LostandFoundYesButton.GetState("State 8");
-            LostandFoundAddState.DisableActionsOfType<SetFsmBool>();
             LostandFoundAddState.DisableFirstActionOfType<SendEvent>();
 
 
             //Closed Exhibit
+            FsmBool ClosedExhibitBool = ModInstance.GlobalPersistentManager.AddFsmBool("ClosedExhibit Unlocked", Plugin.ModRoomManager.GetRoomByName("CLOSED EXHIBIT").IsUnlocked);
             PlayMakerFSM ClosedExhibitYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/DOCUMENTS/RED LETTER STUDY - doc/Page 3/Closed Exhibit Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClosedExhibitAddState = ClosedExhibitYesButton.GetState("State 8");
-            ClosedExhibitAddState.DisableActionsOfType<SetFsmBool>();
             ClosedExhibitAddState.DisableFirstActionOfType<SendEvent>();
 
             //Drafting Studio Adds
 
             //Clock Tower
-            ModInstance.GlobalManager.AddFsmBool("Clock Tower Unlocked", Plugin.ModRoomManager.GetRoomByName("CLOCK TOWER").IsUnlocked);
+            FsmBool ClockTowerBool = ModInstance.GlobalManager.AddFsmBool("Clock Tower Unlocked", Plugin.ModRoomManager.GetRoomByName("CLOCK TOWER").IsUnlocked);
             PlayMakerFSM ClockTowerDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CLOCK TOWER/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClockTowerAddState = ClockTowerDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            ClockTowerAddState.DisableFirstActionOfType<SetFsmBool>();
             ClockTowerAddState.DisableFirstActionOfType<SendEvent>();
 
             //The Kennel
-            ModInstance.GlobalManager.AddFsmBool("The Kennel Unlocked", Plugin.ModRoomManager.GetRoomByName("THE KENNEL").IsUnlocked);
+
+            FsmBool TheKennelBool = ModInstance.GlobalManager.AddFsmBool("The Kennel Unlocked", Plugin.ModRoomManager.GetRoomByName("THE KENNEL").IsUnlocked);
             PlayMakerFSM TheKennelDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/THE KENNEL/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TheKennelAddState = TheKennelDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            TheKennelAddState.DisableFirstActionOfType<SetFsmBool>();
             TheKennelAddState.DisableFirstActionOfType<SendEvent>();
 
             //Vestibule
-            ModInstance.GlobalManager.AddFsmBool("Vestibule Unlocked", Plugin.ModRoomManager.GetRoomByName("VESTIBULE").IsUnlocked);
+            FsmBool VestibuleBool = ModInstance.GlobalManager.AddFsmBool("Vestibule Unlocked", Plugin.ModRoomManager.GetRoomByName("VESTIBULE").IsUnlocked);
             PlayMakerFSM VestibuleDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/VESTIBULE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState VestibuleAddState = VestibuleDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            VestibuleAddState.DisableFirstActionOfType<SetFsmBool>();
             VestibuleAddState.DisableFirstActionOfType<SendEvent>();
 
             //Dovecote
-            ModInstance.GlobalManager.AddFsmBool("Dovecote Unlocked", Plugin.ModRoomManager.GetRoomByName("DOVECOTE").IsUnlocked);
             PlayMakerFSM DovecoteDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DOVECOTE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DovecoteAddState = DovecoteDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            DovecoteAddState.DisableFirstActionOfType<SetFsmBool>();
             DovecoteAddState.DisableFirstActionOfType<SendEvent>();
 
             //Solarium
-            ModInstance.GlobalManager.AddFsmBool("Solarium Unlocked", Plugin.ModRoomManager.GetRoomByName("SOLARIUM").IsUnlocked);
             PlayMakerFSM SolariumDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/SOLARIUM/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState SolariumAddState = SolariumDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            SolariumAddState.DisableFirstActionOfType<SetFsmBool>();
             SolariumAddState.DisableFirstActionOfType<SendEvent>();
 
             //Dormitory
-            ModInstance.GlobalManager.AddFsmBool("Dormitory Unlocked", Plugin.ModRoomManager.GetRoomByName("DORMITORY").IsUnlocked);
             PlayMakerFSM DormitoryDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DORMITORY/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DormitoryAddState = DormitoryDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            DormitoryAddState.DisableFirstActionOfType<SetFsmBool>();
             DormitoryAddState.DisableFirstActionOfType<SendEvent>();
 
             //Casino
-            ModInstance.GlobalManager.AddFsmBool("Casino Unlocked", Plugin.ModRoomManager.GetRoomByName("CASINO").IsUnlocked);
             PlayMakerFSM CasinoDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CasinoAddState = CasinoDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            CasinoAddState.DisableFirstActionOfType<SetFsmBool>();
             CasinoAddState.DisableFirstActionOfType<SendEvent>();
 
-            //Draft UI
-            PlayMakerFSM DraftingStudioUI = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI").GetComponent<PlayMakerFSM>();
-            FsmState CheckUnlocks = DraftingStudioUI.GetState("Fix List");
-            int i = 0;
-            string[] RoomUnlockBools = ["Casino Unlocked", "Dormitory Unlocked", "Clock Tower Unlocked", "Vestibule Unlocked", "The Kennel Unlocked", "Dovecote Unlocked", "Solarium Unlocked", "Classroom Added"];
-            foreach (string actionName in CheckUnlocks.ActionData.ActionNames)
-            {
-                if (actionName == typeof(GetFsmBool).FullName)
-                {
-                    GetFsmBool action = CheckUnlocks.Actions[i].TryCast<GetFsmBool>();
-                    action.variableName = RoomUnlockBools[i - 1];
-                }
-                i++;
-            }
+
+            //Plan Picker
+            PlayMakerFSM PlanPicker = ModInstance.PlanPicker.GetComponent<PlayMakerFSM>();
+            PlanPicker.GetState("Dormitory Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Clock Tower Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Dovecote Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Solarium Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("The Kennel Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Vestibule Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Planetarium").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Tunnel").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Treasure Trove Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Lost & Found Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Conservatory Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Closed Exhibit Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Mechanarium Add").DisableActionsOfType<ArrayListAdd>();
+            PlanPicker.GetState("Casino Add").DisableActionsOfType<ArrayListAdd>();
         }
 
     }

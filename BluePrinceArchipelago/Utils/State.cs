@@ -148,10 +148,16 @@ namespace BluePrinceArchipelago.Utils
             UpdateItemsByDay(ArchipelagoClient.ServerData.ItemsByDay);
         }
         private static void UpdateItemsByDay(Dictionary<int, List<ItemInfo>> itemsByDay) {
-            using (var writer = new StreamWriter(ItemsByDayPath, false))
+            try
             {
-                writer.Write(JsonConvert.SerializeObject(itemsByDay));
-                writer.Flush();
+                using (var writer = new StreamWriter(ItemsByDayPath, false))
+                {
+                    writer.Write(JsonConvert.SerializeObject(itemsByDay));
+                    writer.Flush();
+                }
+            }
+            catch {
+                Logging.LogWarning("Error Serializing ItemsByDay to JSON.");
             }
         }
         public static void FirstLoad() {

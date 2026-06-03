@@ -324,71 +324,46 @@ public class ArchipelagoClient
            
             
         }
-        // Handle all the items that are not preserved by the game.
-        foreach (string item in ServerData.ReceivedItems) {
-            PermanentUnlock unlock = Unlocks.GetPermanentUnlock(item);
-            if (unlock != null)
-            {
-                unlock.Unlocked = true;
-            }
-            // Checks if the item recieved is a Room (includes special mappings like classroom variants)
-            else if (Plugin.ModRoomManager.IsRoomItem(item))
-            {
-                bool isMappedRoom = false;
-                string mappedName = null;
-
-                ModRoom room = Plugin.ModRoomManager.GetRoomByName(item);
-                // If not found with exact name, try the mapped name
-                if (room == null)
-                {
-                    mappedName = Plugin.ModRoomManager.GetMappedRoomName(item);
-                    if (mappedName != null)
-                    {
-                        room = Plugin.ModRoomManager.GetRoomByName(mappedName);
-                        isMappedRoom = true;
-                    }
-                }
-               
-                Plugin.ModRoomManager.GetRoomByName(item).IsUnlocked = true;
-                string roomNameUpper = item.ToUpper().Trim();
-                if (roomNameUpper == "CLASSROOM")
-                {
-                    room.RoomPoolCount++;
-                }
-                // For mapped rooms, always increment pool count
-                else if (isMappedRoom)
-                {
-                    room.RoomPoolCount++;
-                }
-                // For other rooms, only increment if pool is already full
-                else
-                {
-                    if (room.RoomsLeftInPool == 0)
-                    {
-                        room.RoomPoolCount++;
-                    }
-                }
-                room.IsUnlocked = true;
-            }
-            else if (item.ToUpper().Contains("UPGRADE DISK"))
-            {
-                // Trim the name of the item to remove the upgrade disk part.
-                ModItemManager.UpgradeDisks.AddItemToInventory(item.ToUpper().Replace("UPGRADE DISK ", ""));
-            }
-            else
-            {
-                PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
-                if (permanentItem != null)
-                {
-                    permanentItem.IsUnlocked = true;
-                    permanentItem.unlockedCount += 1;
-                }
-                UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item);
-                if (uniqueItem != null) { 
-                    uniqueItem.IsUnlocked = true;
-                }
-            }
-        }
+        //// Handle all the items that are not preserved by the game.
+        //foreach (string item in ServerData.ReceivedItems) {
+        //    PermanentUnlock unlock = Unlocks.GetPermanentUnlock(item);
+        //    if (unlock != null)
+        //    {
+        //        unlock.Unlocked = true;
+        //    }
+        //    // Checks if the item recieved is a Room (includes special mappings like classroom variants)
+        //    else if (Plugin.ModRoomManager.IsRoomItem(item))
+        //    {
+        //        // If rooms haven't been initialized, add it to the item queue
+        //        if (!ModInstance.HasInitializedRooms)
+        //        {
+        //            ModInstance.QueueManager.AddItemToQueue(item);
+        //            session.Items.DequeueItem();
+        //        }
+        //        else
+        //        {
+        //            ModInstance.QueueManager.ReceiveRoom(item);
+        //        }
+        //    }
+        //    else if (item.ToUpper().Contains("UPGRADE DISK"))
+        //    {
+        //        // Trim the name of the item to remove the upgrade disk part.
+        //        ModItemManager.UpgradeDisks.AddItemToInventory(item.ToUpper().Replace("UPGRADE DISK ", ""));
+        //    }
+        //    else
+        //    {
+        //        PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
+        //        if (permanentItem != null)
+        //        {
+        //            permanentItem.IsUnlocked = true;
+        //            permanentItem.unlockedCount += 1;
+        //        }
+        //        UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item);
+        //        if (uniqueItem != null) { 
+        //            uniqueItem.IsUnlocked = true;
+        //        }
+        //    }
+        //}
         
         StateRebuilt = true;
     }
@@ -704,11 +679,6 @@ public class ArchipelagoQueueManager {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
                 return true;
             }
-            if (itemType == "Permanent")
-            {
-                ReceiveLocalItem(item, ignoreState);
-                return true;
-            }
             else {
 
                 if (ModInstance.IsInRun)
@@ -781,6 +751,8 @@ public class ArchipelagoQueueManager {
             }
             else if (itemType == "Unique") {
 
+                UniqueItem uItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
+                uItem.IsUnlocked = true;
                 return true;
             }
             else

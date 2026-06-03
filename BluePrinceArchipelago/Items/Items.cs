@@ -659,6 +659,7 @@ namespace BluePrinceArchipelago.Items
         {
             ModItem item = null;
             //If item exists, retreive it.
+            Logging.LogWarning(itemInfo.ItemName);
             PermanentItem permanentItem = GetPermanentItem(itemInfo.ItemName);
             if (permanentItem != null) { 
                 permanentItem.IsUnlocked = true;
