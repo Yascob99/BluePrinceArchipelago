@@ -183,11 +183,10 @@ namespace BluePrinceArchipelago.Items
                     {
                         ReplacePickup(item);
                     }
-                    else
+                    else if (item.IsUnlocked)
                     {
-                        if (!item.IsUnlocked) {
-                            //GameObject.Destroy(spawnedObj);
-                        }
+                        //Re-enable the previously disabled actions.
+                        state.EnableActionsOfType<ArrayListAdd>();
                     }
                 }
                 else if (obj.name.ToUpper().Contains("UPGRADE"))
@@ -198,15 +197,7 @@ namespace BluePrinceArchipelago.Items
             {
                 if (item != null)
                 {
-                    FsmState state = GetPickupState(obj.name);
-                    if (state != null)
-                    {
-                        if (item.IsUnlocked)
-                        {
-                            //Re-enable the previously disabled actions.
-                            state.EnableActionsOfType<ArrayListAdd>();
-                        }
-                    }
+                    
                 }
             }
         }
@@ -222,7 +213,6 @@ namespace BluePrinceArchipelago.Items
                     SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
                     // Disable the actions that add the item to inventory.
                     state.DisableActionsOfType<ArrayListAdd>();
-                    state.DisableActionsOfType<ArrayListRemove>();
                     // Send an event to signify the pickup.
                     state.AddAction(FSMEventHandler.RegisteredEvents[item.Name].Event);
                 }
