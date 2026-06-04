@@ -98,11 +98,6 @@ namespace BluePrinceArchipelago.Items
             }
             if (GameObj != null)
             {
-                //Logging.LogWarning("Here 2");
-                //if (ModItemManager.EstateItems.Contains(GameObj))
-                //{
-                //    ModItemManager.EstateItems.Remove(GameObj, "GameObject");
-                //}
                 if (Commissary.CommissaryStates.ContainsKey(Name))
                 {
                     //Re-enable commissary purchases of the item.
@@ -134,22 +129,6 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
-        //private string GetPickUpEventName(string name)
-        //{
-        //    // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
-        //    name = name.ToLower().Replace("vault", "safety deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "");
-        //    // Check each Global Transition in the Global Manager.
-        //    foreach (FsmTransition transition in ModInstance.GlobalManager.FsmGlobalTransitions)
-        //    {
-        //        // If the transition's event name contains the item name it's the transition we want.
-        //        if (transition.EventName.ToLower().Contains(name))
-        //        {
-        //            return transition.EventName;
-        //        }
-        //    }
-        //    return "";
-        //}
-
         public bool ApplySanity()
         {
             return SanityType switch
@@ -171,6 +150,7 @@ namespace BluePrinceArchipelago.Items
         public bool ModelsReplaced = false;
         public void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj)
         {
+            Logging.LogWarning(obj.name);
             UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
             //Check if Connected in before replacing items.
             if (ArchipelagoClient.Authenticated)
@@ -178,49 +158,13 @@ namespace BluePrinceArchipelago.Items
                 if (item != null)
                 {
                     FsmState state = GetPickupState(obj.name);
-                    // If the item has not been found before.
-                    if (!item.HasBeenFound)
-                    {
-                        ReplacePickup(item);
-                    }
-                    else if (item.IsUnlocked)
+                    if (item.IsUnlocked && item.HasBeenFound)
                     {
                         //Re-enable the previously disabled actions.
                         state.EnableActionsOfType<ArrayListAdd>();
                     }
                 }
-                else if (obj.name.ToUpper().Contains("UPGRADE"))
-                {
-                }
             }
-            else
-            {
-                if (item != null)
-                {
-                    
-                }
-            }
-        }
-        //Finds the associated Pickup State and replaces the item.
-        private FsmState ReplacePickup(UniqueItem item)
-        {
-            FsmState state = GetPickupState(item.Name);
-            if (state != null)
-            {
-                //If the item is not unlocked, prevent it from being added to inventory.
-                if (!item.IsUnlocked && item.ApplySanity())
-                {
-                    SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
-                    // Disable the actions that add the item to inventory.
-                    state.DisableActionsOfType<ArrayListAdd>();
-                    // Send an event to signify the pickup.
-                    state.AddAction(FSMEventHandler.RegisteredEvents[item.Name].Event);
-                }
-                return state;
-            }
-            // If the item pickup state was not found output an error.
-            Logging.LogError($"No FSM state {item.Name.Trim().ToTitleCase() + " Pickup"} found for: {item.Name}");
-            return null;
         }
 
         public void EndOfDay()

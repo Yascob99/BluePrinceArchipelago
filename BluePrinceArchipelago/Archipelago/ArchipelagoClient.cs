@@ -336,6 +336,7 @@ public class ArchipelagoClient
                 uniqueItem.IsUnlocked = true;
             }
             if (item.ToUpper().Contains("UPGRADE DISK")) {
+                Logging.LogWarning("Attempting to Add Upgrade Disk");
                 ModItemManager.UpgradeDisks.AddItemToInventory(item.ToUpper().Replace("UPGRADE DISK ", ""));
             }
         }
@@ -449,11 +450,7 @@ public class ArchipelagoClient
 
         ServerData.Index++;
         Logging.LogWarning($"Attempting to recieve item: {receivedItem.ItemName}");
-        //Attempt to receive item, if it fails, add to queue to be added later.
-        if (!ModInstance.QueueManager.ReceiveItem(receivedItem))
-        {
-            ModInstance.QueueManager.AddItemToQueue(receivedItem);
-        }
+        ModInstance.QueueManager.AddItemToQueue(receivedItem);
         
     }
 
@@ -744,6 +741,14 @@ public class ArchipelagoQueueManager {
 
         }
         return false;
+    }
+
+    public void DequeueItem() {
+        if (_ReceivedItemQueue.Count > 0)
+        {
+            ItemInfo item = _ReceivedItemQueue.Dequeue();
+            ReceiveItem(item);
+        }
     }
 
     // Handles receiving an item. (doesn't check if it's safe to do so).

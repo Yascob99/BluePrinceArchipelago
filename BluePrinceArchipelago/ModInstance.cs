@@ -203,6 +203,13 @@ namespace BluePrinceArchipelago
             Harmony.UnpatchID("RoomPatches");
             Harmony.UnpatchID("FsmRoomPatch");
         }
+
+        private void Update() {
+            if (IsInRun)
+            {
+                QueueManager.DequeueItem();
+            }
+        }
         // Fires off when an event is sent from an FSM to an FSM or GameObject. Sometimes fails
         public static void OnEventSend(FsmEventTarget target, FsmEvent sendEvent, FsmFloat delay, DelayedEvent delayedEvent, GameObject owner, bool isDelayed) {
             string eventName = sendEvent?.name;
@@ -282,8 +289,7 @@ namespace BluePrinceArchipelago
                 }
                 else if (eventName.Contains("Upgrade"))
                 {
-                    //ModItemManager.UpgradeDisks.UpdateUnlocked();
-                    //ModItemManager.UpgradeDisks.OnPickup();
+                    ModItemManager.UpgradeDisks.OnPickup();
                 }
             }
         }

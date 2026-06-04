@@ -1,8 +1,10 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 using Il2CppSystem.Collections;
 using StableNameDotNet;
 using System;
@@ -70,6 +72,11 @@ namespace BluePrinceArchipelago.Items
                 // If the item has not been found yet.
                 if (!item.HasBeenFound && item.ApplySanity())
                 {
+                    FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                    if (state != null) {
+                        state.DisableActionsOfType<ArrayListAdd>();
+                        state.AddAction(FSMEventHandler.RegisteredEvents[item.Name].Event);
+                    }
                     GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
                     if (prefab != null)
                     {
@@ -79,7 +86,7 @@ namespace BluePrinceArchipelago.Items
                         {
                             //If the Model is not currently already replaced.
                             if (spawnObj.transform.FindChild("AP Swirlie") == null)
-                            {
+                            { 
                                 //Instantiate a copy of the game object at the location of the spawn pool game object.
                                 GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
                                 // Get the APswirly Component of the prefab
@@ -103,7 +110,7 @@ namespace BluePrinceArchipelago.Items
                         }
                         else
                         {
-                            Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab with name: {item.Name}(Clone)001");
+                            Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
                         }
                     }
                     else
@@ -116,6 +123,7 @@ namespace BluePrinceArchipelago.Items
 
         public void ReplaceAPItemNotifications(string itemName, GameObject item, string scoutname = "")
         {
+            Logging.LogWarning($"Attempting to replace Item Notification for {itemName}");
             if (scoutname == "")
             {
                 scoutname = itemName;
@@ -404,11 +412,17 @@ namespace BluePrinceArchipelago.Items
         }
 
         private GameObject FindSpawnObject(string name) {
-            name.Replace("_0", "");
+            name = name.Replace("_0", "");
             string instanceName = name + "(Clone)001";
             GameObject spawnObj = ModInstance.PickupSpawnPool.transform.FindChild(instanceName)?.gameObject;
-            if (spawnObj == null) {
-               spawnObj =  GameObjectExtensions.FindGameObject(name);
+            if (spawnObj == null)
+            {
+                instanceName = name + " (Clone)001";
+                spawnObj = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + instanceName);
+            }
+            if (spawnObj == null)
+            {
+                Plugin.ModItemManager.GetInventoryItem(name);
             }
             return spawnObj;
         }
@@ -1075,34 +1089,11 @@ namespace BluePrinceArchipelago.Items
                 string lowlocation = location.ToLower().Replace("ladyships", "ladyship\'s");
                 if (locationName.ToLower().Contains(lowlocation)) {
                     FoundLocations.Add(location);
+                    ModInstance.ModEventHandler.OnUgradeDiskFound(location);
                     return true;
                 }
             }
             return false;
-        }
-        // Updates the unlocked status of the upgrade disks.
-        public void UpdateUnlocked() {
-            // Updates the unlocked state of the upgrade disk. (A fallback for some edgecases.)
-            foreach (string location in Locations) {
-                FsmBool unlocked = ModInstance.GlobalManager.GetBoolVariable(location.ToTitleCase() + " Disk");
-                if (unlocked != null)
-                {
-                    if (ArchipelagoClient.Authenticated)
-                    {
-                        if (FoundLocations.Contains(location))
-                        {
-                            unlocked.Value = true;
-                        }
-                        else
-                        {
-                            unlocked.Value = false;
-                        }
-                    }
-                    else {
-                        unlocked.Value = true; // Forces default behaviour on not connected.
-                    }
-                }
-            }
         }
         // Handles adding unlocked upgrade disks to the the players inventory until they are used.
         public void StartOfDay() {
@@ -1130,7 +1121,7 @@ namespace BluePrinceArchipelago.Items
                 FoundLocations.Add(location.ToUpper());
                 //Fix location name for pickup event.
                 location = location.Replace("LADYSHIPS", "LADYSHIP's");
-                ModInstance.ModEventHandler.OnUgradeDiskFound(location);
+                
             }
         }
 
