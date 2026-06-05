@@ -828,9 +828,12 @@ public class ItemCommand(string name) : Command(name)
                                 ModItemManager.PickedUp.Add(item, "GameObject");
                                 InventoryIcons.Add(icon, "GameObject");
                                 ArchipelagoConsole.LogMessage($"Added {itemName} to inventory.");
-                                return;
                             }
-                            ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} Has already been spawned.");
+                            else {
+                                ModItemManager.PickedUp.Add(item, "GameObject");
+                                InventoryIcons.Add(icon, "GameObject");
+                                ArchipelagoConsole.LogMessage($"Added {itemName} to inventory.");
+                            }
                             return;
                         }
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");

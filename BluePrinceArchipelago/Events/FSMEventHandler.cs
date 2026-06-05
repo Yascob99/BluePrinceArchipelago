@@ -18,6 +18,7 @@ namespace BluePrinceArchipelago.Events
             { "West Gate Path Unlock", new WestGatePathUnlock() },
             { "Gemstone Caverns Unlock", new AppleOrchardUnlock() },
             { "Outer Draft Start", new OuterDraftStart() },
+            { "Satellite Raised", new SatelliteRaised() },
         };
         public static RegisteredFSMEvent AddFSMEvent(string name, UniqueItem item) {
             RegisteredFSMEvent Event  = new ItemPickup(name, item);
@@ -148,6 +149,42 @@ namespace BluePrinceArchipelago.Events
             Unlocks.WestGatePath.FoundLocation();
         }
     }
+    public class SatelliteRaised : RegisteredFSMEvent
+    {
+
+        public new string Name { get; set; } = "Satellite Raised";
+
+        public override void OnRegister()
+        {
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
+
+        public override void OnTrigger()
+        {
+            Unlocks.SatelliteDish.FoundLocation();
+        }
+    }
+
     public class OuterDraftStart : RegisteredFSMEvent
     {
         public new string Name { get; set; } = "Outer Draft Start";

@@ -162,10 +162,12 @@ namespace BluePrinceArchipelago.Utils
 
         public static GameObject FindGameObject(string name)
         {
+            List<GameObject> gos = new List<GameObject>();
             foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
             {
                 if (go != null)
                 {
+                    
                     if (go?.name?.ToUpper()?.Trim() == name.ToUpper().Trim())
                     {
                         // Make sure the object is not our prefab.
@@ -174,12 +176,20 @@ namespace BluePrinceArchipelago.Utils
                         {
                             if (goName != "prefabs")
                             {
-                                return go;
+                                gos.Add(go);
                             }
                         }
                     }
                 }
 
+            }
+            foreach (GameObject go in gos) {
+                if (go.scene.name == null) {
+                    return go;
+                }
+            }
+            if (gos.Count > 0) {
+                return gos[0];
             }
             Logging.Log($"Unable to Find GameObject with name: {name}");
             return null;

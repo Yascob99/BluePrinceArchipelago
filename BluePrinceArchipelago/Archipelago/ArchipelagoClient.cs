@@ -337,7 +337,8 @@ public class ArchipelagoClient
             }
             if (item.ToUpper().Contains("UPGRADE DISK")) {
                 Logging.LogWarning("Attempting to Add Upgrade Disk");
-                ModItemManager.UpgradeDisks.AddItemToInventory(item.ToUpper().Replace("UPGRADE DISK ", ""));
+                string Location = item.ToUpper().Replace("UPGRADE DISK ", "");
+
             }
         }
         // Handle all the items that are not preserved by the game.
@@ -449,7 +450,7 @@ public class ArchipelagoClient
         if (helper.Index <= ServerData.Index) return;
 
         ServerData.Index++;
-        Logging.LogWarning($"Attempting to recieve item: {receivedItem.ItemName}");
+        Logging.Log($"Attempting to recieve item: {receivedItem.ItemName}", "Items");
         ModInstance.QueueManager.AddItemToQueue(receivedItem);
         
     }
@@ -604,7 +605,7 @@ public class ArchipelagoQueueManager {
     // Tries to receive an item, on sucess returns true, on failure returns false.
     public bool ReceiveItem(ItemInfo item, bool ignoreState = true)
     {
-        Logging.Log($"Attempting to receive Item: {item.ItemName}");
+        Logging.Log($"Attempting to receive Item: {item.ItemName}", "Items");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
         {
             if (ModInstance.IsInRun)
@@ -614,7 +615,9 @@ public class ArchipelagoQueueManager {
                 {
                     State.UpdateRunHistory("Received: " + item.ItemName);
                     State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
+                    Logging.Log($"Attempting to receive Unlock: {item.ItemName}", "Items");
                     unlock.UnlockItem();
+                    return true;
                 }
             }
             // Checks if the item recieved is a Room (includes special mappings like classroom variants)
@@ -711,7 +714,6 @@ public class ArchipelagoQueueManager {
             }
             // if not handle it as an Item.
             string itemType = Plugin.ModItemManager.GetItemType(item.ItemName);
-            Logging.LogWarning($"{itemType}");
             if (itemType == null)
             {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
@@ -725,9 +727,15 @@ public class ArchipelagoQueueManager {
             else if (itemType == "Unique") {
 
                 UniqueItem uItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
-                uItem.IsUnlocked = true;
-                State.UpdateRunHistory("Received: " + item.ItemName);
-                return true;
+                if (uItem != null)
+                {
+                    uItem.IsUnlocked = true;
+                    State.UpdateRunHistory("Received: " + item.ItemName);
+                    return true;
+                }
+                else {
+                    Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
+                }
             }
             else
             {
