@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using BluePrinceArchipelago.Items;
+using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers
 {
@@ -18,7 +19,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
         public override void OnAfterRoomDrafted()
         {
             // Runs the code to prevent Gemstone Cavern from being unlocked normally.
-            //PermanentUnlocks.Unlocks.BlackBridgeGrotto.PreventDefault();
+            Unlocks.BlackBridgeGrotto.PreventDefault();
         }
     }
 }

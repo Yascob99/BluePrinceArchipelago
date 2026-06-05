@@ -301,7 +301,7 @@ namespace BluePrinceArchipelago
                 if (roomname.ToUpper().Trim() == "MAIDS CHAMBER") {
                     roomname = "MAID\'S CHAMBER";
                 }
-                Logging.Log($"Room: {roomname}");
+                Logging.LogWarning($"Room Drafted: {roomname}", "Room");
                 if (Plugin.ModRoomManager.ForcedRoom != null)
                 {
                     if (roomname.ToUpper() == Plugin.ModRoomManager.ForcedRoom.Name.ToUpper())
@@ -372,6 +372,7 @@ namespace BluePrinceArchipelago
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
+                Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
             }
@@ -787,6 +788,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModItemManager.ReplaceItemsWithAP();
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
+                Unlocks.SatelliteDish.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
             }

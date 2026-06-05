@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using static HutongGames.PlayMaker.Actions.GetTimeInfo;
+using static Rewired.Platforms.Custom.CustomPlatformUnifiedKeyboardSource.KeyPropertyMap;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -82,6 +83,9 @@ namespace BluePrinceArchipelago.Items
                     {
 
                         GameObject spawnObj = FindSpawnObject(item.Name);
+                        if (spawnObj == null) {
+                            spawnObj = item.GameObj;
+                        }
                         if (spawnObj != null)
                         {
                             //If the Model is not currently already replaced.
@@ -123,7 +127,7 @@ namespace BluePrinceArchipelago.Items
 
         public void ReplaceAPItemNotifications(string itemName, GameObject item, string scoutname = "")
         {
-            Logging.LogWarning($"Attempting to replace Item Notification for {itemName}");
+            //List<Transform> FoundModels = new();
             if (scoutname == "")
             {
                 scoutname = itemName;
@@ -138,7 +142,7 @@ namespace BluePrinceArchipelago.Items
                     // Tries to find all related You___Messages"
                     if (child.gameObject.name.Contains(GetYou___Name(itemName)) && !CheckSimilar(itemName, child))
                     {
-                        
+                        //FoundModels.Add(child);
                         Transform itemModel = child.FindRecursive(GetItemModelName(itemName), true);
                         if (itemModel != null)
                         {
@@ -318,6 +322,9 @@ namespace BluePrinceArchipelago.Items
                         }
                     }
                 }
+                //if (FoundModels.Count == 0) {
+                //    Logging.LogWarning($"Unable to find any You Found Messages Matching the {itemName.ToTitleCase()}.");
+                //}
             }
             else
             {
@@ -335,6 +342,9 @@ namespace BluePrinceArchipelago.Items
             }
             if (name.Contains("Key")) {
                 name = name.Replace("Vault ", "").Trim();
+            }
+            if (name == "Sleeping Mask") {
+                name = "Sleep Mask";
             }
             return name;
         }
@@ -677,7 +687,6 @@ namespace BluePrinceArchipelago.Items
         {
             ModItem item = null;
             //If item exists, retreive it.
-            Logging.LogWarning(itemInfo.ItemName);
             PermanentItem permanentItem = GetPermanentItem(itemInfo.ItemName);
             if (permanentItem != null) { 
                 permanentItem.IsUnlocked = true;
@@ -1135,17 +1144,18 @@ namespace BluePrinceArchipelago.Items
             if (!UsedLocations.Contains(location.ToUpper()))
             {
 
-                string iconName = Name.ToTitleCase() + " Icon(Clone)001";
+                string iconName = Name.ToTitleCase();
                 GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                 // Some icons use 
                 if (icon == null)
                 {
-                    iconName = Name.ToTitleCase() + " icon(Clone)001";
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    iconName = Name.ToTitleCase() + " Icon(Clone)001";
+                     icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                   
                 }
                 if (icon == null)
                 {
-                    iconName = Name.ToTitleCase();
+                    iconName = Name.ToTitleCase() + " icon(Clone)001";
                     icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
                 }
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
@@ -1182,7 +1192,7 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 370", Plugin.ModItemManager.GetInventoryItem("VAULT KEY 370"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("DIARY KEY", Plugin.ModItemManager.GetInventoryItem("DIARY KEY"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("PRISM KEY_0", GameObjectExtensions.FindGameObject("PRISM KEY_0"), false, ItemSanityType.Key, false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", null, false, ItemSanityType.Key, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", Plugin.ModItemManager.GetInventoryItem("KEY of Aries"), false, ItemSanityType.Key, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("SECRET GARDEN KEY", Plugin.ModItemManager.GetInventoryItem("SECRET GARDEN KEY"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 1", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 1"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 2", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 2"), false, ItemSanityType.Key));
@@ -1207,17 +1217,17 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", Plugin.ModItemManager.GetInventoryItem("LUCKY RABBIT'S FOOT"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("TREASURE MAP", Plugin.ModItemManager.GetInventoryItem("TREASURE MAP"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("STOPWATCH", Plugin.ModItemManager.GetInventoryItem("STOPWATCH"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", null, false, ItemSanityType.Standard, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", Plugin.ModItemManager.GetInventoryItem("REPELLENT"), false, ItemSanityType.Standard, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("WATERING CAN", Plugin.ModItemManager.GetInventoryItem("WATERING CAN"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", null, false, ItemSanityType.Standard, false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", null, false, ItemSanityType.Standard, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", Plugin.ModItemManager.GetInventoryItem("LUNCH BOX"), false, ItemSanityType.Standard, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", Plugin.ModItemManager.GetInventoryItem("CURSED EFFIGY"), false, ItemSanityType.Standard, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("CROWN", Plugin.ModItemManager.GetInventoryItem("CROWN"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetInventoryItem("PAPER CROWN"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetInventoryItem("GEAR WRENCH"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("COMPASS", GameObjectExtensions.FindGameObject("COMPASS"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("HALL PASS", GameObjectExtensions.FindGameObject("HALL PASS"), false, ItemSanityType.Standard));
 
-            Plugin.ModItemManager.AddItem(new UniqueItem("POWERED ELECTROMAGNET", GameObjectExtensions.FindGameObject("ELECTROMAGNET"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", GameObjectExtensions.FindGameObject("ELECTROMAGNET"), false, ItemSanityType.Workshop));
             Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY PURSE", GameObjectExtensions.FindGameObject("LUCKY PURSE"), false, ItemSanityType.Workshop));
             Plugin.ModItemManager.AddItem(new UniqueItem("PICK SOUND AMPLIFIER", GameObjectExtensions.FindGameObject("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop));
             Plugin.ModItemManager.AddItem(new UniqueItem("BURNING GLASS", GameObject.Find("TEMP DELETE AFTER TEST IS COMPLETE/Cheat Spawns/BURNING GLASS"), false, ItemSanityType.Workshop));

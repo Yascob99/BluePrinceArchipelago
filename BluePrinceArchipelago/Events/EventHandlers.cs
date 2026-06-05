@@ -107,6 +107,10 @@ namespace BluePrinceArchipelago.Events
         public void OnVACControlsSolved() {
             LocationFound.Invoke(this, new LocationEventArgs("VAC Controls", "VAC Controls Solved"));
         }
+        public void OnSatelliteRaised()
+        {
+            LocationFound.Invoke(this, new LocationEventArgs("Raise Satellite", "Raise Satellite"));
+        }
         public void OnAllowanceCollected(string locationName) {
             LocationFound.Invoke(this, new LocationEventArgs($"Allowance Token - {locationName.ToTitleCase()}", "Allowance Collected"));
         }

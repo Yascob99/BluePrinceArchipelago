@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BluePrinceArchipelago.Items;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +21,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
 
         public override void OnAfterRoomDrafted()
         {
-            // Runs the code to prevent Gemstone Cavern from being unlocked normally.
-            //PermanentUnlocks.Unlocks.GemstoneCaverns.PreventDefault();
+            Unlocks.GemstoneCaverns.PreventDefault();
         }
     }
 }

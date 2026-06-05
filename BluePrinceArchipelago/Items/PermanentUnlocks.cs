@@ -1,15 +1,9 @@
 ﻿using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Utils;
-using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Il2CppInterop.Runtime;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static HutongGames.PlayMaker.FsmEventTarget;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -53,27 +47,9 @@ namespace BluePrinceArchipelago.Items
         {
             if (!HasPrepatched)
             {
-                // Gemstone Caverns
-                PlayMakerFSM SwitchLever = GameObjectExtensions.FindGameObject("Giant Switch Lever")?.GetComponent<PlayMakerFSM>();
-                FsmState SwitchState = SwitchLever.GetState("State 2");
-                if (!GemstoneCaverns.Unlocked)
+                if (GemstoneCaverns.Solved && GemstoneCaverns.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Gemstone Cavern Open").Value)
                 {
-                    SwitchState.DisableFirstActionOfType<ActivateGameObject>();
-                }
-                if (GemstoneCaverns.Solved && GemstoneCaverns.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Gemstone Cavern Open").Value) {
                     GemstoneCaverns.UnlockItem();
-                }
-                // BlackBridge Grotto
-                PlayMakerFSM GrottoTrigger = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>();
-                FsmState GrottoState = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>()?.GetState("State 2");
-                GrottoState?.DisableActionsOfType<SendEvent>();
-                GrottoState?.InsertAction(5, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
-                PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
-                if (!BlackBridgeGrotto.Solved)
-                {
-                    LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
-                    FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
-                    GrottoOpen.Value = BlackBridgeGrotto.Solved;
                 }
                 if (BlackBridgeGrotto.Solved && BlackBridgeGrotto.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Grotto Open").Value)
                 {
@@ -87,7 +63,7 @@ namespace BluePrinceArchipelago.Items
                 {
                     WestGatePath.UnlockItem();
                 }
-                if (SatelliteDish.Solved && SatelliteDish.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value)
+                if (SatelliteDish.Solved && SatelliteDish.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Satellite").Value)
                 {
                     SatelliteDish.UnlockItem();
                 }
@@ -136,11 +112,14 @@ namespace BluePrinceArchipelago.Items
         // Prevents the default Unlock.
         public override void PreventDefault()
         {
-            ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = false;
-            // Unlocks the Gate (this one seems to do it without sounds).
-            PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
-            appleOrchard.GetState("State 4")?.DisableActionsOfType<SendEvent>();
-            appleOrchard.GetState("State 4")?.AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
+            if (!Unlocked)
+            {
+                ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = false;
+                // Unlocks the Gate (this one seems to do it without sounds).
+                PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
+                appleOrchard.GetState("State 4")?.DisableActionsOfType<SendEvent>();
+                appleOrchard.GetState("State 4")?.AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
+            }
         }
         public override void FoundLocation()
         {
@@ -169,6 +148,7 @@ namespace BluePrinceArchipelago.Items
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
                 // Activate Gemstone Caverns Icon
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/Gemstone Cavern Icon")?.SetActive(true);
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/5/Gemstone Cavern Icon")?.SetActive(true);
                 // Activate and deactivate the required game objects.
                 GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/FAR CULL/_GAMEPLAY do not bake/Gemstone DOOR/Cave Door")?.SetActive(false);
 
@@ -181,10 +161,15 @@ namespace BluePrinceArchipelago.Items
         }
 
         public override void PreventDefault() {
-            // This code may needs to be run after the utility closet has been spawned.
-            //FsmState State2 = GameObject.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
-            //State2.DisableFirstActionOfType<ActivateGameObject>();
-            //State2.AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
+            FsmState State2 = GameObject.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
+            State2.AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
+            if (!Unlocked)
+            {
+                // This code may needs to be run after the utility closet has been spawned.
+               
+                State2.DisableFirstActionOfType<ActivateGameObject>();
+            }
+           
         }
 
         public override void FoundLocation()
@@ -203,20 +188,25 @@ namespace BluePrinceArchipelago.Items
         public override void UnlockItem()
         {
             Unlocked = true;
-            ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.West_Path_Gate_Unlocked);
+            if (Solved)
+            {
+                ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.West_Path_Gate_Unlocked);
 
-            ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = true;
+                ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = true;
 
-            //Run code to open gate.
-            GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>()?.SendEvent("Begin");
-
+                //Run code to open gate.
+                GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>()?.SendEvent("Begin");
+            }
         }
 
         public override void PreventDefault()
         {
-            ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = false;
-            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
-            GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
+            if (!Unlocked)
+            {
+                ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = false;
+                PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
+                GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
+            }
         }
         public override void FoundLocation()
         {
@@ -240,6 +230,7 @@ namespace BluePrinceArchipelago.Items
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
                 // Activate Gemstone Caverns Icon
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/4/BlackBridge Grotto Icon")?.SetActive(true);
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/5/BlackBridge Grotto Icon")?.SetActive(true);
 
                 GameObject.Find("CULL GRID - GROUNDS/UNDERGROUND/Cull - Grotto (once revealed)")?.SetActive(true);
 
@@ -254,6 +245,18 @@ namespace BluePrinceArchipelago.Items
 
         public override void PreventDefault()
         {
+            PlayMakerFSM GrottoTrigger = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>();
+            FsmState GrottoState = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>()?.GetState("State 2");
+            GrottoState?.DisableActionsOfType<SendEvent>();
+            GrottoState?.InsertAction(5, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
+            PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
+            if (!Solved)
+            {
+                LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
+                FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
+                GrottoOpen.Value = Solved;
+            }
+
         }
         public override void FoundLocation()
         {
@@ -273,15 +276,37 @@ namespace BluePrinceArchipelago.Items
 
         public override void UnlockItem()
         {
-            //TODO
+            if (Solved)
+            {
+                PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
+                FsmState boolCheck = pt2.GetState("State 7");
+                boolCheck.EnableFirstActionOfType<BoolTest>();
+                boolCheck.DisableFirstActionOfType<SendEvent>();
+                ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Satellite_Raised);
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
+                // Activate Satellite Dish Icon
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS/5/Satellite Dish Icon")?.SetActive(true);
+                GameObject.Find("TERRAIN/_GAMEPLAY (terrain)/sdish/MOVE UP B").SetActive(true);
+                GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2");
+                ModInstance.GlobalPersistentManager.GetBoolVariable("Satellite").Value = true;
+            }
+            Unlocked = true;
         }
 
         public override void PreventDefault()
         {
-            //TODO
+            if (!Unlocked)
+            {
+                PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
+                FsmState boolCheck = pt2.GetState("State 7");
+                boolCheck.DisableFirstActionOfType<BoolTest>();
+                boolCheck?.AddAction(FSMEventHandler.RegisteredEvents["Satellite Raised"].Event);
+            }
         }
         public override void FoundLocation()
         {
+            Solved = true;
+            ModInstance.ModEventHandler.OnSatelliteRaised();
         }
     }
 
