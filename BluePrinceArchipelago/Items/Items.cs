@@ -1124,7 +1124,6 @@ namespace BluePrinceArchipelago.Items
                 FoundLocations.Add(location.ToUpper());
                 //Fix location name for pickup event.
                 location = location.Replace("LADYSHIPS", "LADYSHIP's");
-                
             }
         }
 

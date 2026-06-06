@@ -699,16 +699,12 @@ public class ArchipelagoQueueManager {
             }
             // If the item is an upgrade disk.
             if (item.ItemName.ToUpper().Contains("UPGRADE DISK")) {
-                if (ModInstance.IsInRun)
+                // Trim the name of the item to remove the upgrade disk part.
+                ModItemManager.UpgradeDisks.RecievedItems.Add(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
+                if (!ignoreState)
                 {
-                    // Trim the name of the item to remove the upgrade disk part.
-                    ModItemManager.UpgradeDisks.AddItemToInventory(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
-                    if (!ignoreState)
-                    {
-                        State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
-                        State.UpdateRunHistory("Received: " + item.ItemName);
-                    }
-                    return true;
+                    State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
+                    State.UpdateRunHistory("Received: " + item.ItemName);
                 }
                 return false;
             }
