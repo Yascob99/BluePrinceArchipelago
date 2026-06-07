@@ -151,9 +151,10 @@ namespace BluePrinceArchipelago.Rooms
             {
                 if (rooms.arrayList.Count > 0)
                 {
-                    foreach (GameObject room in rooms.arrayList)
+                    foreach (var room in rooms.arrayList)
                     {
-                        ModRoom modRoom = GetRoomByName(room.name);
+                        GameObject roomObj = room.TryCast<GameObject>();
+                        ModRoom modRoom = GetRoomByName(roomObj?.name ?? "");
                         if (modRoom != null)
                         {
                             modRoom.RoomInHouseCount++;

@@ -783,7 +783,7 @@ public class ItemCommand(string name) : Command(name)
                 if (item == null)
                 {
                     string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
-                    GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
+                    GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
                     // Some icons use 
                     if (icon == null)
                     {
@@ -791,7 +791,18 @@ public class ItemCommand(string name) : Command(name)
                     }
                     if (icon == null)
                     {
-                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
+                        PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
+                        foreach (var invIcon in iconList.arrayList)
+                        {
+                            GameObject iconGo = invIcon.TryCast<GameObject>();
+                            if (iconGo != null)
+                            {
+                                if (iconGo.name.Contains(iconName))
+                                {
+                                    icon = iconGo;
+                                }
+                            }
+                        }
                     }
                     PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                     if (icon != null && InventoryIcons != null)
@@ -808,9 +819,8 @@ public class ItemCommand(string name) : Command(name)
                     // Check PreSpawn EstateItems, PickedUp, CoatCheck, UsedItems
                     if (Plugin.ModItemManager.IsItemSpawnable(item) || true)
                     {
-
-                        string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
-                        GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
+                        string iconName = Plugin.UniqueItemManager.GetIconName(Name);
+                        GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
                         // Some icons use 
                         if (icon == null)
                         {
@@ -818,7 +828,18 @@ public class ItemCommand(string name) : Command(name)
                         }
                         if (icon == null)
                         {
-                            icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
+                            PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
+                            foreach (var invIcon in iconList.arrayList)
+                            {
+                                GameObject iconGo = invIcon.TryCast<GameObject>();
+                                if (iconGo != null)
+                                {
+                                    if (iconGo.name.Contains(iconName))
+                                    {
+                                        icon = iconGo;
+                                    }
+                                }
+                            }
                         }
                         PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                         if (icon != null && InventoryIcons != null)
@@ -858,31 +879,27 @@ public class ItemCommand(string name) : Command(name)
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
                     return;
                 }
-                string iconName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName.ToLower()) + " Icon(Clone)001";
-
+                string iconName = Plugin.UniqueItemManager.GetIconName(Name);
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
+                // Some icons use 
+                if (icon == null)
+                {
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName.Replace("Icon", "icon") + "(Clone)001");
+                }
+                if (icon == null)
+                {
+                    PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
+                    foreach (GameObject invIcon in iconList.arrayList)
+                    {
+                        if (invIcon.name.Contains(iconName))
+                        {
+                            icon = invIcon;
+                        }
+                    }
+                }
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                 if (InventoryIcons != null)
                 {
-                    GameObject icon = new();
-                    bool found = false;
-                    int i = 0;
-                    while (!found && i < InventoryIcons.GetCount())
-                    {
-                        icon = InventoryIcons.arrayList[i].TryCast<GameObject>();
-                        if (icon == null)
-                        {
-                            if (icon.name == iconName)
-                            {
-                                found = true;
-                            }
-                        }
-                        i++;
-                    }
-                    if (!found)
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName}'s Icon could not be found.");
-                        return;
-                    }
                     //TODO add a check for if the item should be added to the PreSpawn pool.
                     if (ModItemManager.PickedUp.Contains(item))
                     {

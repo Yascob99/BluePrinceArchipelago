@@ -1133,8 +1133,8 @@ namespace BluePrinceArchipelago.Items
             if (!UsedLocations.Contains(location.ToUpper()))
             {
 
-                string iconName = Plugin.UniqueItemManager.GetIconName("UPGRADE DISK " + location);
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
+                string iconName = Plugin.UniqueItemManager.GetIconName("Upgrade Disk");
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
                 // Some icons use 
                 if (icon == null)
                 {
@@ -1142,7 +1142,18 @@ namespace BluePrinceArchipelago.Items
                 }
                 if (icon == null)
                 {
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
+                    PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
+                    foreach (var invIcon in iconList.arrayList)
+                    {
+                        GameObject iconGo = invIcon.TryCast<GameObject>();
+                        if (iconGo != null)
+                        {
+                            if (iconGo.name.Contains(iconName))
+                            {
+                                icon = iconGo;
+                            }
+                        }
+                    }
                 }
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                 if (icon != null && InventoryIcons != null)

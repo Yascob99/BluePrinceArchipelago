@@ -105,7 +105,7 @@ namespace BluePrinceArchipelago.Items
                 // Disable this game action so it doesn't try and display 2 UIs.
                 Logging.LogWarning("Attempting to add item to Inventory");
                 string iconName = Plugin.UniqueItemManager.GetIconName(Name);
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
                 // Some icons use 
                 if (icon == null)
                 {
@@ -113,7 +113,17 @@ namespace BluePrinceArchipelago.Items
                 }
                 if (icon == null)
                 {
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
+                    PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
+                    foreach (var invIcon in iconList.arrayList) {
+                        GameObject iconGo = invIcon.TryCast<GameObject>();
+                        if (iconGo != null)
+                        {
+                            if (iconGo.name.Contains(iconName))
+                            {
+                                icon = iconGo;
+                            }
+                        }
+                    }
                 }
                 Logging.LogWarning(icon != null);
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
@@ -204,6 +214,8 @@ namespace BluePrinceArchipelago.Items
                     return "Prism Key Icon";
                 case "Electromagnet":
                     return "Powered Electro Magnet Icon";
+                case "Key 8":
+                    return "Key 8";
                 case "Lucky Rabbit's Foot":
                     return "Lucky rabbit's foot Icon";
                 case "Salt Shaker":
@@ -252,7 +264,7 @@ namespace BluePrinceArchipelago.Items
         public FsmState GetPickupState(string name)
         {
 
-            // Fixes the name differences
+            // Fixes a name differences
             name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "").Replace("_0", "").Replace("lunch", "luch");
             if (name.Contains("cabinet key")) {
                 if (name.Contains("1"))

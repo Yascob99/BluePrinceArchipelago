@@ -173,13 +173,7 @@ namespace BluePrinceArchipelago
                 FSMPatches.RoomForcer(MasterPicker); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 LoadArrays();
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
-                if (FirstLoad)
-                {
-                    InitializeRooms();
-                }
-                else {
-                    ReloadRoomGameObjects();
-                }
+                InitializeRooms();
                 Plugin.ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
@@ -815,13 +809,6 @@ namespace BluePrinceArchipelago
                 Unlocks.SatelliteDish.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
-            }
-        }
-        private static void ReloadRoomGameObjects() {
-            foreach (ModRoom room in Plugin.ModRoomManager.Rooms) {
-                string roomPath = "__SYSTEM/The Room Engines/" + room.Name;
-                GameObject roomObj = GameObject.Find(roomPath);
-                room.GameObj = roomObj;
             }
         }
 
