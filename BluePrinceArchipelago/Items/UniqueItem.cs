@@ -46,7 +46,6 @@ namespace BluePrinceArchipelago.Items
                 // Send the item found event on the first time it is found.
                 if (!_HasBeenFound && value)
                 {
-                    ModInstance.ModEventHandler.OnFirstFound(this);
                     _HasBeenFound = value;
                 }
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.

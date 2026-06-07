@@ -746,7 +746,6 @@ public class ArchipelagoQueueManager {
         }
         return false;
     }
-
     public void DequeueItem() {
         if (_ReceivedItemQueue.Count > 0)
         {
@@ -754,6 +753,17 @@ public class ArchipelagoQueueManager {
             ReceiveItem(item);
         }
     }
+    public void DequeueLocation() {
+        if (_LocationQueue.Count > 0)
+        {
+            string location = _LocationQueue.Dequeue();
+            Plugin.ArchipelagoClient.CheckLocation(location);
+        }
+    }
+    public void AddLocationToQueue(string name) { 
+        _LocationQueue.Enqueue(name);
+    }
+
 
     // Handles receiving an item. (doesn't check if it's safe to do so).
     public void ReceiveRoom(ItemInfo item) {
