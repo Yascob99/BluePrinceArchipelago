@@ -179,6 +179,7 @@ public class ArchipelagoClient
                     // Regular Recconnect;
                     Reconnect();
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                    ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                 }
                 else {
                     //Crash Disconnect;
@@ -605,7 +606,6 @@ public class ArchipelagoQueueManager {
     // Tries to receive an item, on sucess returns true, on failure returns false.
     public bool ReceiveItem(ItemInfo item, bool ignoreState = true)
     {
-        Logging.Log($"Attempting to receive Item: {item.ItemName}", "Items");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
         {
             if (ModInstance.IsInRun)
@@ -750,6 +750,7 @@ public class ArchipelagoQueueManager {
         if (_ReceivedItemQueue.Count > 0)
         {
             ItemInfo item = _ReceivedItemQueue.Dequeue();
+            Logging.LogWarning(item.ItemName);
             ReceiveItem(item);
         }
     }

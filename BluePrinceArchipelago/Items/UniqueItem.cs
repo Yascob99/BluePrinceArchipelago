@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using UnityEngine;
+using UnityStandardAssets.ImageEffects;
 
 
 namespace BluePrinceArchipelago.Items
@@ -104,27 +105,30 @@ namespace BluePrinceArchipelago.Items
                 }
                 // This may not cause it to re-trigger.
                 // Disable this game action so it doesn't try and display 2 UIs.
-                string iconName = Name.ToTitleCase() + " Icon(Clone)001";
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                string iconName = Plugin.UniqueItemManager.GetIconName(Name);
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "Icon");
                 // Some icons use 
                 if (icon == null)
                 {
-                    iconName = Name.ToTitleCase() + " icon(Clone)001";
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
                 }
                 if (icon == null)
                 {
-                    iconName = Name.ToTitleCase();
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName.Replace("Icon", "icon") + "(Clone)001");
                 }
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                 if (icon != null && InventoryIcons != null)
                 {
-                    Logging.LogWarning("Here 2");
-
                     ModItemManager.PickedUp.Add(GameObj, "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
+                    if (Name == "RUNNING SHOES")
+                    {
+                        ModInstance.RunningEngine.SendEvent("Update");
+                    }
+                    //Send Event 0 to the Global Manager.
+                    ModInstance.GlobalManager.SendEvent("Event 0");
                 }
+               
             }
         }
 
@@ -186,6 +190,30 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        public string GetIconName(string name) {
+            name = name.ToTitleCase();
+            switch (name){
+                case "Cabinet Key 1":
+                    return "Cabinet Key Icon";
+                case "Cabinet Key 2":
+                    return "Cabinet Key Icon";
+                case "Cabinet Key 3":
+                    return "Cabinet Key Icon";
+                case "Prism Key_0":
+                    return "Prism Key Icon";
+                case "Electromagnet":
+                    return "Powered Electro Magnet Icon";
+                case "Key 8":
+                    return "Key 8";
+                case "Lucky Rabbit's Foot":
+                    return "Lucky rabbit's foot Icon";
+                case "Salt Shaker":
+                    return "Salt Icon";
+                default:
+                    return name + " Icon";
+            }
+        }
+
         //Finds the "You Found" Event based on the what "You Found" is called in the GlobalManager Pickup FSM State. Returns null if not found.
         public Transform GetYouFoundParent(FsmState pickupState)
         {
@@ -240,6 +268,21 @@ namespace BluePrinceArchipelago.Items
                     }
                     //Return the state the transition found goes to.
                     return transition.ToFsmState;
+                }
+            }
+            return null;
+        }
+        public FsmTransition GetPickupTransition(string name) {
+            // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
+            name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "");
+            // Check each Global Transition in the Global Manager.
+            foreach (FsmTransition transition in ModInstance.GlobalManager.FsmGlobalTransitions)
+            {
+                // If the transition's event name contains the item name it's the transition we want.
+                if (transition.EventName.ToLower().Contains(name))
+                {
+
+                    return transition;
                 }
             }
             return null;

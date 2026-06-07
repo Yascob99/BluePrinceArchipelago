@@ -6,6 +6,8 @@ using BepInEx;
 using BepInEx.Unity.IL2CPP.Utils;
 using BluePrinceArchipelago.Utils;
 using System.Collections;
+using UnityEngine;
+using TMPro;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -166,7 +168,7 @@ public class DeathLinkHandler
     }
 
     private bool _bedroom = false;
-    private static readonly string[] _bedroomStrings = ["adyship", "aster", "ervants", "unk", "edroom", "quarium", "oudoir", "ormitory", "ovel", "aid", "ursery"];
+    private static readonly string[] _bedroomStrings = ["adyship", "aster", "ervants", "unk", "edroom", "quarium", "oudoir", "ormitory", "ovel", "aid", "ursery", "ampsite"];
     public void SendStepsDeathLink()
     {
         if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) return;
@@ -196,8 +198,8 @@ public class DeathLinkHandler
         }
 
         if (!deathLinkEnabled) return;
-
-        var currentRoom = fsm.GetStringVariable("Current Room String").Value;
+        // Check Current Room
+        string currentRoom = GameObject.Find("__SYSTEM/HUD/RoomText").GetComponent<TextMeshPro>().text;
 
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {

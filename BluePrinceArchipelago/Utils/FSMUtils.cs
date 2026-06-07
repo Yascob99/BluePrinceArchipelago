@@ -1304,6 +1304,21 @@ namespace BluePrinceArchipelago.Utils
                 i++;
             }
         }
+        public static void DisableLastActionOfType<TAction>(this FsmState state) {
+            int i = 0;
+            int lastIndex = -1;
+            foreach (string actionName in state.ActionData.ActionNames)
+            {
+                if (actionName == typeof(TAction).FullName)
+                {
+                    lastIndex = i;
+                }
+                i++;
+            }
+            if (lastIndex > -1) {
+                state.DisableAction(i);
+            }
+        }
         public static void EnableFirstActionOfType<TAction>(this FsmState state)
         {
             int i = 0;
@@ -1315,6 +1330,23 @@ namespace BluePrinceArchipelago.Utils
                     return;
                 }
                 i++;
+            }
+        }
+        public static void EnableLastActionOfType<TAction>(this FsmState state)
+        {
+            int i = 0;
+            int lastIndex = -1;
+            foreach (string actionName in state.ActionData.ActionNames)
+            {
+                if (actionName == typeof(TAction).FullName)
+                {
+                    lastIndex = i;
+                }
+                i++;
+            }
+            if (lastIndex > -1)
+            {
+                state.EnableAction(i);
             }
         }
 
