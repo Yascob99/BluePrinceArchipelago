@@ -783,15 +783,15 @@ public class ItemCommand(string name) : Command(name)
                 if (item == null)
                 {
                     string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
-                    GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "Icon");
+                    GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
                     // Some icons use 
                     if (icon == null)
                     {
-                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
+                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName.Replace("Icon", "icon") + "(Clone)001");
                     }
                     if (icon == null)
                     {
-                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName.Replace("Icon", "icon") + "(Clone)001");
+                        icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
                     }
                     PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                     if (icon != null && InventoryIcons != null)
@@ -810,15 +810,15 @@ public class ItemCommand(string name) : Command(name)
                     {
 
                         string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
-                        GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "Icon");
+                        GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
                         // Some icons use 
                         if (icon == null)
                         {
-                            icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
+                            icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName.Replace("Icon", "icon") + "(Clone)001");
                         }
                         if (icon == null)
                         {
-                            icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName.Replace("Icon", "icon") + "(Clone)001");
+                            icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
                         }
                         PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
                         if (icon != null && InventoryIcons != null)

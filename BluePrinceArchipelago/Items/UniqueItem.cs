@@ -105,15 +105,15 @@ namespace BluePrinceArchipelago.Items
                 // Disable this game action so it doesn't try and display 2 UIs.
                 Logging.LogWarning("Attempting to add item to Inventory");
                 string iconName = Plugin.UniqueItemManager.GetIconName(Name);
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName);
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "(Clone)001");
                 // Some icons use 
                 if (icon == null)
                 {
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName + "(Clone)001");
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName.Replace("Icon", "icon") + "(Clone)001");
                 }
                 if (icon == null)
                 {
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName.Replace("Icon", "icon") + "(Clone)001");
+                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName);
                 }
                 Logging.LogWarning(icon != null);
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
@@ -204,8 +204,6 @@ namespace BluePrinceArchipelago.Items
                     return "Prism Key Icon";
                 case "Electromagnet":
                     return "Powered Electro Magnet Icon";
-                case "Key 8":
-                    return "Key 8";
                 case "Lucky Rabbit's Foot":
                     return "Lucky rabbit's foot Icon";
                 case "Salt Shaker":
@@ -254,8 +252,17 @@ namespace BluePrinceArchipelago.Items
         public FsmState GetPickupState(string name)
         {
 
-            // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
-            name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "");
+            // Fixes the name differences
+            name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "").Replace("_0", "").Replace("lunch", "luch");
+            if (name.Contains("cabinet key")) {
+                if (name.Contains("1"))
+                {
+                    name = "cabinet key";
+                }
+                else if (name.Contains("3")) {
+                    name = "cabinet key 5";
+                }
+            }
             // Check each Global Transition in the Global Manager.
             FsmTransition[] GlobalTransitions = ModInstance.GlobalManager?.FsmGlobalTransitions;
             if (GlobalTransitions != null) {
