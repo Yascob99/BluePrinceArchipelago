@@ -208,6 +208,7 @@ namespace BluePrinceArchipelago
             if (IsInRun)
             {
                 QueueManager.DequeueItem();
+                QueueManager.DequeueLocation();
             }
         }
         // Fires off when an event is sent from an FSM to an FSM or GameObject. Sometimes fails
