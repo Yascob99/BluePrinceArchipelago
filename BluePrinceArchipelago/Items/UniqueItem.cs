@@ -103,8 +103,9 @@ namespace BluePrinceArchipelago.Items
                 }
                 // This may not cause it to re-trigger.
                 // Disable this game action so it doesn't try and display 2 UIs.
+                Logging.LogWarning("Attempting to add item to Inventory");
                 string iconName = Plugin.UniqueItemManager.GetIconName(Name);
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName + "Icon");
+                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/Inventory Icons/" + iconName);
                 // Some icons use 
                 if (icon == null)
                 {
@@ -114,7 +115,9 @@ namespace BluePrinceArchipelago.Items
                 {
                     icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/ " + iconName.Replace("Icon", "icon") + "(Clone)001");
                 }
+                Logging.LogWarning(icon != null);
                 PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
+                Logging.LogWarning(InventoryIcons != null);
                 if (icon != null && InventoryIcons != null)
                 {
                     ModItemManager.PickedUp.Add(GameObj, "GameObject");
