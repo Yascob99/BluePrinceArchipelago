@@ -252,6 +252,7 @@ namespace BluePrinceArchipelago.Events
         public override void OnTrigger()
         {
             item.HasBeenFound = true;
+            ModInstance.QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
         }
     }
 }
