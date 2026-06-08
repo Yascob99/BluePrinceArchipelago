@@ -281,14 +281,12 @@ namespace BluePrinceArchipelago.Patches
             MechanariumAddState.DisableFirstActionOfType<SendEvent>();
 
             //Lost & Found
-            FsmBool LostAndFoundBool = ModInstance.GlobalPersistentManager.AddFsmBool("Lost & Found Unlocked", Plugin.ModRoomManager.GetRoomByName("LOST & FOUND").IsUnlocked);
             PlayMakerFSM LostandFoundYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Lost&Found Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState LostandFoundAddState = LostandFoundYesButton.GetState("State 8");
             LostandFoundAddState.DisableFirstActionOfType<SendEvent>();
 
 
             //Closed Exhibit
-            FsmBool ClosedExhibitBool = ModInstance.GlobalPersistentManager.AddFsmBool("ClosedExhibit Unlocked", Plugin.ModRoomManager.GetRoomByName("CLOSED EXHIBIT").IsUnlocked);
             PlayMakerFSM ClosedExhibitYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/DOCUMENTS/RED LETTER STUDY - doc/Page 3/Closed Exhibit Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClosedExhibitAddState = ClosedExhibitYesButton.GetState("State 8");
             ClosedExhibitAddState.DisableFirstActionOfType<SendEvent>();
@@ -296,20 +294,16 @@ namespace BluePrinceArchipelago.Patches
             //Drafting Studio Adds
 
             //Clock Tower
-            FsmBool ClockTowerBool = ModInstance.GlobalManager.AddFsmBool("Clock Tower Unlocked", Plugin.ModRoomManager.GetRoomByName("CLOCK TOWER").IsUnlocked);
             PlayMakerFSM ClockTowerDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CLOCK TOWER/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClockTowerAddState = ClockTowerDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
             ClockTowerAddState.DisableFirstActionOfType<SendEvent>();
 
             //The Kennel
-
-            FsmBool TheKennelBool = ModInstance.GlobalManager.AddFsmBool("The Kennel Unlocked", Plugin.ModRoomManager.GetRoomByName("THE KENNEL").IsUnlocked);
             PlayMakerFSM TheKennelDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/THE KENNEL/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TheKennelAddState = TheKennelDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
             TheKennelAddState.DisableFirstActionOfType<SendEvent>();
 
             //Vestibule
-            FsmBool VestibuleBool = ModInstance.GlobalManager.AddFsmBool("Vestibule Unlocked", Plugin.ModRoomManager.GetRoomByName("VESTIBULE").IsUnlocked);
             PlayMakerFSM VestibuleDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/VESTIBULE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState VestibuleAddState = VestibuleDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
             VestibuleAddState.DisableFirstActionOfType<SendEvent>();

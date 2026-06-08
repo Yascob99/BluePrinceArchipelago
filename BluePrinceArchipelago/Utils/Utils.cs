@@ -184,7 +184,7 @@ namespace BluePrinceArchipelago.Utils
 
             }
             foreach (GameObject go in gos) {
-                if (go.scene.name == null) {
+                if (go.scene.name == null) {    
                     return go;
                 }
             }

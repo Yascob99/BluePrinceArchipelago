@@ -89,6 +89,10 @@
         <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.AssetBundleModule.dll</HintPath>
 		<Private>False</Private>
 	  </Reference>
+      <Reference Include="UnityEngine.AudioModule">
+        <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.AudioModule.dll</HintPath>
+		  <Private>False</Private>
+      </Reference>
       <Reference Include="UnityEngine.CoreModule">
         <HintPath>$(BluePrinceDir)\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
         <Private>False</Private>

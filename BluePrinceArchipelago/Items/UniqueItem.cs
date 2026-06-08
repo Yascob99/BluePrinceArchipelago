@@ -5,10 +5,11 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Mono.Cecil;
+using PathologicalGames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using UnityEngine;
 
 
@@ -46,7 +47,6 @@ namespace BluePrinceArchipelago.Items
                 // Send the item found event on the first time it is found.
                 if (!_HasBeenFound && value)
                 {
-                    ModInstance.ModEventHandler.OnFirstFound(this);
                     _HasBeenFound = value;
                 }
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
@@ -105,27 +105,25 @@ namespace BluePrinceArchipelago.Items
                 }
                 // This may not cause it to re-trigger.
                 // Disable this game action so it doesn't try and display 2 UIs.
-                string iconName = Name.ToTitleCase() + " Icon(Clone)001";
-                GameObject icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
-                // Some icons use 
-                if (icon == null)
-                {
-                    iconName = Name.ToTitleCase() + " icon(Clone)001";
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
-                }
-                if (icon == null)
-                {
-                    iconName = Name.ToTitleCase();
-                    icon = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + iconName);
-                }
-                PlayMakerArrayListProxy InventoryIcons = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/")?.GetArrayListProxy("Inventory");
+                Logging.LogWarning("Attempting to add item to Inventory");
+                GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
+                PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
+                GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
+       
                 if (icon != null && InventoryIcons != null)
                 {
-                    Logging.LogWarning("Here 2");
-
-                    ModItemManager.PickedUp.Add(GameObj, "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
+                    if (!ModItemManager.PickedUp.Contains(Name)) {
+                        ModItemManager.PickedUp.Add(GameObj, "GameObject");
+                    }
+                    if (Name == "RUNNING SHOES")
+                    {
+                        ModInstance.RunningEngine.SendEvent("Update");
+                    }
+                    //Send Event 0 to the Global Manager.
                 }
+               
             }
         }
 
@@ -187,6 +185,42 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        public string GetIconName(string name) {
+            name = name.ToTitleCase();
+            switch (name){
+                case "Cabinet Key 1":
+                    return "Cabinet Key Icon";
+                case "Cabinet Key 2":
+                    return "Cabinet Key Icon";
+                case "Cabinet Key 3":
+                    return "Cabinet Key Icon";
+                case "Prism Key_0":
+                    return "Prism Key Icon";
+                case "Electromagnet":
+                    return "Powered Electro Magnet Icon";
+                case "Key 8":
+                    return "Key 8";
+                case "Lucky Rabbit's Foot":
+                    return "Lucky rabbit's foot Icon";
+                case "Salt Shaker":
+                    return "Salt Icon";
+                default:
+                    return name + " Icon";
+            }
+        }
+        public GameObject GetIconGameObject(string name) {
+            name = GetIconName(name);
+            PlayMakerArrayListProxy Inventory = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIconMeshes").GetComponent<PlayMakerArrayListProxy>();
+            for (int i=0; i < Inventory.arrayList.Count; i++)
+            {
+                GameObject child = Inventory.arrayList[i].TryCast<GameObject>();
+                if (child.name.Contains(name)) {
+                    return child;
+                }
+            }
+            return null;
+        }
+
         //Finds the "You Found" Event based on the what "You Found" is called in the GlobalManager Pickup FSM State. Returns null if not found.
         public Transform GetYouFoundParent(FsmState pickupState)
         {
@@ -226,6 +260,41 @@ namespace BluePrinceArchipelago.Items
         public FsmState GetPickupState(string name)
         {
 
+            // Fixes a name differences
+            name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "").Replace("_0", "").Replace("lunch", "luch");
+            if (name.Contains("cabinet key")) {
+                if (name.Contains("1"))
+                {
+                    name = "cabinet key";
+                }
+                else if (name.Contains("3")) {
+                    name = "cabinet key 5";
+                }
+            }
+            // Check each Global Transition in the Global Manager.
+            FsmTransition[] GlobalTransitions = ModInstance.GlobalManager?.FsmGlobalTransitions;
+            if (GlobalTransitions != null) {
+                FsmTransition[] transitions = new FsmTransition[ModInstance.GlobalManager?.FsmGlobalTransitions?.Count ?? 0];
+                GlobalTransitions.CopyTo(transitions, 0);
+            foreach (FsmTransition transition in transitions)
+                {
+                    // If the transition's event name contains the item name it's the transition we want.
+                    if (transition.EventName.ToLower().Contains(name))
+                    {
+                        // Treasure Map requires going 1 state deeper
+                        if (name == "treasure map") {
+                            ModInstance.GlobalManager.GetBoolVariable("Treasure Already").Value = true;
+                            return ModInstance.GlobalManager.GetState("Treasure Map Pickup");
+                        }
+                        //Return the state the transition found goes to.
+                        return transition.ToFsmState;
+                    }
+                }
+            }
+            Logging.LogWarning($"Failed to Get pickup state for: {name}");
+            return null;
+        }
+        public FsmTransition GetPickupTransition(string name) {
             // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
             name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "");
             // Check each Global Transition in the Global Manager.
@@ -234,13 +303,8 @@ namespace BluePrinceArchipelago.Items
                 // If the transition's event name contains the item name it's the transition we want.
                 if (transition.EventName.ToLower().Contains(name))
                 {
-                    // Treasure Map requires going 1 state deeper
-                    if (name == "treasure map") {
-                        ModInstance.GlobalManager.GetBoolVariable("Treasure Already").Value = true;
-                        return ModInstance.GlobalManager.GetState("Treasure Map Pickup");
-                    }
-                    //Return the state the transition found goes to.
-                    return transition.ToFsmState;
+
+                    return transition;
                 }
             }
             return null;

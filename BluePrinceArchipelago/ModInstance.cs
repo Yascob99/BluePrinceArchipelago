@@ -12,6 +12,7 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using JetBrains.Annotations;
+using PathologicalGames;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -54,6 +55,7 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM EndGameClicker = new();
         public static PlayMakerFSM RoomText = new();
         public static PlayMakerFSM APEventFSM = new();
+        public static PlayMakerFSM RunningEngine = new();
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -79,8 +81,10 @@ namespace BluePrinceArchipelago
         public static bool AppliedHarmony { get; private set; } = false;
 
         public static bool FirstLoad { get; set; } = true;
+        public static bool RanStartOfDay { get; set; } = false;
 
         public static int LoadCount = 0;
+
 
         public ModInstance(IntPtr ptr) : base(ptr)
         {
@@ -136,6 +140,7 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Mount Holly Estate"))
             {
                 SceneLoaded = true;
+                RanStartOfDay = false;
                 Unlocks.HasPrepatched = false;
                 LoadCount++;
                 if (LoadCount > 1)
@@ -165,6 +170,7 @@ namespace BluePrinceArchipelago
                 DraftValidationAction = MasterPicker.GetState("3").GetFirstActionOfType<CallMethod>();
                 RoomText = GameObject.Find("__SYSTEM/HUD/Room Text")?.GetComponent<PlayMakerFSM>();
                 PickupSpawnPool = GameObject.Find("__SYSTEM/Pickup Spawn Pools").gameObject;
+                RunningEngine = GameObject.Find("__SYSTEM/RUN ENGINE/Running Engine")?.GetComponent<PlayMakerFSM>();
                 FSMPatches.RoomForcer(MasterPicker); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 LoadArrays();
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
@@ -208,6 +214,7 @@ namespace BluePrinceArchipelago
             if (IsInRun)
             {
                 QueueManager.DequeueItem();
+                QueueManager.DequeueLocation();
             }
         }
         // Fires off when an event is sent from an FSM to an FSM or GameObject. Sometimes fails
@@ -283,9 +290,8 @@ namespace BluePrinceArchipelago
                             state.EnableActionsOfType<ArrayListAdd>();
                         }
                     }
-
                     item.HasBeenFound = true;
-                    ModEventHandler.OnFirstFound(item);
+                    //QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
                 }
                 else if (eventName.Contains("Upgrade"))
                 {
@@ -334,7 +340,6 @@ namespace BluePrinceArchipelago
             IsInRun = true;
             // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
-            RegisterItems.Register();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
             Plugin.ModRoomManager.ResetRoomInHouseCounts();
@@ -342,19 +347,30 @@ namespace BluePrinceArchipelago
 
             // Sync room pools with Archipelago at the start of each day, regardless of when auth happened
             SyncRoomPoolsWithArchipelago();
-
+            if (FirstLoad)
+            {
+                RegisterItems.Register();
+            }
+            else {
+                RegisterItems.ReloadGameObjects();
+            }
 
             State.CurrentDayNum = dayNum;
             // Initialize the Star HUD so it can be properly updated when needed.
             GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
             if (ArchipelagoClient.Authenticated)
             {
-                FSMPatches.UpgradeDiskOverride(GlobalManager);
+                RanStartOfDay = true;
+                if (ArchipelagoOptions.UpgradeDiskSanity)
+                {
+                    FSMPatches.UpgradeDiskOverride(GlobalManager);
+                }
                 FSMPatches.AddedFloorPlanOverrides();
                 if (FirstLoad)
                 {
                     // Rebuild the state if it couldn't be done on the Reconnect from crash.
                     //State.FirstLoad();
+                    
                     if (!ArchipelagoClient.StateRebuilt)
                     {
                         Logging.LogWarning("Rebuilding State");
@@ -779,10 +795,13 @@ namespace BluePrinceArchipelago
             {
                 SyncRoomPoolsWithArchipelago();
             }
-            if (IsInRun)
+            if (IsInRun && !RanStartOfDay)
             {
                 ModItemManager.LoadInventories();
-                FSMPatches.UpgradeDiskOverride(GlobalManager);
+                if (ArchipelagoOptions.UpgradeDiskSanity)
+                {
+                    FSMPatches.UpgradeDiskOverride(GlobalManager);
+                }
                 FSMPatches.AddedFloorPlanOverrides();
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
@@ -793,7 +812,8 @@ namespace BluePrinceArchipelago
                 Plugin.UniqueItemManager.StartOfDay();
             }
         }
-        
+
+
         private static void InitializeRooms()
         {
             Logging.Log("Initializing Rooms");

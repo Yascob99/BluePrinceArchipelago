@@ -179,6 +179,7 @@ public class ArchipelagoClient
                     // Regular Recconnect;
                     Reconnect();
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                    ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                 }
                 else {
                     //Crash Disconnect;
@@ -512,7 +513,7 @@ public class ArchipelagoClient
             State.UpdateRunHistory("Send: " + ServerData.LocationDict[locationid]);
         }
         else if (locationid > 1) {
-            Logging.Log($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent or is not being used for this seed.");
+            Logging.LogWarning($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent or is not being used for this seed.");
         }
     }
 
@@ -605,7 +606,6 @@ public class ArchipelagoQueueManager {
     // Tries to receive an item, on sucess returns true, on failure returns false.
     public bool ReceiveItem(ItemInfo item, bool ignoreState = true)
     {
-        Logging.Log($"Attempting to receive Item: {item.ItemName}", "Items");
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
         {
             if (ModInstance.IsInRun)
@@ -699,16 +699,12 @@ public class ArchipelagoQueueManager {
             }
             // If the item is an upgrade disk.
             if (item.ItemName.ToUpper().Contains("UPGRADE DISK")) {
-                if (ModInstance.IsInRun)
+                // Trim the name of the item to remove the upgrade disk part.
+                ModItemManager.UpgradeDisks.RecievedItems.Add(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
+                if (!ignoreState)
                 {
-                    // Trim the name of the item to remove the upgrade disk part.
-                    ModItemManager.UpgradeDisks.AddItemToInventory(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
-                    if (!ignoreState)
-                    {
-                        State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
-                        State.UpdateRunHistory("Received: " + item.ItemName);
-                    }
-                    return true;
+                    State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
+                    State.UpdateRunHistory("Received: " + item.ItemName);
                 }
                 return false;
             }
@@ -750,14 +746,25 @@ public class ArchipelagoQueueManager {
         }
         return false;
     }
-
     public void DequeueItem() {
         if (_ReceivedItemQueue.Count > 0)
         {
             ItemInfo item = _ReceivedItemQueue.Dequeue();
+            Logging.LogWarning(item.ItemName);
             ReceiveItem(item);
         }
     }
+    public void DequeueLocation() {
+        if (_LocationQueue.Count > 0)
+        {
+            string location = _LocationQueue.Dequeue();
+            Plugin.ArchipelagoClient.CheckLocation(location);
+        }
+    }
+    public void AddLocationToQueue(string name) { 
+        _LocationQueue.Enqueue(name);
+    }
+
 
     // Handles receiving an item. (doesn't check if it's safe to do so).
     public void ReceiveRoom(ItemInfo item) {
