@@ -341,6 +341,11 @@ public class ArchipelagoClient
                 string Location = item.ToUpper().Replace("UPGRADE DISK ", "");
 
             }
+            PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
+            if (permanentItem != null) { 
+                permanentItem.IsUnlocked = true;
+                permanentItem.unlockedCount += 1;
+            }
         }
         // Handle all the items that are not preserved by the game.
         StateRebuilt = true;
