@@ -16,6 +16,7 @@ namespace BluePrinceArchipelago.Archipelago;
 public static class ArchipelagoConsole
 {
     public static bool Hidden = true;
+    public static bool ShowOnlyRelevantMessages = true;
 
     private static List<string> logLines = new();
     private static Vector2 scrollView;
@@ -28,6 +29,7 @@ public static class ArchipelagoConsole
     private static string scrollText = "";
     private static float lastUpdateTime = Time.time;
     private const float HideTimeout = 15f;
+    private const int MaxLogLines = 100;
 
     private static string CommandText = "/help";
     private static Rect CommandTextRect;
@@ -41,27 +43,45 @@ public static class ArchipelagoConsole
         UpdateWindow();
     }
 
-    public static void LogMessage(string message, string logTag = "ArchipelagoConsole")
+    public static void LogMessage(string message, string logTag = "ArchipelagoConsole", bool isServerMessage = false)
     {
         if (message.IsNullOrWhiteSpace()) return;
+
         //Handle multiline messages.
         if (message.Contains('\n'))
         {
             foreach (string submessage in message.Split("\n"))
             {
-                logLines.Add(submessage);
+                if (IsRelevantMessage(submessage))
+                {
+                    logLines.Add(submessage);
+                
+                    lastUpdateTime = Time.time;
+                    UpdateWindow();
+                }
+                
                 Logging.Log(submessage, logTag);
-                lastUpdateTime = Time.time;
-                UpdateWindow();
             }
         }
         else
         {
+            if (!IsRelevantMessage(message))
+            {
+                Logging.Log(message, logTag);
+                return;
+            }
             logLines.Add(message);
             Logging.Log(message, logTag);
             lastUpdateTime = Time.time;
             UpdateWindow();
         }
+    }
+
+    private static bool IsRelevantMessage(string message)
+    {
+        if (!ShowOnlyRelevantMessages) return true;
+        if (message.Contains(ArchipelagoClient.ServerData.SlotName)) return true;
+        return false;
     }
 
     public static void OnGUI()
@@ -213,12 +233,13 @@ public static class ArchipelagoConsole
         {
             if (logLines.Count > 0)
             {
-                scrollText = logLines[logLines.Count - 1];
+                scrollText = logLines[^1];
             }
         }
         else
         {
-            for (var i = 0; i < logLines.Count; i++)
+            int start = Math.Max(0, logLines.Count - MaxLogLines);
+            for (var i = start; i < logLines.Count; i++)
             {
                 scrollText += logLines.ElementAt(i);
                 if (i < logLines.Count - 1)

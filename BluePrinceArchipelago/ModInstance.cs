@@ -298,6 +298,22 @@ namespace BluePrinceArchipelago
                     ModItemManager.UpgradeDisks.OnPickup();
                 }
             }
+            if (eventName == "Allowance Token Pickup")
+            {
+                var path = owner.gameObject.GetPath();
+                Logging.Log($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
+                foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
+                {
+                    foreach (var token in roomHandler.AllowanceTokens)
+                    {
+                        if (path.Contains(token))
+                        {
+                            Logging.Log($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
+                            roomHandler.OnAllowanceTokenCollected();
+                        }
+                    }
+                }
+            }
         }
 
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {

@@ -47,6 +47,7 @@ namespace BluePrinceArchipelago {
             //Logging.SetLogLevel("APData", LogLevel.Info);
             Logging.SetLogLevel("ArchipelagoConsole", LogLevel.Info);
             //Logging.SetLogLevel("ItemQueue", LogLevel.Info);
+            Logging.SetLogLevel("ArchipelagoEvents", LogLevel.Info);
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();

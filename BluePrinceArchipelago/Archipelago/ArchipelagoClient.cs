@@ -98,7 +98,7 @@ public class ArchipelagoClient
     /// </summary>
     private void SetupSession()
     {
-        session.MessageLog.OnMessageReceived += message => ArchipelagoConsole.LogMessage(message.ToString());
+        session.MessageLog.OnMessageReceived += message => ArchipelagoConsole.LogMessage(message.ToString(), isServerMessage: true);
         session.Items.ItemReceived += OnItemReceived;
         session.Socket.ErrorReceived += OnSessionErrorReceived;
         session.Socket.SocketClosed += OnSessionSocketClosed;
@@ -343,6 +343,7 @@ public class ArchipelagoClient
             }
             PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
             if (permanentItem != null) { 
+                Logging.LogWarning($"Attempting to rebuild Permanent Item: {item}");
                 permanentItem.IsUnlocked = true;
                 permanentItem.unlockedCount += 1;
             }

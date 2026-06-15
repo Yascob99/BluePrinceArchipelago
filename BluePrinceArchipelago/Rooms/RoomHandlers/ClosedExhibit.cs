@@ -4,7 +4,7 @@ public class ClosedExhibit : RoomHandler
 {
     public ClosedExhibit()
     {
-        MorajaiPuzzles.Add("Closed Exhibit");
+        AllowanceTokens.Add("Closed Exhibit");
     }
 
 }

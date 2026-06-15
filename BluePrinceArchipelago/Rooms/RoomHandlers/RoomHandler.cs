@@ -12,12 +12,12 @@ public abstract class RoomHandler
     public GameObject RoomGameObject { get; set; }
 
     public Dictionary<string, HashSet<string>> ObservedFSMStates { get; } = [];
-    public HashSet<string> MorajaiPuzzles { get; } = [];
+    public HashSet<string> AllowanceTokens { get; } = [];
 
     public virtual void OnRoomDrafted(GameObject roomGameObject) {}
     public virtual void OnAfterRoomDrafted() { }
     public virtual void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState) { }
-    public virtual void OnMorajaiPuzzleSolved(string puzzleName) { }
+    public virtual void OnAllowanceTokenCollected() { }
     public virtual void OnRoomUnlocked(ModRoom room) { 
     }
 
