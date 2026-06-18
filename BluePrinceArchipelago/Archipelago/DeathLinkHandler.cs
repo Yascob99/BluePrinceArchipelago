@@ -202,7 +202,7 @@ public class DeathLinkHandler
 
         if (!deathLinkEnabled) return;
         // Check Current Room
-        string currentRoom = GameObject.Find("__SYSTEM/HUD/RoomText").GetComponent<TextMeshPro>().text;
+        string currentRoom = GameObject.Find("__SYSTEM/HUD/RoomText")?.GetComponent<TextMeshPro>()?.text ?? "";
 
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
@@ -210,6 +210,10 @@ public class DeathLinkHandler
         }
 
         string deathLinkMsg = $"{slotName} ended the day in {currentRoom}";
+        if (currentRoom.IsNullOrWhiteSpace())
+        {
+            deathLinkMsg = $"{slotName} ended the day";
+        }
 
         if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
     }
