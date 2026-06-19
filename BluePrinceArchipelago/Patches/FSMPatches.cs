@@ -3,6 +3,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using System.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Patches
@@ -41,154 +42,176 @@ namespace BluePrinceArchipelago.Patches
             {
                 if (GlobalFSM.GetState("State 35").Actions.Length < 3)
                 {
+                    PlayMakerFSM UsedFSM = GameObject.Find("__SYSTEM/Upgrade Disks").GetComponent<PlayMakerFSM>();
                     // Create a boolean for tracking the current state of the 
-                    FsmBool ArchivesDisk = GlobalFSM.AddFsmBool("Archives Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("ARCHIVES"));
                     FsmState ArchiveState = GlobalFSM.GetState("State 35");
                     GlobalFSM.AddGlobalTransition("Archives Upgrade Disk Pickup", "State 35");
-                    FsmBool TradingPostDisk = GlobalFSM.AddFsmBool("Trading Post Dynamite Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("TRADING POST DYNAMITE"));
+                    FsmBool ArchivesDiskUsed = GlobalFSM.AddFsmBool("Archives Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("ARCHIVES"));
+                    UsedFSM.GetState("Upgrade Disc - Archives").GetFirstActionOfType<SetFsmBool>().variableName = "Archives Disk Used";
                     FsmState TradingPostState = GlobalFSM.GetState("State 27");
+                    FsmBool TradingPostDiskUsed = GlobalFSM.AddFsmBool("Trading Post Dynamite Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("TRADING POST DYNAMITE"));
+                    UsedFSM.GetState("Upgrade Disc - Bootleg").GetFirstActionOfType<SetFsmBool>().variableName = "Trading Post Dynamite Disk Used";
                     GlobalFSM.AddGlobalTransition("Trading Post Dynamite Upgrade Disk Pickup", "State 27");
-                    FsmBool TombDisk = GlobalFSM.AddFsmBool("Tomb Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("TOMB"));
                     FsmState TombState = GlobalFSM.GetState("State 23");
                     GlobalFSM.AddGlobalTransition("Tomb Upgrade Disk Pickup", "State 22");
-                    FsmBool CommissaryDisk = GlobalFSM.AddFsmBool("Commissary Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("COMMISSARY"));
+                    FsmBool TombDiskUsed = GlobalFSM.AddFsmBool("Tomb Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("TOMB"));
+                    UsedFSM.GetState("Upgrade Disc - Cloister").GetFirstActionOfType<SetFsmBool>().variableName = "Tomb Disk Used";
                     FsmState CommissaryState = GlobalFSM.GetState("State 33");
                     GlobalFSM.AddGlobalTransition("Commissary Upgrade Disk Pickup", "State 33");
-                    FsmBool FoundationDisk = GlobalFSM.AddFsmBool("Foundation Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("FOUNDATION"));
+                    FsmBool CommissaryUsed = GlobalFSM.AddFsmBool("Commissary Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("COMMISSARY"));
+                    UsedFSM.GetState("Upgrade Disc - Commissary").GetFirstActionOfType<SetFsmBool>().variableName = "Commissary Disk Used";
                     FsmState FoundationState = GlobalFSM.GetState("State 22");
                     GlobalFSM.AddGlobalTransition("Foundation Disk Pickup", "State 22");
-                    FsmBool FreezerDisk = GlobalFSM.AddFsmBool("Freezer Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("FREEZER"));
+                    FsmBool FoundationUsed = GlobalFSM.AddFsmBool("Foundation Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("FOUNDATION"));
+                    UsedFSM.GetState("Upgrade Disc - Foundation").GetFirstActionOfType<SetFsmBool>().variableName = "Foundation Disk Used";
                     FsmState FreezerState = GlobalFSM.GetState("State 25");
                     GlobalFSM.AddGlobalTransition("Freezer Upgrade Disk Pickup", "State 22");
-                    FsmBool GarageDisk = GlobalFSM.AddFsmBool("Garage Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("GARAGE"));
+                    FsmBool FreezerUsed = GlobalFSM.AddFsmBool("Freezer Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("FREEZER"));
+                    UsedFSM.GetState("Upgrade Disc - Freezer").GetFirstActionOfType<SetFsmBool>().variableName = "Freezer Disk Used";
                     FsmState GarageState = GlobalFSM.GetState("State 30");
                     GlobalFSM.AddGlobalTransition("Garage Upgrade Disk Pickup", "State 30");
-                    FsmBool GreatHallDisk = GlobalFSM.AddFsmBool("Great Hall Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("GREAT HALL"));
+                    FsmBool GarageUsed = GlobalFSM.AddFsmBool("Garage Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("GARAGE"));
+                    UsedFSM.GetState("Upgrade Disc - Garage").GetFirstActionOfType<SetFsmBool>().variableName = "Garage Disk Used";
                     FsmState GreatHallState = GlobalFSM.GetState("State 29");
                     GlobalFSM.AddGlobalTransition("Great Hall Upgrade Disk Pickup", "State 29");
-                    FsmBool LostAndFoundDisk = GlobalFSM.AddFsmBool("Lost and Found Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("LOST AND FOUND"));
+                    FsmBool GreatHallUsed = GlobalFSM.AddFsmBool("Greate Hall Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("GREAT HALL"));
+                    UsedFSM.GetState("Upgrade Disc - Great Hall").GetFirstActionOfType<SetFsmBool>().variableName = "Great Hall Disk Used";
                     FsmState LostAndFoundState = GlobalFSM.GetState("State 28");
                     GlobalFSM.AddGlobalTransition("Lost and Found Upgrade Disk Pickup", "State 28");
-                    FsmBool HLCDisk = GlobalFSM.AddFsmBool("Her Ladyships Chamber Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("HER LADYSHIPS CHAMBER"));
+                    FsmBool LostAndFoundUsed = GlobalFSM.AddFsmBool("Lost and Found Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("LOST AND FOUND"));
+                    UsedFSM.GetState("Upgrade Disc - LostFound").GetFirstActionOfType<SetFsmBool>().variableName = "Lost and Found Disk Used";
                     FsmState HLCState = GlobalFSM.GetState("State 20");
                     GlobalFSM.AddGlobalTransition("Her Ladyships Chamber Upgrade Disk Pickup", "State 20");
-                    FsmBool MechanariumDisk = GlobalFSM.AddFsmBool("Mechanarium Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("MECHANARIUM"));
+                    FsmBool HLCUsed = GlobalFSM.AddFsmBool("Her Ladyships Chamber Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("HER LADYSHIPS CHAMBER"));
+                    UsedFSM.GetState("Upgrade Disc - Master Bedroom").GetFirstActionOfType<SetFsmBool>().variableName = "Her Ladyships Chamber Disk Used";
                     FsmState MechanariumState = GlobalFSM.GetState("State 24");
                     GlobalFSM.AddGlobalTransition("Mechanarium Upgrade Disk Pickup", "State 24");
-                    FsmBool MorningRoomDisk = GlobalFSM.AddFsmBool("Morning Room Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("MORNING ROOM"));
+                    FsmBool MechanariumUsed = GlobalFSM.AddFsmBool("Mechanarium Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("MECHANARIUM"));
+                    UsedFSM.GetState("Upgrade Disc - Mechanarium").GetFirstActionOfType<SetFsmBool>().variableName = "Mechanarium Disk Used";
                     FsmState MorningRoomState = GlobalFSM.GetState("State 21");
                     GlobalFSM.AddGlobalTransition("Morning Room Upgrade Disk Pickup", "State 21");
-                    FsmBool OfficeDisk = GlobalFSM.AddFsmBool("Office Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("OFFICE"));
+                    FsmBool MorningRoomUsed = GlobalFSM.AddFsmBool("Morning Room Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("MORNING ROOM"));
+                    UsedFSM.GetState("Upgrade Disc - Morning Room").GetFirstActionOfType<SetFsmBool>().variableName = "Morning Room Disk Used";
                     FsmState OfficeState = GlobalFSM.GetState("State 34");
                     GlobalFSM.AddGlobalTransition("Office Upgrade Disk Pickup", "State 34");
-                    FsmBool VaultDisk = GlobalFSM.AddFsmBool("Vault Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("VAULT"));
+                    FsmBool OfficeUsed = GlobalFSM.AddFsmBool("Office Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("OFFICE"));
+                    UsedFSM.GetState("Upgrade Disc - Office").GetFirstActionOfType<SetFsmBool>().variableName = "Office Disk Used";
                     FsmState VaultState = GlobalFSM.GetState("State 26");
                     GlobalFSM.AddGlobalTransition("Vault Disk Pickup", "State 26");
-                    FsmBool AbandonedMineDisk = GlobalFSM.AddFsmBool("Abandoned Mine Disk", ModItemManager.UpgradeDisks.RecievedItems.Contains("ABANDONNED MINE"));
+                    FsmBool VaultUsed = GlobalFSM.AddFsmBool("Vault Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("VAULT"));
+                    UsedFSM.GetState("Upgrade Disc - Tomb").GetFirstActionOfType<SetFsmBool>().variableName = "Vault Disk Used";
                     FsmState AbandonedMineState = GlobalFSM.GetState("State 31");
                     GlobalFSM.AddGlobalTransition("Abandoned Mine Pickup", "State 31");
+                    FsmBool AbandonedMineUsed = GlobalFSM.AddFsmBool("Abandoned Mine Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("ABANDONED MINE"));
+                    UsedFSM.GetState("Upgrade Disc - Torch Room ").GetFirstActionOfType<SetFsmBool>().variableName = "Abandoned Mine Disk Used";
 
                     FsmState roomCheck = GlobalFSM.GetState("State 19");
                     StringContains[] checks = roomCheck.GetActionsOfType<StringContains>();
 
-                    FsmStateAction[] addActions = state.GetActionsOfType<ArrayListAdd>();
                     checks[0].containsString = "adyship"; // Fix HLC check
                     checks[3].containsString = "omb"; // Fix Tomb Check
-                    FsmStateAction activateAction = state.GetFirstActionOfType<ActivateGameObject>();
+                    state.DisableActionsOfType<SendEvent>(); //Prevents the Game from Getting Softlocked by a Freeze.
+                    FsmStateAction freeze = state.GetFirstActionOfType<SendEvent>();
+
+                    //Unfreeze 
+                    SendEventByName unfreeze = new SendEventByName()
+                    {
+                        eventTarget = new FsmEventTarget()
+                        {
+                            target = FsmEventTarget.EventTarget.GameObject,
+                            gameObject = new FsmOwnerDefault()
+                            {
+                                gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
+                                ownerOption = OwnerDefaultOption.SpecifyGameObject
+                            },
+                            fsmName = "FSM",
+                            sendToChildren = false,
+                            excludeSelf = false
+                        },
+                        sendEvent = "UnFreeze",
+                        delay = 0f,
+                        everyFrame = false
+                    };
 
                     // Add the Archive pickup Check
-                    ArchiveState.InsertAction(1, new BoolTest() { boolVariable = ArchivesDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    ArchiveState.InsertAction(2, activateAction);
-                    ArchiveState.InsertAction(3, addActions[0]);
-                    ArchiveState.InsertAction(4, addActions[1]);
+                    ArchiveState.InsertAction(1, freeze);
+                    ArchiveState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[0], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    ArchiveState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Trading Post Pickup Check
-                    TradingPostState.InsertAction(1, new BoolTest() { boolVariable = TradingPostDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    TradingPostState.InsertAction(2, activateAction);
-                    TradingPostState.InsertAction(3, addActions[0]);
-                    TradingPostState.InsertAction(4, addActions[1]);
+                    TradingPostState.InsertAction(1, freeze);
+                    TradingPostState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[1], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    TradingPostState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Tomb Pickup Check
-                    TombState.InsertAction(1, new BoolTest() { boolVariable = TombDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    TombState.InsertAction(2, activateAction);
-                    TombState.InsertAction(3, addActions[0]);
-                    TombState.InsertAction(4, addActions[1]);
+                    TombState.InsertAction(1, freeze);
+                    TombState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[2], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    TombState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Commissary Buy Check
-                    CommissaryState.InsertAction(1, new BoolTest() { boolVariable = CommissaryDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    CommissaryState.InsertAction(2, activateAction);
-                    CommissaryState.InsertAction(3, addActions[0]);
-                    CommissaryState.InsertAction(4, addActions[1]);
+                    CommissaryState.InsertAction(1, freeze);
+                    CommissaryState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[3], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    CommissaryState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Foundation Pickup Check
-                    FoundationState.InsertAction(1, new BoolTest() { boolVariable = FoundationDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    FoundationState.InsertAction(2, activateAction);
-                    FoundationState.InsertAction(3, addActions[0]);
-                    FoundationState.InsertAction(4, addActions[1]);
+                    FoundationState.InsertAction(1, freeze);
+                    FoundationState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[4], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    FoundationState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Freezer Pickup Check
-                    FreezerState.InsertAction(1, new BoolTest() { boolVariable = FreezerDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    FreezerState.InsertAction(2, activateAction);
-                    FreezerState.InsertAction(3, addActions[0]);
-                    FreezerState.InsertAction(4, addActions[1]);
+                    FreezerState.InsertAction(1, freeze);
+                    FreezerState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[5], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    FreezerState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Garage Pickup Check
-                    GarageState.InsertAction(1, new BoolTest() { boolVariable = GarageDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    GarageState.InsertAction(2, activateAction);
-                    GarageState.InsertAction(3, addActions[0]);
-                    GarageState.InsertAction(4, addActions[1]);
+                    GarageState.InsertAction(1, freeze);
+                    GarageState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[6], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    GarageState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Great Hall Pickup Check
-                    GreatHallState.InsertAction(1, new BoolTest() { boolVariable = GreatHallDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    GreatHallState.InsertAction(2, activateAction);
-                    GreatHallState.InsertAction(3, addActions[0]);
-                    GreatHallState.InsertAction(4, addActions[1]);
+                    GreatHallState.InsertAction(1, freeze);
+                    GreatHallState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[7], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    GreatHallState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Lost and Found Pickup Check
-                    LostAndFoundState.InsertAction(1, new BoolTest() { boolVariable = LostAndFoundDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    LostAndFoundState.InsertAction(2, activateAction);
-                    LostAndFoundState.InsertAction(3, addActions[0]);
-                    LostAndFoundState.InsertAction(4, addActions[1]);
+                    LostAndFoundState.InsertAction(1, freeze);
+                    LostAndFoundState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[8], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    LostAndFoundState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Her Ladyship's Chamber Pickup Check
-                    HLCState.InsertAction(1, new BoolTest() { boolVariable = HLCDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    HLCState.InsertAction(2, activateAction);
-                    HLCState.InsertAction(3, addActions[0]);
-                    HLCState.InsertAction(4, addActions[1]);
+                    HLCState.InsertAction(1, freeze);
+                    HLCState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[9], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    HLCState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Mechanarium Pickup Check
-                    MechanariumState.InsertAction(1, new BoolTest() { boolVariable = MechanariumDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    MechanariumState.InsertAction(2, activateAction);
-                    MechanariumState.InsertAction(3, addActions[0]);
-                    MechanariumState.InsertAction(4, addActions[1]);
+                    MechanariumState.InsertAction(1, freeze);
+                    MechanariumState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[10], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    MechanariumState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Morning Room Pickup Check
-                    MorningRoomState.InsertAction(1, new BoolTest() { boolVariable = MorningRoomDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    MorningRoomState.InsertAction(2, activateAction);
-                    MorningRoomState.InsertAction(3, addActions[0]);
-                    MorningRoomState.InsertAction(4, addActions[1]);
+                    MorningRoomState.InsertAction(1, freeze);
+                    MorningRoomState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[11], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    MorningRoomState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Office Pickup Check
-                    OfficeState.InsertAction(1, new BoolTest() { boolVariable = OfficeDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    OfficeState.InsertAction(2, activateAction);
-                    OfficeState.InsertAction(3, addActions[0]);
-                    OfficeState.InsertAction(4, addActions[1]);
+                    OfficeState.InsertAction(1, freeze);
+                    OfficeState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[12], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    OfficeState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Vault Pickup Check
-                    VaultState.InsertAction(1, new BoolTest() { boolVariable = VaultDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    VaultState.InsertAction(2, activateAction);
-                    VaultState.InsertAction(3, addActions[0]);
-                    VaultState.InsertAction(4, addActions[1]);
+                    VaultState.InsertAction(1, freeze);
+                    VaultState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[14], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    VaultState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Add the Abandoned Mine Pickup Check
-                    AbandonedMineState.InsertAction(1, new BoolTest() { boolVariable = AbandonedMineDisk, isFalse = FsmEvent.GetFsmEvent("Event 0"), everyFrame = false });
-                    AbandonedMineState.InsertAction(2, activateAction);
-                    AbandonedMineState.InsertAction(3, addActions[0]);
-                    AbandonedMineState.InsertAction(4, addActions[1]);
+                    AbandonedMineState.InsertAction(1, freeze);
+                    AbandonedMineState.InsertAction(2, new ActivateGameObject() { gameObject = new FsmOwnerDefault() { gameObject = UpgradeDisks.YouFoundObjects[15], ownerOption = OwnerDefaultOption.SpecifyGameObject }, activate = true, recursive = false, resetOnExit = false, everyFrame = false });
+                    AbandonedMineState.InsertAction(3, unfreeze); // Backup in case the YouFound doesn't work.
 
                     // Remove the original Pickup actions
                     state.DisableActionsOfType<ArrayListAdd>();
                     state.DisableActionsOfType<ActivateGameObject>();
+                    state.DisableActionsOfType<SendEvent>();
                     // Fix the "Finished Transition"
                     state.ChangeTransition("FINISHED", "State 19"); //Fix transitions
                     Logging.Log("Upgrade Disk Override Applied.");
@@ -218,6 +241,8 @@ namespace BluePrinceArchipelago.Patches
                         delay = 0f,
                         everyFrame = false
                     });
+                    
+
                 }
                 else {
                     Logging.Log("Upgrade Disk Override already applied.");
@@ -296,37 +321,30 @@ namespace BluePrinceArchipelago.Patches
             //Clock Tower
             PlayMakerFSM ClockTowerDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CLOCK TOWER/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClockTowerAddState = ClockTowerDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            ClockTowerAddState.DisableFirstActionOfType<SendEvent>();
 
             //The Kennel
             PlayMakerFSM TheKennelDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/THE KENNEL/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TheKennelAddState = TheKennelDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            TheKennelAddState.DisableFirstActionOfType<SendEvent>();
 
             //Vestibule
             PlayMakerFSM VestibuleDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/VESTIBULE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState VestibuleAddState = VestibuleDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            VestibuleAddState.DisableFirstActionOfType<SendEvent>();
 
             //Dovecote
             PlayMakerFSM DovecoteDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DOVECOTE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DovecoteAddState = DovecoteDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            DovecoteAddState.DisableFirstActionOfType<SendEvent>();
 
             //Solarium
             PlayMakerFSM SolariumDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/SOLARIUM/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState SolariumAddState = SolariumDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            SolariumAddState.DisableFirstActionOfType<SendEvent>();
 
             //Dormitory
             PlayMakerFSM DormitoryDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DORMITORY/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DormitoryAddState = DormitoryDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            DormitoryAddState.DisableFirstActionOfType<SendEvent>();
 
             //Casino
             PlayMakerFSM CasinoDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CasinoAddState = CasinoDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
-            CasinoAddState.DisableFirstActionOfType<SendEvent>();
 
 
             //Plan Picker

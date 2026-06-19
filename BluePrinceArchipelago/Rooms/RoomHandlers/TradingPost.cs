@@ -22,7 +22,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
             //_MoreButtonFSM = UIOverlayCam.transform.Find("Trading Post Menu/Menu Buttons/more button")?.GetComponent<PlayMakerFSM>(); ;
         }
 
-        public override void OnAfterRoomDrafted()
+        public override void OnAfterRoomDrafted(GameObject roomGameObject)
         {
             // Logging.Log("Trading Post drafted. Setting up FSM hooks.");
         }

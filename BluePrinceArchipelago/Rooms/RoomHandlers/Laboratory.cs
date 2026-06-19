@@ -16,7 +16,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
             
         }
 
-        public override void OnAfterRoomDrafted()
+        public override void OnAfterRoomDrafted(GameObject roomGameObject)
         {
             // Runs the code to prevent Gemstone Cavern from being unlocked normally.
             Unlocks.BlackBridgeGrotto.PreventDefault();

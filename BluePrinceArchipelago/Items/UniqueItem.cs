@@ -1,12 +1,9 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.Archipelago;
+﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Mono.Cecil;
-using PathologicalGames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,18 +102,15 @@ namespace BluePrinceArchipelago.Items
                 }
                 // This may not cause it to re-trigger.
                 // Disable this game action so it doesn't try and display 2 UIs.
-                Logging.LogWarning("Attempting to add item to Inventory");
+                Logging.LogWarning($"Attempting to add {Name} to Inventory");
                 GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                 PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
                 GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
-       
                 if (icon != null && InventoryIcons != null)
                 {
+                    ModItemManager.PickedUp.AddIfUnique(GameObj);
                     InventoryIcons.Add(icon, "GameObject");
-                    if (!ModItemManager.PickedUp.Contains(Name)) {
-                        ModItemManager.PickedUp.Add(GameObj, "GameObject");
-                    }
+                    ModItemManager.PreSpawn.RemoveIfExists(Name);
                     if (Name == "RUNNING SHOES")
                     {
                         ModInstance.RunningEngine.SendEvent("Update");
@@ -156,10 +150,18 @@ namespace BluePrinceArchipelago.Items
                 if (item != null)
                 {
                     FsmState state = GetPickupState(obj.name);
-                    if (item.IsUnlocked && item.HasBeenFound)
+                    // If the item is not already in the inventory
+                    if (item.IsUnlocked)
                     {
                         //Re-enable the previously disabled actions.
-                        state.EnableActionsOfType<ArrayListAdd>();
+                        if (ModItemManager.PickedUp.Contains(obj.name))
+                        {
+                            state.EnableFirstActionOfType<ArrayListAdd>();
+                        }
+                        else
+                        {
+                            state.EnableActionsOfType<ArrayListAdd>();
+                        }
                     }
                 }
             }
@@ -195,7 +197,7 @@ namespace BluePrinceArchipelago.Items
                 case "Cabinet Key 3":
                     return "Cabinet Key Icon";
                 case "Prism Key_0":
-                    return "Prism Key Icon";
+                    return "Prism Key";
                 case "Electromagnet":
                     return "Powered Electro Magnet Icon";
                 case "Key 8":
@@ -204,6 +206,14 @@ namespace BluePrinceArchipelago.Items
                     return "Lucky rabbit's foot Icon";
                 case "Salt Shaker":
                     return "Salt Icon";
+                case "Vault Key 149":
+                    return "Vault Key 149 icon";
+                case "Vault Key 233":
+                    return "Vault Key 233 icon";
+                case "Vault Key 304":
+                    return "Vault Key 304 icon";
+                case "Vault Key 370":
+                    return "Vault Key 370 icon";
                 default:
                     return name + " Icon";
             }
@@ -214,7 +224,7 @@ namespace BluePrinceArchipelago.Items
             for (int i=0; i < Inventory.arrayList.Count; i++)
             {
                 GameObject child = Inventory.arrayList[i].TryCast<GameObject>();
-                if (child.name.Contains(name)) {
+                if (child.name.Trim() == name.Trim()) {
                     return child;
                 }
             }

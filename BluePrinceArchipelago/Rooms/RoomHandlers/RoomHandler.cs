@@ -15,7 +15,7 @@ public abstract class RoomHandler
     public HashSet<string> MorajaiPuzzles { get; } = [];
 
     public virtual void OnRoomDrafted(GameObject roomGameObject) {}
-    public virtual void OnAfterRoomDrafted() { }
+    public virtual void OnAfterRoomDrafted(GameObject roomGameObject) { }
     public virtual void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState) { }
     public virtual void OnMorajaiPuzzleSolved(string puzzleName) { }
     public virtual void OnRoomUnlocked(ModRoom room) { 
@@ -47,8 +47,8 @@ public abstract class RoomHandler
             "CLOISTER" => new Cloister(),
             "ENTRANCE HALL" => new EntranceHall(),
             "CLOSED EXHIBIT" => new ClosedExhibit(),
-            //"UTILITY CLOSET" => new UtilityCloset(),
-            //"LABORATORY" => new Laboratory(),
+            "UTILITY CLOSET" => new UtilityCloset(),
+            "LABORATORY" => new Laboratory(),
             _ => null
         };
 

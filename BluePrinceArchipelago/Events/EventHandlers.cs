@@ -31,7 +31,7 @@ namespace BluePrinceArchipelago.Events
             // Send second Bunk Room location.
             if (roomName.ToUpper() == "BUNK ROOM")
             {
-                LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering", "First Draft Room 2"));
+                LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering 2", "First Draft Room 2"));
             }
         }
         public void OnClassroomFirstDrafted(string classroomNumber) {

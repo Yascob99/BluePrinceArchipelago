@@ -814,15 +814,12 @@ public class ItemCommand(string name) : Command(name)
                     if (Plugin.ModItemManager.IsItemSpawnable(item) || true)
                     {
                         GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                        PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                         PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-                        GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(itemName);
+                        GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(item.name);
 
-                        Logging.LogWarning(icon != null);
-                        Logging.LogWarning(InventoryIcons != null);
                         if (icon != null && InventoryIcons != null)
                         {
-                            if (!ModItemManager.PickedUp.Contains(Name))
+                            if (!ModItemManager.PickedUp.Contains(item.name))
                             {
                                 ModItemManager.PickedUp.Add(item, "GameObject");
                             }

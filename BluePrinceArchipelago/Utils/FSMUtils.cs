@@ -1,5 +1,4 @@
-﻿using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Utils.Actions;
+﻿using BluePrinceArchipelago.Utils.Actions;
 using HutongGames.PlayMaker;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
@@ -61,6 +60,37 @@ namespace BluePrinceArchipelago.Utils
             }
             return false;
         }
+        public static bool Contains(this PlayMakerArrayListProxy arrayListProxy, string name) {
+            for (int i = 0; i < arrayListProxy.arrayList.Count; i++)
+            {
+                GameObject item = arrayListProxy?.arrayList[i]?.TryCast<GameObject>();
+                if (item.name.ToUpper().Trim() == name.ToUpper().Trim())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static void RemoveIfExists(this PlayMakerArrayListProxy arrayListProxy, string name) {
+            for (int i = 0; i < arrayListProxy.arrayList.Count; i++) { 
+                GameObject item = arrayListProxy?.arrayList[i]?.TryCast<GameObject>();
+                if (item.name.ToUpper().Trim() == name.ToUpper().Trim()) {
+                    arrayListProxy.RemoveAt(i);
+                }
+            }
+        }
+        public static void AddIfUnique(this PlayMakerArrayListProxy arrayListProxy, GameObject value)
+        {
+            for (int i = 0; i < arrayListProxy.arrayList.Count; i++)
+            {
+                GameObject item = arrayListProxy?.arrayList[i]?.TryCast<GameObject>();
+                if (item.name.ToUpper().Trim() == value.name.ToUpper().Trim()) {
+                    return;
+                }
+            }
+            arrayListProxy.Add(value, "GameObject");
+        }
 
         /// <summary>
         ///     Removes a value at an index from a PlayMakerArrayListProxy 
@@ -78,7 +108,7 @@ namespace BluePrinceArchipelago.Utils
         public static bool SafeRemove(this PlayMakerArrayListProxy list, string objName) {
             for (int i = 0; i < list.arrayList.Count; i++)
             {
-                GameObject item = ModItemManager.PreSpawn?.arrayList[i]?.TryCast<GameObject>();
+                GameObject item = list?.arrayList[i]?.TryCast<GameObject>();
                 if (item.name != objName)
                 {
                     list.RemoveAt(i);
@@ -86,10 +116,6 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
             return false;
-        }
-
-        public static void AddToArray<T>(this PlayMakerArrayListProxy arrayListProxy, T item)
-        {
         }
 
         /// <summary>

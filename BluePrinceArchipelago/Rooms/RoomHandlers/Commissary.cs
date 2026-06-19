@@ -56,7 +56,7 @@ public class Commissary : RoomHandler
 
         SetupItemsForSale();
     }
-    public override void OnAfterRoomDrafted()
+    public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         ReplaceModelsWithAP();
         ReplacePurchases();
@@ -103,6 +103,8 @@ public class Commissary : RoomHandler
 
     private void ReplacePurchases() {
         foreach (var cItem in CommissaryStates) {
+            Logging.LogWarning(cItem.Key);
+            Logging.LogWarning(cItem.Value);
             if (!CanStock.Contains(cItem.Key)) {
                 ReplaceCommissaryPurchase(Plugin.ModItemManager.GetUniqueItem(cItem.Key), cItem.Value);
             }
@@ -111,6 +113,7 @@ public class Commissary : RoomHandler
 
     private FsmState ReplaceCommissaryPurchase(UniqueItem item, string stateName)
     {
+        Logging.LogWarning(stateName);
         FsmState state = ModInstance.CommissaryMenu.GetState(stateName);
         if (state != null)
         {

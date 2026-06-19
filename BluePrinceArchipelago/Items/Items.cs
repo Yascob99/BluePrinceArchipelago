@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using static ES3;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -118,22 +119,22 @@ namespace BluePrinceArchipelago.Items
 
         public void ReplaceAPItemNotifications(string itemName, GameObject item, string scoutname = "")
         {
-            //List<Transform> FoundModels = new();
+            List<Transform> FoundModels = new();
             if (scoutname == "")
             {
                 scoutname = itemName;
             }
+            string youName = GetYou___Name(itemName);
             GameObject You___Text = GameObject.Find("UI OVERLAY CAM/You Found Text")?.gameObject;
             if (You___Text != null)
             {
                 for (int t = 0; t < You___Text.transform.childCount; t++)
                 {
                     Transform child = You___Text.transform.GetChild(t);
-
                     // Tries to find all related You___Messages"
-                    if (child.gameObject.name.Contains(GetYou___Name(itemName)) && !CheckSimilar(itemName, child))
+                    if (child.gameObject.name.Contains(youName) && !CheckSimilar(itemName, child))
                     {
-                        //FoundModels.Add(child);
+                        FoundModels.Add(child);
                         Transform itemModel = child.FindRecursive(GetItemModelName(itemName), true);
                         if (itemModel != null)
                         {
@@ -172,9 +173,9 @@ namespace BluePrinceArchipelago.Items
                             if (playerName != "")
                             {
                                 string scoutItemName = scout?.ItemName ?? "";
+                               
                                 //TODO add logic for the descriptions to be different based on item importance.
                                 string description = "";
-
                                 string[] itemWords = scoutItemName.Split(" ");
                                 if (itemWords.Length < 4)
                                 {
@@ -188,8 +189,11 @@ namespace BluePrinceArchipelago.Items
                                 int ItemNameCount = 0;
                                 int DescriptionCount = 0;
                                 // Update all the fonts and words to be correct
-
-                                Transform textObjects = child.Find("Text/GameObject");
+                                Transform textObjects = GameObject.Find($"UI OVERLAY CAM/You Found Text/{child.name}/Text/GameObject")?.transform;
+                                // Fix for an error in the Prism Key You Bought (and potentially others);
+                                if (textObjects == null) { 
+                                    textObjects = GameObject.Find($"UI OVERLAY CAM/You Found Text/{child.name}/GameObject")?.transform;
+                                }
 
                                 GameObject textObject = GameObject.Instantiate(textPrefab, textObjects.position, textObjects.rotation);
                                 Transform FirstFirstLetter = null;
@@ -312,10 +316,12 @@ namespace BluePrinceArchipelago.Items
                             Logging.LogWarning($"Unable to find the item model for {itemName.ToTitleCase()}");
                         }
                     }
+
                 }
-                //if (FoundModels.Count == 0) {
-                //    Logging.LogWarning($"Unable to find any You Found Messages Matching the {itemName.ToTitleCase()}.");
-                //}
+                if (FoundModels.Count == 0)
+                {
+                    Logging.LogWarning($"Unable to find a 'You ___' notification for {itemName}.");
+                }
             }
             else
             {
@@ -325,19 +331,33 @@ namespace BluePrinceArchipelago.Items
 
         private string GetYou___Name(string name) {
             name = name.ToTitleCase();
-            if (name == "Magnifying Glass") {
-                name = "Mag Glass";
+            switch (name)
+            {
+                case "Magnifying Glass":
+                    return "Mag Glass";
+                case "Lock Pick Kit":
+                    return "Lock Pick";
+                case "Sleeping Mask":
+                    return "Sleep Mask";
+                case "Prism Key_0":
+                    return "Prism Key";
+                case "Key Of Aries":
+                    return "The Key of Aries";
+                case "Vault Key 149":
+                    return "Key 149";
+                case "Vault Key 233":
+                    return "Key 233";
+                case "Vault Key 304":
+                    return "Key 304";
+                case "Vault Key 370":
+                    return "Key 370";
+                case "Cabinet Key 1":
+                    return "Cabinet Key";
+                case "Cabinet Key 2":
+                    return "Cabinet Key 5";
+                default:
+                    return name;
             }
-            if (name == "Lock Pick Kit") {
-                name = "Lock Pick";
-            }
-            if (name.Contains("Key")) {
-                name = name.Replace("Vault ", "").Trim();
-            }
-            if (name == "Sleeping Mask") {
-                name = "Sleep Mask";
-            }
-            return name;
         }
 
         private string GetItemModelName(string name) {
@@ -355,6 +375,14 @@ namespace BluePrinceArchipelago.Items
                     return "crow";
                 case "HALL PASS":
                     return "hallpass";
+                case "CABINET KEY 1":
+                    return "cabinet key";
+                case "CABINET KEY 2":
+                    return "cabinet key";
+                case "PRISM KEY_0":
+                    return "Prism Key";
+                case "KEY Of ARIES":
+                    return "o Key";
                 default:
                     return name;
             }
@@ -391,24 +419,234 @@ namespace BluePrinceArchipelago.Items
         }
 
         public void ReplaceUpgradeDisksWithAP() {
-            GameObject prefab = ModInstance.Prefabs.GetChild("UPGr");
+            GameObject prefab = ModInstance.Prefabs.GetChild("UPGRADE DISK");
             if (prefab != null) {
-                GameObject APswirly = prefab.transform.GetChild(0)?.gameObject;
                 for (int i = 1; i < 17; i++)
                 {
-                
-                    if (APswirly != null)
+                    GameObject spawnObj = null;
+                    // Get the APswirly Component of the Prefab and reparent it to the spawn prefab.
+                    if (i < 10)
                     {
-                        // Get the APswirly Component of the Prefab and reparent it to the spawn prefab.
-                        GameObject spawnObj = ModInstance.PickupSpawnPool.transform.FindChild($"UPGRADEDISK(Clone)00{i}")?.gameObject;
-                        if (spawnObj != null)
+                        spawnObj = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)00{i}")?.gameObject;
+                    }
+                    else
+                    {
+                        spawnObj = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)0{i}")?.gameObject;
+                    }
+                    if (spawnObj != null)
+                    {
+                        GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
+                        // Get the APswirly Component of the prefab
+                        GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
+                        if (APswirly != null)
                         {
                             APswirly.transform.parent = spawnObj.transform;
+                            GameObject.Destroy(APGO);
                         }
                     }
                 }
                 // Replaces the You Found and You bought Message for the Upgrade disk with the Commissary Message. Will Replace the others programmatically. 
-                ReplaceAPItemNotifications("UPGRADE DISK", ModInstance.PickupSpawnPool.transform.FindChild("UPGRADEDISK(Clone)001")?.gameObject, "UPGRADE DISK COMISSARY"); 
+                ReplaceUpgradeDiskNotifications();
+            }
+        }
+        public void ReplaceUpgradeDiskNotifications() {
+            int j = 0;
+            GameObject item = null;
+            foreach (string location in UpgradeDisks.Locations) {
+                j++;
+                
+                if (j < 10)
+                {
+                    item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)00{j}")?.gameObject;
+                }
+                else {
+                    item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)0{j}")?.gameObject;
+                }
+                string scoutname = $"Upgrade Disk - {location.Replace("LADYSHIPS", "LADYSHIP\'s").Replace("AND ", "& ").Replace("FOUNDATION", "THE FOUNDATION").ToTitleCase()}";
+                GameObject You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk - " + location.ToTitleCase());
+                if (You___Message != null)
+                {
+                    Transform itemModel = You___Message.transform.FindRecursive("Floppy Disk", true);
+                    if (itemModel != null)
+                    {
+                        //Instantiate a the AP Object at the original's position
+                        GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
+                        APGO.transform.localScale = itemModel.localScale;
+                        APGO.name = itemModel.name;
+                        itemModel.gameObject.DestroyAllChildren();
+                        APGO.MoveChildrenTo(itemModel.gameObject);
+                        GameObject.Destroy(APGO);
+
+                        //Import the template Text Prefab.  
+                        GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
+
+                        // Get the location ID of our first pickup.
+                        long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname);
+                        // Find the the details of the item that will be sent on pickup.
+                        ScoutedItemInfo scout = null;
+                        
+                        if (locationid != -1)
+                        {
+                            if (ArchipelagoClient.ServerData.LocationItemMap.ContainsKey(locationid))
+                            {
+                                scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
+                            }
+                        }
+
+                        // Get the variables for creating our custom pickup message.
+                        string playerName = scout?.Player?.Name ?? "";
+                        //Check if item is being used.
+                        if (playerName != "")
+                        {
+                            string scoutItemName = scout?.ItemName ?? "";
+                            //TODO add logic for the descriptions to be different based on item importance.
+                            Logging.Log($"scoutItemName");
+                            string description = "";
+
+                            string[] itemWords = scoutItemName.Split(" ");
+                            if (itemWords.Length < 4)
+                            {
+                                scoutItemName = itemWords.Join("\n");
+                            }
+                            else
+                            {
+                                scoutItemName = scoutItemName.Minragged();
+                            }
+                            int FirstLetterCount = 0;
+                            int ItemNameCount = 0;
+                            int DescriptionCount = 0;
+                            // Update all the fonts and words to be correct
+
+                            Transform textObjects = You___Message.transform.Find("Text/GameObject");
+
+                            GameObject textObject = GameObject.Instantiate(textPrefab, textObjects.position, textObjects.rotation);
+                            Transform FirstFirstLetter = null;
+                            Transform FirstItemName = null;
+                            //Get rid of the original Text.
+                            Transform Prescription = textObject.transform.FindChild("Prescription");
+                            Transform Description = textObject.transform.FindChild($"Description (2)");
+
+                            TextMeshPro text = null;
+                            List<GameObject> toDestroy = new List<GameObject>();
+                            for (int i = 0; i < textObjects.transform.childCount; i++)
+                            {
+
+                                Transform textChild = textObjects.gameObject.transform.GetChild(i);
+                                if (textChild.TryGetComponent<TextMeshPro>(out text))
+                                {
+                                    // Add the name of the player who owns the item being spawned.
+                                    if (textChild.name.Contains("Prescription"))
+                                    {
+                                        textChild.name = "Prescription";
+                                        textChild.SetLocalPositionAndRotation(Prescription.localPosition, Prescription.localRotation);
+                                        textChild.transform.localScale = Prescription.transform.localScale;
+
+                                        // Handle names ending in s with proper apostrophe convention
+                                        if (playerName.ToLower().EndsWith('s'))
+                                        {
+                                            text.text = $"{playerName}'";
+                                        }
+                                        else
+                                        {
+                                            text.text = $"{playerName}'s";
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        // The first letter of each word in the item name is handled differently.
+                                        if (textChild.name.StartsWith("First Letter"))
+                                        {
+
+                                            if (FirstLetterCount != 0)
+                                            {
+                                                toDestroy.Add(textChild.gameObject);
+                                            }
+                                            else
+                                            {
+                                                textChild.name = $"First Letter ({FirstLetterCount + 1})";
+                                                Transform FirstLetter = textObject.transform.FindChild($"First Letter ({FirstLetterCount + 1})");
+                                                textChild.SetLocalPositionAndRotation(FirstLetter.localPosition, FirstLetter.localRotation);
+                                                textChild.transform.localScale = FirstLetter.localScale;
+                                                FirstFirstLetter = textChild;
+                                                text.text = scoutItemName.Substring(0, 1);
+                                                FirstLetterCount++;
+                                            }
+
+                                        }
+                                        // The rest of the word in the item name.
+                                        else if (textChild.name.StartsWith("Item Name"))
+                                        {
+                                            if (ItemNameCount != 0)
+                                            {
+                                                toDestroy.Add(textChild.gameObject);
+                                            }
+                                            else
+                                            {
+
+                                                FirstItemName = textChild;
+                                                textChild.name = $"Item Name ({ItemNameCount + 1})";
+
+                                                Transform ItemName = textObject.transform.FindChild($"Item Name ({ItemNameCount + 1})");
+                                                textChild.SetLocalPositionAndRotation(ItemName.localPosition, ItemName.localRotation);
+                                                textChild.transform.localScale = ItemName.localScale;
+                                                text.text = scoutItemName.ToUpper().Substring(1);
+                                                text.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                                                ItemNameCount++;
+                                            }
+
+                                        }
+                                        // Handle the item description.
+                                        else if (textChild.name.StartsWith("Description"))
+                                        {
+
+                                            textChild.name = "Description";
+                                            textChild.SetLocalPositionAndRotation(Description.transform.localPosition, Description.transform.localRotation);
+                                            textChild.transform.localScale = Description.transform.localScale;
+                                            if (DescriptionCount == 0)
+                                            {
+                                                text.text = description;
+                                                text.horizontalAlignment = HorizontalAlignmentOptions.Right;
+                                            }
+                                            else
+                                            {
+                                                toDestroy.Add(textChild.gameObject);
+                                            }
+                                        }
+                                        //Something else got mixed into the item prefab.
+                                        else
+                                        {
+                                            Logging.Log($"An extra game object was found, removing object \"{textChild.name}\"");
+                                            toDestroy.Add(textChild.gameObject);
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    toDestroy.Add(textChild.gameObject);
+                                }
+                            }
+                            //Destroy all the game objects slated to be destroyed.
+                            foreach (GameObject desObj in toDestroy)
+                            {
+                                GameObject.Destroy(desObj);
+                            }
+                            GameObject.Destroy(textObject);
+                        }
+                        else
+                        {
+                            Logging.LogWarning($"Unable to scout location for Upgrade Disk - {location.ToTitleCase()}");
+                        }
+                    }
+                    else
+                    {
+                        Logging.LogWarning($"Unable to find the item model for Upgrade Disk - {location.ToTitleCase()}");
+                    }
+                }
+                else {
+                    Logging.LogWarning($"Unable to find You___ Notification for {scoutname.ToTitleCase()}");
+                }
             }
         }
 
@@ -1078,18 +1316,19 @@ namespace BluePrinceArchipelago.Items
     public class UpgradeDisks(GameObject gameObject) : ProgressiveItems("UPGRADE DISK", gameObject, false, 16, true)
     {
         public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
+        public static List<GameObject> YouFoundObjects = new List<GameObject>();
         public List<EventID> EventNames = [EventID.Upgrade_Disk_Archives_found, EventID.Upgrade_Disk_BootLeg_found, EventID.Upgrade_Disk_Cloister_found, EventID.Upgrade_Disk_Commissary_found, EventID.Upgrade_Disk_Foundation_found, EventID.Upgrade_Disk_Freezer_found, EventID.Upgrade_Disk_Garage_found, EventID.Upgrade_Disk_GreatHall_found, EventID.Upgrade_Disk_LostFound_found, EventID.Upgrade_Disk_MasterBedroom_found, EventID.Upgrade_Disk_Mechanarium_found, EventID.Upgrade_Disk_MorningRoom_found, EventID.Upgrade_Disk_Office_found, EventID.Upgrade_Disk_TradingPost_found, EventID.Upgrade_Disk_Vault_found, EventID.Upgrade_Disk_TorchRoom_found];
-        public List<string> usedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
+        public List<string> UsedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
         public new GameObject GameObj = gameObject;
 
 
         public bool UnlockLocationIfExists(string locationName) {
+            Logging.LogWarning(locationName);
             foreach (string location in Locations) {
-                string lowlocation = location.ToLower().Replace("ladyships", "ladyship\'s");
+                string lowlocation = location.ToLower().Replace("ladyships", "ladyship\'s").Replace("and ", "& ");
                 if (locationName.ToLower().Contains(lowlocation)) {
                     FoundLocations.Add(location);
                     ModInstance.ModEventHandler.OnUgradeDiskFound(location);
-                    return true;
                 }
             }
             return false;
@@ -1098,7 +1337,7 @@ namespace BluePrinceArchipelago.Items
         public void StartOfDay() {
             int i = 0;
             foreach (string location in RecievedItems) {
-                if (!ModInstance.GlobalManager.GetBoolVariable(usedVariables[i]).Value) { 
+                if (!UsedLocations.Contains(location)) { 
                     AddItemToInventory(location);
                 }
                 i++;
@@ -1111,6 +1350,24 @@ namespace BluePrinceArchipelago.Items
             roomname = roomname.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE").Replace(" AND", "&"); // HLC, TP Dynamite, and Lost & Found name fix
             OnFind(roomname);
         }
+        public void OnUsed(int upgradeid) {
+            if (RecievedItems.Count > UsedLocations.Count)
+            {
+                string location = Locations[upgradeid];
+                UsedLocations.Add(location);
+                if (CanRemoveSpawn(location))
+                {
+                    ModInstance.GlobalManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid]).Value = true;
+                }
+            }
+            else {
+                Logging.LogWarning("Unable to set Locaation as used, no received locations are currently unused.", "UpgradeDisks");
+            }
+        }
+        // Checks if the vanilla way to prevent the item from being spawned can be used.
+        private bool CanRemoveSpawn(string location) { 
+            return UsedLocations.Contains(location) && RecievedItems.Contains(location);
+        }
 
         // Sends the location for the found upgrade disk.
         private void OnFind(string location)
@@ -1120,6 +1377,9 @@ namespace BluePrinceArchipelago.Items
                 FoundLocations.Add(location.ToUpper());
                 //Fix location name for pickup event.
                 location = location.Replace("LADYSHIPS", "LADYSHIP's");
+                if (CanRemoveSpawn(location)) {
+                    ModInstance.GlobalManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location)]).Value = true;
+                }
             }
         }
 
@@ -1129,6 +1389,7 @@ namespace BluePrinceArchipelago.Items
             if (!RecievedItems.Contains(location.ToUpper()))
             {
                 RecievedItems.Add(location.ToUpper());
+                ModInstance.GlobalManager.GetBoolVariable(location.ToTitleCase() + " Disk").Value = true;
             }
             if (!UsedLocations.Contains(location.ToUpper()))
             {
@@ -1137,11 +1398,14 @@ namespace BluePrinceArchipelago.Items
                 PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                 PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
                 GameObject icon = Plugin.UniqueItemManager.GetIconGameObject("UPGRADE DISK");
+                PlayMakerArrayListProxy UpgradeDisks = GameObject.Find("__SYSTEM/Upgrade Disks").GetArrayListProxy("upgrade disk pickup");
 
                 if (icon != null && InventoryIcons != null)
                 {
-                    ModItemManager.PickedUp.Add(GameObj, "GameObject");
+                    UpgradeDisks.Add(Locations.IndexOf(location), "Integer");
+                    ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
+
 
                     if (Name == "RUNNING SHOES")
                     {
