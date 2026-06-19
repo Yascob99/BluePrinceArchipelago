@@ -36,6 +36,8 @@ namespace BluePrinceArchipelago.Items
 
         public bool ModelReplaced { get; set; }
 
+        public bool IsPersistent { get; set; }
+
         public bool HasBeenFound
         {
             get { return _HasBeenFound; }
@@ -49,7 +51,7 @@ namespace BluePrinceArchipelago.Items
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
             }
         }
-        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true) : base(name, gameObject, isUnlocked)
+        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false) : base(name, gameObject, isUnlocked)
         {
             _IsPrespawn = isPreSpawn;
             _SanityType = sanityType;
@@ -62,16 +64,20 @@ namespace BluePrinceArchipelago.Items
             {
                 return;
             }
-            //If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
-            if (HasBeenFound && !IsUnlocked)
+            
+            if (HasBeenFound)
             {
-                if (ModItemManager.PreSpawn.Contains(GameObj))
+                // If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
+                if (!IsUnlocked)
                 {
-                    ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
-                }
-                if (ModItemManager.EstateItems.Contains(GameObj))
-                {
-                    ModItemManager.EstateItems.Remove(GameObj, "GameObject");
+                    if (ModItemManager.PreSpawn.Contains(GameObj))
+                    {
+                        ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
+                    }
+                    if (ModItemManager.EstateItems.Contains(GameObj))
+                    {
+                        ModItemManager.EstateItems.Remove(GameObj, "GameObject");
+                    }
                 }
             }
         }

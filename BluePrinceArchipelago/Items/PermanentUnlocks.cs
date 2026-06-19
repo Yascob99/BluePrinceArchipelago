@@ -110,6 +110,7 @@ namespace BluePrinceArchipelago.Items
                 ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Orchard_Unlocked);
                 // Set the Bool in the global persistent Manager to true.
                 ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = true;
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
             }
         }
         // Prevents the default Unlock.

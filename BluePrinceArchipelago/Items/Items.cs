@@ -101,7 +101,15 @@ namespace BluePrinceArchipelago.Items
                                 GameObject.Destroy(APGO);
                             }
                             else {
-                                Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
+                                // Make sure the notification is changed for persistent items.
+                                if (item.IsPersistent)
+                                {
+                                    ReplaceAPItemNotifications(item.Name, spawnObj);
+                                }
+                                else
+                                {
+                                    Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
+                                }
                             }
                         }
                         else
@@ -381,7 +389,7 @@ namespace BluePrinceArchipelago.Items
                     return "cabinet key";
                 case "PRISM KEY_0":
                     return "Prism Key";
-                case "KEY Of ARIES":
+                case "KEY OF ARIES":
                     return "o Key";
                 default:
                     return name;
@@ -1434,22 +1442,22 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("CAR KEYS", Plugin.ModItemManager.GetInventoryItem("CAR KEYS"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("KEYCARD", Plugin.ModItemManager.GetInventoryItem("KEYCARD"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("SILVER KEY", Plugin.ModItemManager.GetInventoryItem("SILVER KEY"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("KEY 8", Plugin.ModItemManager.GetInventoryItem("KEY 8"), false, ItemSanityType.Key));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KEY 8", Plugin.ModItemManager.GetInventoryItem("KEY 8"), false, ItemSanityType.Key, true, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("BASEMENT KEY", Plugin.ModItemManager.GetInventoryItem("BASEMENT KEY"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 149", Plugin.ModItemManager.GetInventoryItem("VAULT KEY 149"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 233", Plugin.ModItemManager.GetInventoryItem("VAULT KEY 233"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 304", Plugin.ModItemManager.GetInventoryItem("VAULT KEY 304"), false, ItemSanityType.Key));
             Plugin.ModItemManager.AddItem(new UniqueItem("VAULT KEY 370", Plugin.ModItemManager.GetInventoryItem("VAULT KEY 370"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("DIARY KEY", Plugin.ModItemManager.GetInventoryItem("DIARY KEY"), false, ItemSanityType.Key));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DIARY KEY", Plugin.ModItemManager.GetInventoryItem("DIARY KEY"), false, ItemSanityType.Key, true, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("PRISM KEY_0", Plugin.ModItemManager.GetInventoryItem("PRISM KEY"), false, ItemSanityType.Key, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("KEY of Aries", Plugin.ModItemManager.GetInventoryItem("KEY of Aries"), false, ItemSanityType.Key, false));
             Plugin.ModItemManager.AddItem(new UniqueItem("SECRET GARDEN KEY", Plugin.ModItemManager.GetInventoryItem("SECRET GARDEN KEY"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 1", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 1"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 2", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 2"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 3", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 3"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 1", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 1"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 2", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key));
-            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 3", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 1", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 1"), false, ItemSanityType.Key, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 2", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 2"), false, ItemSanityType.Key, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MICROCHIP 3", Plugin.ModItemManager.GetInventoryItem("MICROCHIP 3"), false, ItemSanityType.Key, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 1", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 1"), false, ItemSanityType.Key, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 2", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CABINET KEY 3", Plugin.ModItemManager.GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true));
 
             //  Standard Items
             Plugin.ModItemManager.AddItem(new UniqueItem("BATTERY PACK", Plugin.ModItemManager.GetInventoryItem("BATTERY PACK"), false, ItemSanityType.Standard));
@@ -1458,7 +1466,7 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("METAL DETECTOR", Plugin.ModItemManager.GetInventoryItem("METAL DETECTOR"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("SHOVEL", Plugin.ModItemManager.GetInventoryItem("SHOVEL"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("SLEDGE HAMMER", Plugin.ModItemManager.GetInventoryItem("SLEDGE HAMMER"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("TELESCOPE", Plugin.ModItemManager.GetInventoryItem("TELESCOPE"), false, ItemSanityType.Standard));
+            Plugin.ModItemManager.AddItem(new UniqueItem("TELESCOPE", Plugin.ModItemManager.GetInventoryItem("TELESCOPE"), false, ItemSanityType.Standard, true, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("RUNNING SHOES", Plugin.ModItemManager.GetInventoryItem("RUNNING SHOES"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("SALT SHAKER", Plugin.ModItemManager.GetInventoryItem("SALT SHAKER"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("SLEEPING MASK", Plugin.ModItemManager.GetInventoryItem("SLEEPING MASK"), false, ItemSanityType.Standard));
@@ -1468,15 +1476,15 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", Plugin.ModItemManager.GetInventoryItem("LUCKY RABBIT'S FOOT"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("TREASURE MAP", Plugin.ModItemManager.GetInventoryItem("TREASURE MAP"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("STOPWATCH", Plugin.ModItemManager.GetInventoryItem("STOPWATCH"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", Plugin.ModItemManager.GetInventoryItem("REPELLENT"), false, ItemSanityType.Standard, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", Plugin.ModItemManager.GetInventoryItem("REPELLENT"), false, ItemSanityType.Standard, false, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("WATERING CAN", Plugin.ModItemManager.GetInventoryItem("WATERING CAN"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", Plugin.ModItemManager.GetInventoryItem("LUNCH BOX"), false, ItemSanityType.Standard, false));
-            Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", Plugin.ModItemManager.GetInventoryItem("CURSED EFFIGY"), false, ItemSanityType.Standard, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", Plugin.ModItemManager.GetInventoryItem("LUNCH BOX"), false, ItemSanityType.Standard, false, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", Plugin.ModItemManager.GetInventoryItem("CURSED EFFIGY"), false, ItemSanityType.Standard, false, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("CROWN", Plugin.ModItemManager.GetInventoryItem("CROWN"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetInventoryItem("PAPER CROWN"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetInventoryItem("GEAR WRENCH"), false, ItemSanityType.Standard));
+            Plugin.ModItemManager.AddItem(new UniqueItem("PAPER CROWN", Plugin.ModItemManager.GetInventoryItem("PAPER CROWN"), false, ItemSanityType.Standard, true, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("GEAR WRENCH", Plugin.ModItemManager.GetInventoryItem("GEAR WRENCH"), false, ItemSanityType.Standard, true, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("COMPASS", Plugin.ModItemManager.GetInventoryItem("COMPASS"), false, ItemSanityType.Standard));
-            Plugin.ModItemManager.AddItem(new UniqueItem("HALL PASS", Plugin.ModItemManager.GetInventoryItem("HALL PASS"), false, ItemSanityType.Standard));
+            Plugin.ModItemManager.AddItem(new UniqueItem("HALL PASS", Plugin.ModItemManager.GetInventoryItem("HALL PASS"), false, ItemSanityType.Standard, true, true));
 
             // Workshop Items
             Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", Plugin.ModItemManager.GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop));
