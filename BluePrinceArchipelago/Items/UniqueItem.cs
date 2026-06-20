@@ -38,6 +38,12 @@ namespace BluePrinceArchipelago.Items
 
         public bool IsPersistent { get; set; }
 
+        public bool IsCommissary { get; set; }
+
+        public SendEvent CommissaryEvent { get; set; } = null;
+
+        public FsmState CommissaryState { get; set; } = null;
+
         public bool HasBeenFound
         {
             get { return _HasBeenFound; }
@@ -51,11 +57,16 @@ namespace BluePrinceArchipelago.Items
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
             }
         }
-        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false) : base(name, gameObject, isUnlocked)
+        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false, bool isCommissary = false) : base(name, gameObject, isUnlocked)
         {
             _IsPrespawn = isPreSpawn;
             _SanityType = sanityType;
+            IsPersistent = isPersistent;
+            IsCommissary = isCommissary;
             FSMEventHandler.AddFSMEvent(name, this);
+            if (isCommissary) {
+                CommissaryEvent = FSMEventHandler.AddCommissaryFSMEvent(name, this).Event;
+            }
         }
 
         public void RemoveFromPool()
@@ -181,15 +192,37 @@ namespace BluePrinceArchipelago.Items
         }
         public void StartOfDay()
         {
-            RemoveItemsFromPool();
-        }
-
-        private void RemoveItemsFromPool()
-        {
+            Dictionary<string, string> CommissaryStates = new Dictionary<string, string>()
+            {
+                {"MAGNIFYING GLASS", "Mag Glass" },
+                {"SHOVEL", "Shovel Purchase"},
+                {"SALT SHAKER", "Salt Shaker Purchase"},
+                {"COMPASS", "Compass Purchase"},
+                {"SLEDGE HAMMER", "Sledge Hammer Purchase"},
+                {"SLEEPING MASK", "Sleep Mask Purchase"},
+                {"RUNNING SHOES", "Running Shoes Purchase"},
+                {"METAL DETECTOR", "MEtal Detector Purchase"}
+            };
             foreach (UniqueItem item in ModItemManager.UniqueItemList)
             {
-                //If the item has been found once, remove it from
+                // Handles start of Day Item Removal
                 item.RemoveFromPool();
+                // Handles updating the Commissary Menu
+                if (!item.HasBeenFound && item.IsCommissary)
+                {
+                    FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item.Name]);
+                    item.CommissaryState = state;
+                    if (state != null)
+                    {
+                        //If the item is not unlocked, prevent it from being added to inventory.
+                        if (!item.IsUnlocked && item.ApplySanity())
+                        {
+                            //Disable the actions that add the item to inventory.
+                            state.DisableLastActionOfType<ArrayListAdd>();
+                            state.AddAction(item.CommissaryEvent);
+                        }
+                    }
+                }
             }
         }
 

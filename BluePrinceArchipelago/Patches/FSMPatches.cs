@@ -3,6 +3,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -249,6 +250,7 @@ namespace BluePrinceArchipelago.Patches
                 }
             }
         }
+
         public static void IntroSkip() {
             // Menu Logo Skips
             var menuSystem = GameObject.Find("/Menu System");

@@ -1344,8 +1344,23 @@ namespace BluePrinceArchipelago.Items
         // Handles adding unlocked upgrade disks to the the players inventory until they are used.
         public void StartOfDay() {
             int i = 0;
-            foreach (string location in RecievedItems) {
-                if (!UsedLocations.Contains(location)) { 
+            // Skip this Start of Day if it's a reconnect from crash or quit.
+            if (ModInstance.FirstLoad && ArchipelagoClient.Reconnected && !ArchipelagoClient.Disconnected) {
+                Logging.LogWarning("Updating Upgrade Disk Used States");
+                int j = -1;
+                foreach (string boolName in UsedVariables) {
+                    j++;
+                    if (ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(boolName).Value) {
+                        UsedLocations.Add(Locations[j]);
+                    }
+                }
+            }
+            foreach (string location in RecievedItems)
+            {
+                // Check if the item has been used, and if it has, 
+                if (!UsedLocations.Contains(location))
+                {
+
                     AddItemToInventory(location);
                 }
                 i++;
@@ -1365,7 +1380,7 @@ namespace BluePrinceArchipelago.Items
                 UsedLocations.Add(location);
                 if (CanRemoveSpawn(location))
                 {
-                    ModInstance.GlobalManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid]).Value = true;
+                    ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid]).Value = true;
                 }
             }
             else {
@@ -1388,6 +1403,7 @@ namespace BluePrinceArchipelago.Items
                 if (CanRemoveSpawn(location)) {
                     ModInstance.GlobalManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location)]).Value = true;
                 }
+                ModInstance.ModEventHandler.OnUgradeDiskFound(location);
             }
         }
 

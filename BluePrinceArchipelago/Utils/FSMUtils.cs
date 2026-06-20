@@ -354,7 +354,7 @@ namespace BluePrinceArchipelago.Utils
 
         public static FsmState GetState(this PlayMakerFSM fsm, string name)
         {
-            return fsm.FsmStates.FirstOrDefault(s => s.Name == name);
+            return fsm?.FsmStates?.FirstOrDefault(s => s.Name == name);
         }
 
         public static void AddFirstAction(this FsmState state, FsmStateAction action)

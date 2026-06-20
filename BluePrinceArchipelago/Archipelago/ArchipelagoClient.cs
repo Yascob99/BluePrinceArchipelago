@@ -13,9 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using static BluePrinceArchipelago.Archipelago.ItemQueue;
-using static ES3;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -118,7 +116,7 @@ public class ArchipelagoClient
                     ServerData.SlotName,
                     ItemsHandlingFlags.AllItems,
                     new Version(APVersion),
-                    tags: ["AP", "DeathLink"],
+                    tags: ["AP"],
                     password: ServerData.Password,
                     requestSlotData: true
          );
@@ -187,7 +185,7 @@ public class ArchipelagoClient
                     
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
-                    CrashReconnect();
+                    GameRestart();
                 }
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
@@ -203,13 +201,12 @@ public class ArchipelagoClient
 
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 // Creates the Locally Stored data for the locations. 
-               
+                CreateLocationDicts(session.Locations.AllLocations.ToArray());
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
-            CreateLocationDicts(session.Locations.AllLocations.ToArray());
             Authenticated = true;
             // Receives any Queued Items
-            DequeueItems(Reconnected);
+            DequeueItems();
             // Debug: Displaying the data from the server.
             DisplayServerData();
             // Update the locally stored data to match the current state.
@@ -229,7 +226,7 @@ public class ArchipelagoClient
     }
 
     // Attempts to release any Queued items.
-    private void DequeueItems(bool isReconnect = false) {
+    private void DequeueItems() {
         // Handle intial connect to AP.
         if (!Reconnected)
         {
@@ -276,10 +273,37 @@ public class ArchipelagoClient
                 }
             }
         }
+        else if (!Disconnected)
+        {
+            // Rebuilds as much of the gamestate as possible from the received items on a game restart.
+            foreach (ItemInfo item in session.Items.AllItemsReceived)
+            {
+                
+                UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
+                if (uniqueItem != null)
+                {
+                    uniqueItem.IsUnlocked = true;
+                    session.Items.DequeueItem();
+                }
+                else if (item.ItemName.ToUpper().Contains("UPGRADE DISK"))
+                {
+                    //Do not Dequeue the Upgrade Disk
+                    Logging.LogWarning("Attempting to Add Upgrade Disk");
+                }
+                else
+                {
+                    PermanentUnlock permUnlock = Unlocks.GetPermanentUnlock(item.ItemName);
+                    if (permUnlock != null)
+                    {
+                        permUnlock.Unlocked = true;
+                    }
+                    session.Items.DequeueItem();
+                }
+            }
+        }
         else {
             ModInstance.QueueManager.SetItemQueue(new List<ItemInfo>());
         }
-
     }
 
     // Handles everything that should be handled on reconnect.
@@ -289,11 +313,12 @@ public class ArchipelagoClient
         ArchipelagoConsole.LogMessage("Rebuilding Archipelago State...");
         RebuildCheckedLocations();
     }
-    private void CrashReconnect() {
-        ArchipelagoConsole.LogMessage("Attemping to reconnect after a crash...");
+    private void GameRestart() {
+        ArchipelagoConsole.LogMessage("Attemping to reconnect after game restart...");
         Reconnected = true;
         if (ModInstance.IsInRun) {
             ArchipelagoConsole.LogMessage("Rebuilding Archipelago State...");
+            CreateLocationDicts(session.Locations.AllLocations.ToArray());
             RebuildState();
         }
         ArchipelagoConsole.LogMessage("Gathering Seed Data...");
@@ -328,29 +353,6 @@ public class ArchipelagoClient
             catch
             {
                 Logging.LogWarning($"Unable to find location name for location with id {locationids[i]}");
-            }
-            
-        }
-        foreach (string item in ServerData.ReceivedItems)
-        {
-            // Checks if the item recieved is a Room (includes special mappings like classroom variants)
-            UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item);
-            if (uniqueItem != null)
-            {
-                uniqueItem.IsUnlocked = true;
-            }
-            else if (item.ToUpper().Contains("UPGRADE DISK"))
-            {
-                Logging.LogWarning("Attempting to Add Upgrade Disk");
-                string location = item.ToUpper().Replace("UPGRADE DISK ", "");
-                ModItemManager.UpgradeDisks.AddItemToInventory(location);
-            }
-            else {
-                PermanentUnlock permUnlock = Unlocks.GetPermanentUnlock(item);
-                if (permUnlock != null)
-                {
-                    permUnlock.Unlocked = true;
-                }
             }
         }
         // Handle all the items that are not preserved by the game.
