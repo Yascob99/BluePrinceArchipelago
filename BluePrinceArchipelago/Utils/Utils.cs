@@ -260,4 +260,18 @@ namespace BluePrinceArchipelago.Utils
             return highest;
         }
     }
+    public static class ListExtensions {
+        public static int RemoveFirst(this List<string> list, string value) {
+            int index = 0;
+            while (index < list.Count)
+            {
+                if (list[index] == value){
+                    list.RemoveAt(index);
+                    return index;
+                }
+                index++;
+            }
+            return -1;
+        }
+    }
 }

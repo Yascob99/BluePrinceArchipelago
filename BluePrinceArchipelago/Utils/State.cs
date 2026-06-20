@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static BluePrinceArchipelago.Archipelago.ItemQueue;
 
 namespace BluePrinceArchipelago.Utils
 {
@@ -24,9 +23,6 @@ namespace BluePrinceArchipelago.Utils
         public const string ServerOptionsFile = "ServerOptions.json";
         public const string TrunkCountsFile = "TrunkCounts.json";
         public const string LocationDictFile = "LocationDict.json";
-        public const string ItemQueueFile = "ItemQueue.json";
-        public const string LocationQueueFile = "LocationQueue.json";
-        public const string RunHistoryFile = "RunHistory.json";
 
         public static string RecievedItemsPath => Path.Combine(ModFolder, SessionFolder, RecievedItemsFile);
         public static string SentLocationsPath => Path.Combine(ModFolder, SessionFolder, SentLocationsFile);
@@ -36,9 +32,6 @@ namespace BluePrinceArchipelago.Utils
         public static string TrunkCountsPath => Path.Combine(ModFolder, SessionFolder, TrunkCountsFile);
 
         public static string LocationDictPath => Path.Combine(ModFolder, SessionFolder, LocationDictFile);
-        public static string ItemQueuePath => Path.Combine(ModFolder, SessionFolder, ItemQueueFile);
-        public static string LocationQueuePath => Path.Combine(ModFolder, SessionFolder, LocationQueueFile);
-        public static string RunHistoryPath => Path.Combine(ModFolder, SessionFolder, RunHistoryFile);
 
         public static int CurrentDayNum = 1;
 
@@ -47,16 +40,13 @@ namespace BluePrinceArchipelago.Utils
             if (!Directory.Exists(Path.Combine(ModFolder, SessionFolder))) {
                 Directory.CreateDirectory(Path.Combine(ModFolder, SessionFolder));
             }
-            InitializeReceivedItems();
             InitializeSentLocations();
             InitializeSessionData();
             InitializeServerDetails();
             InitializeLocationDict();
-            InitializeRunHistory();
         }
 
         public static void UpdateAll() {
-            UpdateItems(ArchipelagoClient.ServerData.ReceivedItems);
             UpdateLocations(ArchipelagoClient.ServerData.CheckedLocations);
             SessionData session = new SessionData();
             session.SaveSlot = ModInstance.SaveSlot;
@@ -116,35 +106,6 @@ namespace BluePrinceArchipelago.Utils
             {
                 writer.Write(JsonConvert.SerializeObject(ArchipelagoClient.ServerData.LocationDict));
                 writer.Flush();
-            }
-        }
-        public static void UpdateItemQueue(List<ItemInfo> itemQueue) {
-            using (var writer = new StreamWriter(ItemQueuePath, false))
-            {
-                writer.Write(JsonConvert.SerializeObject(itemQueue));
-                writer.Flush();
-            }
-        }
-        public static void UpdateLocationQueue(List<string> locationQueue)
-        {
-            using (var writer = new StreamWriter(LocationQueuePath, false))
-            {
-                writer.Write(JsonConvert.SerializeObject(locationQueue));
-                writer.Flush();
-            }
-        }
-        public static void UpdateRunHistory(string eventString) {
-           
-            try
-            {
-                ArchipelagoClient.ServerData.RunHistory[CurrentDayNum - 1].Add(eventString);
-                using (var writer = new StreamWriter(RunHistoryPath, false))
-                {
-                    writer.Write(JsonConvert.SerializeObject(ArchipelagoClient.ServerData.RunHistory));
-                    writer.Flush();
-                }
-            }
-            catch { 
             }
         }
         private static void InitializeServerDetails()
@@ -252,7 +213,7 @@ namespace BluePrinceArchipelago.Utils
             }
         }
 
-        private static void InitializeReceivedItems() {
+        public static void InitializeReceivedItems() {
             if (File.Exists(RecievedItemsPath))
             {
                 string jsonData = "";
@@ -281,125 +242,7 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
-        //private static void InitializeItemQueue() 
-        //{
-        //    if (File.Exists(ItemQueuePath))
-        //    {
-        //        string jsonData = "";
-        //        using (var reader = new StreamReader(ItemQueuePath))
-        //        {
-        //            jsonData = reader.ReadToEnd();
-        //        }
-        //        if (jsonData.Trim().Length > 0)
-        //        {
-        //            try
-        //            {
-        //                ModInstance.QueueManager.SetItemQueue(JsonConvert.DeserializeObject<List<ItemInfo>>(jsonData));
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Logging.LogWarning($"Error loading Item Queue: \n{ex.Message}");
-        //            }
-        //        }
-        //    }
-        //    else {
-        //        using (var writer = new StreamWriter(ItemQueuePath, false))
-        //        {
-        //            writer.Write(JsonConvert.SerializeObject(new List<ItemInfo>()));
-        //            writer.Flush();
-        //        }
-        //    }
-        //}
-        //private static void InitializeLocationQueue() {
-        //    if (File.Exists(LocationQueuePath))
-        //    {
-        //        string jsonData = "";
-        //        using (var reader = new StreamReader(LocationQueuePath))
-        //        {
-        //            jsonData = reader.ReadToEnd();
-        //        }
-        //        if (jsonData.Trim().Length > 0)
-        //        {
-        //            try
-        //            {
-        //                ModInstance.QueueManager.SetLocationQueue(JsonConvert.DeserializeObject<List<string>>(jsonData));
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Logging.LogWarning($"Error loading Location Queue: \n{ex.Message}");
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        using (var writer = new StreamWriter(LocationQueuePath, false))
-        //        {
-        //            writer.Write(JsonConvert.SerializeObject(new List<String>()));
-        //            writer.Flush();
-        //        }
-        //    }
-        //}
 
-        private static void InitializeRunHistory() {
-            if (File.Exists(RunHistoryPath))
-            {
-                string jsonData = "";
-                using (var reader = new StreamReader(RunHistoryPath))
-                {
-                    jsonData = reader.ReadToEnd();
-                }
-                if (jsonData.Trim().Length > 0)
-                {
-                    try
-                    {
-                        ArchipelagoClient.ServerData.RunHistory = JsonConvert.DeserializeObject<List<List<string>>>(jsonData);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Log($"Error loading Items By Day data: \n{ex.Message}");
-                    }
-                }
-            }
-            else
-            {
-                using (var writer = new StreamWriter(RunHistoryPath, false))
-                {
-                    writer.Write(JsonConvert.SerializeObject(new List<List<string>>()));
-                    writer.Flush();
-                }
-            }
-        }
-
-        //private static void InitializeServerOptions()
-        //{
-        //    if (File.Exists(ServerOptionsPath))
-        //    {
-        //        string jsonData = "";
-        //        using (var reader = new StreamReader(ServerOptionsPath))
-        //        {
-        //            jsonData = reader.ReadToEnd();
-        //        }
-        //        if (jsonData.Trim().Length > 0)
-        //        {
-        //            try
-        //            {
-        //                ArchipelagoClient.ServerData.Options = JsonConvert.DeserializeObject<SlotData>(jsonData);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Logging.Log($"Error loading Received items: \n{ex.Message}");
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        using (var writer = new StreamWriter(ServerOptionsPath, false))
-        //        {
-        //            writer.Write(JsonConvert.SerializeObject(new SlotData()));
-        //            writer.Flush();
-        //        }
-        //    }
-        //}
 
         public static void InitializeTrunkCounts()
         {
@@ -485,13 +328,6 @@ namespace BluePrinceArchipelago.Utils
                 writer.Write(JsonConvert.SerializeObject(defaultData));
                 writer.Flush();
             }
-            //// Server Options
-            //using (var writer = new StreamWriter(ServerOptionsPath, false))
-            //{
-            //    writer.Write(JsonConvert.SerializeObject(new SlotData()));
-            //    writer.Flush();
-            //}
-            // Trunk Counts
             using (var writer = new StreamWriter(TrunkCountsPath, false))
             {
                 writer.Write(JsonConvert.SerializeObject(new Dictionary<string, int>()));
@@ -502,23 +338,6 @@ namespace BluePrinceArchipelago.Utils
             using (var writer = new StreamWriter(LocationDictPath, false))
             {
                 writer.Write(JsonConvert.SerializeObject(new Dictionary<long, string>()));
-                writer.Flush();
-            }
-            //// Item Queue
-            //using (var writer = new StreamWriter(ItemQueuePath, false))
-            //{
-            //    writer.Write(JsonConvert.SerializeObject(new List<ItemInfo>()));
-            //    writer.Flush();
-            //}
-            //// Location Queue
-            //using (var writer = new StreamWriter(LocationQueuePath, false))
-            //{
-            //    writer.Write(JsonConvert.SerializeObject(new List<String>()));
-            //    writer.Flush();
-            //}
-            using (var writer = new StreamWriter(RunHistoryPath, false))
-            {
-                writer.Write(JsonConvert.SerializeObject(new List<List<string>>()));
                 writer.Flush();
             }
             //Don't reset the connection details since they might be useful.
