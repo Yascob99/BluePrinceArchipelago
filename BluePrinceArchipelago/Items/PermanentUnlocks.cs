@@ -14,31 +14,35 @@ namespace BluePrinceArchipelago.Items
         public static WestGatePath WestGatePath = new();
         public static BlackBridgeGrotto BlackBridgeGrotto = new();
         public static SatelliteDish SatelliteDish = new();
-        public static Dictionary<string, PermanentUnlock> UnlockDict = new(){
+        public static Dictionary<string, PermanentUnlock> UnlockedDict = new(){
             {"Apple Orchard", AppleOrchard},
             {"Gemstone Caverns", GemstoneCaverns},
             {"West Gate Path", WestGatePath},
             {"Blackbridge Grotto", BlackBridgeGrotto},
             {"Satellite Dish", SatelliteDish}
         };
+        public static Dictionary<string, PermanentUnlock> SolvedDict = new(){
+            {"Orchard Gate", AppleOrchard},
+            {"VAC Controls", GemstoneCaverns},
+            {"West Gate", WestGatePath},
+            {"Laboratory Puzzle - Blackbridge", BlackBridgeGrotto},
+            {"Raise Satellite", SatelliteDish}
+        };
+
 
         public static bool HasPrepatched = false;
 
         public static PermanentUnlock GetPermanentUnlock(string name)
         {
-            if (UnlockDict.ContainsKey(name))
+            if (UnlockedDict.ContainsKey(name))
             {
-                return UnlockDict[name];
+                return UnlockedDict[name];
             }
             return null;
         }
-        public static PermanentUnlock GetPermanentUnlockByLocation(string locationName) {
-            foreach (var unlock in UnlockDict)
-            {
-                if (unlock.Value.LocationName.ToLower() == locationName.ToLower())
-                {
-                    return unlock.Value;
-                }
+        public static PermanentUnlock GetPermanentSolveByLocation(string locationName) {
+            if (SolvedDict.ContainsKey(locationName)) { 
+                return SolvedDict[locationName];
             }
             return null;
         }
@@ -98,15 +102,15 @@ namespace BluePrinceArchipelago.Items
         public override void UnlockItem() {
             PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
             appleOrchard.GetState("State 4")?.EnableActionsOfType<SendEvent>();
+            PlayMakerFSM appleOrchardButton = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/lock anchor (1)/Rotate Anchor/Orchard Lock/Lock/Button")?.GetComponent<PlayMakerFSM>();
+            appleOrchardButton.GetState("Check Code").ChangeTransition("FINISHED", "Collider's Off");
             if (Solved)
             {
                 // Log the Unlock of the Apple Orchard to Stats.
                 ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Orchard_Unlocked);
                 // Set the Bool in the global persistent Manager to true.
                 ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = true;
-                // Unlocks the Gate (this one seems to do it without sounds).
-                GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>()?.GetState("State 4")?.EnableActionsOfType<SendEvent>();
-
+                GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
             }
         }
         // Prevents the default Unlock.
@@ -117,6 +121,9 @@ namespace BluePrinceArchipelago.Items
                 ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value = false;
                 // Unlocks the Gate (this one seems to do it without sounds).
                 PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
+                PlayMakerFSM appleOrchardButton = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/lock anchor (1)/Rotate Anchor/Orchard Lock/Lock/Button")?.GetComponent<PlayMakerFSM>();
+                appleOrchardButton.GetState("Check Code").RemoveTransition("FINISHED");
+                appleOrchardButton.GetState("Check Code").AddTransition("FINISHED", "Won't Open");
                 appleOrchard.GetState("State 4")?.DisableActionsOfType<SendEvent>();
                 appleOrchard.GetState("State 4")?.AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
             }
@@ -135,6 +142,7 @@ namespace BluePrinceArchipelago.Items
         public new string LocationName = "VAC Controls";
         public new bool Unlocked = true;
         public new bool Solved = false;
+        public GameObject RoomObject = new();
 
         // Run the unlock code.
         public override void UnlockItem()
@@ -161,12 +169,11 @@ namespace BluePrinceArchipelago.Items
         }
 
         public override void PreventDefault() {
-            FsmState State2 = GameObject.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
+            FsmState State2 = RoomObject.transform.Find("_GAMEPLAY").transform.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
             State2.AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
             if (!Unlocked)
             {
                 // This code may needs to be run after the utility closet has been spawned.
-               
                 State2.DisableFirstActionOfType<ActivateGameObject>();
             }
            
@@ -188,6 +195,8 @@ namespace BluePrinceArchipelago.Items
         public override void UnlockItem()
         {
             Unlocked = true;
+            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
+            GateOpened?.GetState("Hover").ChangeTransition("click", "GATE IS OPENED");
             if (Solved)
             {
                 ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.West_Path_Gate_Unlocked);
@@ -203,7 +212,6 @@ namespace BluePrinceArchipelago.Items
         {
             if (!Unlocked)
             {
-                ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value = false;
                 PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
                 GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
             }
@@ -215,6 +223,7 @@ namespace BluePrinceArchipelago.Items
         }
     }
 
+    //TODO Confirm working and improve the handling to be more comparable to the Gemstone Caverns.
     public class BlackBridgeGrotto : PermanentUnlock
     {
         public new string Name = "Blackbridge Grotto";
@@ -223,6 +232,8 @@ namespace BluePrinceArchipelago.Items
         public new bool Unlocked = false;
         public override void UnlockItem()
         {
+            PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
+            LabMachine?.GetState("Chek if Grotto Is Open")?.EnableActionsOfType<GetFsmBool>();
             if (Solved)
             {
                 // Only 90% sure this is the correct event.
@@ -276,11 +287,11 @@ namespace BluePrinceArchipelago.Items
 
         public override void UnlockItem()
         {
+            PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
+            FsmState boolCheck = pt2.GetState("State 7");
+            boolCheck.EnableFirstActionOfType<BoolTest>();
             if (Solved)
             {
-                PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
-                FsmState boolCheck = pt2.GetState("State 7");
-                boolCheck.EnableFirstActionOfType<BoolTest>();
                 boolCheck.DisableFirstActionOfType<SendEvent>();
                 ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.Satellite_Raised);
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);

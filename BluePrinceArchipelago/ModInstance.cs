@@ -1,5 +1,4 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
+﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Core;
 using BluePrinceArchipelago.Events;
@@ -11,8 +10,6 @@ using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using JetBrains.Annotations;
-using PathologicalGames;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,6 +35,7 @@ namespace BluePrinceArchipelago
         public static GameObject StatsLogger = new();
         public static GameObject PickupSpawnPool = new();
         public static GameObject Prefabs = new();
+
         // FSMs
         public static PlayMakerFSM GemManager = new();
         public static PlayMakerFSM StepManager = new();
@@ -191,6 +189,7 @@ namespace BluePrinceArchipelago
                 
                 // Use Invoke to delay the sync - increased to 1 second for safety
                 Instance.Invoke(nameof(PerformDelayedSync), 1.0f);
+                InitializeUpgradeDiskNotifications();
                 HasInitializedRooms = true;
             }
             else {
@@ -211,8 +210,9 @@ namespace BluePrinceArchipelago
         }
 
         private void Update() {
-            if (IsInRun)
+            if (IsInRun && ArchipelagoClient.Authenticated)
             {
+                QueueManager.DequeueUsedUpgrade();
                 QueueManager.DequeueItem();
                 QueueManager.DequeueLocation();
             }
@@ -274,6 +274,10 @@ namespace BluePrinceArchipelago
                     }
                 }
             }
+            if (targetName == "Upgrade Disks" && eventName == "Go") {
+                int usedVariable = ModItemManager.UpgradeDisks.UsedVariables.IndexOf(ModItemManager.UpgradeDisks.RecievedItems[ModItemManager.UpgradeDisks.UsedLocations.Count]);
+                QueueManager.AddUpgradeUsedToQueue(usedVariable);
+            }
             if (targetName == "Global Manager" && eventName.Contains("Pickup"))
             {
                 Logging.Log(eventName, "Events");
@@ -291,7 +295,6 @@ namespace BluePrinceArchipelago
                         }
                     }
                     item.HasBeenFound = true;
-                    //QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
                 }
                 else if (eventName.Contains("Upgrade"))
                 {
@@ -352,7 +355,7 @@ namespace BluePrinceArchipelago
         }
         public static void OnAfterRoomSpawned(GameObject obj) {
             ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
-            room?.Handler?.OnAfterRoomDrafted();
+            room?.Handler?.OnAfterRoomDrafted(obj);
         }
         public static void OnOtherSpawn(GameObject obj, string poolName, GameObject transformObj) {
             
@@ -383,10 +386,6 @@ namespace BluePrinceArchipelago
             if (ArchipelagoClient.Authenticated)
             {
                 RanStartOfDay = true;
-                if (ArchipelagoOptions.UpgradeDiskSanity)
-                {
-                    FSMPatches.UpgradeDiskOverride(GlobalManager);
-                }
                 FSMPatches.AddedFloorPlanOverrides();
                 if (FirstLoad)
                 {
@@ -407,6 +406,10 @@ namespace BluePrinceArchipelago
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
+                if (ArchipelagoOptions.UpgradeDiskSanity)
+                {
+                    FSMPatches.UpgradeDiskOverride(GlobalManager);
+                }
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
@@ -837,7 +840,72 @@ namespace BluePrinceArchipelago
                 Plugin.UniqueItemManager.StartOfDay();
             }
         }
+        private static void InitializeUpgradeDiskNotifications()
+        {
+            GameObject YouBoughtUpgradeDisk = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk").gameObject;
+            GameObject YouFoundUpgradeDisk = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk").gameObject;
+            GameObject ArchivesDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            ArchivesDiskNotification.SetActive(false);
+            ArchivesDiskNotification.name = "You Found Upgrade Disk - Archives";
 
+            GameObject TradingPostDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            TradingPostDiskNotification.SetActive(false);
+            TradingPostDiskNotification.name = "You Found Upgrade Disk - Trading Post Dynamite";
+
+            GameObject TombDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            TombDiskNotification.SetActive(false);
+            TombDiskNotification.name = "You Found Upgrade Disk - Tomb";
+
+            GameObject CommissaryDiskNotification = GameObject.Instantiate(YouBoughtUpgradeDisk, YouBoughtUpgradeDisk.transform.parent);
+            CommissaryDiskNotification.SetActive(false);
+            CommissaryDiskNotification.name = "You Found Upgrade Disk - Commissary";
+
+            GameObject FoundationDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            FoundationDiskNotification.SetActive(false);
+            FoundationDiskNotification.name = "You Found Upgrade Disk - Foundation";
+
+            GameObject FreezerDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            FreezerDiskNotification.SetActive(false);
+            FreezerDiskNotification.name = "You Found Upgrade Disk - Freezer";
+
+            GameObject GarageDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            GarageDiskNotification.SetActive(false);
+            GarageDiskNotification.name = "You Found Upgrade Disk - Garage";
+
+            GameObject GreatHallDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            GreatHallDiskNotification.SetActive(false);
+            GreatHallDiskNotification.name = "You Found Upgrade Disk - Great Hall";
+
+            GameObject LostAndFoundDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            LostAndFoundDiskNotification.SetActive(false);
+            LostAndFoundDiskNotification.name = "You Found Upgrade Disk - Lost And Found";
+
+            GameObject HLCDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            HLCDiskNotification.SetActive(false);
+            HLCDiskNotification.name = "You Found Upgrade Disk - Her Ladyships Chamber";
+
+            GameObject MechanariumDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            MechanariumDiskNotification.SetActive(false);
+            MechanariumDiskNotification.name = "You Found Upgrade Disk - Mechanarium";
+
+            GameObject MorningRoomDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            MorningRoomDiskNotification.SetActive(false);
+            MorningRoomDiskNotification.name = "You Found Upgrade Disk - Morning Room";
+
+            GameObject OfficeDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            OfficeDiskNotification.SetActive(false);
+            OfficeDiskNotification.name = "You Found Upgrade Disk - Office";
+
+            GameObject VaultDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            VaultDiskNotification.SetActive(false);
+            VaultDiskNotification.name = "You Found Upgrade Disk - Vault";
+
+            GameObject AbandonedMineDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            AbandonedMineDiskNotification.SetActive(false);
+            AbandonedMineDiskNotification.name = "You Found Upgrade Disk - Abandoned Mine";
+
+            UpgradeDisks.YouFoundObjects = [ArchivesDiskNotification, TradingPostDiskNotification, TombDiskNotification, CommissaryDiskNotification, FoundationDiskNotification, FreezerDiskNotification, GarageDiskNotification, GarageDiskNotification, GreatHallDiskNotification, LostAndFoundDiskNotification, HLCDiskNotification, MechanariumDiskNotification, MorningRoomDiskNotification, OfficeDiskNotification, null, VaultDiskNotification, AbandonedMineDiskNotification];
+        }
 
         private static void InitializeRooms()
         {

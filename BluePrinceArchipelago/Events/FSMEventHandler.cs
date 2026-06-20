@@ -27,6 +27,13 @@ namespace BluePrinceArchipelago.Events
             Event.OnRegister();
             return Event;
         }
+        public static RegisteredFSMEvent AddCommissaryFSMEvent(string name, UniqueItem item) {
+            RegisteredFSMEvent Event = new ItemBought(name, item);
+            RegisteredEvents[name] = Event;
+
+            Event.OnRegister();
+            return Event;
+        }
 
         public static void RegisterEvents() {
             foreach (var REvent in RegisteredEvents){
@@ -251,8 +258,65 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            item.HasBeenFound = true;
-            ModInstance.QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
+            if (!item.HasBeenFound)
+            {
+                item.HasBeenFound = true;
+                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(item);
+                if (item.IsCommissary)
+                {
+                    FsmState state = item.CommissaryState;
+                    if (state != null)
+                    {
+                        // If the item is not unlocked, prevent it from being added to inventory.
+                        if (item.IsUnlocked && item.ApplySanity())
+                        {
+                            //Disable the actions that add the item to inventory.
+                            state.EnableLastActionOfType<ArrayListAdd>();
+                            state.RemoveFirstActionOfType<SendEvent>();
+                        }
+                    }
+                }
+                ModInstance.QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
+            }
+        }
+    }
+    public class ItemBought(string name, UniqueItem item) : RegisteredFSMEvent {
+        public new string Name { get; set; } = name;
+
+        public UniqueItem item { get; set; } = item;
+
+        public override void OnRegister()
+        {
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
+        public override void OnTrigger()
+        {
+            if (!item.HasBeenFound)
+            {
+                item.HasBeenFound = true;
+                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(item);
+                ModInstance.QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
+            }
         }
     }
 }

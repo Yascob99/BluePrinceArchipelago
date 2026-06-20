@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using static BluePrinceArchipelago.Archipelago.ItemQueue;
 
 namespace BluePrinceArchipelago.Archipelago;
@@ -117,7 +116,7 @@ public class ArchipelagoClient
                     ServerData.SlotName,
                     ItemsHandlingFlags.AllItems,
                     new Version(APVersion),
-                    tags: ["AP", "DeathLink"],
+                    tags: ["AP"],
                     password: ServerData.Password,
                     requestSlotData: true
          );
@@ -177,15 +176,16 @@ public class ArchipelagoClient
                 if (Disconnected)
                 {
                     // Regular Recconnect;
-                    Reconnect();
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
+                    Reconnect();
                 }
                 else {
                     //Crash Disconnect;
-                    CrashReconnect();
+                    
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
+                    GameRestart();
                 }
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
@@ -206,7 +206,7 @@ public class ArchipelagoClient
             }
             Authenticated = true;
             // Receives any Queued Items
-            DequeueItems(Reconnected);
+            DequeueItems();
             // Debug: Displaying the data from the server.
             DisplayServerData();
             // Update the locally stored data to match the current state.
@@ -226,7 +226,7 @@ public class ArchipelagoClient
     }
 
     // Attempts to release any Queued items.
-    private void DequeueItems(bool isReconnect = false) {
+    private void DequeueItems() {
         // Handle intial connect to AP.
         if (!Reconnected)
         {
@@ -273,10 +273,37 @@ public class ArchipelagoClient
                 }
             }
         }
+        else if (!Disconnected)
+        {
+            // Rebuilds as much of the gamestate as possible from the received items on a game restart.
+            foreach (ItemInfo item in session.Items.AllItemsReceived)
+            {
+                
+                UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
+                if (uniqueItem != null)
+                {
+                    uniqueItem.IsUnlocked = true;
+                    session.Items.DequeueItem();
+                }
+                else if (item.ItemName.ToUpper().Contains("UPGRADE DISK"))
+                {
+                    //Do not Dequeue the Upgrade Disk
+                    Logging.LogWarning("Attempting to Add Upgrade Disk");
+                }
+                else
+                {
+                    PermanentUnlock permUnlock = Unlocks.GetPermanentUnlock(item.ItemName);
+                    if (permUnlock != null)
+                    {
+                        permUnlock.Unlocked = true;
+                    }
+                    session.Items.DequeueItem();
+                }
+            }
+        }
         else {
             ModInstance.QueueManager.SetItemQueue(new List<ItemInfo>());
         }
-
     }
 
     // Handles everything that should be handled on reconnect.
@@ -286,11 +313,12 @@ public class ArchipelagoClient
         ArchipelagoConsole.LogMessage("Rebuilding Archipelago State...");
         RebuildCheckedLocations();
     }
-    private void CrashReconnect() {
-        ArchipelagoConsole.LogMessage("Attemping to reconnect after a crash...");
+    private void GameRestart() {
+        ArchipelagoConsole.LogMessage("Attemping to reconnect after game restart...");
         Reconnected = true;
         if (ModInstance.IsInRun) {
             ArchipelagoConsole.LogMessage("Rebuilding Archipelago State...");
+            CreateLocationDicts(session.Locations.AllLocations.ToArray());
             RebuildState();
         }
         ArchipelagoConsole.LogMessage("Gathering Seed Data...");
@@ -315,10 +343,10 @@ public class ArchipelagoClient
                 // Try Upgrade Disks. If that fails, try Permanent Unlocks.
                 else if (!ModItemManager.UpgradeDisks.UnlockLocationIfExists(location))
                 {
-                    PermanentUnlock permUnlock = Unlocks.GetPermanentUnlockByLocation(location);
-                    if (permUnlock != null)
+                    PermanentUnlock permSolved = Unlocks.GetPermanentSolveByLocation(location);
+                    if (permSolved != null)
                     {
-                        permUnlock.Solved = true;
+                        permSolved.Solved = true;
                     }
                 }
             }
@@ -535,6 +563,7 @@ public class ArchipelagoClient
 public class ArchipelagoQueueManager {
     private ItemQueue _ReceivedItemQueue = new("Received Item Queue");
     private LocationQueue _LocationQueue = new("Location Queue");
+    private UpgradeDiskUsedQueue _UpgradeUsedQueue = new("Upgrade Disk Used Queue");
     
     // Adds an item to the Item Queue.
     public void AddItemToQueue(ItemInfo item) { 
@@ -543,6 +572,9 @@ public class ArchipelagoQueueManager {
 
     public void SetItemQueue(List<ItemInfo> queueList) {
         _ReceivedItemQueue.SetQueueList(queueList);
+    }
+    public void AddUpgradeUsedToQueue(int value) {
+        _UpgradeUsedQueue.Enqueue(value);
     }
 
     public void SetLocationQueue(List<string> queueList) {
@@ -756,7 +788,6 @@ public class ArchipelagoQueueManager {
         if (_ReceivedItemQueue.Count > 0)
         {
             ItemInfo item = _ReceivedItemQueue.Dequeue();
-            Logging.LogWarning(item.ItemName);
             ReceiveItem(item);
         }
     }
@@ -767,6 +798,16 @@ public class ArchipelagoQueueManager {
             Plugin.ArchipelagoClient.CheckLocation(location);
         }
     }
+    public void DequeueUsedUpgrade() {
+        if (_UpgradeUsedQueue.Count > 0) {
+            int upgradeId = _UpgradeUsedQueue.Dequeue() ?? -1;
+            if (upgradeId > -1)
+            {
+                ModItemManager.UpgradeDisks.OnUsed(upgradeId);
+            }
+        }
+    }
+
     public void AddLocationToQueue(string name) { 
         _LocationQueue.Enqueue(name);
     }
@@ -901,7 +942,6 @@ public class ItemQueue(string name) {
     {
         return _Queue;
     }
-
     public class LocationQueue(string name) {
         private readonly string _Name = name;
         public string Name
@@ -943,6 +983,39 @@ public class ItemQueue(string name) {
         public List<string> GetLocationQueue()
         {
             return _Queue;
+        }
+    }
+    public class UpgradeDiskUsedQueue(string name)
+    {
+        private readonly string _Name = name;
+        public string Name
+        {
+            get { return _Name; }
+        }
+        private List<int> _Queue = new List<int>();
+        public int Count
+        {
+            get { return _Queue.Count; }
+        }
+        public void Enqueue(int value)
+        {
+            _Queue.Add(value);
+        }
+        public int? Dequeue()
+        {
+            if (_Queue.Count == 0)
+            {
+                Logging.LogWarning("No Locations in Queue, cannot Dequeue");
+                return null;
+            }
+            int temp = _Queue[0];
+            _Queue.RemoveAt(0);
+            return temp;
+        }
+
+        public void SetQueueList(List<int> queueList)
+        {
+            _Queue = queueList;
         }
     }
 }

@@ -37,7 +37,7 @@ public class Armory : RoomHandler
         _ArmoryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Armory Menu")?.gameObject;
     }
 
-    public override void OnAfterRoomDrafted()
+    public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         SetupArmoryItems();
     }

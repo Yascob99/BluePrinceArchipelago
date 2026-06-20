@@ -1,12 +1,9 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.Archipelago;
+﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Mono.Cecil;
-using PathologicalGames;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +36,14 @@ namespace BluePrinceArchipelago.Items
 
         public bool ModelReplaced { get; set; }
 
+        public bool IsPersistent { get; set; }
+
+        public bool IsCommissary { get; set; }
+
+        public SendEvent CommissaryEvent { get; set; } = null;
+
+        public FsmState CommissaryState { get; set; } = null;
+
         public bool HasBeenFound
         {
             get { return _HasBeenFound; }
@@ -52,11 +57,16 @@ namespace BluePrinceArchipelago.Items
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
             }
         }
-        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true) : base(name, gameObject, isUnlocked)
+        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false, bool isCommissary = false) : base(name, gameObject, isUnlocked)
         {
             _IsPrespawn = isPreSpawn;
             _SanityType = sanityType;
+            IsPersistent = isPersistent;
+            IsCommissary = isCommissary;
             FSMEventHandler.AddFSMEvent(name, this);
+            if (isCommissary) {
+                CommissaryEvent = FSMEventHandler.AddCommissaryFSMEvent(name, this).Event;
+            }
         }
 
         public void RemoveFromPool()
@@ -65,16 +75,20 @@ namespace BluePrinceArchipelago.Items
             {
                 return;
             }
-            //If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
-            if (HasBeenFound && !IsUnlocked)
+            
+            if (HasBeenFound)
             {
-                if (ModItemManager.PreSpawn.Contains(GameObj))
+                // If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
+                if (!IsUnlocked)
                 {
-                    ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
-                }
-                if (ModItemManager.EstateItems.Contains(GameObj))
-                {
-                    ModItemManager.EstateItems.Remove(GameObj, "GameObject");
+                    if (ModItemManager.PreSpawn.Contains(GameObj))
+                    {
+                        ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
+                    }
+                    if (ModItemManager.EstateItems.Contains(GameObj))
+                    {
+                        ModItemManager.EstateItems.Remove(GameObj, "GameObject");
+                    }
                 }
             }
         }
@@ -105,18 +119,15 @@ namespace BluePrinceArchipelago.Items
                 }
                 // This may not cause it to re-trigger.
                 // Disable this game action so it doesn't try and display 2 UIs.
-                Logging.LogWarning("Attempting to add item to Inventory");
+                Logging.LogWarning($"Attempting to add {Name} to Inventory");
                 GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                 PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
                 GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
-       
                 if (icon != null && InventoryIcons != null)
                 {
+                    ModItemManager.PickedUp.AddIfUnique(GameObj);
                     InventoryIcons.Add(icon, "GameObject");
-                    if (!ModItemManager.PickedUp.Contains(Name)) {
-                        ModItemManager.PickedUp.Add(GameObj, "GameObject");
-                    }
+                    ModItemManager.PreSpawn.RemoveIfExists(Name);
                     if (Name == "RUNNING SHOES")
                     {
                         ModInstance.RunningEngine.SendEvent("Update");
@@ -156,10 +167,18 @@ namespace BluePrinceArchipelago.Items
                 if (item != null)
                 {
                     FsmState state = GetPickupState(obj.name);
-                    if (item.IsUnlocked && item.HasBeenFound)
+                    // If the item is not already in the inventory
+                    if (item.IsUnlocked)
                     {
                         //Re-enable the previously disabled actions.
-                        state.EnableActionsOfType<ArrayListAdd>();
+                        if (ModItemManager.PickedUp.Contains(obj.name))
+                        {
+                            state.EnableFirstActionOfType<ArrayListAdd>();
+                        }
+                        else
+                        {
+                            state.EnableActionsOfType<ArrayListAdd>();
+                        }
                     }
                 }
             }
@@ -173,15 +192,37 @@ namespace BluePrinceArchipelago.Items
         }
         public void StartOfDay()
         {
-            RemoveItemsFromPool();
-        }
-
-        private void RemoveItemsFromPool()
-        {
+            Dictionary<string, string> CommissaryStates = new Dictionary<string, string>()
+            {
+                {"MAGNIFYING GLASS", "Mag Glass" },
+                {"SHOVEL", "Shovel Purchase"},
+                {"SALT SHAKER", "Salt Shaker Purchase"},
+                {"COMPASS", "Compass Purchase"},
+                {"SLEDGE HAMMER", "Sledge Hammer Purchase"},
+                {"SLEEPING MASK", "Sleep Mask Purchase"},
+                {"RUNNING SHOES", "Running Shoes Purchase"},
+                {"METAL DETECTOR", "MEtal Detector Purchase"}
+            };
             foreach (UniqueItem item in ModItemManager.UniqueItemList)
             {
-                //If the item has been found once, remove it from
+                // Handles start of Day Item Removal
                 item.RemoveFromPool();
+                // Handles updating the Commissary Menu
+                if (!item.HasBeenFound && item.IsCommissary)
+                {
+                    FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item.Name]);
+                    item.CommissaryState = state;
+                    if (state != null)
+                    {
+                        //If the item is not unlocked, prevent it from being added to inventory.
+                        if (!item.IsUnlocked && item.ApplySanity())
+                        {
+                            //Disable the actions that add the item to inventory.
+                            state.DisableLastActionOfType<ArrayListAdd>();
+                            state.AddAction(item.CommissaryEvent);
+                        }
+                    }
+                }
             }
         }
 
@@ -195,7 +236,7 @@ namespace BluePrinceArchipelago.Items
                 case "Cabinet Key 3":
                     return "Cabinet Key Icon";
                 case "Prism Key_0":
-                    return "Prism Key Icon";
+                    return "Prism Key";
                 case "Electromagnet":
                     return "Powered Electro Magnet Icon";
                 case "Key 8":
@@ -204,6 +245,14 @@ namespace BluePrinceArchipelago.Items
                     return "Lucky rabbit's foot Icon";
                 case "Salt Shaker":
                     return "Salt Icon";
+                case "Vault Key 149":
+                    return "Vault Key 149 icon";
+                case "Vault Key 233":
+                    return "Vault Key 233 icon";
+                case "Vault Key 304":
+                    return "Vault Key 304 icon";
+                case "Vault Key 370":
+                    return "Vault Key 370 icon";
                 default:
                     return name + " Icon";
             }
@@ -214,7 +263,7 @@ namespace BluePrinceArchipelago.Items
             for (int i=0; i < Inventory.arrayList.Count; i++)
             {
                 GameObject child = Inventory.arrayList[i].TryCast<GameObject>();
-                if (child.name.Contains(name)) {
+                if (child.name.Trim() == name.Trim()) {
                     return child;
                 }
             }

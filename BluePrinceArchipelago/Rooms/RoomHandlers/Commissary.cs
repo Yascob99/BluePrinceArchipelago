@@ -56,10 +56,9 @@ public class Commissary : RoomHandler
 
         SetupItemsForSale();
     }
-    public override void OnAfterRoomDrafted()
+    public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         ReplaceModelsWithAP();
-        ReplacePurchases();
     }
 
     private void ReplaceModelsWithAP() {
@@ -100,34 +99,6 @@ public class Commissary : RoomHandler
            
         }
     }
-
-    private void ReplacePurchases() {
-        foreach (var cItem in CommissaryStates) {
-            if (!CanStock.Contains(cItem.Key)) {
-                ReplaceCommissaryPurchase(Plugin.ModItemManager.GetUniqueItem(cItem.Key), cItem.Value);
-            }
-        }
-    }
-
-    private FsmState ReplaceCommissaryPurchase(UniqueItem item, string stateName)
-    {
-        FsmState state = ModInstance.CommissaryMenu.GetState(stateName);
-        if (state != null)
-        {
-            //If the item is not unlocked, prevent it from being added to inventory.
-            if (!item.IsUnlocked && item.ApplySanity())
-            {
-                //Disable the actions that add the item to inventory.
-                state.DisableActionsOfType<ArrayListAdd>();
-            }
-            Plugin.UniqueItemManager.SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
-            return state;
-        }
-        // If the item pickup state was not found output an error.
-        Logging.LogError($"No FSM state {stateName} found for: {item.Name}");
-        return null;
-    }
-
     public void EnableCommissaryPurchase(UniqueItem item, string stateName)
     {
 
@@ -148,9 +119,7 @@ public class Commissary : RoomHandler
     }
 
     private void ReplaceWithAPModel(string itemName, GameObject gameObject) {
-        GameObject prefab = null;
-
-            prefab = ModInstance.Prefabs.GetChild(itemName);
+        GameObject prefab = ModInstance.Prefabs.GetChild(itemName);
         if (prefab != null)
             {
                 //Instantiate a copy of the game object at the location of the spawn pool game object.
