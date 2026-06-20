@@ -206,10 +206,24 @@ public class DeathLinkHandler
 
         if (roomTextObj == null)
         {
+            Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
             var parent = GameObject.Find("__SYSTEM/HUD");
             if (parent != null)
             {
                 roomTextObj = parent.transform.Find("RoomText")?.gameObject;
+            }
+            else
+            {
+                Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+                parent = GameObject.Find("__SYSTEM");
+                if (parent != null)
+                {
+                    roomTextObj = parent.transform.Find("HUD/RoomText")?.gameObject;
+                }
+                else
+                {
+                    Logging.LogError("Could not find parent objects for death link end of day message. Room information will not be included in death link messages.", "DeathLink");
+                }
             }
         }
 
@@ -224,6 +238,7 @@ public class DeathLinkHandler
         if (currentRoom.IsNullOrWhiteSpace())
         {
             deathLinkMsg = $"{slotName} ended the day";
+            return;
         }
 
         if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
