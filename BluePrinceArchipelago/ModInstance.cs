@@ -778,6 +778,9 @@ namespace BluePrinceArchipelago
                 case EventID.Tomb_Solved:
                     ModEventHandler.OnTombPuzzleSolved("1");
                     break;
+                case EventID.Natural_Order_Opened:
+                    ModEventHandler.OnTombPuzzleSolved("2");
+                    break;
                 case EventID.Sigil_Solved_Arch_Aries:
                 case EventID.Sigil_Solved_Corarica:
                 case EventID.Sigil_Solved_Eraja:
