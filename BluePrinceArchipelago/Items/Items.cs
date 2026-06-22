@@ -472,6 +472,9 @@ namespace BluePrinceArchipelago.Items
                 }
                 string scoutname = $"Upgrade Disk - {location.Replace("LADYSHIPS", "LADYSHIP\'s").Replace("AND ", "& ").Replace("FOUNDATION", "THE FOUNDATION").ToTitleCase()}";
                 GameObject You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk - " + location.ToTitleCase());
+                if (location.ToTitleCase() == "Commissary") {
+                    You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk - " + location.ToTitleCase());
+                }
                 if (You___Message != null)
                 {
                     Transform itemModel = You___Message.transform.FindRecursive("Floppy Disk", true);
@@ -892,7 +895,6 @@ namespace BluePrinceArchipelago.Items
         }
         public string GetItemType(string itemName)
         {
-            itemName = GetInternalName(itemName);
             ModItem item = GetPermanentItem(itemName);
             itemName = itemName.Trim();
             if (item != null)
@@ -910,13 +912,6 @@ namespace BluePrinceArchipelago.Items
                 return "Unique";
             }
             return null;
-        }
-        private string GetInternalName(string itemName) {
-            //Fixes internal names for items that have different internal names than the check.
-            if (itemName.ToLower().Contains("electromagnet")) {
-                return "POWERED ELECTROMAGNET";
-            }
-            return itemName;
         }
 
         // Handle the code for recieving an item check that results in receiving an item.

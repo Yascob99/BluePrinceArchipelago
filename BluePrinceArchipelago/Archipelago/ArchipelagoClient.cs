@@ -515,7 +515,7 @@ public class ArchipelagoClient
         }
         else 
         {
-            Logging.LogWarning($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
+            Logging.Log($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
         }
     }
     /// <summary>
@@ -531,7 +531,7 @@ public class ArchipelagoClient
             State.UpdateLocations(ServerData.CheckedLocations);
         }
         else if (locationid > 1) {
-            Logging.LogWarning($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent or is not being used for this seed.");
+            Logging.Log($"Unable to send location for {ServerData.LocationDict[locationid]}. Location has already been sent or is not being used for this seed.", "Locations");
         }
     }
 
