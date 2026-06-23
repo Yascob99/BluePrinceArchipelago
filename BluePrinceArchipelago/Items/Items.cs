@@ -472,6 +472,9 @@ namespace BluePrinceArchipelago.Items
                 }
                 string scoutname = $"Upgrade Disk - {location.Replace("LADYSHIPS", "LADYSHIP\'s").Replace("AND ", "& ").Replace("FOUNDATION", "THE FOUNDATION").ToTitleCase()}";
                 GameObject You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk - " + location.ToTitleCase());
+                if (location.ToTitleCase() == "Commissary") {
+                    You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk - " + location.ToTitleCase());
+                }
                 if (You___Message != null)
                 {
                     Transform itemModel = You___Message.transform.FindRecursive("Floppy Disk", true);
@@ -870,7 +873,7 @@ namespace BluePrinceArchipelago.Items
                 {
                     for(int i = 0; i < item.unlockedCount; i++)
                     {
-                        Logging.LogWarning($"Adding {item.Count} {item.Name}(s)");
+                        Logging.Log($"Adding {item.Count} {item.ItemType}(s)", "items");
                         item.AddItemToInventory();
                     }
                 }
@@ -892,7 +895,6 @@ namespace BluePrinceArchipelago.Items
         }
         public string GetItemType(string itemName)
         {
-            itemName = GetInternalName(itemName);
             ModItem item = GetPermanentItem(itemName);
             itemName = itemName.Trim();
             if (item != null)
@@ -910,13 +912,6 @@ namespace BluePrinceArchipelago.Items
                 return "Unique";
             }
             return null;
-        }
-        private string GetInternalName(string itemName) {
-            //Fixes internal names for items that have different internal names than the check.
-            if (itemName.ToLower().Contains("electromagnet")) {
-                return "POWERED ELECTROMAGNET";
-            }
-            return itemName;
         }
 
         // Handle the code for recieving an item check that results in receiving an item.
@@ -1154,7 +1149,7 @@ namespace BluePrinceArchipelago.Items
         private void AdjustKeys(int count = 1)
         {
             ModInstance.KeyManager.FindIntVariable("Adjustment Amount").Value = count;
-            ModInstance.KeyManager.SendEvent("0");
+            ModInstance.KeyManager.SendEvent("Update");
         }
         private void AdjustLuck(int count = 1)
         {
@@ -1198,7 +1193,6 @@ namespace BluePrinceArchipelago.Items
     public class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked)
     {
         private string _ItemType = itemType;
-        private PlayMakerFSM _DayFSM = GameObject.Find("DAY").GetFsm("FSM");
         public int unlockedCount = 0;
 
         public string ItemType
@@ -1220,27 +1214,27 @@ namespace BluePrinceArchipelago.Items
         {
             if (_ItemType == "Gems")
             {
-                AdjustGems(unlockedCount * _Count);
+                AdjustGems(_Count);
             }
             else if (_ItemType == "Steps")
             {
-                AdjustSteps(unlockedCount * _Count);
+                AdjustSteps(_Count);
             }
             else if (_ItemType == "Gold")
             {
-                AdjustGold(unlockedCount * _Count);
+                AdjustGold(_Count);
             }
             else if (_ItemType == "Dice")
             {
-                AdjustDice(unlockedCount * _Count);
+                AdjustDice(_Count);
             }
             else if (_ItemType == "Keys")
             {
-                AdjustKeys(unlockedCount * _Count);
+                AdjustKeys(_Count);
             }
             else if (_ItemType == "Luck")
             {
-                AdjustLuck(unlockedCount * _Count);
+                AdjustLuck(_Count);
             }
             else
             {
@@ -1331,12 +1325,10 @@ namespace BluePrinceArchipelago.Items
 
 
         public bool UnlockLocationIfExists(string locationName) {
-            Logging.LogWarning(locationName);
             foreach (string location in Locations) {
                 string lowlocation = location.ToLower().Replace("ladyships", "ladyship\'s").Replace("and ", "& ");
                 if (locationName.ToLower().Contains(lowlocation)) {
                     FoundLocations.Add(location);
-                    ModInstance.ModEventHandler.OnUgradeDiskFound(location);
                 }
             }
             return false;
@@ -1350,17 +1342,18 @@ namespace BluePrinceArchipelago.Items
                 int j = -1;
                 foreach (string boolName in UsedVariables) {
                     j++;
+                    string location = Locations[j];
                     if (ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(boolName).Value) {
-                        UsedLocations.Add(Locations[j]);
+                        UsedLocations.Add(location);
                     }
                 }
+                return;
             }
             foreach (string location in RecievedItems)
             {
                 // Check if the item has been used, and if it has, 
                 if (!UsedLocations.Contains(location))
                 {
-
                     AddItemToInventory(location);
                 }
                 i++;

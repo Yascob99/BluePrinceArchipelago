@@ -5,5 +5,7 @@
         public string Seed { get; set; }
 
         public int SaveSlot { get; set; }
+
+        public int ItemIndex { get; set; }
     }
 }

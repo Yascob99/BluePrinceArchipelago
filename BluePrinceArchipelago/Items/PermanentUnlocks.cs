@@ -256,10 +256,29 @@ namespace BluePrinceArchipelago.Items
 
         public override void PreventDefault()
         {
+            SendEventByName unfreeze = new SendEventByName()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = "UnFreeze",
+                delay = 0f,
+                everyFrame = false
+            };
             PlayMakerFSM GrottoTrigger = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>();
             FsmState GrottoState = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>()?.GetState("State 2");
             GrottoState?.DisableActionsOfType<SendEvent>();
-            GrottoState?.InsertAction(5, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
+            GrottoState?.InsertAction(5, unfreeze);
+            GrottoState?.InsertAction(6, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
             PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
             if (!Solved)
             {
@@ -272,7 +291,7 @@ namespace BluePrinceArchipelago.Items
         public override void FoundLocation()
         {
             Solved = true;
-            ModInstance.ModEventHandler.OnGateOpened(LocationName);
+            ModInstance.ModEventHandler.OnLaboratoryPuzzleSolved();
         }
     }
 

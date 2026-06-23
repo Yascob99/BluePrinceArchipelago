@@ -20,6 +20,25 @@ namespace BluePrinceArchipelago.Rooms
         public static List<string> VanillaRooms = [];
         public static List<string> CantCopy = ["ANTECHAMBER", "ENTRANCE HALL", "ROOM 46", "FOUNDATION", ""];
 
+        public static Dictionary<string, string> UpgradeIDs = new Dictionary<string, string>()
+        {
+            {"BOUDOIR", "Upgrade Boudoir"},
+            {"CLOSET", "Upgrade Closet"},
+            {"COURTYARD", "Upgrade Courtyard"},
+            {"HALLWAY", "Upgrade Hallway"},
+            {"SPARE ROOM", "Upgrade Spare Room"},
+            {"STOREROOM", "Upgrade Storeroom"},
+            {"BILLIARD ROOM", "Upgrade Billiard"},
+            {"MAIL ROOM", "Upgrade Mail Room"},
+            {"BUNK ROOM", "Upgrade Bunk Room"},
+            {"AQUARIUM", "Upgrade Aquarium"},
+            {"GUEST BEDROOM", "Upgrade Guest Bedroom"},
+            {"CLOISTER", "Upgrade Cloister"},
+            {"NURSERY", "Upgrade Nursery"},
+            {"PARLOR", "Upgrade Parlor"},
+            {"NOOK", "Upgrade Nool"}
+        };
+
         public static List<string> CurrentPickerArrays = [];
 
         public static List<ModRoom> ForceRoomQueue = new(); // Not actually a queue, but is handled like that by the functions that interact with it.
@@ -51,7 +70,7 @@ namespace BluePrinceArchipelago.Rooms
                 }
             }
             if (found) {
-                Logging.Log("Room already in Pool, adding more to the pool");
+                Logging.LogWarning($"{_Rooms[counter].Name} already in Pool, adding more to the pool");
                 _Rooms[counter].RoomPoolCount++;
             }
             else
@@ -182,6 +201,12 @@ namespace BluePrinceArchipelago.Rooms
                 if (room.Name.ToUpper().Trim() == name.ToUpper().Trim() || room.GameObjectName.ToUpper().Trim() == name.ToUpper().Trim()) {
                     return room; 
                 }
+                foreach (GameObject gameObject in room.UpgradeObjects) {
+                    if (gameObject.name.ToUpper().Trim() == name.ToUpper().Trim())
+                    {
+                        return room;
+                    }
+                }
             }
                 return null;
         }
@@ -205,9 +230,31 @@ namespace BluePrinceArchipelago.Rooms
             {
                 Logging.LogWarning($"Could not find room GameObject at '{roomPath}' for room '{name}'", "ModRoomManager");
             }
+
             if (name == "CLASSROOM")
             {
                 return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
+            }
+            // rooms only have children if they have upgrades.
+            if (roomObj.transform.childCount > 0)
+            {
+                List<GameObject> UpgradeObjs = new List<GameObject>();
+                for (int i = 0; i < roomObj.transform.childCount; i++) {
+                    GameObject child = roomObj?.transform?.GetChild(i)?.gameObject;
+                    if (child != null) { 
+                        UpgradeObjs.Add(child);
+                    }
+                }
+                // Get the current UpgradeID of the room
+                int UpgradeID = 0;
+                if (UpgradeIDs.ContainsKey(name))
+                {
+                    UpgradeID = ModInstance.GlobalPersistentManager.GetIntVariable(UpgradeIDs[name]).Value;
+                }
+                else {
+                    Logging.LogWarning($"UpgradeID variable could not be found for {name}.");
+                }
+                return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted, UpgradeObjs, UpgradeID));
             }
             return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
         }
@@ -221,8 +268,6 @@ namespace BluePrinceArchipelago.Rooms
                 room.UpdatePools();
             }
             UpdateCurrentPickerArrays();
-            ModRoom Closet = GetRoomByName("CLOSET");
-            // Fill all the active picker array's empty spots with closets.
             foreach (string arrayName in CurrentPickerArrays)
             {
                 if (arrayName != "")
@@ -419,7 +464,7 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
-    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false)
+    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, List<GameObject> upgradeObjs = null, int upgradeID = 0)
     {
         private string _Name = name;
         public string Name { get { return _Name; } set { _Name = value; } }
@@ -430,6 +475,10 @@ namespace BluePrinceArchipelago.Rooms
 
         private GameObject _GameObj = gameObject;
         public GameObject GameObj { get { return _GameObj; } set { _GameObj = value; } }
+
+        public List<GameObject> UpgradeObjects { get; set; } = upgradeObjs ?? new List<GameObject>();
+
+        public int UpgradeID = upgradeID;
 
         private List<string> _PickerArrays = pickerArrays;
         public List<string> PickerArrays { get { return _PickerArrays; } set { _PickerArrays = value; } }
@@ -543,6 +592,7 @@ namespace BluePrinceArchipelago.Rooms
             // Ensure we have a valid GameObject to add
             if (_GameObj == null)
             {
+                Logging.LogWarning($"Adding {count} {name}(s) to pool.");
                 // Try to get the GameObject from the Room Engines using the game object name
                 _GameObj = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName);
                 if (_GameObj == null)
@@ -573,15 +623,27 @@ namespace BluePrinceArchipelago.Rooms
                 Logging.LogWarning($"Cannot remove {_Name} from pool: GameObject is null");
                 return;
             }
-
+            bool removed = false;
             for (int i = 0; i < count; i++)
             {
                 if (array.Contains(_GameObj))
                 {
                     array.Remove(_GameObj, "GameObject");
                     Logging.Log($"Removed {_Name} from {array.name}");
+                    removed = true;
                 }
-                else {
+                // Handle the Upgraded objects.
+                foreach (GameObject upgrade in UpgradeObjects) {
+                    if (array.Contains(upgrade))
+                    {
+                        Logging.LogWarning("Removed Upgraded Room From Pool");
+                        array.Remove(upgrade, "GameObject");
+                        Logging.Log($"Removed {_Name} from {array.name}");
+                        removed = true;
+                    }
+                }
+                if (!removed)
+                {
                     Logging.Log($"{_Name} doesn't exist in the pool {array.name}");
                 }
             }
@@ -613,7 +675,7 @@ namespace BluePrinceArchipelago.Rooms
                     GameObject room = array.arrayList[i].TryCast<GameObject>();
                     if (room != null)
                     {
-                        if (room.name == _GameObjectName)
+                        if (Plugin.ModRoomManager.GetRoomByName(room.name) != null)
                         {
                             indexes.Insert(0, i); //add to front of list so it's in descending order.
                             count++;

@@ -3,6 +3,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace BluePrinceArchipelago.Events
 {
@@ -110,6 +111,10 @@ namespace BluePrinceArchipelago.Events
         public void OnSatelliteRaised()
         {
             LocationFound.Invoke(this, new LocationEventArgs("Raise Satellite", "Raise Satellite"));
+        }
+        public void OnLaboratoryPuzzleSolved()
+        {
+            LocationFound.Invoke(this, new LocationEventArgs("Laboratory Puzzle - Blackbridge", "Laboratory Puzzle - Blackbridge"));
         }
         public void OnAllowanceCollected(string locationName) {
             LocationFound.Invoke(this, new LocationEventArgs($"Allowance Token - {locationName.ToTitleCase()}", "Allowance Collected"));

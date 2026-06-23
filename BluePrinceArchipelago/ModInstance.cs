@@ -188,7 +188,6 @@ namespace BluePrinceArchipelago
                 }
                 
                 // Use Invoke to delay the sync - increased to 1 second for safety
-                Instance.Invoke(nameof(PerformDelayedSync), 1.0f);
                 InitializeUpgradeDiskNotifications();
                 HasInitializedRooms = true;
             }
@@ -392,7 +391,7 @@ namespace BluePrinceArchipelago
                     // Rebuild the state if it couldn't be done on the Reconnect from crash.
                     //State.FirstLoad();
                     
-                    if (!ArchipelagoClient.StateRebuilt)
+                    if (!ArchipelagoClient.StateRebuilt && ArchipelagoClient.Reconnected)
                     {
                         Logging.LogWarning("Rebuilding State");
                         Plugin.ArchipelagoClient.RebuildState();
@@ -402,6 +401,10 @@ namespace BluePrinceArchipelago
                 // Release items that were queued while offline/before the run started
                 QueueManager.ReleaseAllQueuedItems();
                 QueueManager.ReleaseAllQueuedLocations();
+
+                //Reload the Picker Arrays, Resync the room pools with archipelago.
+                ReloadArrays();
+                SyncRoomPoolsWithArchipelago();
 
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 Plugin.ModItemManager.StartOfDay();
@@ -423,36 +426,6 @@ namespace BluePrinceArchipelago
         /// Called after a delay when the scene loads to sync room pools.
         /// This ensures the game has finished initializing all draft pools before we modify them.
         /// </summary>
-        private void PerformDelayedSync()
-        {
-            Logging.Log($"PerformDelayedSync called - Authenticated: {ArchipelagoClient.Authenticated}, HasInitializedRooms: {HasInitializedRooms}, OptionsLoaded: {ArchipelagoOptions.IsLoaded}");
-
-            if (!ArchipelagoClient.Authenticated)
-            {
-                Logging.Log("PerformDelayedSync skipped - not authenticated");
-                return;
-            }
-
-            if (!HasInitializedRooms)
-            {
-                Logging.Log("PerformDelayedSync skipped - rooms not initialized");
-                return;
-            }
-
-            // If options aren't loaded yet, default to syncing (RoomDraftSanity defaults to true)
-            // This handles the case where options load is delayed
-            if (ArchipelagoOptions.IsLoaded && !ArchipelagoOptions.RoomDraftSanity)
-            {
-                Logging.Log("RoomDraftSanity is disabled - skipping room pool sync");
-                return;
-            }
-
-            Logging.Log("Performing delayed sync after scene load...");
-            ReloadArrays();
-            SyncRoomPoolsWithArchipelago();
-            Logging.Log("Delayed sync complete.");
-            
-        }
 
         /// <summary>
         /// Re-loads the picker arrays. Call this when arrays may have been reset by the game.
@@ -504,7 +477,7 @@ namespace BluePrinceArchipelago
             // Update the actual picker arrays
             Plugin.ModRoomManager.UpdateRoomPools();
 
-            Logging.Log($"Auto-sync complete: {unlockedCount} rooms unlocked from Archipelago.");
+            Logging.Log($"Auto-sync complete: {unlockedCount} rooms unlocked from Archipelago.", "Rooms");
         }
 
         /// <summary>
@@ -543,7 +516,7 @@ namespace BluePrinceArchipelago
         public static void OnDayEnd() {
             IsInRun = false;
             var fsm = GameObject.Find("UI OVERLAY CAM")?.transform?.Find("END OF DAYS CHECKS")?.gameObject?.GetFsm("FSM");
-
+            State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems); // Update Items once a day so it can automatically add any items that should have been added by the crash.
             Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
             State.CurrentDayNum += 1;
@@ -824,23 +797,26 @@ namespace BluePrinceArchipelago
             // Only sync if rooms are already initialized (connected mid-run, not from main menu)
             if (HasInitializedRooms)
             {
+                ReloadArrays();
                 SyncRoomPoolsWithArchipelago();
             }
             if (IsInRun && !RanStartOfDay)
             {
                 ModItemManager.LoadInventories();
+
+                // Handle Start of day code for Permanent items (and maybe curses later).
+                Plugin.ModItemManager.StartOfDay();
+                Plugin.ModItemManager.ReplaceItemsWithAP();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(GlobalManager);
                 }
-                FSMPatches.AddedFloorPlanOverrides();
-                Plugin.ModItemManager.StartOfDay();
-                Plugin.ModItemManager.ReplaceItemsWithAP();
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
-                Unlocks.SatelliteDish.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
+                Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
+                Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
             }
         }
         private static void InitializeUpgradeDiskNotifications()

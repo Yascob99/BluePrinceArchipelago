@@ -47,64 +47,34 @@ namespace BluePrinceArchipelago.Patches
                     // Create a boolean for tracking the current state of the 
                     FsmState ArchiveState = GlobalFSM.GetState("State 35");
                     GlobalFSM.AddGlobalTransition("Archives Upgrade Disk Pickup", "State 35");
-                    FsmBool ArchivesDiskUsed = GlobalFSM.AddFsmBool("Archives Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("ARCHIVES"));
-                    UsedFSM.GetState("Upgrade Disc - Archives").GetFirstActionOfType<SetFsmBool>().variableName = "Archives Disk Used";
                     FsmState TradingPostState = GlobalFSM.GetState("State 27");
-                    FsmBool TradingPostDiskUsed = GlobalFSM.AddFsmBool("Trading Post Dynamite Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("TRADING POST DYNAMITE"));
-                    UsedFSM.GetState("Upgrade Disc - Bootleg").GetFirstActionOfType<SetFsmBool>().variableName = "Trading Post Dynamite Disk Used";
                     GlobalFSM.AddGlobalTransition("Trading Post Dynamite Upgrade Disk Pickup", "State 27");
                     FsmState TombState = GlobalFSM.GetState("State 23");
                     GlobalFSM.AddGlobalTransition("Tomb Upgrade Disk Pickup", "State 22");
-                    FsmBool TombDiskUsed = GlobalFSM.AddFsmBool("Tomb Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("TOMB"));
-                    UsedFSM.GetState("Upgrade Disc - Cloister").GetFirstActionOfType<SetFsmBool>().variableName = "Tomb Disk Used";
                     FsmState CommissaryState = GlobalFSM.GetState("State 33");
                     GlobalFSM.AddGlobalTransition("Commissary Upgrade Disk Pickup", "State 33");
-                    FsmBool CommissaryUsed = GlobalFSM.AddFsmBool("Commissary Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("COMMISSARY"));
-                    UsedFSM.GetState("Upgrade Disc - Commissary").GetFirstActionOfType<SetFsmBool>().variableName = "Commissary Disk Used";
                     FsmState FoundationState = GlobalFSM.GetState("State 22");
                     GlobalFSM.AddGlobalTransition("Foundation Disk Pickup", "State 22");
-                    FsmBool FoundationUsed = GlobalFSM.AddFsmBool("Foundation Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("FOUNDATION"));
-                    UsedFSM.GetState("Upgrade Disc - Foundation").GetFirstActionOfType<SetFsmBool>().variableName = "Foundation Disk Used";
                     FsmState FreezerState = GlobalFSM.GetState("State 25");
                     GlobalFSM.AddGlobalTransition("Freezer Upgrade Disk Pickup", "State 22");
-                    FsmBool FreezerUsed = GlobalFSM.AddFsmBool("Freezer Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("FREEZER"));
-                    UsedFSM.GetState("Upgrade Disc - Freezer").GetFirstActionOfType<SetFsmBool>().variableName = "Freezer Disk Used";
                     FsmState GarageState = GlobalFSM.GetState("State 30");
                     GlobalFSM.AddGlobalTransition("Garage Upgrade Disk Pickup", "State 30");
-                    FsmBool GarageUsed = GlobalFSM.AddFsmBool("Garage Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("GARAGE"));
-                    UsedFSM.GetState("Upgrade Disc - Garage").GetFirstActionOfType<SetFsmBool>().variableName = "Garage Disk Used";
                     FsmState GreatHallState = GlobalFSM.GetState("State 29");
                     GlobalFSM.AddGlobalTransition("Great Hall Upgrade Disk Pickup", "State 29");
-                    FsmBool GreatHallUsed = GlobalFSM.AddFsmBool("Greate Hall Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("GREAT HALL"));
-                    UsedFSM.GetState("Upgrade Disc - Great Hall").GetFirstActionOfType<SetFsmBool>().variableName = "Great Hall Disk Used";
                     FsmState LostAndFoundState = GlobalFSM.GetState("State 28");
                     GlobalFSM.AddGlobalTransition("Lost and Found Upgrade Disk Pickup", "State 28");
-                    FsmBool LostAndFoundUsed = GlobalFSM.AddFsmBool("Lost and Found Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("LOST AND FOUND"));
-                    UsedFSM.GetState("Upgrade Disc - LostFound").GetFirstActionOfType<SetFsmBool>().variableName = "Lost and Found Disk Used";
                     FsmState HLCState = GlobalFSM.GetState("State 20");
                     GlobalFSM.AddGlobalTransition("Her Ladyships Chamber Upgrade Disk Pickup", "State 20");
-                    FsmBool HLCUsed = GlobalFSM.AddFsmBool("Her Ladyships Chamber Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("HER LADYSHIPS CHAMBER"));
-                    UsedFSM.GetState("Upgrade Disc - Master Bedroom").GetFirstActionOfType<SetFsmBool>().variableName = "Her Ladyships Chamber Disk Used";
                     FsmState MechanariumState = GlobalFSM.GetState("State 24");
                     GlobalFSM.AddGlobalTransition("Mechanarium Upgrade Disk Pickup", "State 24");
-                    FsmBool MechanariumUsed = GlobalFSM.AddFsmBool("Mechanarium Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("MECHANARIUM"));
-                    UsedFSM.GetState("Upgrade Disc - Mechanarium").GetFirstActionOfType<SetFsmBool>().variableName = "Mechanarium Disk Used";
                     FsmState MorningRoomState = GlobalFSM.GetState("State 21");
                     GlobalFSM.AddGlobalTransition("Morning Room Upgrade Disk Pickup", "State 21");
-                    FsmBool MorningRoomUsed = GlobalFSM.AddFsmBool("Morning Room Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("MORNING ROOM"));
-                    UsedFSM.GetState("Upgrade Disc - Morning Room").GetFirstActionOfType<SetFsmBool>().variableName = "Morning Room Disk Used";
                     FsmState OfficeState = GlobalFSM.GetState("State 34");
                     GlobalFSM.AddGlobalTransition("Office Upgrade Disk Pickup", "State 34");
-                    FsmBool OfficeUsed = GlobalFSM.AddFsmBool("Office Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("OFFICE"));
-                    UsedFSM.GetState("Upgrade Disc - Office").GetFirstActionOfType<SetFsmBool>().variableName = "Office Disk Used";
                     FsmState VaultState = GlobalFSM.GetState("State 26");
                     GlobalFSM.AddGlobalTransition("Vault Disk Pickup", "State 26");
-                    FsmBool VaultUsed = GlobalFSM.AddFsmBool("Vault Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("VAULT"));
-                    UsedFSM.GetState("Upgrade Disc - Tomb").GetFirstActionOfType<SetFsmBool>().variableName = "Vault Disk Used";
                     FsmState AbandonedMineState = GlobalFSM.GetState("State 31");
                     GlobalFSM.AddGlobalTransition("Abandoned Mine Pickup", "State 31");
-                    FsmBool AbandonedMineUsed = GlobalFSM.AddFsmBool("Abandoned Mine Disk Used", ModItemManager.UpgradeDisks.UsedLocations.Contains("ABANDONED MINE"));
-                    UsedFSM.GetState("Upgrade Disc - Torch Room ").GetFirstActionOfType<SetFsmBool>().variableName = "Abandoned Mine Disk Used";
 
                     FsmState roomCheck = GlobalFSM.GetState("State 19");
                     StringContains[] checks = roomCheck.GetActionsOfType<StringContains>();
@@ -220,10 +190,15 @@ namespace BluePrinceArchipelago.Patches
                     //Commissary Replacement Code
                     PlayMakerFSM CommissaryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.GetComponent<PlayMakerFSM>();
                     // Prevent the Default add to inventory behavior.
+                    FsmState UpgradeDisksAdd = CommissaryMenu.GetState("Upgrade Disks Add");
+                    UpgradeDisksAdd.DisableFirstActionOfType<SetFsmInt>();
+                    UpgradeDisksAdd.DisableFirstActionOfType<SendEvent>();
+
                     FsmState UpgradeDiskPurchaseState = CommissaryMenu.GetState("Upgrade Disk Purchase 2");
                     UpgradeDiskPurchaseState.DisableActionsOfType<ArrayListAdd>();
                     // Attempt to create a SendEvent to send info the 
                     // There's a solid chance this just breaks.
+                    UpgradeDiskPurchaseState.DisableFirstActionOfType<ActivateGameObject>();
                     UpgradeDiskPurchaseState.InsertAction(3, new SendEventByName()
                     {
                         eventTarget = new FsmEventTarget()
