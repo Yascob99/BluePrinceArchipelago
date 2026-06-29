@@ -821,7 +821,7 @@ namespace BluePrinceArchipelago
         }
 
         public static void OnConnectToArchipelago() {
-            GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
+           
             // Only sync if rooms are already initialized (connected mid-run, not from main menu)
             if (HasInitializedRooms)
             {
@@ -831,7 +831,7 @@ namespace BluePrinceArchipelago
             if (IsInRun && !RanStartOfDay)
             {
                 ModItemManager.LoadInventories();
-
+                GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
