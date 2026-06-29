@@ -112,4 +112,21 @@ namespace BluePrinceArchipelago.Items
             }
         }
     }
+    public class SetTrap(string name, string trapType, int count = -1) : Trap(name, trapType)
+    {
+        public override void ActivateTrap()
+        {
+            if (TrapType == "Steps")
+            {
+                // TODO: find how to get current step count
+                var current = 50;
+                
+                var difference = current - count;
+                // change the adjustment amount.
+                ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -difference;
+                // Send the "Update" event and the step counter should update.
+                ModInstance.StepManager.SendEvent("Update");
+            }
+        }
+    }
 }

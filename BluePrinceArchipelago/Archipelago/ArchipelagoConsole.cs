@@ -16,6 +16,7 @@ namespace BluePrinceArchipelago.Archipelago;
 public static class ArchipelagoConsole
 {
     public static bool Hidden = true;
+    public static bool ShowOnlyRelevantMessages = true;
 
     private static List<string> logLines = new();
     private static Vector2 scrollView;
@@ -28,6 +29,7 @@ public static class ArchipelagoConsole
     private static string scrollText = "";
     private static float lastUpdateTime = Time.time;
     private const float HideTimeout = 15f;
+    private const int MaxLogLines = 100;
 
     private static string CommandText = "/help";
     private static Rect CommandTextRect;
@@ -41,27 +43,45 @@ public static class ArchipelagoConsole
         UpdateWindow();
     }
 
-    public static void LogMessage(string message, string logTag = "ArchipelagoConsole")
+    public static void LogMessage(string message, string logTag = "ArchipelagoConsole", bool isServerMessage = false)
     {
         if (message.IsNullOrWhiteSpace()) return;
+
         //Handle multiline messages.
         if (message.Contains('\n'))
         {
             foreach (string submessage in message.Split("\n"))
             {
-                logLines.Add(submessage);
+                if (IsRelevantMessage(submessage))
+                {
+                    logLines.Add(submessage);
+                
+                    lastUpdateTime = Time.time;
+                    UpdateWindow();
+                }
+                
                 Logging.Log(submessage, logTag);
-                lastUpdateTime = Time.time;
-                UpdateWindow();
             }
         }
         else
         {
+            if (!IsRelevantMessage(message))
+            {
+                Logging.Log(message, logTag);
+                return;
+            }
             logLines.Add(message);
             Logging.Log(message, logTag);
             lastUpdateTime = Time.time;
             UpdateWindow();
         }
+    }
+
+    private static bool IsRelevantMessage(string message)
+    {
+        if (!ShowOnlyRelevantMessages) return true;
+        if (message.Contains(ArchipelagoClient.ServerData.SlotName) || message.Contains("[Server]") || message.Contains("You can't afford the hint")) return true;
+        return false;
     }
 
     public static void OnGUI()
@@ -213,12 +233,13 @@ public static class ArchipelagoConsole
         {
             if (logLines.Count > 0)
             {
-                scrollText = logLines[logLines.Count - 1];
+                scrollText = logLines[^1];
             }
         }
         else
         {
-            for (var i = 0; i < logLines.Count; i++)
+            int start = Math.Max(0, logLines.Count - MaxLogLines);
+            for (var i = start; i < logLines.Count; i++)
             {
                 scrollText += logLines.ElementAt(i);
                 if (i < logLines.Count - 1)
@@ -340,6 +361,7 @@ public static class CommandManager
         _LocalCommands["received"] = new ReceivedCommand("Received"); // Show received Archipelago items
         _LocalCommands["resetdata"] = new ResetData("ResetData");
         _LocalCommands["collect"] = new CollectCommand("Collect"); // Collect location from the Archipelago item pool, for testing purposes.
+        _LocalCommands["recordevent"] = new RecordEventCommand("RecordEvent"); // records an event to set some of the vanilla states
     }
     private static ParsedCommand ParseCommand(string command)
     {
@@ -1584,5 +1606,54 @@ public class ResetData(string name) : Command(name)
     {
         State.Reset();
         State.Initialize();
+    }
+}
+
+public class RecordEventCommand(string name) : Command(name)
+{
+    public override string Description => "Records an event to set some of the vanilla states (for testing purposes).";
+
+    public override string Syntax => "Usage:\n\t/RecordEvent <EventName>\n\nExample:\n\t/RecordEvent Orchard_Unlocked";
+
+    public override void Run(List<string> Args)
+    {
+        var eventName = string.Join(" ", Args);
+        if (eventName.StartsWith("\"") && eventName.EndsWith("\""))
+            eventName = eventName[1..^1];
+        
+        var eventID = EventID.Null;
+        switch (eventName.ToLower())
+        {
+            case "west_path_gate_unlocked":
+            case var _ when eventName.ToLower().Contains("west") && eventName.ToLower().Contains("gate") && eventName.ToLower().Contains("unlocked"):
+                eventID = EventID.West_Path_Gate_Unlocked;
+                break;
+            
+            case "gemstone_cavern_unlocked":
+            case var _ when eventName.ToLower().Contains("gemstone") && eventName.ToLower().Contains("cavern") && eventName.ToLower().Contains("unlocked"):
+                eventID = EventID.Gemstone_Cavern_Unlocked;
+                break;
+
+            case "orchard_unlocked":
+            case var _ when eventName.ToLower().Contains("orchard") && eventName.ToLower().Contains("unlocked"):
+                eventID = EventID.Orchard_Unlocked;
+                break;
+
+            case "satellite_raised":
+            case var _ when eventName.ToLower().Contains("satellite") && eventName.ToLower().Contains("raised"):
+                eventID = EventID.Satellite_Raised;
+                break;
+            
+            case "blackbridge_powered":
+            case var _ when eventName.ToLower().Contains("blackbridge") && eventName.ToLower().Contains("powered"):
+                eventID = EventID.Blackbridge_Powered;
+                break;
+
+            default:
+                ArchipelagoConsole.LogMessage($"Unknown event name: {eventName}");
+                return;
+        }
+
+        ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(eventID);
     }
 }

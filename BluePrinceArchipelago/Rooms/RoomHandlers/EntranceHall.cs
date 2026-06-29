@@ -13,6 +13,7 @@ public class EntranceHall : RoomHandler
     {
         ObservedFSMStates.Add("Vase 1", ["BREAK!"]);
         ObservedFSMStates.Add("Vase 2", ["BREAK!"]);
+        AllowanceTokens.Add("ENTRANCE HALL");
     }
 
     public override void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState)
@@ -35,5 +36,10 @@ public class EntranceHall : RoomHandler
     public override void OnRoomDrafted(GameObject roomGameObject) // This is still used when drafting this room in the outer room, which is needed for the allowance token check
     {
         RoomGameObject = roomGameObject;
+    }
+
+    public override void OnAllowanceTokenCollected(string token)
+    {
+        ModInstance.ModEventHandler.OnAllowanceCollected("Outer Entrance Hall Vase");
     }
 }

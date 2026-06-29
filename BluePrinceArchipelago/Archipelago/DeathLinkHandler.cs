@@ -13,7 +13,7 @@ namespace BluePrinceArchipelago.Archipelago;
 
 public class DeathLinkHandler
 {
-    private static bool _deathLinkEnabled = true;
+    public static bool _deathLinkEnabled = true;
     public static bool deathLinkEnabled
     {
         get => _deathLinkEnabled && ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none;
@@ -91,6 +91,7 @@ public class DeathLinkHandler
         {
             if (!ModInstance.IsInRun) return;
             if (deathLinks.Count < 1) return;
+            if (!deathLinkEnabled) return;
 
             var deathLink = deathLinks.Dequeue();
             var cause = deathLink.Cause.IsNullOrWhiteSpace() ? GetDeathLinkCause(deathLink) : deathLink.Cause;
@@ -182,7 +183,9 @@ public class DeathLinkHandler
 
         if (!deathLinkEnabled) return;
 
-        SendDeathLink("Ran out of steps");
+        string deathLinkMsg = $"{slotName} ran out of steps";
+
+        SendDeathLink(deathLinkMsg);
     }
 
     public void SendEndOfDayDeathLink(PlayMakerFSM fsm)
@@ -199,14 +202,46 @@ public class DeathLinkHandler
 
         if (!deathLinkEnabled) return;
         // Check Current Room
-        string currentRoom = GameObject.Find("__SYSTEM/HUD/RoomText").GetComponent<TextMeshPro>().text;
+        var roomTextObj = GameObject.Find("__SYSTEM/HUD/RoomText");
+
+        if (roomTextObj == null)
+        {
+            Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+            var parent = GameObject.Find("__SYSTEM/HUD");
+            if (parent != null)
+            {
+                roomTextObj = parent.transform.Find("RoomText")?.gameObject;
+            }
+            else
+            {
+                Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+                parent = GameObject.Find("__SYSTEM");
+                if (parent != null)
+                {
+                    roomTextObj = parent.transform.Find("HUD/RoomText")?.gameObject;
+                }
+                else
+                {
+                    Logging.LogError("Could not find parent objects for death link end of day message. Room information will not be included in death link messages.", "DeathLink");
+                }
+            }
+        }
+
+        string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
 
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
             _bedroom = true;
         }
 
-        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink("End of Day");
+        string deathLinkMsg = $"{slotName} ended the day in {currentRoom}";
+        if (currentRoom.IsNullOrWhiteSpace())
+        {
+            deathLinkMsg = $"{slotName} ended the day";
+            return;
+        }
+
+        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
     }
 
     /// <summary>

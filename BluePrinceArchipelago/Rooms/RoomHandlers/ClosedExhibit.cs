@@ -4,7 +4,11 @@ public class ClosedExhibit : RoomHandler
 {
     public ClosedExhibit()
     {
-        MorajaiPuzzles.Add("Closed Exhibit");
+        AllowanceTokens.Add("Closed Exhibit");
     }
 
+    public override void OnAllowanceTokenCollected(string token)
+    {
+        ModInstance.ModEventHandler.OnMoraJaiSolved("Closed Exhibit");
+    }
 }

@@ -372,15 +372,46 @@ namespace BluePrinceArchipelago.Rooms
         /// </summary>
         private string MapArchipelagoRoomName(string apRoomName)
         {
-            // Currently no special mappings needed
-            // Classroom items now come as just "Classroom" which matches "CLASSROOM" directly
-
             // Add other special mappings here as needed in the future
 
             return apRoomName switch
             {
                 "Progressive Classroom" => "CLASSROOM", // Map all classroom variants to the base classroom name
                 _ => null
+            };
+        }
+
+        /// <summary>
+        /// Gets the base room name for upgraded rooms
+        /// </summary>
+        /// <param name="roomName">The name of the upgraded room to check</param>
+        /// <returns>The base room name if the input is an upgraded room, otherwise returns the original name</returns>
+        public static string GetBaseRoomName(string roomName)
+        {
+            roomName = roomName.ToUpper().Trim();
+            return roomName switch
+            {
+                _ when roomName.Contains("SPARE") => "SPARE ROOM", // Handle all spare room variants
+                _ when roomName.StartsWith("CLOISTER") => "CLOISTER", // Handle all cloister variants
+                "FUNERAL PARLOR" => "PARLOR",
+                "POOL HALL" => "BILLIARD ROOM",
+                "BREAK ROOM" => "BILLIARD ROOM",
+                "SPEAKEASY" => "BILLIARD ROOM",
+                "EMPTY CLOSET" => "CLOSET",
+                "BEDROOM CLOSET" => "CLOSET",
+                "HALLWAY CLOSET" => "CLOSET",
+                "READING NOOK" => "NOOK",
+                "BREAKFAST NOOK" => "NOOK",
+                "ELECTRIC EEL AQUARIUM" => "AQUARIUM",
+                "STARFISH AQUARIUM" => "AQUARIUM",
+                "GOLDFISH AQUARIUM" => "AQUARIUM",
+                "GUESS BEDROOM" => "GUEST BEDROOM",
+                "QUEST BEDROOM" => "GUEST BEDROOM",
+                "GEIST BEDROOM" => "GUEST BEDROOM",
+                "NURSE'S STATION" => "NURSERY",
+                "INDOOR NURSERY" => "NURSERY",
+                "CORRIYARD" => "COURTYARD",
+                _ => roomName  
             };
         }
 

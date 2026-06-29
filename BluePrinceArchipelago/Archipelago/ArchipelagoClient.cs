@@ -99,7 +99,7 @@ public class ArchipelagoClient
     /// </summary>
     private void SetupSession()
     {
-        session.MessageLog.OnMessageReceived += message => ArchipelagoConsole.LogMessage(message.ToString());
+        session.MessageLog.OnMessageReceived += message => ArchipelagoConsole.LogMessage(message.ToString(), isServerMessage: true);
         session.Socket.ErrorReceived += OnSessionErrorReceived;
         session.Socket.SocketClosed += OnSessionSocketClosed;
         session.Locations.CheckedLocationsUpdated += OnRemoteLocationChecked;
@@ -118,7 +118,7 @@ public class ArchipelagoClient
                     ServerData.SlotName,
                     ItemsHandlingFlags.AllItems,
                     new Version(APVersion),
-                    tags: ["AP"],
+                    tags: DeathLinkHandler._deathLinkEnabled ? ["AP", "DeathLink"] : ["AP"],
                     password: ServerData.Password,
                     requestSlotData: true
          );
@@ -344,6 +344,27 @@ public class ArchipelagoClient
             catch
             {
                 Logging.LogWarning($"Unable to find location name for location with id {locationids[i]}");
+            }
+            
+        }
+        foreach (string item in ServerData.ReceivedItems)
+        {
+            // Checks if the item recieved is a Room (includes special mappings like classroom variants)
+            UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item);
+            if (uniqueItem != null)
+            {
+                uniqueItem.IsUnlocked = true;
+            }
+            if (item.ToUpper().Contains("UPGRADE DISK")) {
+                Logging.LogWarning("Attempting to Add Upgrade Disk");
+                string Location = item.ToUpper().Replace("UPGRADE DISK ", "");
+
+            }
+            PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
+            if (permanentItem != null) { 
+                Logging.LogWarning($"Attempting to rebuild Permanent Item: {item}");
+                permanentItem.IsUnlocked = true;
+                permanentItem.unlockedCount += 1;
             }
         }
         foreach (ItemInfo item in session.Items.AllItemsReceived)

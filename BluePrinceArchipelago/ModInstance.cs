@@ -327,6 +327,28 @@ namespace BluePrinceArchipelago
                     ModItemManager.UpgradeDisks.OnPickup();
                 }
             }
+            if (eventName == "Allowance Token Pickup")
+            {
+                bool matched = false;
+                var path = owner.gameObject.GetPath();
+                Logging.Log($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
+                foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
+                {
+                    foreach (var token in roomHandler.AllowanceTokens)
+                    {
+                        if (path.Contains(token))
+                        {
+                            Logging.Log($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
+                            roomHandler.OnAllowanceTokenCollected(token);
+                            matched = true;
+                        }
+                    }
+                }
+                if (!matched)
+                {
+                    Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
+                }
+            }
         }
 
         public static void OnRoomSpawned(GameObject obj, GameObject transformObj) {
@@ -666,6 +688,9 @@ namespace BluePrinceArchipelago
                 case EventID.Drafting_Studio_Safe_Opened:
                     ModEventHandler.OnSafeOpened("Drafting Studio Safe");
                     break;
+                case EventID.Shelter_Safe_Opened:
+                    ModEventHandler.OnSafeOpened("Shelter Safe");
+                    break;
                 case EventID.Mayait_Opened:
                     ModEventHandler.OnGateOpened("Underpass Gate");
                     break;
@@ -752,6 +777,9 @@ namespace BluePrinceArchipelago
                     break;
                 case EventID.Tomb_Solved:
                     ModEventHandler.OnTombPuzzleSolved("1");
+                    break;
+                case EventID.Natural_Order_Opened:
+                    ModEventHandler.OnTombPuzzleSolved("2");
                     break;
                 case EventID.Sigil_Solved_Arch_Aries:
                 case EventID.Sigil_Solved_Corarica:

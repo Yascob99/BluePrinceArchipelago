@@ -12,19 +12,24 @@ public abstract class RoomHandler
     public GameObject RoomGameObject { get; set; }
 
     public Dictionary<string, HashSet<string>> ObservedFSMStates { get; } = [];
-    public HashSet<string> MorajaiPuzzles { get; } = [];
+    public HashSet<string> AllowanceTokens { get; } = [];
 
     public virtual void OnRoomDrafted(GameObject roomGameObject) {}
     public virtual void OnAfterRoomDrafted(GameObject roomGameObject) { }
     public virtual void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState) { }
-    public virtual void OnMorajaiPuzzleSolved(string puzzleName) { }
+    public virtual void OnAllowanceTokenCollected(string token) { }
     public virtual void OnRoomUnlocked(ModRoom room) { 
     }
+
+    public virtual void SetupEventHooks(){}
     
     public static readonly Dictionary<string, RoomHandler> RoomHandlers = new Dictionary<string, RoomHandler>()
     {
         {"BASEMENT", new Basement()},
         {"THE WELL", new Well()},
+        {"UNDERPASS", new Underpass()},
+        {"TUNNEL AREA", new TunnelArea()},
+        {"SANCTUMS", new Sanctums()},
     };
 
     public static RoomHandler CreateRoomHandler(string roomName)
@@ -47,6 +52,12 @@ public abstract class RoomHandler
             "CLOISTER" => new Cloister(),
             "ENTRANCE HALL" => new EntranceHall(),
             "CLOSED EXHIBIT" => new ClosedExhibit(),
+            "TOMB" => new Tomb(),
+            "TUNNEL" => new Tunnel(),
+            "MASTER BEDROOM" => new MasterBedroom(),
+            "SOLARIUM" => new Solarium(),
+            "LOST & FOUND" => new LostAndFound(),
+            "THRONE ROOM" => new ThroneRoom(),
             "UTILITY CLOSET" => new UtilityCloset(),
             "LABORATORY" => new Laboratory(),
             _ => null

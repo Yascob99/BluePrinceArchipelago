@@ -1,9 +1,4 @@
-using System;
-using BluePrinceArchipelago.Utils;
-using BluePrinceArchipelago.Utils.Actions;
-using HarmonyLib;
-using HutongGames.PlayMaker;
-using Il2CppSystem.Linq;
+
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers
@@ -12,7 +7,12 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
     {
         public TradingPost()
         {
-            Logging.Log("Initializing Trading Post.");
+            AllowanceTokens.Add("Trading Post");
+        }
+
+        public override void OnAllowanceTokenCollected(string token)
+        {
+            ModInstance.ModEventHandler.OnMoraJaiSolved("Trading Post");
         }
 
         public override void OnRoomDrafted(GameObject roomGameObject)

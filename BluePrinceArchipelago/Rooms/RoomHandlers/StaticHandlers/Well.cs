@@ -14,6 +14,7 @@ public class Well : RoomHandler
         ObservedFSMStates.Add("Basement Door 1", ["Open Door"]);
     }
 
+    // TODO: Figure out why the foundation one works but this one doesn't
     public override void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState)
     {
         if (newState == "Open Door")
