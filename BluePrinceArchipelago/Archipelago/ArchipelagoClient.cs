@@ -364,7 +364,6 @@ public class ArchipelagoClient
             if (permanentItem != null) { 
                 Logging.LogWarning($"Attempting to rebuild Permanent Item: {item}");
                 permanentItem.IsUnlocked = true;
-                permanentItem.unlockedCount += 1;
             }
         }
         foreach (ItemInfo item in session.Items.AllItemsReceived)
