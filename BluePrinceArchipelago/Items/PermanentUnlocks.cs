@@ -36,7 +36,6 @@ namespace BluePrinceArchipelago.Items
         {
             if (UnlockedDict.ContainsKey(name))
             {
-                Logging.LogWarning(name);
                 return UnlockedDict[name];
             }
             return null;
@@ -55,8 +54,6 @@ namespace BluePrinceArchipelago.Items
                 if (GemstoneCaverns.Solved && GemstoneCaverns.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Gemstone Cavern Open").Value)
                 {
                     GemstoneCaverns.UnlockItem();
-                    // Retroactively apply the Gemstone Cavern's Effect
-                    GemstoneCaverns.ApplyEffects();
                 }
                 if (BlackBridgeGrotto.Solved && BlackBridgeGrotto.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Grotto Open").Value)
                 {
@@ -65,8 +62,6 @@ namespace BluePrinceArchipelago.Items
                 if (AppleOrchard.Solved && AppleOrchard.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("Apple Orchard Open").Value)
                 {
                     AppleOrchard.UnlockItem();
-                    // Retroactively apply the Gemstone Cavern's Effect
-                    AppleOrchard.ApplyEffects();
                 }
                 if (WestGatePath.Solved && WestGatePath.Unlocked && !ModInstance.GlobalPersistentManager.GetBoolVariable("West Gate Open").Value)
                 {
@@ -82,9 +77,9 @@ namespace BluePrinceArchipelago.Items
     }
     public abstract class PermanentUnlock
     {
-        public abstract string Name { get; set; }
+        public string Name = "";
 
-        public abstract string LocationName { get; set; }
+        public string LocationName = "";
 
         public bool Unlocked = false;
         public bool Solved = false;
@@ -99,11 +94,12 @@ namespace BluePrinceArchipelago.Items
     public class AppleOrchard:PermanentUnlock
     {
         // Override the Name
-        public override string Name { get; set; } = "Apple Orchard";
-        public override string LocationName { get; set; } = "Orchard Gate";
+        public new string Name = "Apple Orchard";
+        public new string LocationName = "Orchard Gate";
+        public new bool Unlocked = false;
+        public new bool Solved = false;
         // Run the unlock code.
         public override void UnlockItem() {
-            Unlocked = true;
             PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
             appleOrchard.GetState("State 4")?.EnableActionsOfType<SendEvent>();
             PlayMakerFSM appleOrchardButton = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/lock anchor (1)/Rotate Anchor/Orchard Lock/Lock/Button")?.GetComponent<PlayMakerFSM>();
@@ -138,31 +134,21 @@ namespace BluePrinceArchipelago.Items
             ModInstance.ModEventHandler.OnGateOpened(LocationName);
         }
 
-        public void ApplyEffects() {
-            FsmInt AdjustmentAmount = ModInstance.StepManager.FindIntVariable("Adjustment Amount");
-            AdjustmentAmount.Value = AdjustmentAmount.Value + 20;
-            // Send the "Update" event and the step counter should update.
-            ModInstance.StepManager.SendEvent("Update");
-        }
-
     }
     public class GemstoneCaverns : PermanentUnlock
     {
         // Override the Name
-        public override string Name { get; set; } = "Gemstone Caverns";
-        public override string LocationName { get; set; } = "VAC Controls";
-        public GameObject RoomObject = null;
+        public new string Name = "Gemstone Caverns";
+        public new string LocationName = "VAC Controls";
+        public new bool Unlocked = true;
+        public new bool Solved = false;
+        public GameObject RoomObject = new();
 
         // Run the unlock code.
         public override void UnlockItem()
         {
-            Unlocked = true;
-            if (RoomObject != null)
-            {
-                FsmState State2 = RoomObject.transform.Find("_GAMEPLAY/Giant Switch/Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
-                State2.EnableAction(2);
-                State2.RemoveLastActionOfType<SendEventByName>();
-            }
+            FsmState State2 = GameObject.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
+            State2.EnableFirstActionOfType<ActivateGameObject>();
             if (Solved)
             {
                 GameObject.Find("CULL GRID - GROUNDS/UNDERGROUND/Cull - Gemstone Cavern (once revealed)")?.SetActive(true);
@@ -183,44 +169,14 @@ namespace BluePrinceArchipelago.Items
         }
 
         public override void PreventDefault() {
-            SendEventByName unfreeze = new SendEventByName()
+            FsmState State2 = RoomObject.transform.Find("_GAMEPLAY").transform.Find("Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
+            State2.AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
+            if (!Unlocked)
             {
-                eventTarget = new FsmEventTarget()
-                {
-                    target = FsmEventTarget.EventTarget.GameObject,
-                    gameObject = new FsmOwnerDefault()
-                    {
-                        gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
-                        ownerOption = OwnerDefaultOption.SpecifyGameObject
-                    },
-                    fsmName = "FSM",
-                    sendToChildren = false,
-                    excludeSelf = false
-                },
-                sendEvent = "UnFreeze",
-                delay = 0f,
-                everyFrame = false
-            };
-
-            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
-            for (int i = 0; i < RoomSpawnPools.transform.childCount; i++)
-            {
-                Transform child = RoomSpawnPools.transform.GetChild(i);
-                if (child.name.Contains("Utility Closet"))
-                {
-                    RoomObject = child.gameObject;
-                    FsmState State2 = RoomObject.transform.Find("_GAMEPLAY/Giant Switch/Giant Switch Lever").GetComponent<PlayMakerFSM>().GetState("State 2");
-                    if (!Unlocked)
-                    {
-                        // This code may needs to be run after the utility closet has been spawned.
-                        State2.DisableAction(2);
-                    }
-                    State2.AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
-                    State2.AddAction(unfreeze);
-                    
-                }
+                // This code may needs to be run after the utility closet has been spawned.
+                State2.DisableFirstActionOfType<ActivateGameObject>();
             }
-
+           
         }
 
         public override void FoundLocation()
@@ -228,19 +184,13 @@ namespace BluePrinceArchipelago.Items
             Solved = true;
             ModInstance.ModEventHandler.OnVACControlsSolved();
         }
-
-        public void ApplyEffects()
-        {
-            FsmInt AdjustmentAmount = ModInstance.GemManager.FindIntVariable("Adjustment Amount");
-            AdjustmentAmount.Value = AdjustmentAmount.Value + 2;
-            // Send the "Update" event and the step counter should update.
-            ModInstance.GemManager.SendEvent("Update");
-        }
     }
     public class WestGatePath : PermanentUnlock
     {
-        public override string Name { get; set; } = "West Gate Path";
-        public override string LocationName { get; set; } = "West Gate";
+        public new string Name = "West Gate Path";
+        public new string LocationName = "West Gate";
+        public new bool Solved = false;
+        public new bool Unlocked = false;
 
         public override void UnlockItem()
         {
@@ -276,18 +226,14 @@ namespace BluePrinceArchipelago.Items
     //TODO Confirm working and improve the handling to be more comparable to the Gemstone Caverns.
     public class BlackBridgeGrotto : PermanentUnlock
     {
-        public override string Name { get; set; } = "Blackbridge Grotto";
-        public override string LocationName { get; set; } = "Laboratory Puzzle - Blackbridge";
-
-        public GameObject RoomObject = null;
+        public new string Name = "Blackbridge Grotto";
+        public new string LocationName = "Laboratory Puzzle - Blackbridge";
+        public new bool Solved = false;
+        public new bool Unlocked = false;
         public override void UnlockItem()
         {
-            Unlocked = true;
-            if (RoomObject != null)
-            {
-                PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
-                LabMachine?.GetState("Chek if Grotto Is Open")?.EnableActionsOfType<GetFsmBool>();
-            }
+            PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
+            LabMachine?.GetState("Chek if Grotto Is Open")?.EnableActionsOfType<GetFsmBool>();
             if (Solved)
             {
                 // Only 90% sure this is the correct event.
@@ -305,6 +251,7 @@ namespace BluePrinceArchipelago.Items
 
                 ModInstance.GlobalPersistentManager.GetBoolVariable("Grotto Open").Value = true;
             }
+            Unlocked = true;
         }
 
         public override void PreventDefault()
@@ -327,29 +274,18 @@ namespace BluePrinceArchipelago.Items
                 delay = 0f,
                 everyFrame = false
             };
-            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
-            for (int i = 0; i < RoomSpawnPools.transform.childCount; i++)
+            PlayMakerFSM GrottoTrigger = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>();
+            FsmState GrottoState = GameObject.Find("Grotto Trigger")?.GetComponent<PlayMakerFSM>()?.GetState("State 2");
+            GrottoState?.DisableActionsOfType<SendEvent>();
+            GrottoState?.InsertAction(5, unfreeze);
+            GrottoState?.InsertAction(6, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
+            PlayMakerFSM LabMachine = GameObjectExtensions.FindGameObject("Lab Machine")?.GetComponent<PlayMakerFSM>();
+            if (!Solved)
             {
-                Transform child = RoomSpawnPools.transform.GetChild(i);
-                if (child.name.Contains("Utility Closet"))
-                {
-                    RoomObject = child.gameObject;
-                    PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
-                    PlayMakerFSM GrottoTrigger = RoomObject.transform.Find("_GAMEPLAY/Lab Machine/Grotto Trigger").GetComponent<PlayMakerFSM>();
-                    FsmState GrottoState = GrottoTrigger?.GetState("State 2");
-                    GrottoState?.DisableActionsOfType<SendEvent>();
-                    GrottoState?.InsertAction(5, unfreeze);
-                    GrottoState?.InsertAction(6, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
-                    FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
-                    GrottoOpen.Value = Solved;
-                    if (!Solved)
-                    {
-                        LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
-                        
-                    }
-                }
+                LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
+                FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
+                GrottoOpen.Value = Solved;
             }
-            
 
         }
         public override void FoundLocation()
@@ -361,13 +297,15 @@ namespace BluePrinceArchipelago.Items
 
     public class SatelliteDish : PermanentUnlock
     {
-        public override string Name { get; set; } = "Satellite Dish";
+        public new string Name = "Satellite Dish";
 
-        public override string LocationName { get; set; } = "Raise Satellite";
+        public new string LocationName = "Raise Satellite";
+
+        public new bool Solved = false;
+        public new bool Unlocked = false;
 
         public override void UnlockItem()
         {
-            Unlocked = true;
             PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
             FsmState boolCheck = pt2.GetState("State 7");
             boolCheck.EnableFirstActionOfType<BoolTest>();
@@ -381,7 +319,8 @@ namespace BluePrinceArchipelago.Items
                 GameObject.Find("TERRAIN/_GAMEPLAY (terrain)/sdish/MOVE UP B").SetActive(true);
                 GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2");
                 ModInstance.GlobalPersistentManager.GetBoolVariable("Satellite").Value = true;
-            }  
+            }
+            Unlocked = true;
         }
 
         public override void PreventDefault()
@@ -403,8 +342,8 @@ namespace BluePrinceArchipelago.Items
 
     public class BlueTents : PermanentUnlock
     {
-        public override string Name { get; set; } = "Blue Tents";
-        public override string LocationName { get; set; } = "Blue Tents Pickup";
+        public new string Name = "Blue Tents";
+        public new string LocationName = "Blue Tents Pickup";
 
         public bool _Bought = false;
 

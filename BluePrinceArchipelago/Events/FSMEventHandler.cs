@@ -13,7 +13,7 @@ namespace BluePrinceArchipelago.Events
             { "Apple Orchard Unlock", new AppleOrchardUnlock() },
             { "Blackbridge Grotto Unlock", new BlackBridgeGrotto() },
             { "West Gate Path Unlock", new WestGatePathUnlock() },
-            { "Gemstone Caverns Unlock", new GemstoneCavernsUnlock() },
+            { "Gemstone Caverns Unlock", new AppleOrchardUnlock() },
             { "Outer Draft Start", new OuterDraftStart() },
             { "Satellite Raised", new SatelliteRaised() },
         };
@@ -90,42 +90,6 @@ namespace BluePrinceArchipelago.Events
             Unlocks.AppleOrchard.FoundLocation();
         }
     }
-    public class GemstoneCavernsUnlock : RegisteredFSMEvent
-    {
-
-        public new string Name { get; set; } = "Gemstone Caverns Unlock";
-
-        public override void OnRegister()
-        {
-            ModInstance.APEventFSM.AddState(Name);
-            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
-            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
-            Event = new SendEvent()
-            {
-                eventTarget = new FsmEventTarget()
-                {
-                    target = FsmEventTarget.EventTarget.GameObject,
-                    gameObject = new FsmOwnerDefault()
-                    {
-                        gameObject = Plugin.ModObject,
-                        ownerOption = OwnerDefaultOption.SpecifyGameObject
-                    },
-                    fsmName = "FSM",
-                    sendToChildren = false,
-                    excludeSelf = false
-                },
-                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
-                everyFrame = false,
-                delay = 0f
-            };
-        }
-
-        public override void OnTrigger()
-        {
-            Unlocks.GemstoneCaverns.FoundLocation();
-        }
-    }
-
     public class WestGatePathUnlock : RegisteredFSMEvent
     {
 
@@ -480,7 +444,6 @@ namespace BluePrinceArchipelago.Events
                 Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
             }
-            Item.HasBeenFound = true;
         }
     }
 }

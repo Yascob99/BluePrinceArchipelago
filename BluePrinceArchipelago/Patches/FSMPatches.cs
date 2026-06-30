@@ -40,6 +40,7 @@ namespace BluePrinceArchipelago.Patches
             {
                 if (GlobalFSM.GetState("State 35").Actions.Length < 3)
                 {
+                    PlayMakerFSM UsedFSM = GameObject.Find("__SYSTEM/Upgrade Disks").GetComponent<PlayMakerFSM>();
                     // Create a boolean for tracking the current state of the 
                     FsmState ArchiveState = GlobalFSM.GetState("State 35");
                     GlobalFSM.AddGlobalTransition("Archives Upgrade Disk Pickup", "State 35");

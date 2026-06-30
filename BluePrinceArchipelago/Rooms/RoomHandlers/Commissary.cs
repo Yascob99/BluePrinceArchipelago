@@ -1,3 +1,4 @@
+using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
@@ -15,6 +16,9 @@ public class Commissary : RoomHandler
     
     private GameObject _ItemsForSaleGameObject;
     private PlayMakerFSM _ItemsForSaleFsm;
+    private GameObject _CommissaryMenuGameObject;
+    private PlayMakerFSM _CommissaryMenuFsm;
+    private GameObject _ColliderGameObject;
     private static readonly string[] ItemStateNames = ["A Items", "B Items", "C Items", "D Items", "E Items", "F Items", "G Items", "C Items 2", "K ITEMS", "D Items 2", "A Items 2", "J ITEMS", "E Items 2", "G Items 2", "F Items 2", "M Items", "I ITEMS 6", "N Items ", "I ITEMS 7", "I ITEMS", "I ITEMS 2", "I ITEMS 5", "I ITEMS 3", "I ITEMS 4", "H Items"];
     private static readonly string[] ItemsWithAP = ["Shovel", "Magnifying Glasses", "Saltshakers", "Hammers", "Compasses", "Shoes", "Metal Detectors", "Sleeping Mask", "Upgrade Disk"];
     public static Dictionary<string, string> CommissaryStates = new Dictionary<string, string>(){
@@ -46,24 +50,15 @@ public class Commissary : RoomHandler
         }
         _ItemsForSaleGameObject = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.gameObject;
         _ItemsForSaleFsm = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.GetComponent<PlayMakerFSM>();
+        _CommissaryMenuGameObject = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.gameObject;
+        _CommissaryMenuFsm = _CommissaryMenuGameObject?.GetComponent<PlayMakerFSM>();
+        _ColliderGameObject = RoomGameObject.transform.Find("_GAMEPLAY/Click Commissary Collider")?.gameObject;
 
         SetupItemsForSale();
-        CommissaryDiskAdjustment();
     }
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         ReplaceModelsWithAP();
-    }
-
-    private void CommissaryDiskAdjustment() {
-        if (_ItemsForSaleFsm == null)
-        {
-            return;
-        }
-        // Changes makes it check if the location has been found instead of a different check.
-        FsmBool CanSpawnDisk = _ItemsForSaleFsm.AddBoolVariable("CanSpawnDisk");
-        CanSpawnDisk.Value = !ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
-        _ItemsForSaleFsm.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
     }
 
     private void ReplaceModelsWithAP() {
@@ -102,6 +97,24 @@ public class Commissary : RoomHandler
                 }
             }
            
+        }
+    }
+    public void EnableCommissaryPurchase(UniqueItem item, string stateName)
+    {
+
+        FsmState state = ModInstance.CommissaryMenu.GetState(stateName);
+        if (state != null)
+        {
+            //If the item is not unlocked, prevent it from being added to inventory.
+            if (!item.IsUnlocked && item.ApplySanity())
+            {
+                //Disable the actions that add the item to inventory.
+                state.DisableActionsOfType<ArrayListAdd>();
+                //Disables the You found Text (for now).
+                state.DisableFirstActionOfType<ActivateGameObject>();
+            }
+            Plugin.UniqueItemManager.SpawnedItems.Add(Plugin.ModItemManager.GetUniqueItem(item.Name));
+            return;
         }
     }
 
@@ -161,7 +174,6 @@ public class Commissary : RoomHandler
                         {
                             var itemName = setFsmString.setValue.Value;
 
-                            UniqueItem item = Plugin.ModItemManager.GetUniqueItem(itemName);
                             if (itemName.Contains("Upgrade Disk"))
                                 itemName += " - Commissary";
 
@@ -172,17 +184,10 @@ public class Commissary : RoomHandler
                                     Name = itemName
                                 });
                             }
+
                             string apItem = LocationMap[itemName].GetScoutHint();
-                            if (item != null) {
-                                if (!item.HasBeenFound) {
-                                    setFsmString.setValue.Value = apItem;
-                                }
-                            }
-                            if (itemName.Contains("Upgrade Disk")) {
-                                if (!ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY")) {
-                                    setFsmString.setValue.Value = apItem;
-                                }
-                            }
+
+                            setFsmString.setValue.Value = apItem;
                         }
                     }
                 }

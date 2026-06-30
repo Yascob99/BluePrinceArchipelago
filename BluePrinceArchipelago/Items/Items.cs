@@ -1392,7 +1392,7 @@ namespace BluePrinceArchipelago.Items
                 {
                     UsedLocations.Add(location);
                 }
-                ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
+                ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid-1]).Value = true;
             }
             else {
                 Logging.LogWarning("Unable to set Locaation as used, no received locations are currently unused.", "UpgradeDisks");
@@ -1402,11 +1402,13 @@ namespace BluePrinceArchipelago.Items
         // Sends the location for the found upgrade disk.
         private void OnFind(string location)
         {
-            location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND");
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
                 //Fix location name for pickup event.
+                location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND");
+                Logging.LogWarning(location);
+                ModInstance.GlobalManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location)]).Value = true;
                 ModInstance.ModEventHandler.OnUgradeDiskFound(location);
             }
         }
@@ -1438,13 +1440,16 @@ namespace BluePrinceArchipelago.Items
 
             if (icon != null && InventoryIcons != null)
             {
-                // Prevent adding the same Upgrade disk multiple times.
-                int upgradeid = Locations.IndexOf(location) + 1;
-                if (!UpgradeDisks.Contains(upgradeid)) {
-                    UpgradeDisks.Add(upgradeid, "Integer");
-                    ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
-                    InventoryIcons.Add(icon, "GameObject");
+                UpgradeDisks.Add(Locations.IndexOf(location) + 1, "Integer");
+                ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
+                InventoryIcons.Add(icon, "GameObject");
+
+
+                if (Name == "RUNNING SHOES")
+                {
+                    ModInstance.RunningEngine.SendEvent("Update");
                 }
+                //Send Event 0 to the Global Manager.
             }
 
 
@@ -1502,7 +1507,7 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("TREASURE MAP", Plugin.ModItemManager.GetInventoryItem("TREASURE MAP"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("STOPWATCH", Plugin.ModItemManager.GetInventoryItem("STOPWATCH"), false, ItemSanityType.Standard, true, false, ["Dig"]));
             Plugin.ModItemManager.AddItem(new UniqueItem("REPELLENT", Plugin.ModItemManager.GetInventoryItem("REPELLENT"), false, ItemSanityType.Standard, false, true));
-            Plugin.ModItemManager.AddItem(new UniqueItem("WATERING CAN", Plugin.ModItemManager.GetInventoryItem("WATERING CAN"), false, ItemSanityType.Standard, false, true));
+            Plugin.ModItemManager.AddItem(new UniqueItem("WATERING CAN", Plugin.ModItemManager.GetInventoryItem("WATERING CAN"), false, ItemSanityType.Standard));
             Plugin.ModItemManager.AddItem(new UniqueItem("LUNCH BOX", Plugin.ModItemManager.GetInventoryItem("LUNCH BOX"), false, ItemSanityType.Standard, false, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("CURSED EFFIGY", Plugin.ModItemManager.GetInventoryItem("CURSED EFFIGY"), false, ItemSanityType.Standard, false, true));
             Plugin.ModItemManager.AddItem(new UniqueItem("CROWN", Plugin.ModItemManager.GetInventoryItem("CROWN"), false, ItemSanityType.Standard));

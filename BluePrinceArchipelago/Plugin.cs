@@ -67,7 +67,6 @@ namespace BluePrinceArchipelago {
             State.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
-            ArchipelagoConsole.UpdateWindow();
             CommandManager.initializeLocalCommands();
         }
     }
