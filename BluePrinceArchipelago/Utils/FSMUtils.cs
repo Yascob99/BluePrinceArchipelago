@@ -1332,30 +1332,24 @@ namespace BluePrinceArchipelago.Utils
         }
 
         public static void DisableFirstActionOfType<TAction>(this FsmState state) {
-            int i = 0;
-            foreach (string actionName in state.ActionData.ActionNames)
+            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
             {
-                if (actionName == typeof(TAction).FullName)
+                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName)
                 {
                     state.DisableAction(i);
                     return;
                 }
-                i++;
             }
         }
         public static void DisableLastActionOfType<TAction>(this FsmState state) {
-            int i = 0;
-            int lastIndex = -1;
-            foreach (string actionName in state.ActionData.ActionNames)
+            int length = state.ActionData.ActionNames.Count;
+            for (int i = 0; i < length; i++)
             {
-                if (actionName == typeof(TAction).FullName)
+                if (state.ActionData.ActionNames[length - 1 - i] == typeof(TAction).FullName)
                 {
-                    lastIndex = i;
+                    state.DisableAction(i);
+                    return;
                 }
-                i++;
-            }
-            if (lastIndex > -1) {
-                state.DisableAction(i);
             }
         }
         public static void EnableFirstActionOfType<TAction>(this FsmState state)
@@ -1373,19 +1367,14 @@ namespace BluePrinceArchipelago.Utils
         }
         public static void EnableLastActionOfType<TAction>(this FsmState state)
         {
-            int i = 0;
-            int lastIndex = -1;
-            foreach (string actionName in state.ActionData.ActionNames)
+            int length = state.ActionData.ActionNames.Count;
+            for (int i = 0; i < length; i++)
             {
-                if (actionName == typeof(TAction).FullName)
+                if (state.ActionData.ActionNames[length - 1 - i] == typeof(TAction).FullName)
                 {
-                    lastIndex = i;
+                    state.EnableAction(i);
+                    return;
                 }
-                i++;
-            }
-            if (lastIndex > -1)
-            {
-                state.EnableAction(i);
             }
         }
 

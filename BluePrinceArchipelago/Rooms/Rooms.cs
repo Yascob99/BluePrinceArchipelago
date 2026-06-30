@@ -1,9 +1,12 @@
 ﻿using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
+using CirrusPlay.PortalLibrary;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Il2CppSystem.Collections;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms
@@ -162,26 +165,6 @@ namespace BluePrinceArchipelago.Rooms
             }
             room.IsUnlocked = false;
         }
-        // Updates the count of how many of each room is in the house.
-        public void UpdateRoomsInHouse()
-        {
-            PlayMakerArrayListProxy rooms = ModInstance.RoomsInHouse?.GetComponent<PlayMakerArrayListProxy>();
-            if (rooms != null)
-            {
-                if (rooms.arrayList.Count > 0)
-                {
-                    foreach (var room in rooms.arrayList)
-                    {
-                        GameObject roomObj = room.TryCast<GameObject>();
-                        ModRoom modRoom = GetRoomByName(roomObj?.name ?? "");
-                        if (modRoom != null)
-                        {
-                            modRoom.RoomInHouseCount++;
-                        }
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Resets the room in house count for all rooms. Call this at the start of a new day.
@@ -262,13 +245,33 @@ namespace BluePrinceArchipelago.Rooms
 
         public void UpdateRoomPools()
         {
-            UpdateRoomsInHouse();
             Logging.Log("Updating Room Pools");
-            foreach (ModRoom room in _Rooms)
+            foreach (PlayMakerArrayListProxy array in ModInstance.PickerDict.Values)
             {
-                room.UpdatePools();
+                int length = array.arrayList.Count;
+                Dictionary<string, int> RoomCounts = new Dictionary<string, int>();
+                for (int i = 0; i < length; i++)
+                {
+                    GameObject room = array.arrayList[i].TryCast<GameObject>();
+                    if (room != null)
+                    {
+                        ModRoom modRoom = GetRoomByName(room.name);
+                        if (modRoom != null) {
+                            if (RoomCounts.ContainsKey(modRoom.Name))
+                            {
+                                RoomCounts[room.name]++;
+                            }
+                            else {
+                                RoomCounts[room.name] = 1;
+                            }
+                        }
+                    }
+                }
+                foreach (var pair in RoomCounts) {
+                    ModRoom modRoom = GetRoomByName(pair.Key);
+                    modRoom.UpdateArray(array, pair.Value);
+                }
             }
-            UpdateCurrentPickerArrays();
         }
         public void EmptyDraftPool()
         {
@@ -609,6 +612,20 @@ namespace BluePrinceArchipelago.Rooms
                 return left > 0 ? left : 0; // Ensure we never return negative
             }
         }
+        public bool IsRoomOrUpgrade(string name) {
+            if (Name.ToUpper().Trim() == name.ToUpper().Trim() || GameObjectName.ToUpper().Trim() == name.ToUpper().Trim())
+            {
+                return true;
+            }
+            foreach (GameObject gameObject in UpgradeObjects)
+            {
+                if (gameObject.name.ToUpper().Trim() == name.ToUpper().Trim())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         //Adds a copy(s) of this room to the pool array
         private void AddToPool(PlayMakerArrayListProxy array, int count = 1) {
@@ -686,39 +703,26 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
         // Helper function that updates 1 array at a time.
-        private void UpdateArray(PlayMakerArrayListProxy array) {
+        public void UpdateArray(PlayMakerArrayListProxy array, int count) {
             if (RoomsLeftInPool > 0)
             {
-                int count = 0;
-                // Find all copies of the room currently in the list
-                // Use GameObjectName for comparison since that's the actual Unity object name
-                for (int i = 0; i < array.GetCount(); i++)
-                {
-                    GameObject room = array.arrayList[i].TryCast<GameObject>();
-                    if (room != null)
-                    {
-                        if (Plugin.ModRoomManager.GetRoomByName(room.name) != null)
-                        {
-                            count++;
-                        }
-                    }
-                }
-                // Check room drafting dependencies and if the dependencies are not met remove all copies from the pool.
-                foreach (Func<ModRoom, bool> dependency in Dependencies)
-                {
-                    if (!dependency(this))
-                    {
-                        if (count > 0) {
-                            RemoveFromPool(array, count);
-                            FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                            if (poolRemoval != null)
-                            {
-                                poolRemoval.Value = true;
-                            } //Set the FSMBool to true so that it removes the room from the pool.
-                        }
-                        return;
-                    }
-                }
+                //// Check room drafting dependencies and if the dependencies are not met remove all copies from the pool.
+                //foreach (Func<ModRoom, bool> dependency in Dependencies)
+                //{
+                //    if (!dependency(this))
+                //    {
+                //        if (count > 0) {
+                //            RemoveFromPool(array, count);
+                //            FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
+                //            if (poolRemoval != null)
+                //            {
+                //                poolRemoval.Value = true;
+                //            } //Set the FSMBool to true so that it removes the room from the pool.
+                //            count = 0;
+                //        }
+                //        return;
+                //    }
+                //}
                 // If the room has at least one copy currently in the pool
                 if ((count > 0 && _IsUnlocked && !_UseVanilla))
                 {
@@ -726,12 +730,13 @@ namespace BluePrinceArchipelago.Rooms
                     if (count > RoomsLeftInPool)
                     {
                         RemoveFromPool(array, count - RoomsLeftInPool);
-
+                        count -= (count - RoomsLeftInPool);
                     }
                     // check if there less copies than there should be
                     else if (RoomsLeftInPool > count)
                     {
                         AddToPool(array, RoomsLeftInPool - count);
+                        count += RoomsLeftInPool - count;
                     }
                 }
                 // check if there are still rooms that should be in the pool but aren't
@@ -742,42 +747,6 @@ namespace BluePrinceArchipelago.Rooms
                 // Handle extra copies of rooms that use vanilla logic. Assume always 1 is default (no extra copies), and that the rest is extra.
                 else if (_RoomPoolCount > 1 && _RoomPoolCount -1 != count && _UseVanilla && ! ModRoomManager.CantCopy.Contains(Name)) {
                     AddToPool(array, _RoomPoolCount -1);
-                }
-                // If copies in pool and not set to use vanilla logic, remove from pool.
-                else if (count > 0 && !_UseVanilla)
-                {
-                    RemoveFromPool(array, count);
-                    FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                    if (poolRemoval != null)
-                    {
-                        poolRemoval.Value = false;
-                    } //Set the FSMBool to true so that it removes the room from the pool.
-                }
-            }
-        }
-
-        public void UpdatePools()
-        {
-            foreach (string arrayName in _PickerArrays)
-            {
-                if (arrayName != "")
-                {
-                    if (ModInstance.PickerDict.ContainsKey(arrayName))
-                    {
-                        PlayMakerArrayListProxy array = ModInstance.PickerDict[arrayName];
-                        if (array != null)
-                        {
-                            UpdateArray(array);
-                        }
-                        else
-                        {
-                            Logging.LogWarning($"Array '{arrayName}' is null in PickerDict for room '{Name}'");
-                        }
-                    }
-                    else
-                    {
-                        Logging.LogWarning($"Array '{arrayName}' not found in PickerDict for room '{Name}'");
-                    }
                 }
             }
         }

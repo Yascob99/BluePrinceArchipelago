@@ -4,7 +4,6 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -202,7 +201,6 @@ namespace BluePrinceArchipelago.Items
         public bool ModelsReplaced = false;
         public void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj)
         {
-            Logging.LogWarning(obj.name);
             UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
             //Check if Connected in before replacing items.
             if (ArchipelagoClient.Authenticated)

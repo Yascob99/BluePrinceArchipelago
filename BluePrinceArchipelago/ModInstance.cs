@@ -227,42 +227,9 @@ namespace BluePrinceArchipelago
             string eventName = sendEvent?.name;
             string targetType = target?.target.ToString() ?? "";
             string targetName = target?.gameObject?.gameObject?.name ?? "";
-            // Attempt to find the name of the GameObject being targeted.
-            if (targetName.Trim() == "")
-            {
-                GameObject targetObj = target?.gameObject?.gameObject?.value;
-                if (targetObj != null && ! isDelayed)
-                {
-                    targetName = targetObj.name;
-                }
-                else if (isDelayed) {
-                    targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.name ?? "";
-                    if (targetName.Trim() == "") {
-                        targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.value?.name ?? "";
-                    }
-                }
-            }
-            // Triggers whenever a custom Archipelago Event is sent to Archipelago FSM.
-            if (targetName == "Archipelago") {
-                // If the Event is registered, trigger the event.
-                if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
-                {
-                    FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
-                }
-                else {
-                    Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
-                }
-            }
-            else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
-            {
-                TrunkManager.OnTrunkOpen();
-            }
-            else if (targetName == "Grotto Trigger" && eventName == "Go")
-            {
-
-            }
             string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
             Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}", "Events");
+            // Attempt to find the name of the GameObject being targeted.
             if (targetName.Trim() == "")
             {
                 GameObject targetObj = target?.gameObject?.gameObject?.value;
@@ -279,32 +246,54 @@ namespace BluePrinceArchipelago
                     }
                 }
             }
-            if (targetName == "Upgrade Disks" && eventName == "Go") {
+            // Triggers whenever a custom Archipelago Event is sent to Archipelago FSM.
+            if (targetName == "Archipelago")
+            {
+                // If the Event is registered, trigger the event.
+                if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
+                {
+                    FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
+                }
+                else
+                {
+                    Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
+                }
+            }
+            else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
+            {
+                TrunkManager.OnTrunkOpen();
+            }
+            else if (targetName == "Upgrade Disks" && eventName == "Go")
+            {
                 PlayMakerArrayListProxy UpgradeIDs = UpgradeDisksObj.GetComponent<PlayMakerArrayListProxy>();
                 int length = UpgradeIDs.arrayList.Count;
                 int i = 0;
                 int id = -1;
                 bool exit = false;
-                while (i < length && !exit) {
+                while (i < length && !exit)
+                {
                     try
                     {
                         id = UpgradeIDs.GetItemAt(i).Unbox<int>();
                     }
-                    catch {
+                    catch
+                    {
                         id = -1;
                         Logging.LogWarning("Error While attempting to convert Array item to integer");
                     }
-                    if (id > -1) {
-                        if (QueueManager.AddUpgradeUsedToQueue(i)) {
+                    if (id > -1)
+                    {
+                        if (QueueManager.AddUpgradeUsedToQueue(i))
+                        {
                             exit = true;
                             QueueManager.AddUpgradeUsedToQueue(id);
                         }
                     }
                     i++;
                 }
-                
+
             }
-            if (targetName == "Global Manager" && eventName.Contains("Pickup"))
+            else if (targetName == "Global Manager" && eventName.Contains("Pickup"))
             {
                 Logging.Log(eventName, "Events");
                 UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
@@ -327,7 +316,7 @@ namespace BluePrinceArchipelago
                     ModItemManager.UpgradeDisks.OnPickup();
                 }
             }
-            if (eventName == "Allowance Token Pickup")
+            else if (eventName == "Allowance Token Pickup")
             {
                 bool matched = false;
                 var path = owner.gameObject.GetPath();
@@ -347,6 +336,36 @@ namespace BluePrinceArchipelago
                 if (!matched)
                 {
                     Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
+                }
+            }
+            else if (eventName == "Go" && target?.gameObject?.gameObject?.Value?.transform?.parent?.name == "PLAN PICKER") {
+                if (HasInitializedRooms && ArchipelagoClient.Authenticated)
+                {
+                    // Skip Archipelago room pool management if RoomDraftSanity is disabled
+                    if (!ArchipelagoOptions.RoomDraftSanity)
+                    {
+                        // Still allow force room draft for other purposes if needed
+                        Plugin.ModRoomManager.CheckForceRoomDraft();
+                        return;
+                    }
+
+                    // Reload arrays to ensure we have fresh references (game may have reset them)
+                    ReloadArrays();
+
+                    // If connected to Archipelago, ensure room unlock states are correct
+                    if (ArchipelagoClient.Authenticated)
+                    {
+                        // Only set unlock states, don't update pools yet (we'll do that below)
+                        EnsureRoomUnlockStates();
+                    }
+
+                    Plugin.ModRoomManager.CheckForceRoomDraft();
+                    Logging.Log("Updating Rooms for draft");
+                    Plugin.ModRoomManager.UpdateRoomPools();
+                }
+                else
+                {
+                    Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
                 }
             }
         }
@@ -555,33 +574,7 @@ namespace BluePrinceArchipelago
         // Handles initializing rooms. Called when a draft is about to start (e.g., player opens a door).
         public static void OnDraftInitialize() 
         {
-            if (HasInitializedRooms)
-            {
-                // Skip Archipelago room pool management if RoomDraftSanity is disabled
-                if (!ArchipelagoOptions.RoomDraftSanity)
-                {
-                    // Still allow force room draft for other purposes if needed
-                    Plugin.ModRoomManager.CheckForceRoomDraft();
-                    return;
-                }
-
-                // Reload arrays to ensure we have fresh references (game may have reset them)
-                ReloadArrays();
-
-                // If connected to Archipelago, ensure room unlock states are correct
-                if (ArchipelagoClient.Authenticated)
-                {
-                    // Only set unlock states, don't update pools yet (we'll do that below)
-                    EnsureRoomUnlockStates();
-                }
-
-                Plugin.ModRoomManager.CheckForceRoomDraft();
-                Logging.Log("Updating Rooms for draft");
-                Plugin.ModRoomManager.UpdateRoomPools();
-            }
-            else {
-                Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
-            }
+            
         }
 
         public static void OnOuterDraftStart(OuterDraftManager draftManager) {
@@ -809,19 +802,19 @@ namespace BluePrinceArchipelago
                 }
             }
 
-            // Additional arrays that may be needed for special drafts (like Entrance Hall, first draft, etc.)
-            List<int> additionalChildIDs = [0, 33, 34, 35, 36, 37, 38, 39, 40, 44, 45, 57];
-            for (int i = 0; i < additionalChildIDs.Count; i++) {
-                PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(additionalChildIDs[i]).gameObject?.GetComponent<PlayMakerArrayListProxy>();
-                if (array != null) {
-                    PickerDict[array.name.Trim()] = array;
-                    Logging.Log($"Loaded additional array: {array.name} with {array.GetCount()} rooms");
-                }
-            }
+            //// Additional arrays that may be needed for special drafts (like Entrance Hall, first draft, etc.)
+            //List<int> additionalChildIDs = [0, 33, 34, 35, 36, 37, 38, 39, 40, 44, 45, 57];
+            //for (int i = 0; i < additionalChildIDs.Count; i++) {
+            //    PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(additionalChildIDs[i]).gameObject?.GetComponent<PlayMakerArrayListProxy>();
+            //    if (array != null) {
+            //        PickerDict[array.name.Trim()] = array;
+            //        Logging.Log($"Loaded additional array: {array.name} with {array.GetCount()} rooms");
+            //    }
+            //}
         }
 
         public static void OnConnectToArchipelago() {
-            GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
+           
             // Only sync if rooms are already initialized (connected mid-run, not from main menu)
             if (HasInitializedRooms)
             {
@@ -831,7 +824,7 @@ namespace BluePrinceArchipelago
             if (IsInRun && !RanStartOfDay)
             {
                 ModItemManager.LoadInventories();
-
+                GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
