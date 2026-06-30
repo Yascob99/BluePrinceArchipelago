@@ -1438,16 +1438,13 @@ namespace BluePrinceArchipelago.Items
 
             if (icon != null && InventoryIcons != null)
             {
-                UpgradeDisks.Add(Locations.IndexOf(location) + 1, "Integer");
-                ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
-                InventoryIcons.Add(icon, "GameObject");
-
-
-                if (Name == "RUNNING SHOES")
-                {
-                    ModInstance.RunningEngine.SendEvent("Update");
+                // Prevent adding the same Upgrade disk multiple times.
+                int upgradeid = Locations.IndexOf(location) + 1;
+                if (!UpgradeDisks.Contains(upgradeid)) {
+                    UpgradeDisks.Add(upgradeid, "Integer");
+                    ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
+                    InventoryIcons.Add(icon, "GameObject");
                 }
-                //Send Event 0 to the Global Manager.
             }
 
 

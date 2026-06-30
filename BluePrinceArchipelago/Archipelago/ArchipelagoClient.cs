@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static ES3;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -38,7 +39,7 @@ public class ArchipelagoClient
     //Returns the locationid from the name or -1 if It can't be found.
     public long GetLocationFromName(string locationName)
     {
-        return ServerData.LocationDict?.FirstOrDefault(x => x.Value.ToLower() == locationName.ToLower()).Key ?? -1;
+        return ServerData?.LocationDict?.FirstOrDefault(x => x.Value.ToLower() == locationName.ToLower()).Key ?? -1;
     }
     public void DisplayServerData()
     {
@@ -344,25 +345,6 @@ public class ArchipelagoClient
                 Logging.LogWarning($"Unable to find location name for location with id {locationids[i]}");
             }
             
-        }
-        foreach (string item in ServerData.ReceivedItems)
-        {
-            // Checks if the item recieved is a Room (includes special mappings like classroom variants)
-            UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item);
-            if (uniqueItem != null)
-            {
-                uniqueItem.IsUnlocked = true;
-            }
-            if (item.ToUpper().Contains("UPGRADE DISK")) {
-                Logging.LogWarning("Attempting to Add Upgrade Disk");
-                string Location = item.ToUpper().Replace("UPGRADE DISK ", "");
-
-            }
-            PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item);
-            if (permanentItem != null) { 
-                Logging.LogWarning($"Attempting to rebuild Permanent Item: {item}");
-                permanentItem.IsUnlocked = true;
-            }
         }
         foreach (ItemInfo item in session.Items.AllItemsReceived)
         {
