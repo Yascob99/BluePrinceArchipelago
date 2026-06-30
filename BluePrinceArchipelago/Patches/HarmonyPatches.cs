@@ -25,7 +25,6 @@ namespace BluePrinceArchipelago.Patches
                 // Unsure why this results in a null object in some instances.
                 if (poolName == "Pickup" && obj != null)
                 {
-                    Logging.LogWarning($"Spawning item {obj.name}");
                     Plugin.UniqueItemManager.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }

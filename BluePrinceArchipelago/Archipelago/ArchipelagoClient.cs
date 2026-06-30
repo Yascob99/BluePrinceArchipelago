@@ -8,7 +8,6 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
-using Il2CppSystem.Collections;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,7 +39,14 @@ public class ArchipelagoClient
     //Returns the locationid from the name or -1 if It can't be found.
     public long GetLocationFromName(string locationName)
     {
-        return ServerData.LocationDict?.FirstOrDefault(x => x.Value.ToLower() == locationName.ToLower()).Key ?? -1;
+        int length = ServerData.LocationDict.Count;
+        foreach (var data in ServerData.LocationDict) {
+            string val = data.Value;
+            if (val.ToLower() == locationName.ToLower()) {
+                return data.Key;
+            }
+        }
+        return -1;
     }
     public void DisplayServerData()
     {
@@ -204,6 +210,7 @@ public class ArchipelagoClient
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 // Creates the Locally Stored data for the locations. 
                 CreateLocationDicts(session.Locations.AllLocations.ToArray());
+                State.UpdateLocationDict();
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
             session.Items.ItemReceived += OnItemReceived;
@@ -307,6 +314,7 @@ public class ArchipelagoClient
         ArchipelagoConsole.LogMessage("Attemping to reconnect after game restart...");
         Reconnected = true;
         CreateLocationDicts(session.Locations.AllLocations.ToArray());
+        State.UpdateLocationDict();
         if (ModInstance.IsInRun) {
             ArchipelagoConsole.LogMessage("Rebuilding Archipelago State...");
             
@@ -451,12 +459,16 @@ public class ArchipelagoClient
         for (int i = 0; i < serverLocations.Length; i++)
         {
             long location = serverLocations[i];
-            string locationName = session.Locations.GetLocationNameFromId(location);
-            ServerData.LocationDict[location] = locationName; 
+            // Only add new data if the old one is not good.
+            if (!ServerData.LocationDict.ContainsKey(location)) { 
+            
+                string locationName = session.Locations.GetLocationNameFromId(location);
+                ServerData.LocationDict[location] = locationName;
+            }
         }
         //Asynchronously gather the data for all items stored in all the active locations, then wait for a response.
         Task<Dictionary<long, ScoutedItemInfo>> scoutTask = session.Locations
-                .ScoutLocationsAsync(hint, serverLocations);
+                .ScoutLocationsAsync(hint, ServerData.LocationDict.Keys.ToArray());
         scoutTask.Wait();
         Dictionary<long, ScoutedItemInfo> scoutResult = scoutTask.Result;
         foreach (KeyValuePair<long, ScoutedItemInfo> scout in scoutResult)
@@ -466,10 +478,6 @@ public class ArchipelagoClient
             string itemName = scout.Value.ItemName ?? $"?Item {itemId}";
             ServerData.ItemDict[itemId] = itemName;
             ServerData.LocationItemMap[locationId] = scout.Value;
-        }
-        if (!hint)
-        {
-            State.UpdateLocationDict();
         }
     }
 
@@ -668,16 +676,13 @@ public class ArchipelagoQueueManager {
         if (ModInstance.SceneLoaded && ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
         {
             ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
-            if (ModInstance.IsInRun)
+            PermanentUnlock unlock = Unlocks.GetPermanentUnlock(item.ItemName);
+            if (unlock != null)
             {
-                PermanentUnlock unlock = Unlocks.GetPermanentUnlock(item.ItemName);
-                if (unlock != null)
-                {
-                    
-                    Logging.Log($"Attempting to receive Unlock: {item.ItemName}", "Items");
-                    unlock.UnlockItem();
-                    return true;
-                }
+
+                Logging.Log($"Attempting to receive Unlock: {item.ItemName}", "Items");
+                unlock.UnlockItem();
+                return true;
             }
             // Checks if the item recieved is a Room (includes special mappings like classroom variants)
             if (Plugin.ModRoomManager.IsRoomItem(item.ItemName))

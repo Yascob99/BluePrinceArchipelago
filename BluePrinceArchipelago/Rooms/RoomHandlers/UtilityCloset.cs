@@ -21,7 +21,6 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
 
         public override void OnAfterRoomDrafted(GameObject roomGameObject)
         {
-            Unlocks.GemstoneCaverns.RoomObject = roomGameObject;
             Unlocks.GemstoneCaverns.PreventDefault();
         }
     }
