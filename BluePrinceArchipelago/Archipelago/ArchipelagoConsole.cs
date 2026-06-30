@@ -27,9 +27,12 @@ public static class ArchipelagoConsole
 
     private static GUIStyle textStyle = new();
     private static string scrollText = "";
+    private static string previousScrollText = "";
+    private static int previousStart = 0;
+    private static int previousEnd = 0;
     private static float lastUpdateTime = Time.time;
     private const float HideTimeout = 15f;
-    private const int MaxLogLines = 1000;
+    private const int MaxLogLines = 300;
 
     private static string CommandText = "/help";
     private static Rect CommandTextRect;
@@ -48,30 +51,23 @@ public static class ArchipelagoConsole
         if (message.IsNullOrWhiteSpace()) return;
 
         //Handle multiline messages.
+        // Log any relevant messages to the archipelago console;
+        if (IsRelevantMessage(message))
+        {
+            Logging.Log(message, logTag);
+        }
         if (message.Contains('\n'))
         {
             foreach (string submessage in message.Split("\n"))
             {
-                if (IsRelevantMessage(submessage))
-                {
-                    logLines.Add(submessage);
-                
-                    lastUpdateTime = Time.time;
-                    UpdateWindow();
-                }
-                
-                Logging.Log(submessage, logTag);
+                logLines.Add(submessage);
             }
+            lastUpdateTime = Time.time;
+            UpdateWindow();
         }
         else
         {
-            if (!IsRelevantMessage(message))
-            {
-                Logging.Log(message, logTag);
-                return;
-            }
             logLines.Add(message);
-            Logging.Log(message, logTag);
             lastUpdateTime = Time.time;
             UpdateWindow();
         }
@@ -228,27 +224,71 @@ public static class ArchipelagoConsole
     public static void UpdateWindow()
     {
         scrollText = "";
-
+        int currentLogLines = logLines.Count;
+        // Create a behind the scenes text form of the log that is cached;
+        int start = Math.Max(0, currentLogLines - MaxLogLines);
+        // If the scrolltext has not been initialized.
+        if (previousScrollText == "")
+        {
+            for (var i = start; i < currentLogLines; i++)
+            {
+                previousScrollText += logLines[i];
+                previousScrollText += "\n";
+            }
+            previousStart = start;
+            previousEnd = currentLogLines;
+        }
+        // Otherwise use the previously cached string as a basis;
+        else
+        {
+            string newLines = previousScrollText;
+            // If the starting line has shifted, delete that many lines.
+            if (start > previousStart)
+            {
+                int linesToDelete = start - previousStart;
+                int index = 0;
+                // Iterate through characters until the next newline is found, or the end is reached.
+                while (linesToDelete > 0 && index < newLines.Length)
+                {
+                    char current = newLines[index];
+                    if (current == '\n')
+                    {
+                        linesToDelete--;
+                    }
+                    index++;
+                }
+                // Update the new data;
+                newLines = previousScrollText.Substring(index - 1);
+                // Update the start to be the new start;
+                previousStart = start;
+            }
+            // If a new line(s) got added, add them to the end of the cached scrolltext;
+            // Cache the length in case extra lines get added while updating.
+            int lengthDiff = currentLogLines - previousEnd;
+            if (lengthDiff > 0)
+            {
+                for (int i = 0; i < lengthDiff; i++)
+                {
+                    newLines += logLines[previousEnd + i];
+                    newLines += '\n';
+                }
+                previousEnd += lengthDiff;
+            }
+            // Finally set the scrollText to the new data;
+            previousScrollText = newLines;
+        }
         if (Hidden)
         {
-            if (logLines.Count > 0)
+            if (currentLogLines > 0)
             {
                 scrollText = logLines[^1];
             }
         }
         else
         {
-            int start = Math.Max(0, logLines.Count - MaxLogLines);
-            for (var i = start; i < logLines.Count; i++)
-            {
-                scrollText += logLines.ElementAt(i);
-                if (i < logLines.Count - 1)
-                {
-                    scrollText += "\n";
-                }
-            }
+            scrollText = previousScrollText;
         }
-
+       
         var width = (int)(Screen.width * 0.4f);
         int height;
         int scrollDepth;

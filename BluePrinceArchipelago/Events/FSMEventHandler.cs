@@ -444,6 +444,7 @@ namespace BluePrinceArchipelago.Events
                 Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
             }
+            Item.HasBeenFound = true;
         }
     }
 }

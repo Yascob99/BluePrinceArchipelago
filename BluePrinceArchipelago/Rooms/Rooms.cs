@@ -268,7 +268,6 @@ namespace BluePrinceArchipelago.Rooms
             {
                 room.UpdatePools();
             }
-            UpdateCurrentPickerArrays();
         }
         public void EmptyDraftPool()
         {
