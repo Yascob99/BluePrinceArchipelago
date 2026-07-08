@@ -3,7 +3,9 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Il2CppInterop.Runtime;
 using UnityEngine;
+using static UnityEngine.U2D.ClipperOffset2D;
 
 namespace BluePrinceArchipelago.Patches
 {
@@ -229,7 +231,7 @@ namespace BluePrinceArchipelago.Patches
                 {
                     Logging.LogWarning("Error changing Vault Upgrade disk spawn logic.");
                 }
-                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND/Below Foundation (Cullable)/Below Foundation - Prefab/_GAMEPLAY/5").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND/Below Foundation (Cullable)/Below Foundation - Prefab/_GAMEPLAY/5")?.GetComponent<PlayMakerFSM>();
                 if (FoundationSpawn != null)
                 {
                     bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
@@ -295,6 +297,18 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM TreasureTroveYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TreasureTroveAddState = TreasureTroveYesButton.GetState("State 8");
             TreasureTroveAddState.DisableFirstActionOfType<SendEvent>();
+
+            // Attempt to remake the tunnel Pickup from scratch.
+            CallMethod TunnelPickupEvent = TunnelYesButton.GetState("State 7").GetFirstActionOfType<CallMethod>();
+            FsmVar TunnelEvent = TunnelPickupEvent.parameters[0];
+            Il2CppSystem.Enum il2cppTreasureID = Il2CppSystem.Enum.Parse(Il2CppType.Of<EventID>(), "Treasure_Trove_Floorplan_Found").TryCast<Il2CppSystem.Enum>();
+            FsmVar[] parameters = [new FsmVar() { enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, EnumValue = il2cppTreasureID, namedVar = new FsmEnum() { enumName = "EventID", EnumName = "EventID", enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, intValue = 403, RawValue= il2cppTreasureID, value = il2cppTreasureID, Value = il2cppTreasureID} }, TunnelPickupEvent.parameters[1]];
+            CallMethod TreasureTrovePickup = new CallMethod()
+            {
+                behaviour = TunnelPickupEvent.behaviour,
+                parameters = parameters
+            };
+            TreasureTroveYesButton.GetState("State 7").AddFirstAction(TreasureTrovePickup);
 
             //Mechanarium
             PlayMakerFSM MechanariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/MECHANARIUM Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
