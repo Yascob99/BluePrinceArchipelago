@@ -298,10 +298,10 @@ namespace BluePrinceArchipelago.Patches
             FsmState TreasureTroveAddState = TreasureTroveYesButton.GetState("State 8");
             TreasureTroveAddState.DisableFirstActionOfType<SendEvent>();
 
-            // Attempt to remake the tunnel Pickup from scratch.
+            // Attempt to remake the Tunnel Added Event from scratch.
             CallMethod TunnelPickupEvent = TunnelYesButton.GetState("State 7").GetFirstActionOfType<CallMethod>();
             FsmVar TunnelEvent = TunnelPickupEvent.parameters[0];
-            Il2CppSystem.Enum il2cppTreasureID = Il2CppSystem.Enum.Parse(Il2CppType.Of<EventID>(), "Treasure_Trove_Floorplan_Found").TryCast<Il2CppSystem.Enum>();
+            Il2CppSystem.Enum il2cppTreasureID = EnumExtensions.EnumToIl2Cpp<EventID>("Treasure_Trove_Floorplan_Found");
             FsmVar[] parameters = [new FsmVar() { enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, EnumValue = il2cppTreasureID, namedVar = new FsmEnum() { enumName = "EventID", EnumName = "EventID", enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, intValue = 403, RawValue= il2cppTreasureID, value = il2cppTreasureID, Value = il2cppTreasureID} }, TunnelPickupEvent.parameters[1]];
             CallMethod TreasureTrovePickup = new CallMethod()
             {
