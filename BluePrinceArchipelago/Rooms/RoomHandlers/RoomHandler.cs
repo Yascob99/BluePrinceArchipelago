@@ -60,6 +60,15 @@ public abstract class RoomHandler
             "THRONE ROOM" => new ThroneRoom(),
             "UTILITY CLOSET" => new UtilityCloset(),
             "LABORATORY" => new Laboratory(),
+            "ARCHIVES" => new Archives(),
+            "FREEZER" => new Freezer(),
+            "GARAGE" => new Garage(),
+            "GREAT HALL" => new GreatHall(),
+            "HER LADYSHIP\'S CHAMBER" => new HLC(),
+            "MECHANARIUM" => new Mechanarium(),
+            "MORNING ROOM" => new MorningRoom(),
+            "OFFICE" => new Office(),
+            "VAULT" => new Vault(),
             _ => null
         };
 

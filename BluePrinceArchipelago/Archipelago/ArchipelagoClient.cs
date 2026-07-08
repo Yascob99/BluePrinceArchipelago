@@ -14,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static ES3;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -292,7 +291,7 @@ public class ArchipelagoClient
             {
                 session.Items.DequeueItem();
                 // Handle any items that have not been received formally.
-                if (Received.RemoveFirst(item.ItemName) == -1) {
+                if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Starting ")) {
                     Logging.LogWarning($"Requeueing {item.ItemName}");
                     ModInstance.QueueManager.AddItemToQueue(item);
                 } 

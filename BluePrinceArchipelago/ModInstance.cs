@@ -390,6 +390,7 @@ namespace BluePrinceArchipelago
                 ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomname.ToUpper().Trim());
                 if (room != null)
                 {
+                    room.RoomInHouseCount++;
                     room.Handler?.OnRoomDrafted(obj);
                     if (!room.HasBeenDrafted)
                     {

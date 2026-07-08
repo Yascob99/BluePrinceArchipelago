@@ -91,6 +91,31 @@ namespace BluePrinceArchipelago.Utils
             }
             return null;
         }
+        public static Transform[] FindAllRecursive(this Transform transform, string name, bool caseinsensitive = false)
+        {
+            Queue<Transform> queue = new Queue<Transform>();
+            List<Transform> transforms = new();
+            queue.Enqueue(transform);
+            while (queue.Count > 0)
+            {
+                Transform current = queue.Dequeue();
+                if (caseinsensitive)
+                {
+                    if (current.name.ToLower() == name.ToLower() && current != transform)
+                    {
+                        transforms.Add(current);
+                    }
+                }
+                else if (current.name == name && current != transform)
+                {
+                    transforms.Add(current);
+                }
+
+                for (int i = 0; i < current.childCount; i++)
+                    queue.Enqueue(current.GetChild(i));
+            }
+            return transforms.ToArray();
+        }
     }
     public static class StringExtensions {
 

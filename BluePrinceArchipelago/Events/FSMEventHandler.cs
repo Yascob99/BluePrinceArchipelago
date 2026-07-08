@@ -193,7 +193,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            Unlocks.WestGatePath.FoundLocation();
+            Unlocks.BlackBridgeGrotto.FoundLocation();
         }
     }
     public class SatelliteRaised : RegisteredFSMEvent

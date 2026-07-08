@@ -1,4 +1,4 @@
-using BluePrinceArchipelago.Items;
+﻿using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -6,22 +6,14 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
-class Tomb : RoomHandler
+class Archives: RoomHandler
 {
-    public Tomb()
-    {
-        AllowanceTokens.Add("Tomb");
-    }
-    public override void OnAllowanceTokenCollected(string token)
-    {
-        ModInstance.ModEventHandler.OnMoraJaiSolved("Tomb");
-    }
     public override void OnRoomDrafted(GameObject roomGameObject)
     {
-        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_GAMEPLAY/Sliding Wall A Anchor/Gold Pay Off/3")?.GetComponent<PlayMakerFSM>();
+        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("TOMB");
+            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ARCHIVES");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;
@@ -29,7 +21,7 @@ class Tomb : RoomHandler
         }
         else
         {
-            Logging.LogWarning("Error changing Tomb Upgrade disk spawn logic.");
+            Logging.LogWarning("Error changing Archives Upgrade disk spawn logic.");
         }
     }
 }
