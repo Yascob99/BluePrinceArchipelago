@@ -704,23 +704,6 @@ namespace BluePrinceArchipelago.Rooms
         public void UpdateArray(PlayMakerArrayListProxy array, int count) {
             if (RoomsLeftInPool > 0)
             {
-                //// Check room drafting dependencies and if the dependencies are not met remove all copies from the pool.
-                //foreach (Func<ModRoom, bool> dependency in Dependencies)
-                //{
-                //    if (!dependency(this))
-                //    {
-                //        if (count > 0) {
-                //            RemoveFromPool(array, count);
-                //            FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                //            if (poolRemoval != null)
-                //            {
-                //                poolRemoval.Value = true;
-                //            } //Set the FSMBool to true so that it removes the room from the pool.
-                //            count = 0;
-                //        }
-                //        return;
-                //    }
-                //}
                 // If the room has at least one copy currently in the pool
                 if ((count > 0 && _IsUnlocked && !_UseVanilla))
                 {
@@ -745,6 +728,16 @@ namespace BluePrinceArchipelago.Rooms
                 // Handle extra copies of rooms that use vanilla logic. Assume always 1 is default (no extra copies), and that the rest is extra.
                 else if (_RoomPoolCount > 1 && _RoomPoolCount -1 != count && _UseVanilla && ! ModRoomManager.CantCopy.Contains(_Name)) {
                     AddToPool(array, _RoomPoolCount -1);
+                }
+                // If copies in pool and not set to use vanilla logic, remove from pool.
+                else if (count > 0 && !_UseVanilla)
+                {
+                    RemoveFromPool(array, count);
+                    FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
+                    if (poolRemoval != null)
+                    {
+                        poolRemoval.Value = false;
+                    } //Set the FSMBool to true so that it removes the room from the pool.
                 }
             }
         }
