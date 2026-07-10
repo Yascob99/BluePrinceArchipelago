@@ -228,7 +228,7 @@ public class DeathLinkHandler
         }
 
         string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
-        if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
+        if (_bedroomStrings.Any(s => currentRoom.Contains(s)) && ArchipelagoOptions.DeathLinkType == DeathLinkType.option_bedroom)
         {
             _bedroom = true;
         }
