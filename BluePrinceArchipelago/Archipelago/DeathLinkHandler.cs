@@ -202,12 +202,12 @@ public class DeathLinkHandler
 
         if (!deathLinkEnabled) return;
         // Check Current Room
-        var roomTextObj = GameObject.Find("__SYSTEM/HUD/RoomText");
+        var roomTextObj = GameObject.Find("_SYSTEM/HUD/RoomText");
 
         if (roomTextObj == null)
         {
             Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
-            var parent = GameObject.Find("__SYSTEM/HUD");
+            var parent = GameObject.Find("_SYSTEM/HUD");
             if (parent != null)
             {
                 roomTextObj = parent.transform.Find("RoomText")?.gameObject;
@@ -215,7 +215,7 @@ public class DeathLinkHandler
             else
             {
                 Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
-                parent = GameObject.Find("__SYSTEM");
+                parent = GameObject.Find("_SYSTEM");
                 if (parent != null)
                 {
                     roomTextObj = parent.transform.Find("HUD/RoomText")?.gameObject;
@@ -228,7 +228,7 @@ public class DeathLinkHandler
         }
 
         string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
-
+        Logging.LogWarning(currentRoom);
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
             _bedroom = true;

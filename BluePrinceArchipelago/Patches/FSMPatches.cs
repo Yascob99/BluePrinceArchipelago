@@ -229,7 +229,7 @@ namespace BluePrinceArchipelago.Patches
                 }
                 else
                 {
-                    Logging.LogWarning("Error changing Vault Upgrade disk spawn logic.");
+                    Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
                 }
                 PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND/Below Foundation (Cullable)/Below Foundation - Prefab/_GAMEPLAY/5")?.GetComponent<PlayMakerFSM>();
                 if (FoundationSpawn != null)
@@ -238,11 +238,11 @@ namespace BluePrinceArchipelago.Patches
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
-                    FoundationSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                 }
                 else
                 {
-                    Logging.LogWarning("Error changing Vault Upgrade disk spawn logic.");
+                    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
                 }
             }
         }

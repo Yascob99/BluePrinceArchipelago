@@ -74,6 +74,7 @@ namespace BluePrinceArchipelago
 
         // Other
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict { set; get; } =  [];
+        public static Dictionary<string, PlayMakerArrayListProxy> UntouchedPickers { set; get; } = [];
         public static int SaveSlot = 5; // Will be used to better confirm the loaded archipelago run.
 
         public static HashSet<string> SanctumsSolved = [];
@@ -179,7 +180,7 @@ namespace BluePrinceArchipelago
                 LoadArrays();
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 InitializeRooms();
-                Plugin.ModRoomManager.SetAllVanilla();
+                //Plugin.ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
                 if (scene.name != PreviousSceneName)
@@ -481,6 +482,7 @@ namespace BluePrinceArchipelago
         {
             Logging.Log("Reloading picker arrays...");
             PickerDict.Clear();
+            UntouchedPickers.Clear();
             LoadArrays();
             Logging.Log($"Reloaded {PickerDict.Count} picker arrays.");
         }
@@ -795,12 +797,28 @@ namespace BluePrinceArchipelago
         // loads the list of picker arrays the rooms can be added to. May rewrite to use names instead of the id of the child for better forward compatibility.
         private static void LoadArrays() {
             // Core picker arrays (indexes 2-32, 55-56, 58-61)
-            List<int> coreChildIDs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55, 56, 58, 59, 60, 61];
+            PlayMakerArrayListProxy array = null;
+            List<int> coreChildIDs = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55];
             for (int i = 0; i < coreChildIDs.Count; i++) {
-                PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
+                array = PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
                 if (array != null) {
                     PickerDict[array.name.Trim()] = array;
                 }
+            }
+
+            for (int i = 1; i < 31; i++)
+            {
+                array = GameObject.Find("__SYSTEM/Room Lists/UntouchedPickers").transform.GetChild(i).gameObject.GetComponent<PlayMakerArrayListProxy>();
+                if (array != null)
+                {
+                    UntouchedPickers[array.name.Trim()] = array;
+                }
+            }
+
+            // Standalone Array Full
+            array = PlanPicker.transform.GetChild(56).gameObject.GetComponent<PlayMakerArrayListProxy>();
+            if (array != null) {
+                UntouchedPickers["STANDALONE ARRAY"] = array;
             }
 
             //// Additional arrays that may be needed for special drafts (like Entrance Hall, first draft, etc.)

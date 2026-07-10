@@ -1,12 +1,9 @@
 ﻿using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
-using CirrusPlay.PortalLibrary;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Il2CppSystem.Collections;
 using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms
@@ -246,30 +243,54 @@ namespace BluePrinceArchipelago.Rooms
         public void UpdateRoomPools()
         {
             Logging.Log("Updating Room Pools");
-            foreach (PlayMakerArrayListProxy array in ModInstance.PickerDict.Values)
+            foreach (string key in ModInstance.PickerDict.Keys)
             {
+                PlayMakerArrayListProxy untouchedArray = ModInstance.UntouchedPickers[key];
+                PlayMakerArrayListProxy array = ModInstance.PickerDict[key];
                 int length = array.arrayList.Count;
+                GameObject room = null;
+                ModRoom modRoom = null;
                 Dictionary<string, int> RoomCounts = new Dictionary<string, int>();
-                for (int i = 0; i < length; i++)
-                {
-                    GameObject room = array.arrayList[i].TryCast<GameObject>();
+                for (int i = 0; i < length; i++) {
+                    room = array.arrayList[i].TryCast<GameObject>();
                     if (room != null)
                     {
-                        ModRoom modRoom = GetRoomByName(room.name);
-                        if (modRoom != null) {
-                            if (RoomCounts.ContainsKey(modRoom.Name))
+                        modRoom = GetRoomByName(room.name);
+                        if (modRoom != null)
+                        {
+                            if (RoomCounts.ContainsKey(room.name))
                             {
                                 RoomCounts[room.name]++;
                             }
-                            else {
+                            else
+                            {
                                 RoomCounts[room.name] = 1;
                             }
                         }
                     }
                 }
-                foreach (var pair in RoomCounts) {
-                    ModRoom modRoom = GetRoomByName(pair.Key);
-                    modRoom.UpdateArray(array, pair.Value);
+                int untouchedLength = untouchedArray.arrayList.Count;
+                for (int j = 0; j < untouchedLength; j++)
+                {
+                    if (untouchedArray.arrayList[j] != null)
+                    {
+                        room = untouchedArray.arrayList[j].TryCast<GameObject>();
+                        if (room != null)
+                        {
+                            modRoom = GetRoomByName(room.name);
+                            if (modRoom != null)
+                            {
+                                if (RoomCounts.ContainsKey(room.name))
+                                {
+                                    modRoom.UpdateArray(array, RoomCounts[room.name]);
+                                }
+                                else
+                                {
+                                    modRoom.UpdateArray(array, 0);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -488,7 +509,7 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
     public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, List<GameObject> upgradeObjs = null, int upgradeID = 0)
     {
-        private string _Name = name;
+        private string _Name { get; set; } = name;
         public string Name { get { return _Name; } set { _Name = value; } }
 
         // The actual game object name used in "__SYSTEM/The Room Engines/"
@@ -733,11 +754,6 @@ namespace BluePrinceArchipelago.Rooms
                 else if (count > 0 && !_UseVanilla)
                 {
                     RemoveFromPool(array, count);
-                    FsmBool poolRemoval = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
-                    if (poolRemoval != null)
-                    {
-                        poolRemoval.Value = false;
-                    } //Set the FSMBool to true so that it removes the room from the pool.
                 }
             }
         }
