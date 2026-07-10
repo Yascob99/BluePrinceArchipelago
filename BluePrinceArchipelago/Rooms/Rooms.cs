@@ -19,6 +19,7 @@ namespace BluePrinceArchipelago.Rooms
 
         public static List<string> VanillaRooms = [];
         public static List<string> CantCopy = ["ANTECHAMBER", "ENTRANCE HALL", "ROOM 46", "FOUNDATION", ""];
+        public static List<string> FoundFloorplans = ["PLANETARIUM", "CONSERVATORY", "TUNNEL", "THRONE ROOM", "TREASURE TROVE", "MECHANARIUM", "LOST & FOUND", "CLOSED EXHIBIT", "CLOCK TOWER", "THE KENNEL", "VESTIBULE", "DOVECOTE", "SOLARIUM", "DORMITORY", "CASINO"];
 
         public static Dictionary<string, string> UpgradeIDs = new Dictionary<string, string>()
         {
@@ -73,6 +74,7 @@ namespace BluePrinceArchipelago.Rooms
             if (found) {
                 Logging.LogWarning($"{_Rooms[counter].Name} already in Pool, adding more to the pool");
                 _Rooms[counter].RoomPoolCount++;
+                room.Initialize();
             }
             else
             {
@@ -267,9 +269,13 @@ namespace BluePrinceArchipelago.Rooms
                                 RoomCounts[room.name] = 1;
                             }
                         }
+                        else {
+                            Logging.Log($"Unable to find room: {room.name}");
+                        }
                     }
                 }
                 int untouchedLength = untouchedArray.arrayList.Count;
+                List<string> updated = [];
                 for (int j = 0; j < untouchedLength; j++)
                 {
                     if (untouchedArray.arrayList[j] != null)
@@ -283,12 +289,34 @@ namespace BluePrinceArchipelago.Rooms
                                 if (RoomCounts.ContainsKey(room.name))
                                 {
                                     modRoom.UpdateArray(array, RoomCounts[room.name]);
+                                    updated.Add(room.name);
                                 }
                                 else
                                 {
                                     modRoom.UpdateArray(array, 0);
+                                    updated.Add(room.name);
                                 }
                             }
+                            else
+                            {
+                                Logging.Log($"Unable to find room: {room.name}");
+                            }
+                        }
+                    }
+                }
+                foreach (string roomName in FoundFloorplans) {
+                    if (!RoomCounts.ContainsKey(roomName) && !updated.Contains(roomName)) {
+                        modRoom = GetRoomByName(roomName);
+                        if (modRoom != null)
+                        {
+                            if (modRoom.PickerArrays.Contains(key))
+                            {
+                                modRoom.UpdateArray(array, 0);
+                            }
+                        }
+                        else
+                        {
+                            Logging.Log($"Unable to find room: {room.name}");
                         }
                     }
                 }

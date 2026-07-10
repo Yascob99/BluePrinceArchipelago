@@ -430,8 +430,6 @@ namespace BluePrinceArchipelago
             else {
                 RegisterItems.ReloadGameObjects();
             }
-
-            State.CurrentDayNum = dayNum;
             // Initialize the Star HUD so it can be properly updated when needed.
             GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
             if (ArchipelagoClient.Authenticated)
@@ -572,7 +570,6 @@ namespace BluePrinceArchipelago
             State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems); // Update Items once a day so it can automatically add any items that should have been added by the crash.
             Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
-            State.CurrentDayNum += 1;
         }
         public static void OnDraftBeforeInitialize()
         {

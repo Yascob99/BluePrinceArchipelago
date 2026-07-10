@@ -29,7 +29,7 @@ public class ArchipelagoClient
     public static bool StateRebuilt = false;
 
     public static ArchipelagoData ServerData = new();
-    public DeathLinkHandler DeathLinkHandler;
+    public DeathLinkHandler DeathLinkHandler { get; set; }
     private ArchipelagoSession session;
 
     public ArchipelagoClient()
@@ -95,7 +95,7 @@ public class ArchipelagoClient
         {
             Logging.LogError(e);
         }
-
+        State.InitializeDeathLinkTotals();
         TryConnect();
     }
 

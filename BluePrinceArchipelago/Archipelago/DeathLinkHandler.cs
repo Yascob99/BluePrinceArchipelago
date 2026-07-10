@@ -17,16 +17,18 @@ public class DeathLinkHandler
     public static bool deathLinkEnabled
     {
         get => _deathLinkEnabled && ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none;
-        private set
+        set
         {
             _deathLinkEnabled = value;
         }
     }
 
-    private int _deathLinkCount = 0;
+    public static int DeathLinkCount { get; set; } = 0;
+    public static int TotalDeathLinksSent = 0;
     private string slotName;
     private readonly DeathLinkService service;
     private readonly Queue<DeathLink> deathLinks = new();
+    public static int BlockedDeathLinks = 0;
 
     /// <summary>
     /// instantiates our death link handler, sets up the hook for receiving death links, and enables death link if needed
@@ -44,6 +46,7 @@ public class DeathLinkHandler
         if (deathLinkEnabled)
         {
             service.EnableDeathLink();
+            State.UpdateDeathLinkData();
         }
     }
 
@@ -57,10 +60,12 @@ public class DeathLinkHandler
         if (deathLinkEnabled)
         {
             service.EnableDeathLink();
+            State.UpdateDeathLinkData();
         }
         else
         {
             service.DisableDeathLink();
+            State.UpdateDeathLinkData();
         }
     }
 
@@ -79,8 +84,6 @@ public class DeathLinkHandler
         KillPlayer();
     }
 
-    private int _blockedDeathLinks = 0;
-
     /// <summary>
     /// can be called when in a valid state to kill the player, dequeueing and immediately killing the player with a
     /// message if we have a death link in the queue
@@ -96,15 +99,17 @@ public class DeathLinkHandler
             var deathLink = deathLinks.Dequeue();
             var cause = deathLink.Cause.IsNullOrWhiteSpace() ? GetDeathLinkCause(deathLink) : deathLink.Cause;
 
-            if (ArchipelagoOptions.DeathLinkProtection > _blockedDeathLinks)
+            if (ArchipelagoOptions.DeathLinkProtection > BlockedDeathLinks)
             {
-                _blockedDeathLinks++;
-                ArchipelagoConsole.LogMessage($"{cause}. Blocked by protection. Blocks remaining until next: {ArchipelagoOptions.DeathLinkProtection - _blockedDeathLinks}", "DeathLink");
+                BlockedDeathLinks++;
+                State.UpdateDeathLinkData();
+                ArchipelagoConsole.LogMessage($"{cause}. Blocked by protection. Blocks remaining until next: {ArchipelagoOptions.DeathLinkProtection - BlockedDeathLinks}", "DeathLink");
                 return;
             }
             else
             {
-                _blockedDeathLinks = 0;
+                BlockedDeathLinks = 0;
+                State.UpdateDeathLinkData();
             }
 
             ModInstance.Instance.StartCoroutine(KillPlayer(cause, deathLink));
@@ -255,7 +260,7 @@ public class DeathLinkHandler
 
             if (_bedroom)
             {
-                Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Campsite).", "DeathLink");
+                Logging.Log($"End of Day deathlink prevented by sleeping in a bedroom (or at the Campsite).", "DeathLink");
                 _bedroom = false;
                 return;
             }
@@ -266,10 +271,10 @@ public class DeathLinkHandler
                 return;
             }
 
-            if (ArchipelagoOptions.DeathLinkGrace > _deathLinkCount)
+            if (ArchipelagoOptions.DeathLinkGrace > DeathLinkCount)
             {
-                _deathLinkCount++;
-                ArchipelagoConsole.LogMessage($"Death Link grace active. Deaths until next deathlink can be sent: {ArchipelagoOptions.DeathLinkGrace - _deathLinkCount}", "DeathLink");
+                DeathLinkCount++;
+                ArchipelagoConsole.LogMessage($"Death Link grace active. Deaths until next deathlink can be sent: {ArchipelagoOptions.DeathLinkGrace - DeathLinkCount}", "DeathLink");
                 return;
             }
 
@@ -279,6 +284,9 @@ public class DeathLinkHandler
             var linkToSend = new DeathLink(slotName, cause);
 
             service.SendDeathLink(linkToSend);
+            DeathLinkCount = 0;
+            TotalDeathLinksSent += 1;
+            State.UpdateDeathLinkData();
         }
         catch (Exception e)
         {
