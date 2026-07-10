@@ -169,7 +169,7 @@ public class DeathLinkHandler
     }
 
     private bool _bedroom = false;
-    private static readonly string[] _bedroomStrings = ["adyship", "aster", "ervants", "unk", "edroom", "quarium", "oudoir", "ormitory", "ovel", "aid", "ursery", "ampsite"];
+    private static readonly string[] _bedroomStrings = ["adyship", "aster", "uarters", "unk", "edroom", "quarium", "oudoir", "ormitory", "ovel", "aid", "ursery", "ampsite"];
     public void SendStepsDeathLink()
     {
         if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) return;
@@ -230,7 +230,6 @@ public class DeathLinkHandler
         string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
-            Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Campsite).", "DeathLink");
             _bedroom = true;
         }
 
@@ -256,6 +255,7 @@ public class DeathLinkHandler
 
             if (_bedroom)
             {
+                Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Campsite).", "DeathLink");
                 _bedroom = false;
                 return;
             }
