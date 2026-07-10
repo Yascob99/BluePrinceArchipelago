@@ -1512,26 +1512,28 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("HALL PASS", Plugin.ModItemManager.GetInventoryItem("HALL PASS"), false, ItemSanityType.Standard, true, true));
 
             // Workshop Items
-            Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", Plugin.ModItemManager.GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY PURSE", Plugin.ModItemManager.GetInventoryItem("LUCKY PURSE"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("PICK SOUND AMPLIFIER", Plugin.ModItemManager.GetInventoryItem("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("BURNING GLASS", Plugin.ModItemManager.GetInventoryItem("BURNING GLASS"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("DETECTOR SHOVEL", Plugin.ModItemManager.GetInventoryItem("DETECTOR SHOVEL"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("DOWSING ROD", Plugin.ModItemManager.GetInventoryItem("DOWSING ROD"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("JACK HAMMER", Plugin.ModItemManager.GetInventoryItem("JACK HAMMER"), false, ItemSanityType.Workshop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("POWER HAMMER", Plugin.ModItemManager.GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop));
+            Plugin.ModItemManager.AddItem(new UniqueItem("ELECTROMAGNET", Plugin.ModItemManager.GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("LUCKY PURSE", Plugin.ModItemManager.GetInventoryItem("LUCKY PURSE"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("PICK SOUND AMPLIFIER", Plugin.ModItemManager.GetInventoryItem("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("BURNING GLASS", Plugin.ModItemManager.GetInventoryItem("BURNING GLASS"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DETECTOR SHOVEL", Plugin.ModItemManager.GetInventoryItem("DETECTOR SHOVEL"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("DOWSING ROD", Plugin.ModItemManager.GetInventoryItem("DOWSING ROD"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("JACK HAMMER", Plugin.ModItemManager.GetInventoryItem("JACK HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("POWER HAMMER", Plugin.ModItemManager.GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
 
-            // Special Shop Items
-            Plugin.ModItemManager.AddItem(new UniqueItem("CHRONOGRAPH", Plugin.ModItemManager.GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("EMERALD BRACELET", Plugin.ModItemManager.GetInventoryItem("EMERALD BRACELET"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MASTER KEY", Plugin.ModItemManager.GetInventoryItem("MASTER KEY"), false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MOON PENDANT", Plugin.ModItemManager.GetInventoryItem("MOON PENDANT"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("ORNATE COMPASS", Plugin.ModItemManager.GetInventoryItem("ORNATE COMPASS"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SILVER SPOON", Plugin.ModItemManager.GetInventoryItem("SLIVER SPOON"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MORNING STAR", Plugin.ModItemManager.GetInventoryItem("MORNING STAR"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("THE AXE", Plugin.ModItemManager.GetInventoryItem("THE AXE"), false, ItemSanityType.SpecialShop));
-            Plugin.ModItemManager.AddItem(new UniqueItem("KNIGHTS SHIELD", Plugin.ModItemManager.GetInventoryItem("KNIGHTS SHIELD"), false, ItemSanityType.SpecialShop, true, false, ["Dig"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("TORCH", Plugin.ModItemManager.GetInventoryItem("KNIGHTS SHIELD"), false, ItemSanityType.SpecialShop));
+            // Showroom
+            Plugin.ModItemManager.AddItem(new UniqueItem("CHRONOGRAPH", Plugin.ModItemManager.GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("EMERALD BRACELET", Plugin.ModItemManager.GetInventoryItem("EMERALD BRACELET"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MASTER KEY", Plugin.ModItemManager.GetInventoryItem("MASTER KEY"), false, ItemSanityType.SpecialShop, true, false, ["Locksmith", "Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MOON PENDANT", Plugin.ModItemManager.GetInventoryItem("MOON PENDANT"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("ORNATE COMPASS", Plugin.ModItemManager.GetInventoryItem("ORNATE COMPASS"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SILVER SPOON", Plugin.ModItemManager.GetInventoryItem("SLIVER SPOON"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            
+            // Armory
+            Plugin.ModItemManager.AddItem(new UniqueItem("MORNING STAR", Plugin.ModItemManager.GetInventoryItem("MORNING STAR"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("THE AXE", Plugin.ModItemManager.GetInventoryItem("THE AXE"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("KNIGHTS SHIELD", Plugin.ModItemManager.GetInventoryItem("KNIGHTS SHIELD"), false, ItemSanityType.SpecialShop, true, false, ["Dig", "Armory"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("TORCH", Plugin.ModItemManager.GetInventoryItem("TORCH"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
 
             //Permanent Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Dice 1", null, false, "Dice", 1));

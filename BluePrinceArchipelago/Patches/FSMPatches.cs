@@ -4,7 +4,6 @@ using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using UnityEngine;
-using static UnityEngine.U2D.ClipperOffset2D;
 
 namespace BluePrinceArchipelago.Patches
 {
