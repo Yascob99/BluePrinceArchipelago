@@ -199,26 +199,26 @@ public class DeathLinkHandler
             _localDeathsInProgress -= 1;
             return;
         }
-
+        Logging.Log($"Deathlink Enabled: {deathLinkEnabled}");
         if (!deathLinkEnabled) return;
         // Check Current Room
-        var roomTextObj = GameObject.Find("_SYSTEM/HUD/RoomText");
+        GameObject roomTextObj = GameObject.Find("__SYSTEM/HUD/Room Text");
 
         if (roomTextObj == null)
         {
             Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
-            var parent = GameObject.Find("_SYSTEM/HUD");
+            GameObject parent = GameObject.Find("__SYSTEM/HUD");
             if (parent != null)
             {
-                roomTextObj = parent.transform.Find("RoomText")?.gameObject;
+                roomTextObj = parent.transform.Find("Room Text")?.gameObject;
             }
             else
             {
                 Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
-                parent = GameObject.Find("_SYSTEM");
+                parent = GameObject.Find("__SYSTEM/");
                 if (parent != null)
                 {
-                    roomTextObj = parent.transform.Find("HUD/RoomText")?.gameObject;
+                    roomTextObj = parent.transform.Find("HUD/Room Text")?.gameObject;
                 }
                 else
                 {
@@ -231,6 +231,7 @@ public class DeathLinkHandler
         Logging.LogWarning(currentRoom);
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
+            Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Camp).", "DeathLink");
             _bedroom = true;
         }
 
