@@ -222,7 +222,6 @@ namespace BluePrinceArchipelago.Patches
                 if (MineUpgradeSpawn != null)
                 {
                     bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
-                    Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
@@ -231,11 +230,11 @@ namespace BluePrinceArchipelago.Patches
                 {
                     Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
                 }
-                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND/Below Foundation (Cullable)/Below Foundation - Prefab/_GAMEPLAY/5")?.GetComponent<PlayMakerFSM>();
+                // Unsure why but this one doesn't want to play nicely otherwise.
+                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
                 if (FoundationSpawn != null)
                 {
                     bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
-                    Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;

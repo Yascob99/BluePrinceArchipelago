@@ -228,10 +228,9 @@ public class DeathLinkHandler
         }
 
         string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
-        Logging.LogWarning(currentRoom);
         if (_bedroomStrings.Any(s => currentRoom.Contains(s)))
         {
-            Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Camp).", "DeathLink");
+            Logging.Log($"End of Day deathlink prevented by sleeping in Bedroom (or Campsite).", "DeathLink");
             _bedroom = true;
         }
 

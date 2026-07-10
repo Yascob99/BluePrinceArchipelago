@@ -378,6 +378,10 @@ namespace BluePrinceArchipelago
                 if (roomname.ToUpper().Trim() == "MAIDS CHAMBER") {
                     roomname = "MAID\'S CHAMBER";
                 }
+                if (roomname.ToUpper().Trim() == "LADYSHIPS")
+                {
+                    roomname = "HER LADYSHIP\'S CHAMBER";
+                }
                 Logging.LogWarning($"Room Drafted: {roomname}", "Room");
                 if (Plugin.ModRoomManager.ForcedRoom != null)
                 {
