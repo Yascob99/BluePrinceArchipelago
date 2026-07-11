@@ -23,6 +23,7 @@ namespace BluePrinceArchipelago.Utils
         public const string ServerOptionsFile = "ServerOptions.json";
         public const string TrunkCountsFile = "TrunkCounts.json";
         public const string LocationDictFile = "LocationDict.json";
+        public const string DeathLinkTotalsFile = "DeathLinkTotals.json";
 
         public static string RecievedItemsPath => Path.Combine(ModFolder, SessionFolder, RecievedItemsFile);
         public static string SentLocationsPath => Path.Combine(ModFolder, SessionFolder, SentLocationsFile);
@@ -30,10 +31,8 @@ namespace BluePrinceArchipelago.Utils
         public static string ServerDetailsPath => Path.Combine(ModFolder, SessionFolder, ServerDetailsFile);
         public static string ServerOptionsPath => Path.Combine(ModFolder, SessionFolder, ServerOptionsFile);
         public static string TrunkCountsPath => Path.Combine(ModFolder, SessionFolder, TrunkCountsFile);
-
         public static string LocationDictPath => Path.Combine(ModFolder, SessionFolder, LocationDictFile);
-
-        public static int CurrentDayNum = 1;
+        public static string DeathLinkTotalsPath => Path.Combine(ModFolder, SessionFolder, DeathLinkTotalsFile);
 
         public static void Initialize()
         {
@@ -105,6 +104,19 @@ namespace BluePrinceArchipelago.Utils
             using (var writer = new StreamWriter(LocationDictPath))
             {
                 writer.Write(JsonConvert.SerializeObject(ArchipelagoClient.ServerData.LocationDict));
+                writer.Flush();
+            }
+        }
+
+        public static void UpdateDeathLinkData() {
+            using (var writer = new StreamWriter(DeathLinkTotalsPath, false))
+            {
+                DeathLinkData data = new DeathLinkData();
+                data.DeathLinkEnabled = DeathLinkHandler.deathLinkEnabled;
+                data.DeathLinkCount = DeathLinkHandler.DeathLinkCount;
+                data.TotalDeathLinksSent = DeathLinkHandler.TotalDeathLinksSent;
+                data.BlockedDeaths = DeathLinkHandler.BlockedDeathLinks;
+                writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
         }
@@ -304,6 +316,46 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
+        public static void InitializeDeathLinkTotals()
+        {
+            if (File.Exists(DeathLinkTotalsPath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(DeathLinkTotalsPath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        DeathLinkData data = JsonConvert.DeserializeObject<DeathLinkData>(jsonData);
+                        DeathLinkHandler.deathLinkEnabled = data.DeathLinkEnabled;
+                        DeathLinkHandler.DeathLinkCount = data.DeathLinkCount;
+                        DeathLinkHandler.TotalDeathLinksSent = data.TotalDeathLinksSent;
+                        DeathLinkHandler.BlockedDeathLinks = data.BlockedDeaths;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(DeathLinkTotalsPath, false))
+                {
+                    DeathLinkData data = new DeathLinkData();
+                    data.DeathLinkEnabled = false;
+                    data.DeathLinkCount = 0;
+                    data.TotalDeathLinksSent = 0;
+                    data.BlockedDeaths = 0;
+                    writer.Write(JsonConvert.SerializeObject(data));
+                    writer.Flush();
+                }
+            }
+        }
 
 
         public static void Reset() {
@@ -338,6 +390,18 @@ namespace BluePrinceArchipelago.Utils
             using (var writer = new StreamWriter(LocationDictPath, false))
             {
                 writer.Write(JsonConvert.SerializeObject(new Dictionary<long, string>()));
+                writer.Flush();
+            }
+
+            //DeathLinkData
+            using (var writer = new StreamWriter(DeathLinkTotalsPath, false))
+            {
+                DeathLinkData data = new DeathLinkData();
+                data.DeathLinkEnabled = false;
+                data.DeathLinkCount = 0;
+                data.TotalDeathLinksSent = 0;
+                data.BlockedDeaths = 0;
+                writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
             //Don't reset the connection details since they might be useful.

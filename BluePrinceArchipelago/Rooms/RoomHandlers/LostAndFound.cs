@@ -18,11 +18,13 @@ class LostAndFound : RoomHandler
     }
     public override void OnRoomDrafted(GameObject roomGameObject)
     {
-        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.GetComponent<PlayMakerFSM>();
+        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
+            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
+            Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
-            CanSpawnDisk.Value = !ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
+            CanSpawnDisk.Value = found;
             ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
         }
         else {

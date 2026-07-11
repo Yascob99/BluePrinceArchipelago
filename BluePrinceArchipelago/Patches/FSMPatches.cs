@@ -181,43 +181,65 @@ namespace BluePrinceArchipelago.Patches
                     state.DisableActionsOfType<SendEvent>();
                     // Fix the "Finished Transition"
                     state.ChangeTransition("FINISHED", "State 19"); //Fix transitions
-                    Logging.Log("Upgrade Disk Override Applied.");
-
-                    //Commissary Replacement Code
-                    PlayMakerFSM CommissaryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.GetComponent<PlayMakerFSM>();
-                    // Prevent the Default add to inventory behavior.
-                    FsmState UpgradeDisksAdd = CommissaryMenu.GetState("Upgrade Disks Add");
-                    UpgradeDisksAdd.DisableFirstActionOfType<SetFsmInt>();
-                    UpgradeDisksAdd.DisableFirstActionOfType<SendEvent>();
-
-                    FsmState UpgradeDiskPurchaseState = CommissaryMenu.GetState("Upgrade Disk Purchase 2");
-                    UpgradeDiskPurchaseState.DisableActionsOfType<ArrayListAdd>();
-                    // Attempt to create a SendEvent to send info the 
-                    // There's a solid chance this just breaks.
-                    UpgradeDiskPurchaseState.DisableFirstActionOfType<ActivateGameObject>();
-                    UpgradeDiskPurchaseState.InsertAction(3, new SendEventByName()
-                    {
-                        eventTarget = new FsmEventTarget()
-                        {
-                            target = FsmEventTarget.EventTarget.GameObject,
-                            gameObject = new FsmOwnerDefault()
-                            {
-                                gameObject = GameObject.Find("Global Manager"),
-                                ownerOption = OwnerDefaultOption.SpecifyGameObject
-                            },
-                            fsmName = "FSM",
-                            sendToChildren = false,
-                            excludeSelf = false
-                        },
-                        sendEvent = "Upgrade Disk Pickup",
-                        delay = 0f,
-                        everyFrame = false
-                    });
-                    
-
+                    Logging.Log("Upgrade Disk Override Applied."); 
                 }
                 else {
                     Logging.Log("Upgrade Disk Override already applied.");
+                }
+                //Commissary Replacement Code
+                PlayMakerFSM CommissaryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.GetComponent<PlayMakerFSM>();
+                // Prevent the Default add to inventory behavior.
+                FsmState UpgradeDisksAdd = CommissaryMenu.GetState("Upgrade Disks Add");
+                UpgradeDisksAdd.DisableFirstActionOfType<SetFsmInt>();
+                UpgradeDisksAdd.DisableFirstActionOfType<SendEvent>();
+
+                FsmState UpgradeDiskPurchaseState = CommissaryMenu.GetState("Upgrade Disk Purchase 2");
+                UpgradeDiskPurchaseState.DisableActionsOfType<ArrayListAdd>();
+                // Attempt to create a SendEvent to send info the 
+                // There's a solid chance this just breaks.
+                UpgradeDiskPurchaseState.DisableFirstActionOfType<ActivateGameObject>();
+                UpgradeDiskPurchaseState.InsertAction(3, new SendEventByName()
+                {
+                    eventTarget = new FsmEventTarget()
+                    {
+                        target = FsmEventTarget.EventTarget.GameObject,
+                        gameObject = new FsmOwnerDefault()
+                        {
+                            gameObject = GameObject.Find("Global Manager"),
+                            ownerOption = OwnerDefaultOption.SpecifyGameObject
+                        },
+                        fsmName = "FSM",
+                        sendToChildren = false,
+                        excludeSelf = false
+                    },
+                    sendEvent = "Upgrade Disk Pickup",
+                    delay = 0f,
+                    everyFrame = false
+                });
+                PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
+                if (MineUpgradeSpawn != null)
+                {
+                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
+                    FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
+                    CanSpawnDisk.Value = found;
+                    MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                }
+                else
+                {
+                    Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
+                }
+                // Unsure why but this one doesn't want to play nicely otherwise.
+                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
+                if (FoundationSpawn != null)
+                {
+                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
+                    FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
+                    CanSpawnDisk.Value = found;
+                    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                }
+                else
+                {
+                    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
                 }
             }
         }
@@ -272,6 +294,18 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM TreasureTroveYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TreasureTroveAddState = TreasureTroveYesButton.GetState("State 8");
             TreasureTroveAddState.DisableFirstActionOfType<SendEvent>();
+
+            // Attempt to remake the Tunnel Added Event from scratch.
+            CallMethod TunnelPickupEvent = TunnelYesButton.GetState("State 7").GetFirstActionOfType<CallMethod>();
+            FsmVar TunnelEvent = TunnelPickupEvent.parameters[0];
+            Il2CppSystem.Enum il2cppTreasureID = EnumExtensions.EnumToIl2Cpp<EventID>("Treasure_Trove_Floorplan_Found");
+            FsmVar[] parameters = [new FsmVar() { enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, EnumValue = il2cppTreasureID, namedVar = new FsmEnum() { enumName = "EventID", EnumName = "EventID", enumType = TunnelEvent.enumType, EnumType = TunnelEvent.EnumType, intValue = 403, RawValue= il2cppTreasureID, value = il2cppTreasureID, Value = il2cppTreasureID} }, TunnelPickupEvent.parameters[1]];
+            CallMethod TreasureTrovePickup = new CallMethod()
+            {
+                behaviour = TunnelPickupEvent.behaviour,
+                parameters = parameters
+            };
+            TreasureTroveYesButton.GetState("State 7").AddFirstAction(TreasureTrovePickup);
 
             //Mechanarium
             PlayMakerFSM MechanariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/MECHANARIUM Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();

@@ -193,7 +193,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            Unlocks.WestGatePath.FoundLocation();
+            Unlocks.BlackBridgeGrotto.FoundLocation();
         }
     }
     public class SatelliteRaised : RegisteredFSMEvent
@@ -355,6 +355,28 @@ namespace BluePrinceArchipelago.Events
                             if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
                             {
                                 state.RemoveFirstActionOfType<SendEvent>();
+                            }
+                        }
+                    }
+                }
+                if (Item.IsShowRoom)
+                {
+                    List<FsmState> states = Item.ShowRoomStates;
+                    foreach (FsmState state in states)
+                    {
+                        if (state != null)
+                        {
+                            // If the item is not unlocked, prevent it from being added to inventory.
+                            if (item.IsUnlocked && item.ApplySanity())
+                            {
+                                //Disable the actions that add the item to inventory.
+                                state.EnableActionsOfType<ArrayListAdd>();
+                                SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
+                                // Check if the event we are trying to remove is the custom event we added.
+                                if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
+                                {
+                                    state.RemoveFirstActionOfType<SendEvent>();
+                                }
                             }
                         }
                     }

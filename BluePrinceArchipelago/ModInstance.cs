@@ -74,6 +74,7 @@ namespace BluePrinceArchipelago
 
         // Other
         public static Dictionary<string, PlayMakerArrayListProxy> PickerDict { set; get; } =  [];
+        public static Dictionary<string, PlayMakerArrayListProxy> UntouchedPickers { set; get; } = [];
         public static int SaveSlot = 5; // Will be used to better confirm the loaded archipelago run.
 
         public static HashSet<string> SanctumsSolved = [];
@@ -179,7 +180,7 @@ namespace BluePrinceArchipelago
                 LoadArrays();
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 InitializeRooms();
-                Plugin.ModRoomManager.SetAllVanilla();
+                //Plugin.ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
                 if (scene.name != PreviousSceneName)
@@ -377,6 +378,10 @@ namespace BluePrinceArchipelago
                 if (roomname.ToUpper().Trim() == "MAIDS CHAMBER") {
                     roomname = "MAID\'S CHAMBER";
                 }
+                if (roomname.ToUpper().Trim() == "LADYSHIPS")
+                {
+                    roomname = "HER LADYSHIP\'S CHAMBER";
+                }
                 Logging.LogWarning($"Room Drafted: {roomname}", "Room");
                 if (Plugin.ModRoomManager.ForcedRoom != null)
                 {
@@ -390,6 +395,7 @@ namespace BluePrinceArchipelago
                 ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomname.ToUpper().Trim());
                 if (room != null)
                 {
+                    room.RoomInHouseCount++;
                     room.Handler?.OnRoomDrafted(obj);
                     if (!room.HasBeenDrafted)
                     {
@@ -424,8 +430,6 @@ namespace BluePrinceArchipelago
             else {
                 RegisterItems.ReloadGameObjects();
             }
-
-            State.CurrentDayNum = dayNum;
             // Initialize the Star HUD so it can be properly updated when needed.
             GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
             if (ArchipelagoClient.Authenticated)
@@ -480,6 +484,7 @@ namespace BluePrinceArchipelago
         {
             Logging.Log("Reloading picker arrays...");
             PickerDict.Clear();
+            UntouchedPickers.Clear();
             LoadArrays();
             Logging.Log($"Reloaded {PickerDict.Count} picker arrays.");
         }
@@ -565,7 +570,6 @@ namespace BluePrinceArchipelago
             State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems); // Update Items once a day so it can automatically add any items that should have been added by the crash.
             Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink(fsm);
             Plugin.UniqueItemManager.EndOfDay();
-            State.CurrentDayNum += 1;
         }
         public static void OnDraftBeforeInitialize()
         {
@@ -794,12 +798,28 @@ namespace BluePrinceArchipelago
         // loads the list of picker arrays the rooms can be added to. May rewrite to use names instead of the id of the child for better forward compatibility.
         private static void LoadArrays() {
             // Core picker arrays (indexes 2-32, 55-56, 58-61)
-            List<int> coreChildIDs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55, 56, 58, 59, 60, 61];
+            PlayMakerArrayListProxy array = null;
+            List<int> coreChildIDs = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55];
             for (int i = 0; i < coreChildIDs.Count; i++) {
-                PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
+                array = PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
                 if (array != null) {
                     PickerDict[array.name.Trim()] = array;
                 }
+            }
+
+            for (int i = 1; i < 31; i++)
+            {
+                array = GameObject.Find("__SYSTEM/Room Lists/UntouchedPickers").transform.GetChild(i).gameObject.GetComponent<PlayMakerArrayListProxy>();
+                if (array != null)
+                {
+                    UntouchedPickers[array.name.Trim()] = array;
+                }
+            }
+
+            // Standalone Array Full
+            array = PlanPicker.transform.GetChild(56).gameObject.GetComponent<PlayMakerArrayListProxy>();
+            if (array != null) {
+                UntouchedPickers["STANDALONE ARRAY"] = array;
             }
 
             //// Additional arrays that may be needed for special drafts (like Entrance Hall, first draft, etc.)
@@ -1030,7 +1050,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("LAUNDRY ROOM", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("LAVATORY", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("LIBRARY", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
-                Plugin.ModRoomManager.AddRoom("LOCKER ROOM", ["FRONT - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "CENTER - Tier 2 G"], false, true)
+                Plugin.ModRoomManager.AddRoom("LOCKER ROOM", ["FRONT - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "CENTER - Tier 2 G"], false)
                     .AddDependency(poolCheck);
                 Plugin.ModRoomManager.AddRoom("LOCKSMITH", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], false);

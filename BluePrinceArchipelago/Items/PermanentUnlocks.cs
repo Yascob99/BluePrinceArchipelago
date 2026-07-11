@@ -264,7 +264,9 @@ namespace BluePrinceArchipelago.Items
             {
                 PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
                 GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
+                //AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
             }
+
         }
         public override void FoundLocation()
         {

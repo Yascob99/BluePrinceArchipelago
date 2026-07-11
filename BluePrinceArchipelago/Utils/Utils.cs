@@ -1,4 +1,5 @@
 ﻿using Archipelago.MultiClient.Net.Enums;
+using Il2CppInterop.Runtime;
 using StableNameDotNet;
 using System;
 using System.Collections.Generic;
@@ -90,6 +91,31 @@ namespace BluePrinceArchipelago.Utils
                     queue.Enqueue(current.GetChild(i));
             }
             return null;
+        }
+        public static Transform[] FindAllRecursive(this Transform transform, string name, bool caseinsensitive = false)
+        {
+            Queue<Transform> queue = new Queue<Transform>();
+            List<Transform> transforms = new();
+            queue.Enqueue(transform);
+            while (queue.Count > 0)
+            {
+                Transform current = queue.Dequeue();
+                if (caseinsensitive)
+                {
+                    if (current.name.ToLower() == name.ToLower() && current != transform)
+                    {
+                        transforms.Add(current);
+                    }
+                }
+                else if (current.name == name && current != transform)
+                {
+                    transforms.Add(current);
+                }
+
+                for (int i = 0; i < current.childCount; i++)
+                    queue.Enqueue(current.GetChild(i));
+            }
+            return transforms.ToArray();
         }
     }
     public static class StringExtensions {
@@ -249,6 +275,17 @@ namespace BluePrinceArchipelago.Utils
                 description.Add("Trap");
 
             return string.Join(" ", description);
+        }
+        // Converts an enum to an Il2Cpp version of that Enum or null on failure.
+        public static Il2CppSystem.Enum EnumToIl2Cpp<T>(string value) where T : System.Enum
+        {
+            try
+            {
+                return Il2CppSystem.Enum.Parse(Il2CppType.Of<T>(), value).TryCast<Il2CppSystem.Enum>();
+            }
+            catch {
+                return null;
+            }
         }
     }
     public static class DictionaryExtensions {
