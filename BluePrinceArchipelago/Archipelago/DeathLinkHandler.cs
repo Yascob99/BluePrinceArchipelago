@@ -13,10 +13,10 @@ namespace BluePrinceArchipelago.Archipelago;
 
 public class DeathLinkHandler
 {
-    public static bool _deathLinkEnabled = false;
+    public static bool _deathLinkEnabled = true;
     public static bool deathLinkEnabled
     {
-        get => _deathLinkEnabled && ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none;
+        get => !(ArchipelagoOptions.DeathLinkType == DeathLinkType.option_none || !_deathLinkEnabled) ;
         set
         {
             _deathLinkEnabled = value;
