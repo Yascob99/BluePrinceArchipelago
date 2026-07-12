@@ -260,6 +260,28 @@ namespace BluePrinceArchipelago
                     Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
                 }
             }
+            else if (eventName.Contains("Allowance Token Pickup"))
+            {
+                bool matched = false;
+                var path = owner.gameObject.GetPath();
+                Logging.LogWarning($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
+                foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
+                {
+                    foreach (var token in roomHandler.AllowanceTokens)
+                    {
+                        if (path.Contains(token))
+                        {
+                            Logging.LogWarning($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
+                            roomHandler.OnAllowanceTokenCollected(token);
+                            matched = true;
+                        }
+                    }
+                }
+                if (!matched)
+                {
+                    Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
+                }
+            }
             else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
             {
                 TrunkManager.OnTrunkOpen();
@@ -315,28 +337,6 @@ namespace BluePrinceArchipelago
                 else if (eventName.Contains("Upgrade"))
                 {
                     ModItemManager.UpgradeDisks.OnPickup();
-                }
-            }
-            else if (eventName == "Allowance Token Pickup")
-            {
-                bool matched = false;
-                var path = owner.gameObject.GetPath();
-                Logging.LogWarning($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
-                foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
-                {
-                    foreach (var token in roomHandler.AllowanceTokens)
-                    {
-                        if (path.Contains(token))
-                        {
-                            Logging.LogWarning($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
-                            roomHandler.OnAllowanceTokenCollected(token);
-                            matched = true;
-                        }
-                    }
-                }
-                if (!matched)
-                {
-                    Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
                 }
             }
             else if (eventName == "Go" && target?.gameObject?.gameObject?.Value?.transform?.parent?.name == "PLAN PICKER") {
@@ -733,7 +733,7 @@ namespace BluePrinceArchipelago
                 case EventID.Lost_and_Found_Floorplan_Found:
                     ModEventHandler.OnFloorplanFound("Lost and Found");
                     break;
-                case EventID.Treasure_Trove_Floorplan_Found:
+                case EventID.Treasure_Trove_Floorplan_Found: // TODO: This is doesn't work in vanilla, will need to re-hook it elsewhere
                     ModEventHandler.OnFloorplanFound("Treasure Trove");
                     break;
                 case EventID.Throne_Room_Floorplan_Found:
