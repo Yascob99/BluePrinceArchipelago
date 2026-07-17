@@ -446,9 +446,20 @@ public class ArchipelagoClient
                 ServerData.LocationDict[location] = locationName;
             }
         }
-        //Asynchronously gather the data for all items stored in all the active locations, then wait for a response.
-        Task<Dictionary<long, ScoutedItemInfo>> scoutTask = session.Locations
-                .ScoutLocationsAsync(hint, ServerData.LocationDict.Keys.ToArray());
+
+        Task<Dictionary<long, ScoutedItemInfo>> scoutTask = null;
+
+        if (hint)
+        {
+            scoutTask = session.Locations
+                .ScoutLocationsAsync(hint, serverLocations);
+        }
+        else
+        {
+            //Asynchronously gather the data for all items stored in all the active locations, then wait for a response.
+            scoutTask = session.Locations
+                    .ScoutLocationsAsync(hint, [.. ServerData.LocationDict.Keys]);
+        }
         scoutTask.Wait();
         Dictionary<long, ScoutedItemInfo> scoutResult = scoutTask.Result;
         foreach (KeyValuePair<long, ScoutedItemInfo> scout in scoutResult)

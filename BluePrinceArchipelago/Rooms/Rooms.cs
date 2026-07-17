@@ -537,9 +537,11 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
     public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, List<GameObject> upgradeObjs = null, int upgradeID = 0)
     {
-        private string _Name { get; set; } = name;
+#pragma warning disable CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
+        private string _Name = name;
+#pragma warning restore CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
         public string Name { get { return _Name; } set { _Name = value; } }
-
+        
         // The actual game object name used in "__SYSTEM/The Room Engines/"
         private string _GameObjectName = gameObjectName;
         public string GameObjectName { get { return _GameObjectName; } set { _GameObjectName = value; } }
@@ -580,22 +582,22 @@ namespace BluePrinceArchipelago.Rooms
                             // POOL REMOVAL = true means room is NOT available (removed from pool)
                             // POOL REMOVAL = false means room IS available (in pool)
                             poolRemovalVar.Value = !value;
-                            Logging.LogDebug($"Room '{_Name}' (GO: {_GameObjectName}) POOL REMOVAL set to {!value} (IsUnlocked={value})");
+                            Logging.LogDebug($"Room '{Name}' (GO: {_GameObjectName}) POOL REMOVAL set to {!value} (IsUnlocked={value})");
                         }
                         else
                         {
-                            Logging.LogWarning($"Room '{_Name}' (GO: {_GameObjectName}): Could not find 'POOL REMOVAL' variable in FSM");
+                            Logging.LogWarning($"Room '{Name}' (GO: {_GameObjectName}): Could not find 'POOL REMOVAL' variable in FSM");
                         }
                     }
                     else
                     {
-                        Logging.LogWarning($"Room '{_Name}' (GO: {_GameObjectName}): Could not find FSM named '{_GameObjectName}'");
+                        Logging.LogWarning($"Room '{Name}' (GO: {_GameObjectName}): Could not find FSM named '{_GameObjectName}'");
                     }
                 }
                 else
                 {
                     // This is expected if scene isn't loaded yet
-                    Logging.LogDebug($"Room '{_Name}': Room engine not found at '{roomPath}' (scene may not be loaded)");
+                    Logging.LogDebug($"Room '{Name}': Room engine not found at '{roomPath}' (scene may not be loaded)");
                 }
                 _IsUnlocked = value;
                 Handler?.OnRoomUnlocked(this);
@@ -635,9 +637,9 @@ namespace BluePrinceArchipelago.Rooms
                     _RoomPoolCount = 0;
                     Logging.LogWarning("Cannot set roomcount to below 0");
                 }
-                else if (value > 1 && (ModRoomManager.CantCopy.Contains(_Name)))
+                else if (value > 1 && (ModRoomManager.CantCopy.Contains(Name)))
                 {
-                    Logging.LogWarning($"Cannot have more than 1 copy of the {_Name}, it will break your save file/run.");
+                    Logging.LogWarning($"Cannot have more than 1 copy of the {Name}, it will break your save file/run.");
                 }
                 else {
                     _RoomPoolCount = value;
@@ -684,15 +686,15 @@ namespace BluePrinceArchipelago.Rooms
                 _GameObj = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName);
                 if (_GameObj == null)
                 {
-                    Logging.LogWarning($"Cannot add {_Name} to pool: GameObject is null (looked for '{_GameObjectName}')");
+                    Logging.LogWarning($"Cannot add {Name} to pool: GameObject is null (looked for '{_GameObjectName}')");
                     return;
                 }
             }
             //Checks dependencies of the room before adding it to the draft pool.
             foreach (Func<ModRoom, bool> dependency in Dependencies) {
-                Logging.LogWarning($"Checking Dependency of {_Name}");
+                Logging.LogWarning($"Checking Dependency of {Name}");
                 if (!dependency(this)) {
-                    Logging.LogWarning($"Cannot add {_Name} to pool: Dependency not met");
+                    Logging.LogWarning($"Cannot add {Name} to pool: Dependency not met");
                     return;
                 }
             }
@@ -700,14 +702,14 @@ namespace BluePrinceArchipelago.Rooms
             for (int i = 0; i < count; i++)
             {
                 array.Add(_GameObj, "GameObject");
-                Logging.Log($"Added {_Name} (GO: {_GameObjectName}) to {array.name}");
+                Logging.Log($"Added {Name} (GO: {_GameObjectName}) to {array.name}");
             }
         }
         //Removes copy(s) of this room from the pool array
         private void RemoveFromPool(PlayMakerArrayListProxy array, int count = 1) {
             if (_GameObj == null)
             {
-                Logging.LogWarning($"Cannot remove {_Name} from pool: GameObject is null");
+                Logging.LogWarning($"Cannot remove {Name} from pool: GameObject is null");
                 return;
             }
             bool removed = false;
@@ -716,7 +718,7 @@ namespace BluePrinceArchipelago.Rooms
                 if (array.Contains(_GameObj))
                 {
                     array.Remove(_GameObj, "GameObject");
-                    Logging.Log($"Removed {_Name} from {array.name}");
+                    Logging.Log($"Removed {Name} from {array.name}");
                     removed = true;
                 }
                 // Handle the Upgraded objects.
@@ -725,13 +727,13 @@ namespace BluePrinceArchipelago.Rooms
                     {
                         Logging.LogWarning("Removed Upgraded Room From Pool");
                         array.Remove(upgrade, "GameObject");
-                        Logging.Log($"Removed {_Name} from {array.name}");
+                        Logging.Log($"Removed {Name} from {array.name}");
                         removed = true;
                     }
                 }
                 if (!removed)
                 {
-                    Logging.Log($"{_Name} doesn't exist in the pool {array.name}");
+                    Logging.Log($"{Name} doesn't exist in the pool {array.name}");
                 }
             }
         }
@@ -775,7 +777,7 @@ namespace BluePrinceArchipelago.Rooms
                     AddToPool(array, RoomsLeftInPool);
                 }
                 // Handle extra copies of rooms that use vanilla logic. Assume always 1 is default (no extra copies), and that the rest is extra.
-                else if (_RoomPoolCount > 1 && _RoomPoolCount -1 != count && _UseVanilla && ! ModRoomManager.CantCopy.Contains(_Name)) {
+                else if (_RoomPoolCount > 1 && _RoomPoolCount -1 != count && _UseVanilla && ! ModRoomManager.CantCopy.Contains(Name)) {
                     AddToPool(array, _RoomPoolCount -1);
                 }
                 // If copies in pool and not set to use vanilla logic, remove from pool.
