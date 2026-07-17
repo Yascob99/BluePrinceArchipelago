@@ -273,10 +273,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Add better handling of certain rooms that rely on other events to be added to the pool (eg. Morning Room) - partial done
     - [ ] Add ways of better handling upgraded rooms.
 - Items
-    - [ ] Create AP assets for replacement unique item locations
-    - [ ] Handle recieving items mid-run and remove it from the appropriate inventories.
-    - [ ] Handle Junk item rewards.
-    - [ ] Handle Permanent items (rewards that persist between days).
+    - [x] Create AP assets for replacement unique item locations
+    - [x] Handle recieving items mid-run and remove it from the appropriate inventories.
+    - [x] Handle Junk item rewards.
+    - [x] Handle Permanent items (rewards that persist between days).
 - Reverse Engineering
     - [x] Find events to hook to track if a run is ongoing so items and traps, and deathlinks can be applied at the proper times.
     - [x] Find out how shops choose their inventory and how to change it based on our items.
@@ -286,9 +286,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - Goals
     - [x] Find where to hook for specific goals being achieved.
 - Archipelago
-    - [ ] Create the logic for handling events from the AP server.
-    - [ ] Create a reconnect logic that will reconstruct as much of the state as possible from the Data from the AP Server.
-    - [ ] Create a way of storing run specific data in case of a game crash. (eg which save file, any queued checks, any temporary effects applied to the current day)
+    - [x] Create the logic for handling events from the AP server.
+    - [x] Create a reconnect logic that will reconstruct as much of the state as possible from the Data from the AP Server.
+    - [x] Create a way of storing run specific data in case of a game crash. (eg which save file, any queued checks, any temporary effects applied to the current day)
 - UI
     - [ ] Create a better looking UI
     - [ ] Add a menu option for Archipelago Mode on creating a new file.
