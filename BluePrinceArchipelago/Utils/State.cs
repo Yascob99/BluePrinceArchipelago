@@ -9,6 +9,10 @@ using System.IO;
 
 namespace BluePrinceArchipelago.Utils
 {
+    /// <summary>
+    ///     Handles storage of the game state and data that needs to persist across crashes.
+    ///     Data is stored in JSON files.
+    /// </summary>
     public static class State
     {
         public static string PluginPath => Paths.PluginPath;
@@ -34,6 +38,9 @@ namespace BluePrinceArchipelago.Utils
         public static string LocationDictPath => Path.Combine(ModFolder, SessionFolder, LocationDictFile);
         public static string DeathLinkTotalsPath => Path.Combine(ModFolder, SessionFolder, DeathLinkTotalsFile);
 
+        /// <summary>
+        ///     Initializes all of the data and creates the subfolder if it doesn't exist.
+        /// </summary>
         public static void Initialize()
         {
             if (!Directory.Exists(Path.Combine(ModFolder, SessionFolder))) {
@@ -45,6 +52,9 @@ namespace BluePrinceArchipelago.Utils
             InitializeLocationDict();
         }
 
+        /// <summary>
+        ///     Updates all of the non-timing sensitive states.
+        /// </summary>
         public static void UpdateAll() {
             UpdateLocations(ArchipelagoClient.ServerData.CheckedLocations);
             SessionData session = new SessionData();
@@ -53,6 +63,10 @@ namespace BluePrinceArchipelago.Utils
             UpdateSession(session);
         }
 
+        /// <summary>
+        ///     Updates the location list.
+        /// </summary>
+        /// <param name="data"></param>
         public static void UpdateLocations(List<long> data) { 
             using (var writer = new StreamWriter(SentLocationsPath, false))
             {
@@ -60,6 +74,11 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+
+        /// <summary>
+        ///     Updates the Item List.
+        /// </summary>
+        /// <param name="data"></param>
         public static void UpdateItems(List<string> data)
         {
             using (var writer = new StreamWriter(RecievedItemsPath, false))
@@ -68,6 +87,11 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+
+        /// <summary>
+        ///     Updates the Server Connection Details
+        /// </summary>
+        /// <param name="data">The Server Connection Details</param>
         public static void UpdateServerDetails(List<string> data)
         {
             ConnectionData connData = new ConnectionData();
@@ -76,6 +100,7 @@ namespace BluePrinceArchipelago.Utils
             connData.Password = data[2];
             UpdateServerDetails(connData);
         }
+        /// <inheritdoc cref="UpdateServerDetails(List{string})"/>
         public static void UpdateServerDetails(ConnectionData data)
         {
             using (var writer = new StreamWriter(ServerDetailsPath, false))
@@ -84,6 +109,11 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+
+        /// <summary>
+        ///     Updates the session details
+        /// </summary>
+        /// <param name="data">Important data about the archipelago session.</param>
         public static void UpdateSession(SessionData data)
         {
             using (var writer = new StreamWriter(SessionDataPath, false))
@@ -92,6 +122,9 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+        /// <summary>
+        ///     Updates the data about the trunk counts.
+        /// </summary>
         public static void UpdateTrunkCounts()
         {
             using (var writer = new StreamWriter(TrunkCountsPath))
@@ -100,6 +133,10 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+
+        /// <summary>
+        ///     Updates the location dictionary.
+        /// </summary>
         public static void UpdateLocationDict() {
             using (var writer = new StreamWriter(LocationDictPath))
             {
@@ -108,6 +145,9 @@ namespace BluePrinceArchipelago.Utils
             }
         }
 
+        /// <summary>
+        ///     Updates the DeathLinkData.
+        /// </summary>
         public static void UpdateDeathLinkData() {
             using (var writer = new StreamWriter(DeathLinkTotalsPath, false))
             {
@@ -120,6 +160,10 @@ namespace BluePrinceArchipelago.Utils
                 writer.Flush();
             }
         }
+
+        /// <summary>
+        ///     Initializes the Server Connection Details data and file.
+        /// </summary>
         private static void InitializeServerDetails()
         {
             if (File.Exists(ServerDetailsPath))
@@ -157,7 +201,9 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
-
+        /// <summary>
+        ///     Initializes the Session data and file.
+        /// </summary>
         private static void InitializeSessionData()
         {
             if (File.Exists(SessionDataPath))
@@ -194,6 +240,9 @@ namespace BluePrinceArchipelago.Utils
             }
         }
 
+        /// <summary>
+        ///     Initializes the Sent location data and file.
+        /// </summary>
         private static void InitializeSentLocations()
         {
             if (File.Exists(SentLocationsPath))
@@ -224,7 +273,9 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
-
+        /// <summary>
+        ///     Initializes the received items data and file.
+        /// </summary>
         public static void InitializeReceivedItems() {
             if (File.Exists(RecievedItemsPath))
             {
@@ -255,7 +306,9 @@ namespace BluePrinceArchipelago.Utils
             }
         }
 
-
+        /// <summary>
+        ///     Initializes the Trunk data and file.
+        /// </summary>
         public static void InitializeTrunkCounts()
         {
             if (File.Exists(TrunkCountsPath))
@@ -286,6 +339,10 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
+
+        /// <summary>
+        ///     Initializes the Location Dictionary data and file.
+        /// </summary>
         public static void InitializeLocationDict()
         {
             if (File.Exists(LocationDictPath))
@@ -316,6 +373,10 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
+
+        /// <summary>
+        ///     Initializes the Deathlink data and file.
+        /// </summary>
         public static void InitializeDeathLinkTotals()
         {
             if (File.Exists(DeathLinkTotalsPath))
@@ -357,7 +418,9 @@ namespace BluePrinceArchipelago.Utils
             }
         }
 
-
+        /// <summary>
+        ///     Resets most of the State Data to it's defaults.
+        /// </summary>
         public static void Reset() {
             // Received Items
             using (var writer = new StreamWriter(RecievedItemsPath, false))

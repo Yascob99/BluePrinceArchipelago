@@ -7,9 +7,17 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Patches
 {
+    /// <summary>
+    ///     A series of patches applied to FSMs
+    /// </summary>
     public static class FSMPatches
     {
-        //This additionally prevents the Day 1 Draft 1 forced draft.
+
+        /// <summary>
+        ///     A patch that adds the ability to force a room to appear in the next draft.
+        ///     This additionally prevents the Day 1 Draft 1 forced draft.
+        /// </summary>
+        /// <param name="fsm">The FSM to modify.</param>
         public static void RoomForcer(PlayMakerFSM fsm)
         {
             FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", false);
@@ -33,6 +41,10 @@ namespace BluePrinceArchipelago.Patches
             OuterDraftState.InsertAction(3, FSMEventHandler.RegisteredEvents["Outer Draft Start"].Event);
         }
 
+        /// <summary>
+        ///     Overrides the UpgradeDisk Pickup logic in the Global FSM so that upgrade disks function as intended.
+        /// </summary>
+        /// <param name="GlobalFSM">The Global FSM</param>
         public static void UpgradeDiskOverride(PlayMakerFSM GlobalFSM) {
             // Disable the Global Manager FSM states to not give this item in inventory
             FsmState state = Plugin.UniqueItemManager.GetPickupState("Upgrade Disk");
@@ -244,6 +256,9 @@ namespace BluePrinceArchipelago.Patches
             }
         }
 
+        /// <summary>
+        ///     Skips some of the intro cinematics because that was a big pain in testing.
+        /// </summary>
         public static void IntroSkip() {
             // Menu Logo Skips
             var menuSystem = GameObject.Find("/Menu System");
@@ -262,6 +277,9 @@ namespace BluePrinceArchipelago.Patches
             wait.time = new FsmFloat(0f);
         }
 
+        /// <summary>
+        ///     Adjusts the FloorPlan Pickup FSMs to function properly as location and prevent some default actions.
+        /// </summary>
         public static void AddedFloorPlanOverrides()
         {
             //Planetarium

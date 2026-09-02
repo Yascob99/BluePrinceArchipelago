@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Patches
 {
+    /// <summary>
+    ///     Patches related to item/rooms being spawned by the game.
+    /// </summary>
     public class ItemPatches
     {
         [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
@@ -54,6 +57,10 @@ namespace BluePrinceArchipelago.Patches
             }
         }
     }
+
+    /// <summary>
+    ///     Patches related to Rooms and drafting.
+    /// </summary>
     public class RoomPatches {
         [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.StartDraft))]
         [HarmonyPostfix]
@@ -68,6 +75,10 @@ namespace BluePrinceArchipelago.Patches
         }
 
     }
+
+    /// <summary>
+    ///     Patches related to events.
+    /// </summary>
     public class EventPatches {
 
         public static int depth = 0;
@@ -95,7 +106,6 @@ namespace BluePrinceArchipelago.Patches
             }
         }
 
-        // Should be called after all the 
         [HarmonyPatch(typeof(StatsLogger), "BeginDay", [typeof(int)])]
         [HarmonyPostfix]
         static void PostFix(int dayNum) { 
@@ -116,6 +126,7 @@ namespace BluePrinceArchipelago.Patches
             ModInstance.OnDayEnd();
         }
 
+        // The game will throw an error when falling back to closet. This prevents the error from filling up the log.
         [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.PerformValidation))]
         [HarmonyPrefix]
         static bool PerformValidationPreFix(RoomDraftHelper __instance) {

@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms
 {
+    /// <summary>
+    ///     A Manager that handles operations related to rooms or drafting.
+    /// </summary>
     public class ModRoomManager {
         private List<ModRoom> _Rooms = [];
         public List<ModRoom> Rooms {
@@ -61,6 +64,11 @@ namespace BluePrinceArchipelago.Rooms
             Logging.Log("ModRoomManager reset.");
         }
 
+        /// <summary>
+        ///     Adds a room to the tracked mod pool.
+        /// </summary>
+        /// <param name="room">The ModRoom of the room to add.</param>
+        /// <returns>The Modroom provided.</returns>
         public ModRoom AddRoom(ModRoom room) {
             bool found = false;
             int counter = -1;
@@ -86,6 +94,11 @@ namespace BluePrinceArchipelago.Rooms
             }
             return room;
         }
+
+        /// <summary>
+        ///     Forces a Draft for a given room
+        /// </summary>
+        /// <param name="roomname">The name of the room to force.</param>
         public void ForceDraft(string roomname) {
             ModRoom room = GetRoomByName(roomname);
             if (room != null)
@@ -95,6 +108,11 @@ namespace BluePrinceArchipelago.Rooms
             }
             Logging.LogWarning($"Error forcing room unable to find the room: {roomname}");
         }
+
+        /// <summary>
+        ///     Adds a room to the Queue or rooms to be forced.
+        /// </summary>
+        /// <param name="room"></param>
         public void ForceDraft(ModRoom room) {
             if (room != null) { 
                 ForceRoomQueue.Add(room);
@@ -102,14 +120,11 @@ namespace BluePrinceArchipelago.Rooms
             }
             Logging.LogWarning("Error forcing room, room can't be null");
         }
-        public void SetAllVanilla() {
-            foreach (ModRoom room in _Rooms) {
-                room.UseVanilla = true;
-                VanillaRooms.Add(room.Name);
-            }
-        }
 
-        //Forced Room doesn't account for pickers that combine multiple lists. Need to add a way of handling that.
+        /// <summary>
+        ///     Checks if there is a valid room to force. If it can be forced force it and return true.
+        /// </summary>
+        /// <returns>True if a room was forced, False if not</returns>
         public bool CheckForceRoomDraft() {
             // Check if any rooms have been queued for forcing.
             //Pre-reset this.
@@ -157,7 +172,9 @@ namespace BluePrinceArchipelago.Rooms
             return false;
         }
 
-        // Sets all rooms to the correct unlock state. (for in case the game changed it or for if the state changed since it's last check).
+        /// <summary>
+        ///     Sets all rooms to the correct unlock state. (for in case the game changed it or for if the state changed since it's last check).
+        /// </summary>
         public void RecheckRoomUnlockStatus() {
             // Forcibly set certain rooms as removed from the pool so they are not actually draftable.
             foreach (ModRoom room in Rooms)
@@ -186,6 +203,10 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
 
+        /// <summary>
+        ///     Removes a copy of a room from the mod's counted pool
+        /// </summary>
+        /// <param name="room">The room to remove</param>
         public void RemoveRoom(ModRoom room)
         {
             if (room.RoomPoolCount > 0) {
@@ -193,9 +214,10 @@ namespace BluePrinceArchipelago.Rooms
             }
             room.IsUnlocked = false;
         }
+        /// <summary>
+        ///     A fix for the HLC being deactivated for days 8+ on veteran mode.
+        /// </summary>
         public void HLCFix() {
-            // A fix for the HLC being deactivated for days 8+ on veteran mode.
-
             if (ModInstance.GlobalPersistentManager.GetBoolVariable("_Veteran Player").Value) {
                 ModRoom HLC = GetRoomByName("HER LADYSHIP\'S CHAMBER");
                 if (HLC.IsUnlocked) {
@@ -203,6 +225,7 @@ namespace BluePrinceArchipelago.Rooms
                 }
             }
         }
+
         /// <summary>
         /// Resets the room in house count for all rooms. Call this at the start of a new day.
         /// </summary>
@@ -215,7 +238,11 @@ namespace BluePrinceArchipelago.Rooms
             Logging.Log("Reset all room in-house counts for new day.");
         }
 
-        // Returns the ModRoom object by it's name.
+        /// <summary>
+        ///     Gets a ModRoom by its name.
+        /// </summary>
+        /// <param name="name">The Name of the room</param>
+        /// <returns>The ModRoom matching the room.</returns>
         public ModRoom GetRoomByName(string name)
         {
             foreach (ModRoom room in _Rooms) {
@@ -233,14 +260,14 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
-        /// Adds a room with the same name for both the room and its game object path.
+        ///     Adds a room with the same name for both the room and its game object path.
         /// </summary>
         public ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
             return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted);
         }
 
         /// <summary>
-        /// Adds a room with a separate game object name (for special cases like classroom variants).
+        ///     Adds a room with a separate game object name (for special cases like classroom variants).
         /// </summary>
         /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
         /// <param name="gameObjectName">The actual name of the game object in Room Engines (e.g., "CLASSROOM")</param>
@@ -280,6 +307,9 @@ namespace BluePrinceArchipelago.Rooms
             return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
         }
 
+        /// <summary>
+        ///     Attempts to update all the picker arrays to match what the mod expects them to be.
+        /// </summary>
         public void UpdateRoomPools()
         {
             Logging.Log("Updating Room Pools");
@@ -360,6 +390,10 @@ namespace BluePrinceArchipelago.Rooms
                 }
             }
         }
+
+        /// <summary>
+        ///     Empties the draft pool.
+        /// </summary>
         public void EmptyDraftPool()
         {
             foreach (ModRoom room in _Rooms) {
@@ -368,8 +402,8 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
-        /// Clears the entire draft pool for Archipelago mode - locks ALL rooms regardless of vanilla status.
-        /// Use this when syncing with Archipelago to start fresh.
+        ///     Clears the entire draft pool for Archipelago mode - locks ALL rooms regardless of vanilla status.
+        ///     Use this when syncing with Archipelago to start fresh.
         /// </summary>
         public void ClearAllRoomsForArchipelago()
         {
@@ -382,9 +416,11 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
-        /// Checks if an item name corresponds to a room, including special mappings.
-        /// Returns true if the item is a room, false otherwise.
+        ///     Checks if an item name corresponds to a room, including special mappings.
+        ///     Returns true if the item is a room, false otherwise.
         /// </summary>
+        /// <param name="itemName">The AP item name to check</param>
+        /// <returns>If the AP item is a room</returns>
         public bool IsRoomItem(string itemName)
         {
             // Try exact match first
@@ -404,9 +440,11 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
-        /// Unlocks a specific room by name for Archipelago mode.
-        /// Handles special cases like classroom variants (e.g., "Classroom 2" → "CLASSROOM (2)").
+        ///     Unlocks a specific room by name for Archipelago mode.
+        ///     Handles special cases like classroom variants (e.g., "Classroom 2" → "CLASSROOM (2)").
         /// </summary>
+        /// <param name="roomName">The Name of the room</param>
+        /// <returns>True if successfully unlocked, false if it failed.</returns>
         public bool UnlockRoomForArchipelago(string roomName)
         {
             // Try to find room with exact name first
@@ -504,6 +542,12 @@ namespace BluePrinceArchipelago.Rooms
                 _ => roomName  
             };
         }
+
+        /// <summary>
+        ///     Sets the variable the game uses to remove rooms from the pool with repellant. Useful for our purposes.
+        /// </summary>
+        /// <param name="name">The name of the room</param>
+        /// <param name="value">The value to set it to.</param>
         public void SetPoolRemovalVar(string name, bool value = false) {
             string roomPath = "__SYSTEM/The Room Engines/" + name;
             GameObject roomEngine = GameObject.Find(roomPath);
@@ -532,6 +576,9 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
 
+        /// <summary>
+        ///     Updates only the picker arrays being used in the current draft.
+        /// </summary>
         public void UpdateCurrentPickerArrays() {
             PlayMakerFSM grid = ModInstance.TheGrid;
             PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").value?.GetComponent<PlayMakerFSM>();
@@ -567,6 +614,16 @@ namespace BluePrinceArchipelago.Rooms
         }
     }
 
+    /// <summary>
+    ///     Represents a classroom in the draft pool with all its state.
+    /// </summary>
+    /// <param name="name">Internal name for the mod (e.g., "CLASSROOM (1)")</param>
+    /// <param name="gameObjectName">Actual game object name in Room Engines (e.g., "CLASSROOM")</param>
+    /// <param name="gameObject">The Unity GameObject for this room</param>
+    /// <param name="pickerArrays">List of picker arrays this room can appear in</param>
+    /// <param name="isUnlocked">Whether the room is initially unlocked</param>
+    /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
+    /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
     public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted)
     {
         private int _HighestDrafted = 0;
@@ -591,7 +648,7 @@ namespace BluePrinceArchipelago.Rooms
     }
 
     /// <summary>
-    /// Represents a room in the draft pool with all its state.
+    ///     Represents a room in the draft pool with all its state.
     /// </summary>
     /// <param name="name">Internal name for the mod (e.g., "CLASSROOM (1)")</param>
     /// <param name="gameObjectName">Actual game object name in Room Engines (e.g., "CLASSROOM")</param>
@@ -600,6 +657,8 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
     /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
+    /// <param name="upgradeObjs">The GameObjects for the Upgraded versions of the Room.</param>
+    /// <param name="upgradeID">The Upgrade ID of this instance of the Room</param>
     public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, List<GameObject> upgradeObjs = null, int upgradeID = 0)
     {
 #pragma warning disable CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
@@ -726,22 +785,12 @@ namespace BluePrinceArchipelago.Rooms
                 return left > 0 ? left : 0; // Ensure we never return negative
             }
         }
-        public bool IsRoomOrUpgrade(string name) {
-            if (Name.ToUpper().Trim() == name.ToUpper().Trim() || GameObjectName.ToUpper().Trim() == name.ToUpper().Trim())
-            {
-                return true;
-            }
-            foreach (GameObject gameObject in UpgradeObjects)
-            {
-                if (gameObject.name.ToUpper().Trim() == name.ToUpper().Trim())
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
-        //Adds a copy(s) of this room to the pool array
+        /// <summary>
+        ///     Adds copy(s) of this room to the pool array
+        /// </summary>
+        /// <param name="array">The Picker Array to add it to</param>
+        /// <param name="count">The number to add to the pool</param>
         private void AddToPool(PlayMakerArrayListProxy array, int count = 1) {
             // Ensure we have a valid GameObject to add
             if (_GameObj == null)
@@ -770,7 +819,11 @@ namespace BluePrinceArchipelago.Rooms
                 Logging.Log($"Added {Name} (GO: {_GameObjectName}) to {array.name}");
             }
         }
-        //Removes copy(s) of this room from the pool array
+        /// <summary>
+        ///     Removes copy(s) of the room from the picker array.
+        /// </summary>
+        /// <param name="array">The array to remove from</param>
+        /// <param name="count">The number to remove from the pool.</param>
         private void RemoveFromPool(PlayMakerArrayListProxy array, int count = 1) {
             if (_GameObj == null)
             {
@@ -802,7 +855,10 @@ namespace BluePrinceArchipelago.Rooms
                 }
             }
         }
-        //Set the FSMBools in the appropriate room to ensure that the correct rooms show up in draft.
+
+        /// <summary>
+        ///     Set the FSMBools in the appropriate room to ensure that the correct rooms show up in draft.
+        /// </summary>
         public void Initialize()
         {
             var pool = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
@@ -816,7 +872,12 @@ namespace BluePrinceArchipelago.Rooms
                 pool.Value = false;
             }
         }
-        // Helper function that updates 1 array at a time.
+
+        /// <summary>
+        ///     Helper function that updates 1 array at a time.
+        /// </summary>
+        /// <param name="array">The array to update</param>
+        /// <param name="count">The number of copies that should be in the pool.</param>
         public void UpdateArray(PlayMakerArrayListProxy array, int count) {
             if (RoomsLeftInPool > 0)
             {
@@ -853,10 +914,18 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
 
+        /// <summary>
+        ///     Adds a Dependency to the room
+        /// </summary>
+        /// <param name="dependency">A Function that checks the dependency.</param>
         public void AddDependency(Func<ModRoom, bool> dependency)
         {
             Dependencies.Add(dependency);
         }
+        /// <summary>
+        ///     Adds a collection of dependencies to a room
+        /// </summary>
+        /// <param name="dependencies">A collection of functions that check if dependencies for those rooms are met.</param>
         public void AddDependencies(params Func<ModRoom, bool>[] dependencies) {
             Dependencies.AddRange(dependencies);
         }

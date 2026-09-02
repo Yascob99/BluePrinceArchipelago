@@ -2,6 +2,9 @@
 using System.Runtime.CompilerServices;
 namespace BluePrinceArchipelago
 {
+    /// <summary>
+    ///     The Static class that handles logging globally
+    /// </summary>
     public static class Logging {
 
         public static Logger Logger { get; } = new Logger();
@@ -22,6 +25,9 @@ namespace BluePrinceArchipelago
         }
     }
 
+    /// <summary>
+    ///     The Logger instance.
+    /// </summary>
     public class Logger
     {
         public Dictionary<string, LogLevel> LogLevels { get; } = [];
@@ -67,6 +73,9 @@ namespace BluePrinceArchipelago
         }
     }
 
+    /// <summary>
+    ///     The log levels.
+    /// </summary>
     public enum LogLevel
     {
         Debug,
