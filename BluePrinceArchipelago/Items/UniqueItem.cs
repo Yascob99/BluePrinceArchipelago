@@ -4,16 +4,18 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using StableNameDotNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using UnityEngine;
 
 
 namespace BluePrinceArchipelago.Items
 {
+
+    /// <summary>
+    ///     The template for Unique items.
+    /// </summary>
     public class UniqueItem : ModItem
     {
 
@@ -83,6 +85,16 @@ namespace BluePrinceArchipelago.Items
                 // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
             }
         }
+        /// <summary>
+        ///     Creates a UniqueItem
+        /// </summary>
+        /// <param name="name">The name of the object.</param>
+        /// <param name="gameObject">The GameObject of the item.</param>
+        /// <param name="isUnlocked">If the item is unlocked.</param>
+        /// <param name="sanityType">The Sanitytype of the item. Defaults to none.</param>
+        /// <param name="isPreSpawn">If the item is usually in the prespawn list. Defualts to true.</param>
+        /// <param name="isPersistent">If the item is persists across scene transitions.</param>
+        /// <param name="shopTags">What shops the item can be in.</param>
         public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, gameObject, isUnlocked)
         {
             _IsPrespawn = isPreSpawn;
@@ -124,6 +136,10 @@ namespace BluePrinceArchipelago.Items
             }
             
         }
+
+        /// <summary>
+        ///     Removes the item from the prespawn and estate pool.
+        /// </summary>
         public void RemoveFromPool()
         {
             if (!ApplySanity())
@@ -148,6 +164,10 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+
+        /// <summary>
+        ///     Handles adding the item to the inventory.
+        /// </summary>
         public override void AddItemToInventory()
         {
             if (!ApplySanity())
@@ -187,12 +207,16 @@ namespace BluePrinceArchipelago.Items
                     {
                         ModInstance.RunningEngine.SendEvent("Update");
                     }
-                    //Send Event 0 to the Global Manager.
                 }
                
             }
         }
 
+
+        /// <summary>
+        ///     Checks if the sanity is relevant to the current item.
+        /// </summary>
+        /// <returns></returns>
         public bool ApplySanity()
         {
             return SanityType switch
@@ -207,11 +231,23 @@ namespace BluePrinceArchipelago.Items
         }
     }
 
+
+    /// <summary>
+    ///     A manager for common operations associated with Unique Items.
+    /// </summary>
     public class UniqueItemManager
     {
         public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
         public bool ModelsReplaced = false;
+
+        /// <summary>
+        ///     Triggered by a Unique item being spawned.
+        /// </summary>
+        /// <param name="obj">The GameObject of the spawned item.</param>
+        /// <param name="poolName">The PoolName of the spawned item's spawn pool.</param>
+        /// <param name="transformObj">The GameObject with contains the position data for where the item will be spawned.</param>
+        /// <param name="spawnedObj">The GameObject for the spawned object.</param>
         public void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj)
         {
             UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
@@ -250,12 +286,19 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        /// <summary>
+        ///     Code to be run on end of day.
+        /// </summary>
         public void EndOfDay()
         {
             //Reset the list of spawned items.
             SpawnedItems = new List<UniqueItem>();
             ModelsReplaced = false;
         }
+
+        /// <summary>
+        ///     Code to be run at the start of day.
+        /// </summary>
         public void StartOfDay()
         {
             Dictionary<string, string> CommissaryStates = new Dictionary<string, string>()
@@ -382,6 +425,11 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        /// <summary>
+        ///     Returns the Inventory Icon name for various items that differ from their usual name.
+        /// </summary>
+        /// <param name="name">The name of the item.</param>
+        /// <returns>The name of the icon</returns>
         public string GetIconName(string name) {
             name = name.ToTitleCase();
             switch (name){
@@ -413,6 +461,12 @@ namespace BluePrinceArchipelago.Items
                     return name + " Icon";
             }
         }
+
+        /// <summary>
+        ///     Gets the game object for the Inventory Icon of of a given Unique Item.
+        /// </summary>
+        /// <param name="name">The name of the Unique Item</param>
+        /// <returns>The GameObject of the icon</returns>
         public GameObject GetIconGameObject(string name) {
             name = GetIconName(name);
             PlayMakerArrayListProxy Inventory = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIconMeshes").GetComponent<PlayMakerArrayListProxy>();
@@ -426,7 +480,11 @@ namespace BluePrinceArchipelago.Items
             return null;
         }
 
-        //Finds the "You Found" Event based on the what "You Found" is called in the GlobalManager Pickup FSM State. Returns null if not found.
+        /// <summary>
+        ///     Finds the Parent Transform of the you found event based on the provided state.
+        /// </summary>
+        /// <param name="pickupState">The pickup state of the item in the GlobalFsm</param>
+        /// <returns>The Parent Transform</returns>
         public Transform GetYouFoundParent(FsmState pickupState)
         {
             if (pickupState != null)
@@ -442,7 +500,11 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
-        // Checks if the item has been picked up before.
+        /// <summary>
+        ///     Checks if the item has been picked up before.
+        /// </summary>
+        /// <param name="name">the name of the item</param>
+        /// <returns>True if item is spawned, false if not.</returns>
         public UniqueItem GetIfSpawned(string name)
         {
             foreach (UniqueItem item in SpawnedItems)
@@ -460,8 +522,11 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
-
-        // Finds the state in the Global Manager associated with the given item's pickup. Returns null if not found.
+        /// <summary>
+        ///     Finds the state in the Global Manager associated with the given item's pickup. Returns null if not found.    
+        /// </summary>
+        /// <param name="name">The name of the item</param>
+        /// <returns>The FsmState of the item's pickup handling.</returns>
         public FsmState GetPickupState(string name)
         {
 
@@ -499,24 +564,12 @@ namespace BluePrinceArchipelago.Items
             Logging.LogWarning($"Failed to Get pickup state for: {name}");
             return null;
         }
-        public FsmTransition GetPickupTransition(string name) {
-            // Fixes a name difference for the vault keys and rabbit's foot and puts name into lower case.
-            name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "");
-            // Check each Global Transition in the Global Manager.
-            foreach (FsmTransition transition in ModInstance.GlobalManager.FsmGlobalTransitions)
-            {
-                // If the transition's event name contains the item name it's the transition we want.
-                if (transition.EventName.ToLower().Contains(name))
-                {
-
-                    return transition;
-                }
-            }
-            return null;
-        }
 
     }
 
+    /// <summary>
+    ///     The enum for the Sanity Types.
+    /// </summary>
     public enum ItemSanityType
     {
         None,

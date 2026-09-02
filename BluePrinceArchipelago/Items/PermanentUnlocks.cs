@@ -7,6 +7,10 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
+
+    /// <summary>
+    ///     A series of functions for handling permanent game unlocks.
+    /// </summary>
     public static class Unlocks
     {
         public static AppleOrchard AppleOrchard = new();
@@ -32,6 +36,11 @@ namespace BluePrinceArchipelago.Items
 
         public static bool HasPrepatched = false;
 
+        /// <summary>
+        ///     Gets a Permanent Unlock by Name.
+        /// </summary>
+        /// <param name="name">The name of the unlock to find.</param>
+        /// <returns>The PermanentUnlock or null if not found.</returns>
         public static PermanentUnlock GetPermanentUnlock(string name)
         {
             if (UnlockedDict.ContainsKey(name))
@@ -41,13 +50,22 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
+
+        /// <summary>
+        ///     Gets a Permanent Unlocks solve by it's location.
+        /// </summary>
+        /// <param name="locationName">The name of the location.</param>
+        /// <returns></returns>
         public static PermanentUnlock GetPermanentSolveByLocation(string locationName) {
             if (SolvedDict.ContainsKey(locationName)) { 
                 return SolvedDict[locationName];
             }
             return null;
         }
-        // Trying to patch the Rooms by modifying the prefabs.
+
+        /// <summary>
+        ///     Try to prepatch the permanent unlocks based on gamestate.
+        /// </summary>
         public static void AttemptPrePatch()
         {
             if (!HasPrepatched)
@@ -80,6 +98,10 @@ namespace BluePrinceArchipelago.Items
             }
         }
     }
+
+    /// <summary>
+    ///     A template for a Permanent Unlock.
+    /// </summary>
     public abstract class PermanentUnlock
     {
         public abstract string Name { get; set; }
@@ -89,19 +111,31 @@ namespace BluePrinceArchipelago.Items
         public bool Unlocked = false;
         public bool Solved = false;
 
+        /// <summary>
+        ///     Run the Unlock Code.
+        /// </summary>
         public abstract void UnlockItem();
 
+        /// <summary>
+        ///     Run the Found Location Code.
+        /// </summary>
         public abstract void FoundLocation();
 
+        /// <summary>
+        ///     Run the code that prevents the default behaviour.
+        /// </summary>
         public abstract void PreventDefault();
     }
 
+    /// <summary>
+    ///     The Apple Orchard PermanentUnlock.
+    /// </summary>
     public class AppleOrchard:PermanentUnlock
     {
         // Override the Name
         public override string Name { get; set; } = "Apple Orchard";
         public override string LocationName { get; set; } = "Orchard Gate";
-        // Run the unlock code.
+
         public override void UnlockItem() {
             Unlocked = true;
             PlayMakerFSM appleOrchard = GameObject.Find("TERRAIN/EAST SECTOR/_CAMPSITE/CAMPSITE SOUTH CULL/Orchard Gameplay/Orchard Gate/Letters Click Code (1)")?.GetComponent<PlayMakerFSM>();
@@ -117,7 +151,6 @@ namespace BluePrinceArchipelago.Items
                 GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /PERMANENT ADDITIONS")?.SetActive(true);
             }
         }
-        // Prevents the default Unlock.
         public override void PreventDefault()
         {
             if (!Unlocked)
@@ -132,12 +165,16 @@ namespace BluePrinceArchipelago.Items
                 appleOrchard.GetState("State 4")?.AddAction(FSMEventHandler.RegisteredEvents["Apple Orchard Unlock"].Event);
             }
         }
+
         public override void FoundLocation()
         {
             Solved = true;
             ModInstance.ModEventHandler.OnGateOpened(LocationName);
         }
 
+        /// <summary>
+        ///     A function for simulating the effect of the unlock. Used when the unlock is received at the start of a day.
+        /// </summary>
         public void ApplyEffects() {
             FsmInt AdjustmentAmount = ModInstance.StepManager.FindIntVariable("Adjustment Amount");
             AdjustmentAmount.Value = AdjustmentAmount.Value + 20;
@@ -146,6 +183,10 @@ namespace BluePrinceArchipelago.Items
         }
 
     }
+
+    /// <summary>
+    ///     The Gemstone Caverns Permanent Unlock.
+    /// </summary>
     public class GemstoneCaverns : PermanentUnlock
     {
         // Override the Name
@@ -153,7 +194,6 @@ namespace BluePrinceArchipelago.Items
         public override string LocationName { get; set; } = "VAC Controls";
         public GameObject RoomObject = null;
 
-        // Run the unlock code.
         public override void UnlockItem()
         {
             Unlocked = true;
@@ -229,6 +269,9 @@ namespace BluePrinceArchipelago.Items
             ModInstance.ModEventHandler.OnVACControlsSolved();
         }
 
+        /// <summary>
+        ///     Apply the effects of the Gemstone Caverns. For if it's unlocked during day start.
+        /// </summary>
         public void ApplyEffects()
         {
             FsmInt AdjustmentAmount = ModInstance.GemManager.FindIntVariable("Adjustment Amount");
@@ -237,6 +280,10 @@ namespace BluePrinceArchipelago.Items
             ModInstance.GemManager.SendEvent("Update");
         }
     }
+
+    /// <summary>
+    ///     The West Gate Path Permanent Unlock Object.
+    /// </summary>
     public class WestGatePath : PermanentUnlock
     {
         public override string Name { get; set; } = "West Gate Path";
@@ -276,6 +323,10 @@ namespace BluePrinceArchipelago.Items
     }
 
     //TODO Confirm working and improve the handling to be more comparable to the Gemstone Caverns.
+
+    /// <summary>
+    ///     The Black Bridge Grotto Permanent Unlock Object.
+    /// </summary>
     public class BlackBridgeGrotto : PermanentUnlock
     {
         public override string Name { get; set; } = "Blackbridge Grotto";
@@ -361,6 +412,9 @@ namespace BluePrinceArchipelago.Items
         }
     }
 
+    /// <summary>
+    ///     The Satellite Dish Permanent Unlock Object.
+    /// </summary>
     public class SatelliteDish : PermanentUnlock
     {
         public override string Name { get; set; } = "Satellite Dish";
@@ -403,6 +457,9 @@ namespace BluePrinceArchipelago.Items
         }
     }
 
+    /// <summary>
+    ///     Blue Tents Permanent Unlock. Currently not in use.
+    /// </summary>
     public class BlueTents : PermanentUnlock
     {
         public override string Name { get; set; } = "Blue Tents";

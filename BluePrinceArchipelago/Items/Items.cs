@@ -1501,8 +1501,8 @@ namespace BluePrinceArchipelago.Items
     /// <summary>
     ///     A Handler for all the Upgrade disks and their associated functions. Upgrade Disks persist across days.
     /// </summary>
-    /// <param name="gameObject"></param>
-    public class UpgradeDisks(GameObject gameObject) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
+    /// <param name="gameObject">The gameobject of upgradedisk. Defaults to null.</param>
+    public class UpgradeDisks(GameObject gameObject = null) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
     {
         public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
         public static List<GameObject> YouFoundObjects = new List<GameObject>();

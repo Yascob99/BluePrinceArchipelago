@@ -4,13 +4,26 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
-
+    /// <summary>
+    ///     The Template for traps.
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
     public abstract class Trap (string name, string trapType)
     {
         public string Name = name;
         public string TrapType = trapType;
+
+        /// <summary>
+        ///     Handles what happens on trap activation.
+        /// </summary>
         public abstract void ActivateTrap();
     }
+    /// <summary>
+    ///     Causes the player to lose an object at random. 
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
     public class LoseItemTrap(string name, string trapType) : Trap(name, trapType)
     {
         public override void ActivateTrap()
@@ -18,12 +31,17 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.LoseRandomItem();
         }
     }
+    /// <summary>
+    ///     Simulates the effect of the freezer.
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
     public class FreezeTrap(string name, string trapType) : Trap(name, trapType) 
     {
         public override void ActivateTrap()
         {
             FsmBool isFrozen = ModInstance.GlobalPersistentManager?.GetBoolVariable("YesterFreezer");
-            //If not in run and not already frozen.
+            // If not in run and not already frozen.
             if (ModInstance.IsInRun && isFrozen != null && !isFrozen.Value)
             {
                 isFrozen.Value = true;
@@ -36,6 +54,11 @@ namespace BluePrinceArchipelago.Items
             }
         }
     }
+    /// <summary>
+    ///     Ends the day by invoking the ZeroStepEnding.
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
     public class EndOfDayTrap(string name, string trapType) : Trap(name, trapType)
     {
         public override void ActivateTrap()
@@ -44,6 +67,13 @@ namespace BluePrinceArchipelago.Items
             GameObject.Find("ZERO STEP ENDING").SetActive(true);
         }
     }
+
+    /// <summary>
+    ///     A trap that causes the player to lose an amount of a resource.
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
+    /// <param name="count">The number of that resource to adjust by. Defaults to -1</param>
     public class LoseTrap(string name, string trapType, int count = -1) : Trap(name, trapType)
     {
         public override void ActivateTrap()
@@ -114,7 +144,14 @@ namespace BluePrinceArchipelago.Items
             }
         }
     }
-    public class SetTrap(string name, string trapType, int count = -1) : Trap(name, trapType)
+
+    /// <summary>
+    ///     Sets the current number of a given resource to a specific value.
+    /// </summary>
+    /// <param name="name">The name of the trap</param>
+    /// <param name="trapType">The type of the trap.</param>
+    /// <param name="count">The count to set the player's resource to.</param>
+    public class SetTrap(string name, string trapType, int count = 0) : Trap(name, trapType)
     {
         public override void ActivateTrap()
         {
