@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Models
 {
+    /// <summary>
+    ///     A model for the slot data from the APworld.
+    /// </summary>
     public class SlotData
     {
         [JsonProperty("room_draft_sanity")]

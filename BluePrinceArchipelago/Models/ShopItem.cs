@@ -6,6 +6,9 @@ using BluePrinceArchipelago.Utils;
 
 namespace BluePrinceArchipelago.Models
 {
+    /// <summary>
+    ///     A model for ShopItems.
+    /// </summary>
     public class ShopItem
     {
         public string Name { get; set; }
