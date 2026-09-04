@@ -1537,21 +1537,22 @@ namespace BluePrinceArchipelago.Items
             // Skip this Start of Day if it's a reconnect from crash or quit.
             Logging.LogWarning("Updating Upgrade Disk Used States");
             int j = -1;
-            foreach (string boolName in UsedVariables)
-            {
-                j++;
-                string location = Locations[j];
-                if (ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(boolName).Value)
-                {
-                    if (!UsedLocations.Contains(location))
-                    {
-                        UsedLocations.Add(location);
-                    }
-                }
-            }
-            Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
             if (ArchipelagoOptions.UpgradeDiskSanity)
             {
+                foreach (string boolName in UsedVariables)
+                {
+                    j++;
+                    string location = Locations[j];
+                    if (ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(boolName).Value)
+                    {
+                        if (!UsedLocations.Contains(location))
+                        {
+                            UsedLocations.Add(location);
+                        }
+                    }
+                }
+                Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
+            
                 foreach (string location in RecievedItems)
                 {
                     Logging.LogWarning($"{location}");
