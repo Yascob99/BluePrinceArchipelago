@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BluePrinceArchipelago.Models
 {
+    /// <summary>
+    ///     A model of the data used in tracking deathlink information.
+    /// </summary>
     public class DeathLinkData
     {
         public int DeathLinkCount { get; set; }

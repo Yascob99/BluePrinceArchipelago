@@ -1,0 +1,4 @@
+- name: Docs
+  href: obj/Debug/BluePrinceArchipelago.xml/
+- name: API
+  href: api/

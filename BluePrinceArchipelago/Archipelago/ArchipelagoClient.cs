@@ -22,10 +22,13 @@ public class ArchipelagoClient
     public const string APVersion = "0.6.7";
     private const string Game = "Blue Prince";
 
+
     public static bool Authenticated;
     private bool _AttemptingConnection;
     public static bool Reconnected = false;
-    public static bool Disconnected = false; // Indicates whether the client was fully disconnected at any point during the session (important for crash handling).
+
+    public static bool Disconnected = false;
+
     public static bool StateRebuilt = false;
 
     public static ArchipelagoData ServerData = new();
@@ -35,6 +38,7 @@ public class ArchipelagoClient
     public ArchipelagoClient()
     {
     }
+
     /// <summary>
     ///     Returns the locationid from the name or -1 if It can't be found.
     ///     Not Case Sensitive.
@@ -593,7 +597,7 @@ public class ArchipelagoClient
     /// <summary>
     ///     Sends to the server that the location has been checked.
     /// </summary>
-    /// <param name="locationName">the name of the location to complete</param>
+    /// <param name="locationid">the id of the location to complete</param>
     public void CheckLocation(long locationid)
     {
         if (!ServerData.CheckedLocations.Contains(locationid))

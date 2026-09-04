@@ -264,11 +264,13 @@ namespace BluePrinceArchipelago.Utils
             return retArray;
         }
         /// <inheritdoc cref="GetTransition(PlayMakerFSM, string, string)"/>
+        /// <param name="fsm">The FSM in which to find the transition.</param>
         /// <param name="stateName">The name of the state</param>
         /// <param name="eventName">The name of the event</param>
         public static FsmTransition GetTransition(this PlayMakerFSM fsm, string stateName, string eventName) => fsm.GetState(stateName)!.GetTransition(eventName);
 
         /// <inheritdoc cref="GetTransition(PlayMakerFSM, string, string)"/>
+        /// <param name="fsm">The FSM in which to find the transition.</param>
         /// <param name="stateName">The name of the state</param>
         /// <param name="eventName">The name of the event</param>
         public static FsmTransition GetTransition(this Fsm fsm, string stateName, string eventName) => fsm.GetState(stateName)!.GetTransition(eventName);
@@ -401,6 +403,7 @@ namespace BluePrinceArchipelago.Utils
         }
 
         /// <inheritdoc cref="AddState(PlayMakerFSM, FsmState)"/>
+        /// <param name="fsm">The fsm</param>
         /// <param name="name">The name of the FSMState to create and add to the PlayMakerFSM.</param>
         public static FsmState AddState(this PlayMakerFSM fsm, string name)
         {
@@ -692,12 +695,15 @@ namespace BluePrinceArchipelago.Utils
         }
 
         /// <inheritdoc cref="AddTransition(FsmState, FsmEvent, FsmState)"/>
+        /// <param name="state">The FsmState to transition from.</param>
         /// <param name="eventName">The name of the transition event.</param>
+        /// <param name="toState">The FsmState to transition to.</param>
         public static FsmTransition AddTransition(this FsmState state, string eventName, FsmState toState)
         {
             return state.AddTransition(FsmEvent.GetFsmEvent(eventName), toState);
         }
         /// <inheritdoc cref="AddTransition(FsmState, FsmEvent, FsmState)"/>
+        /// <param name="state">The FsmState to transition from.</param>
         /// <param name="eventName">The name of the transition event.</param>
         /// <param name="toState">The name of the FsmState to transition to.</param>
         public static FsmTransition AddTransition(this FsmState state, string eventName, string toState)
@@ -1292,12 +1298,9 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="fsm">The fsm</param>
         /// <param name="stateName">The name of the state from which the transition starts</param>
         /// <param name="eventName">The event of the transition</param>
-
-        /// <inheritdoc cref="RemoveTransition(PlayMakerFSM, string, string)"/>
-
         public static void RemoveTransition(this Fsm fsm, string stateName, string eventName) => fsm.GetState(stateName)!.RemoveTransition(eventName);
 
-        /// <inheritdoc cref="RemoveTransition(PlayMakerFSM, string, string)"/>
+        /// <inheritdoc cref="RemoveTransition(Fsm, string, string)"/>
         /// <param name="state">The fsm state</param>
         /// <param name="eventName">The event of the transition</param>
 

@@ -14,6 +14,8 @@
         <RootNamespace>BluePrinceArchipelago</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <PlatformTarget>AnyCPU</PlatformTarget>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

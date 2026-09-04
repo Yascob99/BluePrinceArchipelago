@@ -271,6 +271,10 @@ namespace BluePrinceArchipelago.Rooms
         /// </summary>
         /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
         /// <param name="gameObjectName">The actual name of the game object in Room Engines (e.g., "CLASSROOM")</param>
+        /// <param name="pickerArrays">The Picker Arrays the room uses.</param>
+        /// <param name="isUnlocked">If the room is unlocked.</param>
+        /// <param name="useVanilla">Whether to Use Vanilla handling</param>
+        /// <param name="hasBeenDrafted">If the room has been drafted at least once.</param>
         public ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) {
             string roomPath = "__SYSTEM/The Room Engines/" + gameObjectName;
             GameObject roomObj = GameObject.Find(roomPath);
