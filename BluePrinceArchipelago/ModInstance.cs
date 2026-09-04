@@ -14,7 +14,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Rewired.Glyphs.UnityUI.UnityUITextMeshProGlyphHelper.Tag;
 
 namespace BluePrinceArchipelago
 {

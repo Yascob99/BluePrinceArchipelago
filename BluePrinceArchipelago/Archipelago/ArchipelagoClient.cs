@@ -841,6 +841,7 @@ public class ArchipelagoQueueManager {
             }
             // If the item is an upgrade disk.
             if (item.ItemName.ToUpper().Contains("UPGRADE DISK")) {
+                
                 // Trim the name of the item to remove the upgrade disk part.
                 string location = item.ItemName.ToUpper().Replace("UPGRADE DISK ", "");
                 if (!ModItemManager.UpgradeDisks.RecievedItems.Contains(location))

@@ -1550,15 +1550,18 @@ namespace BluePrinceArchipelago.Items
                 }
             }
             Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
-            foreach (string location in RecievedItems)
+            if (ArchipelagoOptions.UpgradeDiskSanity)
             {
-                Logging.LogWarning($"{location}");
-                // Check if the item has been used, and if it has, 
-                if (!UsedLocations.Contains(location.ToUpper()))
+                foreach (string location in RecievedItems)
                 {
-                    AddItemToInventory(location);
+                    Logging.LogWarning($"{location}");
+                    // Check if the item has been used, and if it has, 
+                    if (!UsedLocations.Contains(location.ToUpper()))
+                    {
+                        AddItemToInventory(location);
+                    }
+                    i++;
                 }
-                i++;
             }
         }
 
