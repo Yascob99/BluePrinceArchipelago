@@ -281,7 +281,7 @@ namespace BluePrinceArchipelago.Items
             else if (obj.name.ToUpper().Trim().Contains("UPGRADE DISK"))
             {
                 string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
-                CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE").Replace(" AND", "&"); // HLC, TP Dynamite, and Lost & Found name fix
+                CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
                 ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
             }
         }
