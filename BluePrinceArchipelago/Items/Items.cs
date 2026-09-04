@@ -1591,7 +1591,7 @@ namespace BluePrinceArchipelago.Items
                 ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
             }
             else {
-                Logging.LogWarning("Unable to set Locaation as used, no received locations are currently unused.", "UpgradeDisks");
+                Logging.LogWarning("Unable to set Location as used, no received locations are currently unused.", "UpgradeDisks");
             }
         }
 

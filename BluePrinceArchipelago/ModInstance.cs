@@ -412,7 +412,7 @@ namespace BluePrinceArchipelago
                 if (roomname.ToUpper().Trim() == "MAIDS CHAMBER") {
                     roomname = "MAID\'S CHAMBER";
                 }
-                if (roomname.ToUpper().Trim() == "LADYSHIPS")
+                if (roomname.ToUpper().Trim().Contains("LADYSHIPS"))
                 {
                     roomname = "HER LADYSHIP\'S CHAMBER";
                 }
