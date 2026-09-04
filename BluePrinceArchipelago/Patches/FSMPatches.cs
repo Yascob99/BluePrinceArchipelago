@@ -371,6 +371,9 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM CasinoDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CasinoAddState = CasinoDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
+            // Prevents the CoM from erronously granting the planetarium location.
+            PlayMakerFSM CoMAddButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Duplicate Find - menu/2 Button Spread(2)/ YES BUTTON").GetComponent<PlayMakerFSM>();
+            CoMAddButton.GetState("State 7").DisableFirstActionOfType<CallMethod>();
 
             //Plan Picker
             PlayMakerFSM PlanPicker = ModInstance.PlanPicker.GetComponent<PlayMakerFSM>();

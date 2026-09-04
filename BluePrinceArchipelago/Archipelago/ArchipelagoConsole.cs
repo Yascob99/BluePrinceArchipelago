@@ -984,20 +984,13 @@ public class ItemCommand(string name) : Command(name)
 
                         if (icon != null && InventoryIcons != null)
                         {
-                            if (!ModItemManager.PickedUp.Contains(item.name))
-                            {
-                                ModItemManager.PickedUp.Add(item, "GameObject");
-                                
-                            }
+                            ModItemManager.PickedUp.AddIfUnique(item);
                             InventoryIcons.Add(icon, "GameObject");
-
-                            if (itemName == "RUNNING SHOES")
+                            ModItemManager.PreSpawn.RemoveIfExists(item.name);
+                            if (Name == "RUNNING SHOES")
                             {
                                 ModInstance.RunningEngine.SendEvent("Update");
-                                
                             }
-                            //Send Event 0 to the Global Manager.
-                            return;
                         }
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");
                         return;

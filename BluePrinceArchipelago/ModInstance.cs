@@ -12,6 +12,7 @@ using HutongGames.PlayMaker.Actions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -806,7 +807,7 @@ namespace BluePrinceArchipelago
                     ModEventHandler.OnFloorplanFound("Conservatory");
                     break;
                 case EventID.Planetarium_Floorplan_Found:
-                    ModEventHandler.OnFloorplanFound("Planetarium");
+                        ModEventHandler.OnFloorplanFound("Planetarium");
                     break;
                 case EventID.Lost_and_Found_Floorplan_Found:
                     ModEventHandler.OnFloorplanFound("Lost and Found");
