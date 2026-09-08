@@ -18,6 +18,8 @@ namespace BluePrinceArchipelago.Events
             { "West Gate Path Unlock", new WestGatePathUnlock() },
             { "Gemstone Caverns Unlock", new GemstoneCavernsUnlock() },
             { "Satellite Raised", new SatelliteRaised() },
+            { "Outer Draft Start", new OuterDraftStart() },
+            { "Outer Draft Reroll", new OuterDraftReroll() },
         };
 
         /// <summary>

@@ -411,12 +411,8 @@ namespace BluePrinceArchipelago.Patches
                 FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
                 //SendFreeze.DisableActionsOfType<CallMethod>();
                 SendFreeze.DisableActionsOfType<SendEvent>();
-                RegisteredFSMEvent OuterDraftStart = new OuterDraftStart();
-                FSMEventHandler.RegisteredEvents["Outer Draft Start"] = OuterDraftStart;
-                OuterDraftStart.OnRegister();
-                RegisteredFSMEvent OuterDraftReroll = new OuterDraftReroll();
-                FSMEventHandler.RegisteredEvents["Outer Draft Reroll"] = OuterDraftReroll;
-                OuterDraftReroll.OnRegister();
+                RegisteredFSMEvent OuterDraftStart = FSMEventHandler.RegisteredEvents["Outer Draft Start"];
+                RegisteredFSMEvent OuterDraftReroll = FSMEventHandler.RegisteredEvents["Outer Draft Reroll"];
 
                 ShuffleRooms.AddAction(OuterDraftStart.Event);
                 ShuffleRooms.RemoveTransitionsTo("FINISHED");
