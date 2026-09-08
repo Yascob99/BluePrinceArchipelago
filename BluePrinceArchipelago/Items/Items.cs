@@ -1534,10 +1534,8 @@ namespace BluePrinceArchipelago.Items
         ///     Handles adding unlocked upgrade disks to the the players inventory until they are used.
         /// </summary>
         public void StartOfDay() {
-            int i = 0;
             // Skip this Start of Day if it's a reconnect from crash or quit.
             Logging.LogWarning("Updating Upgrade Disk Used States");
-            int j = -1;
             if (ArchipelagoOptions.UpgradeDiskSanity)
             {
                 Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
@@ -1549,7 +1547,6 @@ namespace BluePrinceArchipelago.Items
                     {
                         AddItemToInventory(location);
                     }
-                    i++;
                 }
             }
         }

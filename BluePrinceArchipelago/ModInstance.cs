@@ -699,7 +699,7 @@ namespace BluePrinceArchipelago
         /// <param name="e">The event arguements.</param>
         public static void OnLocalLocationSent(System.Object sender, LocationEventArgs e)
         {
-            Logging.Log($"Location sent: {e.LocationName} of the location type: {e.LocationType}");
+            Logging.Log($"Location sent: {e.LocationName} of the location type: {e.LocationType}", "Locations");
             if (ArchipelagoClient.Authenticated)
             {
                 Plugin.ArchipelagoClient.CheckLocation(e.LocationName);
@@ -1113,8 +1113,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("BALLROOM", ["FRONTBACK G - RARE", "CENTER - Tier 2 G", "EDGECREEP - RARE G"], true);
                 Plugin.ModRoomManager.AddRoom("BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BILLIARD ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
-                Plugin.ModRoomManager.AddRoom("BOILER ROOM", ["CENTER - Tier 2 G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true)
-                    .AddDependency(poolCheck);
+                Plugin.ModRoomManager.AddRoom("BOILER ROOM", ["CENTER - Tier 2 G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true);
                 Plugin.ModRoomManager.AddRoom("BOOKSHOP", [""], true, true);
                 Plugin.ModRoomManager.AddRoom("BOUDOIR", ["SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
                 Plugin.ModRoomManager.AddRoom("BUNK ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);

@@ -287,6 +287,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
+            Logging.LogWarning("Satellite Raised");
             Unlocks.SatelliteDish.FoundLocation();
         }
     }

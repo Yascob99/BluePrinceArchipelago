@@ -3,7 +3,6 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace BluePrinceArchipelago.Events
 {

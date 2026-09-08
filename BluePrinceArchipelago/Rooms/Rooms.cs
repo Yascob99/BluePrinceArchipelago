@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using StableNameDotNet;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -140,6 +141,7 @@ namespace BluePrinceArchipelago.Rooms
                 if (ForcedRoom == null)
                 {
                     UpdateCurrentPickerArrays();
+                    Logging.LogWarning($"[{CurrentPickerArrays.Join(", ")}]");
                     while (!draftable && i < ForceRoomQueue.Count - 1)
                     {
                         i++;

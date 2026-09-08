@@ -327,13 +327,13 @@ public static class ArchipelagoConsole
         else
         {
             height = (int)(Screen.height * 0.3f);
-            if (currentLogLines < 11)
+            if (currentLogLines < 10)
             {
                 scrollDepth = (int)(Screen.height * 0.3f);
             }
             else
             {
-                scrollDepth = (int)(Screen.height * 0.02f * currentLogLines);
+                scrollDepth = (int)(Screen.height * 0.03f * currentLogLines + 1);
             }
         }
 
@@ -977,6 +977,7 @@ public class ItemCommand(string name) : Command(name)
                         ModItemManager.PickedUp.Add(item, "GameObject");
                         //Send Event 0 to the Global Manager.
                         Inventory.SendEvent("Update");
+                        return;
                     }
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");
                     return; 
@@ -998,6 +999,7 @@ public class ItemCommand(string name) : Command(name)
                             {
                                 ModInstance.RunningEngine.SendEvent("Update");
                             }
+                            return;
                         }
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");
                         return;

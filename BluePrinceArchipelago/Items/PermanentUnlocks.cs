@@ -292,8 +292,9 @@ namespace BluePrinceArchipelago.Items
         public override void UnlockItem()
         {
             Unlocked = true;
-            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
-            GateOpened?.GetState("Hover").ChangeTransition("click", "GATE IS OPENED");
+            PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>();
+            GateOpened.GetState("Hover").ChangeTransition("click", "GATE IS OPENED");
+            GateOpened.GetState("Off").ChangeTransition("click", "GATE IS OPENED");
             if (Solved)
             {
                 ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(EventID.West_Path_Gate_Unlocked);
@@ -309,9 +310,16 @@ namespace BluePrinceArchipelago.Items
         {
             if (!Unlocked)
             {
-                PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened")?.GetComponent<PlayMakerFSM>();
-                GateOpened?.GetState("Hover").ChangeTransition("click", "Off");
-                //AddAction(FSMEventHandler.RegisteredEvents["Gemstone Caverns Unlock"].Event);
+                PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM GateClosed = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Closed").GetComponent<PlayMakerFSM>();
+                FsmState GateIsClosed = GateOpened.AddState("GATE IS CLOSED");
+                GateIsClosed.RemoveTransitionsTo("FINISHED");
+                FsmTransition off = GateIsClosed.AddTransition("off", "Off");
+                GateIsClosed.AddAction(FSMEventHandler.RegisteredEvents["West Gate Path Unlock"].Event);
+                GateIsClosed.AddAction(new Wait() { time = 3.3f, finishEvent = off.FsmEvent, realTime = false });
+                GateOpened.GetState("Hover").ChangeTransition("click", "GATE IS CLOSED");
+                GateOpened.GetState("Off").ChangeTransition("click", "GATE IS CLOSED");
+                
             }
 
         }
@@ -336,10 +344,19 @@ namespace BluePrinceArchipelago.Items
         public override void UnlockItem()
         {
             Unlocked = true;
-            if (RoomObject != null)
+            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
+            for (int i = 0; i < RoomSpawnPools.transform.childCount; i++)
             {
-                PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
-                LabMachine?.GetState("Chek if Grotto Is Open")?.EnableActionsOfType<GetFsmBool>();
+                Transform child = RoomSpawnPools.transform.GetChild(i);
+                if (child.name.Contains("Laboratory"))
+                {
+                    RoomObject = child.gameObject;
+                    PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
+                    FsmState State12 = LabMachine.GetState("State 12");
+                    State12.EnableAction(1);
+                    State12.EnableAction(4);
+                    State12.RemoveAction(7);
+                }
             }
             if (Solved)
             {
@@ -362,48 +379,42 @@ namespace BluePrinceArchipelago.Items
 
         public override void PreventDefault()
         {
-            SendEventByName unfreeze = new SendEventByName()
+            if (!Unlocked)
             {
-                eventTarget = new FsmEventTarget()
+                SendEventByName unfreeze = new SendEventByName()
                 {
-                    target = FsmEventTarget.EventTarget.GameObject,
-                    gameObject = new FsmOwnerDefault()
+                    eventTarget = new FsmEventTarget()
                     {
-                        gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
-                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                        target = FsmEventTarget.EventTarget.GameObject,
+                        gameObject = new FsmOwnerDefault()
+                        {
+                            gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
+                            ownerOption = OwnerDefaultOption.SpecifyGameObject
+                        },
+                        fsmName = "FSM",
+                        sendToChildren = false,
+                        excludeSelf = false
                     },
-                    fsmName = "FSM",
-                    sendToChildren = false,
-                    excludeSelf = false
-                },
-                sendEvent = "UnFreeze",
-                delay = 0f,
-                everyFrame = false
-            };
-            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
-            for (int i = 0; i < RoomSpawnPools.transform.childCount; i++)
-            {
-                Transform child = RoomSpawnPools.transform.GetChild(i);
-                if (child.name.Contains("Utility Closet"))
+                    sendEvent = "UnFreeze",
+                    delay = 0f,
+                    everyFrame = false
+                };
+                GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
+                for (int i = 0; i < RoomSpawnPools.transform.childCount; i++)
                 {
-                    RoomObject = child.gameObject;
-                    PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
-                    PlayMakerFSM GrottoTrigger = RoomObject.transform.Find("_GAMEPLAY/Lab Machine/Grotto Trigger").GetComponent<PlayMakerFSM>();
-                    FsmState GrottoState = GrottoTrigger?.GetState("State 2");
-                    GrottoState?.DisableActionsOfType<SendEvent>();
-                    GrottoState?.InsertAction(5, unfreeze);
-                    GrottoState?.InsertAction(6, FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event);
-                    FsmBool GrottoOpen = LabMachine.GetBoolVariable("Grotto Open");
-                    GrottoOpen.Value = Solved;
-                    if (!Solved)
+                    Transform child = RoomSpawnPools.transform.GetChild(i);
+                    if (child.name.Contains("Laboratory"))
                     {
-                        LabMachine?.GetState("Chek if Grotto Is Open")?.DisableActionsOfType<GetFsmBool>();
-                        
+                        RoomObject = child.gameObject;
+                        PlayMakerFSM LabMachine = RoomObject.transform.Find("_GAMEPLAY/Lab Machine").GetComponent<PlayMakerFSM>();
+                        FsmState State12 = LabMachine.GetState("State 12");
+                        State12.DisableAction(1);
+                        State12.DisableAction(4);
+                        State12.InsertAction(FSMEventHandler.RegisteredEvents["Blackbridge Grotto Unlock"].Event, 4);
+                        State12.AddAction(unfreeze);
                     }
                 }
-            }
-            
-
+            }         
         }
         public override void FoundLocation()
         {
@@ -426,7 +437,7 @@ namespace BluePrinceArchipelago.Items
             Unlocked = true;
             PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
             FsmState boolCheck = pt2.GetState("State 7");
-            boolCheck.EnableFirstActionOfType<BoolTest>();
+            boolCheck.EnableActionsOfType<BoolTest>();
             if (Solved)
             {
                 boolCheck.DisableFirstActionOfType<SendEvent>();
@@ -446,8 +457,9 @@ namespace BluePrinceArchipelago.Items
             {
                 PlayMakerFSM pt2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/SUNDIAL CONTROL/pt 2").GetComponent<PlayMakerFSM>();
                 FsmState boolCheck = pt2.GetState("State 7");
-                boolCheck.DisableFirstActionOfType<BoolTest>();
-                boolCheck?.AddAction(FSMEventHandler.RegisteredEvents["Satellite Raised"].Event);
+                boolCheck.RemoveTransitionsTo("FINISHED");
+                boolCheck.DisableActionsOfType<BoolTest>();
+                boolCheck.AddAction(FSMEventHandler.RegisteredEvents["Satellite Raised"].Event);
             }
         }
         public override void FoundLocation()
