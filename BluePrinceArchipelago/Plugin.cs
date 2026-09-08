@@ -48,7 +48,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("ModRoomManager", LogLevel.Info);
             //Logging.SetLogLevel("Items", LogLevel.Info);
             //Logging.SetLogLevel("Rooms", LogLevel.Info);
-            //Logging.SetLogLevel("Events", LogLevel.Info);
+            Logging.SetLogLevel("Events", LogLevel.Info);
             Logging.SetLogLevel("StatEvents", LogLevel.Info);
             Logging.SetLogLevel("Connection", LogLevel.Info);
             //Logging.SetLogLevel("APData", LogLevel.Info);

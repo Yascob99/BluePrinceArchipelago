@@ -60,6 +60,10 @@ namespace BluePrinceArchipelago
         public static PlayMakerFSM APEventFSM = new();
         public static PlayMakerFSM RunningEngine = new();
         public static PlayMakerFSM DigEngine = new();
+        public static PlayMakerFSM ChessKing = new();
+
+        // Other
+        public static RoomDraftHelper RDHelper = new(); 
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -192,7 +196,9 @@ namespace BluePrinceArchipelago
                 PickupSpawnPool = GameObject.Find("__SYSTEM/Pickup Spawn Pools").gameObject;
                 RunningEngine = GameObject.Find("__SYSTEM/RUN ENGINE/Running Engine")?.GetComponent<PlayMakerFSM>();
                 DigEngine = GameObject.Find("__SYSTEM/Utility/Dig Engine")?.GetComponent<PlayMakerFSM>();
+                ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>();
                 UpgradeDisksObj = GameObject.Find("__SYSTEM/Upgrade Disks");
+                RDHelper = GameObject.Find("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>();
                 FSMPatches.RoomForcer(MasterPicker); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 LoadArrays();
                 Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
@@ -476,6 +482,7 @@ namespace BluePrinceArchipelago
             else {
                 RegisterItems.ReloadGameObjects();
             }
+
             // Initialize the Star HUD so it can be properly updated when needed.
             GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
             if (ArchipelagoClient.Authenticated)
@@ -508,6 +515,9 @@ namespace BluePrinceArchipelago
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(GlobalManager);
+                }
+                if (ArchipelagoOptions.RoomDraftSanity) {
+                    FSMPatches.OuterDraftOverrides();
                 }
                 Plugin.ModRoomManager.HLCFix();
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
@@ -636,12 +646,11 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.RecheckRoomUnlockStatus();
             }
         }
-        // TODO: Fix outer room hook.
+
         /// <summary>
         ///     Called when the Outer Room Draft starts. Hook currently doesn't function properly.
         /// </summary>
-        /// <param name="draftManager">The draft manager object for the outer room.</param>
-        public static void OnOuterDraftStart(OuterDraftManager draftManager) {
+        public static void OnOuterDraftStart() {
             if (HasInitializedRooms) {
                 // Skip Archipelago room pool management if RoomDraftSanity is disabled
                 if (!ArchipelagoOptions.RoomDraftSanity)
@@ -650,22 +659,29 @@ namespace BluePrinceArchipelago
                     return;
                 }
 
-                // Reload arrays to ensure we have fresh references
-                ReloadArrays();
-
-                // If connected to Archipelago, ensure room unlock states are correct
-                if (ArchipelagoClient.Authenticated)
-                {
-                    EnsureRoomUnlockStates();
-                }
-
-                Logging.Log("Updating Rooms for outer draft");
+                Logging.LogWarning("Updating Rooms for outer draft");
                 Plugin.ModRoomManager.UpdateRoomPools();
+
+                ModRoomManager.OuterDraftRooms = Plugin.ModRoomManager.OuterDraftPrePickShuffling();
+                Logging.LogWarning("Outer Room Pool:");
+                foreach (ModRoom room in ModRoomManager.OuterDraftRooms) {
+                    Logging.LogWarning($"\t{room.Name}");
+                }
+                MasterPicker.GetIntVariable("Reroll Count").Value = 0;
+                Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, 0);
+                PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM DraftUI = GameObject.Find("__SYSTEM/THE DRAFT/anchor/DRAFT UI").GetComponent<PlayMakerFSM>();
+                StandaloneDoorCode.SendEvent("ResumeDraft");
+                DraftUI.SendEvent("Go");
             }
             else
             {
                 Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
             }
+        }
+
+        public static void OnOuterDraftReroll() {
+            Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, MasterPicker.GetIntVariable("Reroll Count").Value);
         }
 
         /// <summary>
@@ -881,7 +897,7 @@ namespace BluePrinceArchipelago
         private static void LoadArrays() {
             // Core picker arrays (indexes 2-32, 55-56, 58-61)
             PlayMakerArrayListProxy array = null;
-            List<int> coreChildIDs = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 55];
+            List<int> coreChildIDs = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32];
             for (int i = 0; i < coreChildIDs.Count; i++) {
                 array = PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
                 if (array != null) {
@@ -936,6 +952,10 @@ namespace BluePrinceArchipelago
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(GlobalManager);
+                }
+                if (ArchipelagoOptions.RoomDraftSanity)
+                {
+                    FSMPatches.OuterDraftOverrides();
                 }
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
@@ -1211,6 +1231,6 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.AddRoom("ROOM 46", [], true, false);
                 Plugin.ModRoomManager.AddRoom("ENTRANCE HALL", [], true, false);
             }
-        }
+        }   
     }
 }

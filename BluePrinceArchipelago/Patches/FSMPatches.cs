@@ -1,9 +1,12 @@
 ﻿using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using UnityEngine;
+using static HutongGames.PlayMaker.FsmEventTarget;
 
 namespace BluePrinceArchipelago.Patches
 {
@@ -36,9 +39,6 @@ namespace BluePrinceArchipelago.Patches
             DraftCodeStart.ChangeTransition("FINISHED", "Draft Forced Check");
             FsmState PickAnother = fsm.GetState("Pick Another ");
             PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
-            FsmState OuterDraftState = fsm.GetState("Outer slot pick");
-            // Add Outer Draft Trigger.
-            OuterDraftState.InsertAction(3, FSMEventHandler.RegisteredEvents["Outer Draft Start"].Event);
         }
 
         /// <summary>
@@ -363,17 +363,18 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM SolariumDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/SOLARIUM/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState SolariumAddState = SolariumDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
-            //Dormitory
+            // Dormitory
             PlayMakerFSM DormitoryDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DORMITORY/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DormitoryAddState = DormitoryDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
-            //Casino
+            // Casino
             PlayMakerFSM CasinoDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CasinoAddState = CasinoDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             // Prevents the CoM from erronously granting the planetarium location.
-            PlayMakerFSM CoMAddButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Duplicate Find - menu/2 Button Spread(2)/ YES BUTTON").GetComponent<PlayMakerFSM>();
-            CoMAddButton.GetState("State 7").DisableFirstActionOfType<CallMethod>();
+            PlayMakerFSM CoMAddButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Duplicate Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            FsmState CoMEventState = CoMAddButton.GetState("State 7");
+            CoMEventState.DisableFirstActionOfType<CallMethod>();
 
             //Plan Picker
             PlayMakerFSM PlanPicker = ModInstance.PlanPicker.GetComponent<PlayMakerFSM>();
@@ -393,5 +394,101 @@ namespace BluePrinceArchipelago.Patches
             PlanPicker.GetState("Casino Add").DisableActionsOfType<ArrayListAdd>();
         }
 
+        /// <summary>
+        ///     Overrides the Default Outer Draft Algorithm.
+        /// </summary>
+        public static void OuterDraftOverrides()    
+        {
+            PlayMakerFSM MasterPicker = ModInstance.MasterPicker;
+
+            // Prevent the Patch from being applied more than once.
+            if (MasterPicker.GetState("Pick Outer Slot") == null)
+            {
+                // Prevent Default Draft Code Calls.
+                FsmInt RerollCount = MasterPicker.AddFsmInt("Reroll Count", 0);
+                PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
+                FsmState SendFreeze = StandaloneDoorCode.GetState("Send Freeze");
+                FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
+                //SendFreeze.DisableActionsOfType<CallMethod>();
+                SendFreeze.DisableActionsOfType<SendEvent>();
+                RegisteredFSMEvent OuterDraftStart = new OuterDraftStart();
+                FSMEventHandler.RegisteredEvents["Outer Draft Start"] = OuterDraftStart;
+                OuterDraftStart.OnRegister();
+                RegisteredFSMEvent OuterDraftReroll = new OuterDraftReroll();
+                FSMEventHandler.RegisteredEvents["Outer Draft Reroll"] = OuterDraftReroll;
+                OuterDraftReroll.OnRegister();
+
+                ShuffleRooms.AddAction(OuterDraftStart.Event);
+                ShuffleRooms.RemoveTransitionsTo("FINISHED");
+                SendFreeze.ChangeTransition("FINISHED", "Shuffle Rooms");
+                StandaloneDoorCode.AddGlobalTransition("ResumeDraft", "State 1");
+                FsmState BerryCheck = MasterPicker.GetState("Berry Check");
+                FsmState OuterSlotPick = MasterPicker.GetState("Outer slot pick");
+                BerryCheck.ChangeTransition("FINISHED", "Outer slot pick");
+                GameObject Closet = Plugin.ModRoomManager.GetRoomByName("CLOSET").GameObj;
+                FsmGameObject OuterRoom1 = MasterPicker.AddFsmGameObject("OuterRoom1", Closet);
+                FsmGameObject OuterRoom2 = MasterPicker.AddFsmGameObject("OuterRoom2", Closet);
+                FsmGameObject OuterRoom3 = MasterPicker.AddFsmGameObject("OuterRoom3", Closet);
+
+                // Prevent the Default Room Picking.
+                OuterSlotPick.DisableFirstActionOfType<CallMethod>();
+                OuterSlotPick.DisableFirstActionOfType<SendEvent>();
+
+                // Add a New state that can be looped back to.
+                FsmState PickOuterSlot = MasterPicker.AddState("Pick Outer Slot");
+                OuterSlotPick.AddTransition("FINISHED", "Pick Outer Slot");
+
+                // Add a transition to be used Later.
+                MasterPicker.AddGlobalTransition("Outer Redraft", "Outer slot pick");
+
+                FsmState OuterSlot1 = MasterPicker.AddState("Outer Slot 1");
+                FsmState OuterSlot3 = MasterPicker.AddState("Outer Slot 3");
+                PickOuterSlot.AddTransition("Slot1", "Outer Slot 1");
+                PickOuterSlot.AddTransition("Slot3", "Outer Slot 3");
+
+                // Build the PickOuterSlot State.
+                SendEvent PlanSelected = MasterPicker.GetState("Slot 1").GetFirstActionOfType<SendEvent>();
+                IntCompare CheckSlot = new IntCompare() { integer1 = MasterPicker.GetIntVariable("SLOT"), integer2 = 2, lessThan = FsmEvent.GetFsmEvent("Slot1"), greaterThan = FsmEvent.GetFsmEvent("Slot3") };
+                PickOuterSlot.AddAction(CheckSlot);
+                PickOuterSlot.AddAction(new SetGameObject()
+                {
+                    everyFrame = false,
+                    gameObject = OuterRoom2,
+                    variable = MasterPicker.FindGameObjectVariable("RoomEngine")
+                });
+                PickOuterSlot.AddAction(PlanSelected);
+                PickOuterSlot.RemoveTransitionsTo("FINISHED");
+
+                // Build the OuterSlot1 State.
+                OuterSlot1.AddAction(new SetGameObject()
+                {
+                    everyFrame = false,
+                    gameObject = OuterRoom1,
+                    variable = MasterPicker.FindGameObjectVariable("RoomEngine")
+                });
+                OuterSlot1.AddAction(PlanSelected);
+                OuterSlot1.RemoveTransitionsTo("FINISHED");
+
+                // Build the OuterSlot3 State.
+                OuterSlot3.AddAction(new SetGameObject()
+                {
+                    everyFrame = false,
+                    gameObject = OuterRoom3,
+                    variable = MasterPicker.FindGameObjectVariable("RoomEngine")
+                });
+                OuterSlot3.AddAction(PlanSelected);
+                OuterSlot3.RemoveTransitionsTo("FINISHED");
+
+                // Change the Monk path to fall back on the PickOuterSlot if it isn't a Monk Pick.
+                FsmState OuterSlotPick2 = MasterPicker.GetState("Outer slot pick 2");
+                OuterSlotPick2.ChangeTransition("3", "Pick Outer Slot");
+
+                FsmState StandaloneRedraw = MasterPicker.GetState("Standalone Redraw");
+                IntAdd AddToRedraw = new IntAdd() { intVariable = RerollCount, add = 1, everyFrame = false };
+                StandaloneRedraw.AddAction(AddToRedraw);
+                StandaloneRedraw.AddAction(OuterDraftReroll.Event);
+                StandaloneRedraw.RemoveTransitionsTo("FINISHED");
+            }
+        }   
     }
 }

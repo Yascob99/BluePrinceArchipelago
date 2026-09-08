@@ -23,6 +23,7 @@ namespace BluePrinceArchipelago.Rooms
         public static List<string> VanillaRooms = [];
         public static List<string> CantCopy = ["ANTECHAMBER", "ENTRANCE HALL", "ROOM 46", "FOUNDATION", ""];
         public static List<string> FoundFloorplans = ["PLANETARIUM", "CONSERVATORY", "TUNNEL", "THRONE ROOM", "TREASURE TROVE", "MECHANARIUM", "LOST & FOUND", "CLOSED EXHIBIT", "CLOCK TOWER", "THE KENNEL", "VESTIBULE", "DOVECOTE", "SOLARIUM", "DORMITORY", "CASINO", "SAUNA", "LOCKER ROOM", "MORNING ROOM", "CLASSROOM"];
+        public static List<ModRoom> OuterDraftRooms = new();
 
         public static Dictionary<string, string> UpgradeIDs = new Dictionary<string, string>()
         {
@@ -578,6 +579,260 @@ namespace BluePrinceArchipelago.Rooms
                     Logging.LogWarning($"Room 'Room '{name.ToTitleCase()}' (GO: {name}): Could not find FSM named '{name}'");
                 }
             }
+        }
+
+        /// <summary>
+        ///     A substitute preshuffle of the Outer Rooms that works on smaller pool sizes.
+        /// </summary>
+        /// <returns>The shuffled outer room list 3-8 long.</returns>
+        public List<ModRoom> OuterDraftPrePickShuffling() {
+            List<string> OuterRooms = ["TOOLSHED", "BOMB SHELTER", "SCHOOLHOUSE", "SHRINE", "ROOT CELLAR", "HOVEL", "TRADING POST", "TOMB"];
+            List<string> NewList = new List<string>();
+            List<ModRoom> Output = new List<ModRoom>();
+            PlayMakerArrayListProxy StandaloneArray = ModInstance.PlanPicker.transform.GetChild(56).gameObject.GetComponent<PlayMakerArrayListProxy>();
+
+            // Keep on the rooms that are unlocked.
+            foreach (string room in OuterRooms) {
+                ModRoom modRoom = GetRoomByName(room);
+                if (modRoom.IsUnlocked) {
+                    NewList.Add(room);
+                }
+            }
+
+            // Replace with Closets if none.
+            if (NewList.Count == 0) {
+                ModRoom Closet = GetRoomByName("CLOSET");
+                return [Closet, Closet, Closet];
+            }
+
+            // Shuffle All the Rooms;
+            System.Random rng = new System.Random();
+            NewList.Shuffle(rng);
+
+            // Handles all the cases for less than 3 rooms in pool.
+            if (NewList.Count < 3)
+            {
+                foreach (string roomname in NewList)
+                {
+                    ModRoom modRoom = GetRoomByName(roomname);
+                    Output.Add(modRoom);
+                }
+                if (NewList.Count == 1) {
+                    Output.Add(Output[0]);
+                    Output.Add(Output[0]);
+                }
+                else if (NewList.Count == 2) {
+                    Output.Add(Output[0]);
+                }
+                return Output;
+            }
+            // Get all needed values.
+            int TombRNG = rng.Next(100) + 1;
+            int SchoolHouseRNG = rng.Next(100) + 1;
+            int ShrineRNG = rng.Next(100) + 1;
+            bool Reached46 = ModInstance.GlobalPersistentManager.GetBoolVariable("Room 46 Reached").Value;
+            bool VetMode = ModInstance.GlobalPersistentManager.GetBoolVariable("_Veteran Player").Value;
+            bool FoundationLowered = ModInstance.GlobalPersistentManager.GetBoolVariable("Foundation Elevator Down").Value;
+            int OuterDrafts = ModInstance.GlobalPersistentManager.GetIntVariable("Outer Drafts").Value;
+            int Day = ModInstance.GlobalPersistentManager.GetIntVariable("DAY").Value;
+            bool smallChance = Reached46 || (VetMode && Day == 1);
+            int StandaloneDraftedID = ModInstance.GlobalPersistentManager.GetIntVariable("TheStandaloneRoomDraftedToday").Value;
+            bool mediumChance = Day > 7 || FoundationLowered || OuterDrafts > 2;
+            List<bool> colorBools = ConfirmColors();
+
+            // Tomb RNG
+            if (!(TombRNG > 10 && smallChance))
+            {
+                if (!(TombRNG > 45 && mediumChance))    
+                {
+                    if (TombRNG != 100)
+                    {
+                        NewList.FindAndInsert("TOMB", NewList.Count - 1);
+                    }
+                }
+            }
+
+            // Schoolhouse RNG
+            if (!(SchoolHouseRNG > 10 && smallChance))
+            {
+                if (!(SchoolHouseRNG > 45 && mediumChance))
+                {
+                    if (SchoolHouseRNG < 95)
+                    {
+                        NewList.FindAndInsert("SCHOOLHOUSE", NewList.Count - 2);
+                    }
+                }
+            }
+
+            // Shrine RNG
+            if (!(ShrineRNG > 10 && smallChance))
+            {
+                if (!(ShrineRNG > 45 && mediumChance))
+                {
+                    if (ShrineRNG < 60)
+                    {
+                        NewList.FindAndInsert("SCHOOLHOUSE", NewList.Count - 2);
+                    }
+                }
+            }
+
+            // First Outer Draft
+            if (OuterDrafts == 0 && !(VetMode && Day == 1))
+            {
+                NewList.FindAndInsert("ROOT CELLAR");
+                NewList.FindAndInsert("TOOLSHED", 1);
+                NewList.FindAndInsert("HOVEL", 2);
+            }
+
+            // If 
+            if (StandaloneDraftedID != 100 && NewList.Count > 3) {
+                List<string> FirstThree = [NewList[0], NewList[1], NewList[2]];
+                if (StandaloneDraftedID == 0 && FirstThree.Contains("TOMB"))
+                {
+                    NewList.FindAndInsert("TOMB", 4);
+                }
+                else if (StandaloneDraftedID == 1 && FirstThree.Contains("TOMB"))
+                {
+                    NewList.FindAndInsert("TOOL SHED", 4);
+                }
+                else if (StandaloneDraftedID == 2 && FirstThree.Contains("TOOL SHED"))
+                {
+                    NewList.FindAndInsert("TRADING POST", 4);
+                }
+                else if (StandaloneDraftedID == 3 && FirstThree.Contains("HOVEL"))
+                {
+                    NewList.FindAndInsert("HOVEL", 4);
+                }
+                else if (StandaloneDraftedID == 4 && FirstThree.Contains("BOMB SHELTER"))
+                {
+                    NewList.FindAndInsert("BOMB SHELTER", 4);
+                }
+                else if (StandaloneDraftedID == 5 && FirstThree.Contains("ROOT CELLAR"))
+                {
+                    NewList.FindAndInsert("ROOT CELLAR", 4);
+                }
+                else if (StandaloneDraftedID == 6 && FirstThree.Contains("SHRINE"))
+                {
+                    NewList.FindAndInsert("SHRINE", 4);
+                }
+                else if (StandaloneDraftedID == 6 && FirstThree.Contains("SCHOOLHOUSE"))
+                {
+                    NewList.FindAndInsert("SCHOOLHOUSE", 4);
+                }
+            }
+
+            // Bedrooms more common today.
+            if (colorBools[0]) {
+                NewList.FindAndInsert("HOVEL", 0);
+            }
+
+            // Green Rooms more common today.
+            if (colorBools[4]) 
+            {
+                NewList.FindAndInsert("ROOT CELLAR", 0);
+            }
+
+            // Shop Rooms more common today.
+            if (colorBools[3])
+            {
+                NewList.FindAndInsert("TRADING POST", 0);
+            }
+
+            // Handles upgrade color rarities.
+            if (colorBools[5]) {
+                int BlueRNG = rng.Next(4);
+                switch (BlueRNG)
+                {
+                    case 0:
+                        NewList.FindAndInsertInOrder(["TOOLSHED", "BOMB SHELTER", "SHRINE"]);
+                        break;
+                    case 1:
+                        NewList.FindAndInsertInOrder(["SCHOOLHOUSE", "TOOLSHED", "BOMB SHELTER", "SHRINE"]);
+                        break;
+                    case 2:
+                        NewList.FindAndInsertInOrder(["SHRINE", "BOMB SHELTER", "SCHOOLHOUSE"]);
+                        break;
+                    case 3:
+                        NewList.FindAndInsertInOrder(["TOOLSHED", "SHRINE", "BOMB SHELTER", "SCHOOLHOUSE"]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // Handles Draxus
+            if (ModInstance.RDHelper.EnableDraxus || colorBools[6]) {
+                NewList.FindAndInsert("TOMB");
+            }
+
+            return GenerateOuterList(NewList);
+        }
+
+        /// <summary>
+        ///     Generates the Outer Draft Room List Based on the current list of Draftable Rooms.
+        /// </summary>
+        /// <param name="rooms">A list containing room names.</param>
+        /// <returns>A list of GameObjects representing rooms.</returns>
+        private List<ModRoom> GenerateOuterList(List<string> rooms) {
+            List<ModRoom> NewList = new();
+            foreach (string room in rooms) {
+                NewList.Add(GetRoomByName(room));
+            }
+            return NewList;
+        }
+
+        /// <summary>
+        ///     Confirms all colors are set correctly based on the activated color based rarity effects such as King and Scepter.
+        /// </summary>
+        /// <returns>A List of bools with which colors are active.</returns>
+        private List<bool> ConfirmColors() {
+            //                       0: Violet                           1: Orange                            2: Red                              3: Yellow                         4: Green                               5: Blue                               6: Black                                  
+            List<bool> colorBools = [ModInstance.RDHelper.EnableBedroom, ModInstance.RDHelper.EnableHallways, ModInstance.RDHelper.EnableFurnace, ModInstance.RDHelper.EnableShops, ModInstance.RDHelper.EnableGreenhouse, ModInstance.RDHelper.EnableBlueRooms, ModInstance.RDHelper.EnableBlackRooms];
+            PlayMakerFSM ColorFSM = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/ROYAL SCEPTER/You Found Royal Scepter/Text/GameObject/buttons/CONFIRM BUTTON").GetComponent<PlayMakerFSM>();
+            string sceptorColor = ColorFSM.GetStringVariable("Scepter Color").Value;
+            string kingColor = ModInstance.GlobalPersistentManager.GetIntVariable("Chess Power").Value == 6 ? ModInstance.ChessKing.GetStringVariable("King Color").Value : "";
+            if (sceptorColor == "BEDROOMS" || kingColor == "BEDROOMS") {
+                colorBools[0] = true;
+            }
+            else if (sceptorColor == "HALLWAYS" || kingColor == "HALLWAYS")
+            {
+                colorBools[1] = true;
+            }
+            else if (sceptorColor == "RED ROOMS" || kingColor == "RED ROOMS")
+            {
+                colorBools[2] = true;
+            }
+            else if (sceptorColor == "SHOP ROOMS" || kingColor == "SHOP ROOMS")
+            {
+                colorBools[3] = true;
+            }
+            else if (sceptorColor == "GREEN ROOMS" || kingColor == "GREEN ROOMS")
+            {
+                colorBools[4] = true;
+            }
+            else if (sceptorColor == "BLUEPRINTS" || kingColor == "BLUEPRINTS")
+            {
+                colorBools[5] = true;
+            }
+            else if (sceptorColor == "BLACKPRINTS" || kingColor == "BLACKPRINTS")
+            {
+                colorBools[6] = true;
+            }
+            return colorBools;
+        }
+
+        public void SetOuterDraftRooms(List<ModRoom> RoomList, int rerolls) {
+            int index = (0 + 3 * rerolls);
+            Logging.LogWarning($"{index % (RoomList.Count - 1)}");
+            
+            ModRoom Room1 = RoomList[index % (RoomList.Count - 1)];
+            ModRoom Room2 = RoomList[(index + 1) % (RoomList.Count - 1)];
+            ModRoom Room3 = RoomList[(index + 2) % (RoomList.Count - 1)];
+            Logging.LogWarning(Room1.GameObj.name);
+            ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom1").Value = Room1.GameObj;
+            ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom2").Value = Room2.GameObj;
+            ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom3").Value = Room3.GameObj;
+            Logging.LogWarning(ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom1").Value.name);
         }
 
         /// <summary>

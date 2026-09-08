@@ -34,7 +34,7 @@ public static class ArchipelagoConsole
     private static int previousEnd = 0;
     private static float lastUpdateTime = Time.time;
     private const float HideTimeout = 15f;
-    private const int MaxLogLines = 300;
+    private const int MaxLogLines = 5000;
 
     private static string CommandText = "/help";
     private static Rect CommandTextRect;
@@ -327,7 +327,14 @@ public static class ArchipelagoConsole
         else
         {
             height = (int)(Screen.height * 0.3f);
-            scrollDepth = height * 10;
+            if (currentLogLines < 11)
+            {
+                scrollDepth = (int)(Screen.height * 0.3f);
+            }
+            else
+            {
+                scrollDepth = (int)(Screen.height * 0.02f * currentLogLines);
+            }
         }
 
         window = new Rect(Screen.width / 2 - width / 2, 0, width, height);

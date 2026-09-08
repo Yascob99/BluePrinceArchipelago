@@ -7,8 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -464,6 +462,121 @@ namespace BluePrinceArchipelago.Utils
                 index++;
             }
             return -1;
+        }
+
+        /// <summary>
+        ///     A Fisher-Yates Shuffle algorithm.
+        ///     Taken from https://stackoverflow.com/questions/273313/randomize-a-listt
+        /// </summary>
+        /// <typeparam name="T">The Type of the list's items.</typeparam>
+        /// <param name="list">The List to Shuffle</param>
+        /// <param name="rng">The System.Random rng to use.</param>
+        public static void Shuffle<T>(this IList<T> list, System.Random rng = null)
+        {
+            if (rng == null)
+            {
+                rng = new System.Random();
+            }
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+        /// <summary>
+        ///     Finds a value in the list then moves it to the new index.
+        ///     Adds the value to the back of the list if the index is too high.
+        /// </summary>
+        /// <typeparam name="T">The type of values in the list</typeparam>
+        /// <param name="list">The list to modify</param>
+        /// <param name="value">The value to find and move.</param>
+        /// <param name="i">The position to move it to.</param>
+        public static void FindAndInsert<T>(this IList<T> list, T value, int i = 0) {
+            int n = list.Count;
+            int j = 0;
+
+            // Restrict i to be 0 to n - 1 to make sure it's within bounds.
+            i = i < 0 ? 0 : i > n - 1 ? n - 1 : i;
+            while (j < n)
+            {
+                T val = list[j];
+                if (val.Equals(value))
+                {
+                    n = j;
+                    list.RemoveAt(j);
+                    list.Insert(i, value);
+                    return;
+                }
+                j++;
+            }
+
+        }
+
+        /// <summary>
+        ///     Finds the provided values then inserts them in the prescribed order if found.
+        /// </summary>
+        /// <typeparam name="T">The type of values in the list</typeparam>
+        /// <param name="list">The list the operation is performed on.</param>
+        /// <param name="values">The list of values to find.</param>
+        /// <param name="i">The starting index for inserting values at.</param>
+        public static void FindAndInsertInOrder<T>(this IList<T> list, T[] values, int i = 0) {
+            int n = list.Count;
+            int j = 0;
+            if (i < 0)
+            {
+                i = 0;
+            }
+            int count = 0;
+            int removed = 0;
+
+            // Initialize a list with which values were found.
+            List<bool> found = new();
+            foreach (T value in values) {
+                found.Add(false);
+            }
+
+            // Find all the values, note which were found and remove it from the list;
+            while (j < n - removed && found.Count < values.Length)
+            {
+                T val = list[j];
+                count = 0;
+                foreach (T value in values)
+                {
+                    if (val.Equals(value))
+                    {
+                        list.RemoveAt(j);
+                        removed++;
+                        j--; // Remove so the next item isn't skipped.
+                        found[count] = true;
+                    }
+                    count++;
+                }
+                j++;
+            }
+
+            int shift = 0;
+            count = 0;
+            int insertIndex = 0;
+
+            // Now finally add back in the items in the correct order.
+            foreach (bool wasfound in found) {
+                if (wasfound) {
+                    insertIndex = i + shift;
+                    if (insertIndex < n - 1)
+                    {
+                        list.Insert(insertIndex, values[count]);
+                    }
+                    else { 
+                        list.Add(values[insertIndex]);
+                    }
+                    shift++;
+                }
+                count++;
+            }
         }
     }
 }

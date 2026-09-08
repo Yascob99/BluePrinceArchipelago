@@ -40,17 +40,20 @@ namespace BluePrinceArchipelago.Items
     {
         public override void ActivateTrap()
         {
-            FsmBool isFrozen = ModInstance.GlobalPersistentManager?.GetBoolVariable("YesterFreezer");
+            FsmBool isFrozen = ModInstance.GlobalPersistentManager.GetBoolVariable("YesterFreezer");
             // If not in run and not already frozen.
             if (ModInstance.IsInRun && isFrozen != null && !isFrozen.Value)
             {
-                isFrozen.Value = true;
+                
+                ModInstance.GlobalPersistentManager.GetBoolVariable("YesterFreezer").Value = true;
                 Logging.LogWarning(ModInstance.GemManager.GetIntVariable("Gems").Value);
                 Logging.LogWarning(ModInstance.GoldManager.GetIntVariable("Gold").Value);
-                ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value = ModInstance.GemManager.GetIntVariable("Gems").Value;
-                ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGold").Value = ModInstance.GoldManager.GetIntVariable("Gold").Value;
+                int gems = ModInstance.GemManager.GetIntVariable("Gems").Value;
+                int gold = ModInstance.GoldManager.GetIntVariable("Gold").Value;
                 ModInstance.GoldManager.SendEvent("Freeze");
-                ModInstance.GemManager.SendEvent("QuickFreeze");
+                ModInstance.GemManager.SendEvent("Freeze");
+                ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value = gems;
+                ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGold").Value = gold;
             }
         }
     }

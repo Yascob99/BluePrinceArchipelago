@@ -33,6 +33,24 @@ namespace BluePrinceArchipelago.Utils
         }
 
         /// <summary>
+        ///     Attempts to convert the PlayMakerArrayListProxy into a list.
+        /// </summary>
+        /// <param name="arrayListProxy">The Proxy to convert.</param>
+        /// <returns>A list of GameObjects.</returns>
+        public static List<GameObject> TryConvertToList(this PlayMakerArrayListProxy arrayListProxy) {
+            List<GameObject> NewList = new List<GameObject>();
+            GameObject newVal = null;
+            foreach (var value in arrayListProxy.arrayList)
+            {
+                newVal = value.TryCast<GameObject>();
+                if (newVal != null) { 
+                    NewList.Add(newVal);
+                }
+            }
+            return NewList;
+        }
+
+        /// <summary>
         ///     Gets a PlayMakerHashTableProxy.
         /// </summary>
         /// <param name="go">The GameObject</param>

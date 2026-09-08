@@ -17,7 +17,6 @@ namespace BluePrinceArchipelago.Events
             { "Blackbridge Grotto Unlock", new BlackBridgeGrotto() },
             { "West Gate Path Unlock", new WestGatePathUnlock() },
             { "Gemstone Caverns Unlock", new GemstoneCavernsUnlock() },
-            { "Outer Draft Start", new OuterDraftStart() },
             { "Satellite Raised", new SatelliteRaised() },
         };
 
@@ -291,43 +290,6 @@ namespace BluePrinceArchipelago.Events
     }
 
     /// <summary>
-    ///     An event for when the OuterDraft starts.
-    /// </summary>
-    public class OuterDraftStart : RegisteredFSMEvent
-    {
-        public new string Name { get; set; } = "Outer Draft Start";
-        public override void OnRegister()
-        {
-            ModInstance.APEventFSM.AddState(Name);
-            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
-            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
-            Event = new SendEvent()
-            {
-                eventTarget = new FsmEventTarget()
-                {
-                    target = FsmEventTarget.EventTarget.GameObject,
-                    gameObject = new FsmOwnerDefault()
-                    {
-                        gameObject = Plugin.ModObject,
-                        ownerOption = OwnerDefaultOption.SpecifyGameObject
-                    },
-                    fsmName = "FSM",
-                    sendToChildren = false,
-                    excludeSelf = false
-                },
-                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
-                everyFrame = false,
-                delay = 0f
-            };
-        }
-
-        public override void OnTrigger()
-        {
-            ModInstance.OnDraftInitialize();
-        }
-    }
-
-    /// <summary>
     ///     An event for when a Unique Item is picked up.
     /// </summary>
     /// <param name="name">The name of the event.</param>
@@ -585,6 +547,76 @@ namespace BluePrinceArchipelago.Events
                 ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
             }
             Item.HasBeenFound = true;
+        }
+    }
+
+    public class OuterDraftStart() : RegisteredFSMEvent
+    {
+        public new string Name { get; set; } = "Outer Draft Start";
+
+        public override void OnRegister()
+        {
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
+
+        public override void OnTrigger()
+        {
+            Logging.LogWarning("Outer Draft Triggered");
+            ModInstance.OnOuterDraftStart();
+        }
+    }
+    public class OuterDraftReroll() : RegisteredFSMEvent
+    {
+        public new string Name { get; set; } = "Outer Draft Reroll";
+
+        public override void OnRegister()
+        {
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
+
+        public override void OnTrigger()
+        {
+            ModInstance.OnOuterDraftReroll();
         }
     }
 }

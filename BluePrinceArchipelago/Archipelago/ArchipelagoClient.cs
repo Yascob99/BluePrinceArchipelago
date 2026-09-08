@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
+using AsmResolver.PE.DotNet.ReadyToRun;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Rooms;
@@ -312,7 +313,38 @@ public class ArchipelagoClient
                 // Handle any items that have not been received formally.
                 if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Starting ")) {
                     Logging.LogWarning($"Requeueing {item.ItemName}");
-                    ModInstance.QueueManager.AddItemToQueue(item);
+                    if (item.LocationName == "Server")
+                    {
+                        // Checks if the item recieved is a room.
+                        if (Plugin.ModRoomManager.GetRoomByName(item.ItemName) != null)
+                        {
+                            // If rooms haven't been initialized, add it to the item queue
+                            if (!ModInstance.HasInitializedRooms)
+                            {
+                                ModInstance.QueueManager.AddItemToQueue(item);
+                                session.Items.DequeueItem();
+                            }
+                            else
+                            {
+                                ModInstance.QueueManager.ReceiveRoom(item);
+                            }
+                        }
+                        // Not a Room.
+                        else
+                        {
+                            session.Items.DequeueItem();
+                            // Try to recieve item, on failure add it back to the queue.
+                            if (!ModInstance.QueueManager.ReceiveServerItem(item))
+                            {
+                                ModInstance.QueueManager.AddItemToQueue(item);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        ModInstance.QueueManager.AddItemToQueue(item);
+                    }
                 } 
             }
         }
@@ -851,6 +883,11 @@ public class ArchipelagoQueueManager {
                 if (!ModItemManager.UpgradeDisks.RecievedItems.Contains(location))
                 {
                     ModItemManager.UpgradeDisks.RecievedItems.Add(location);
+                    return true;
+                }
+                // Do not requeue Upgrade Disks when Upgrade Disk Sanity is off.
+                if (!ArchipelagoOptions.UpgradeDiskSanity) {
+                    return true;
                 }
                 return false;
             }
