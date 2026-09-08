@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using BepInEx;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using Newtonsoft.Json;
 using System;
@@ -28,6 +29,7 @@ namespace BluePrinceArchipelago.Utils
         public const string TrunkCountsFile = "TrunkCounts.json";
         public const string LocationDictFile = "LocationDict.json";
         public const string DeathLinkTotalsFile = "DeathLinkTotals.json";
+        public const string UpgradeDiskStateFile = "UpgradeDiskState.json";
 
         public static string RecievedItemsPath => Path.Combine(ModFolder, SessionFolder, RecievedItemsFile);
         public static string SentLocationsPath => Path.Combine(ModFolder, SessionFolder, SentLocationsFile);
@@ -37,6 +39,7 @@ namespace BluePrinceArchipelago.Utils
         public static string TrunkCountsPath => Path.Combine(ModFolder, SessionFolder, TrunkCountsFile);
         public static string LocationDictPath => Path.Combine(ModFolder, SessionFolder, LocationDictFile);
         public static string DeathLinkTotalsPath => Path.Combine(ModFolder, SessionFolder, DeathLinkTotalsFile);
+        public static string UpgradeDiskStatePath => Path.Combine(ModFolder, SessionFolder, UpgradeDiskStateFile);
 
         /// <summary>
         ///     Initializes all of the data and creates the subfolder if it doesn't exist.
@@ -50,7 +53,8 @@ namespace BluePrinceArchipelago.Utils
             InitializeSessionData();
             InitializeServerDetails();
             InitializeLocationDict();
-        }
+            InitializeUpgradeDiskData();
+        }   
 
         /// <summary>
         ///     Updates all of the non-timing sensitive states.
@@ -156,6 +160,17 @@ namespace BluePrinceArchipelago.Utils
                 data.DeathLinkCount = DeathLinkHandler.DeathLinkCount;
                 data.TotalDeathLinksSent = DeathLinkHandler.TotalDeathLinksSent;
                 data.BlockedDeaths = DeathLinkHandler.BlockedDeathLinks;
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+        }
+
+        public static void UpdateUpgradeDiskData() {
+            using (var writer = new StreamWriter(UpgradeDiskStatePath, false))
+            {
+                UpgradeDiskData data = new UpgradeDiskData();
+                data.FoundUpgrades = ModItemManager.UpgradeDisks.FoundLocations;
+                data.UsedUpgrades = ModItemManager.UpgradeDisks.UsedLocations;
                 writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
@@ -417,6 +432,44 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
         }
+        public static void InitializeUpgradeDiskData()
+        {
+            if (File.Exists(UpgradeDiskStatePath))
+            {
+                string jsonData = "";
+                using (var reader = new StreamReader(UpgradeDiskStatePath))
+                {
+                    jsonData = reader.ReadToEnd();
+                }
+                if (jsonData.Trim().Length > 0)
+                {
+                    try
+                    {
+                        UpgradeDiskData data = JsonConvert.DeserializeObject<UpgradeDiskData>(jsonData);
+                        ModItemManager.UpgradeDisks.FoundLocations = data.FoundUpgrades;
+                        ModItemManager.UpgradeDisks.UsedLocations = data.UsedUpgrades;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Log($"Error loading Received items: \n{ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                using (var writer = new StreamWriter(UpgradeDiskStatePath, false))
+                {
+                    DeathLinkData data = new DeathLinkData();
+                    data.DeathLinkEnabled = false;
+                    data.DeathLinkCount = 0;
+                    data.TotalDeathLinksSent = 0;
+                    data.BlockedDeaths = 0;
+                    writer.Write(JsonConvert.SerializeObject(data));
+                    writer.Flush();
+                }
+            }
+        }
 
         /// <summary>
         ///     Resets most of the State Data to it's defaults.
@@ -467,6 +520,15 @@ namespace BluePrinceArchipelago.Utils
                 writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
+            //Upgrade Disk Data
+            using (var writer = new StreamWriter(UpgradeDiskStatePath, false)) { 
+                UpgradeDiskData data = new UpgradeDiskData();
+                data.FoundUpgrades = new List<string>();
+                data.UsedUpgrades = new List<string>();
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Flush();
+            }
+
             //Don't reset the connection details since they might be useful.
         }
     }

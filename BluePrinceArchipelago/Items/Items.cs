@@ -1522,6 +1522,7 @@ namespace BluePrinceArchipelago.Items
                     if (!FoundLocations.Contains(location))
                     {
                         FoundLocations.Add(location);
+                        State.UpdateUpgradeDiskData();
                         return true;
                     } 
                 }
@@ -1539,20 +1540,7 @@ namespace BluePrinceArchipelago.Items
             int j = -1;
             if (ArchipelagoOptions.UpgradeDiskSanity)
             {
-                foreach (string boolName in UsedVariables)
-                {
-                    j++;
-                    string location = Locations[j];
-                    if (ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(boolName).Value)
-                    {
-                        if (!UsedLocations.Contains(location))
-                        {
-                            UsedLocations.Add(location);
-                        }
-                    }
-                }
                 Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
-            
                 foreach (string location in RecievedItems)
                 {
                     Logging.LogWarning($"{location}");
@@ -1587,8 +1575,12 @@ namespace BluePrinceArchipelago.Items
                 if (!UsedLocations.Contains(location))
                 {
                     UsedLocations.Add(location);
+                    State.UpdateDeathLinkData();
                 }
-                ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
+                if (FoundLocations.Contains(location))
+                {
+                    ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
+                }
             }
             else {
                 Logging.LogWarning("Unable to set Location as used, no received locations are currently unused.", "UpgradeDisks");
@@ -1605,9 +1597,11 @@ namespace BluePrinceArchipelago.Items
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
+                State.UpdateDeathLinkData();
                 //Fix location name for pickup event.
                 ModInstance.ModEventHandler.OnUgradeDiskFound(location);
             }
+            ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
         }
 
         /// <summary>
@@ -1637,6 +1631,10 @@ namespace BluePrinceArchipelago.Items
             if (!RecievedItems.Contains(location.ToUpper()))
             {
                 RecievedItems.Add(location.ToUpper());
+            }
+            // If UpgradeDiskSanity is off, prevent adding it to inventory.
+            if (!ArchipelagoOptions.UpgradeDiskSanity) {
+                return;
             }
             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
             PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");

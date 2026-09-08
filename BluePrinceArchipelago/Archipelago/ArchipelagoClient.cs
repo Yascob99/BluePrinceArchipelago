@@ -264,7 +264,7 @@ public class ArchipelagoClient
                 // If the item was a starting item
                 if (item.LocationName == "Server")
                 {
-                    Logging.Log($"Attempting to receive Item: {item.ItemName}");
+                    Logging.LogWarning($"Attempting to receive Item: {item.ItemName}");
                     // Checks if the item recieved is a room.
                     if (Plugin.ModRoomManager.GetRoomByName(item.ItemName) != null)
                     {
@@ -312,7 +312,6 @@ public class ArchipelagoClient
                 session.Items.DequeueItem();
                 // Handle any items that have not been received formally.
                 if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Starting ")) {
-                    Logging.LogWarning($"Requeueing {item.ItemName}");
                     if (item.LocationName == "Server")
                     {
                         // Checks if the item recieved is a room.
@@ -343,6 +342,7 @@ public class ArchipelagoClient
                     }
                     else
                     {
+                        Logging.LogWarning($"Requeueing {item.ItemName}");
                         ModInstance.QueueManager.AddItemToQueue(item);
                     }
                 } 

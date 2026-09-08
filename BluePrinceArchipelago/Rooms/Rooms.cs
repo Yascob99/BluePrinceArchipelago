@@ -823,16 +823,13 @@ namespace BluePrinceArchipelago.Rooms
 
         public void SetOuterDraftRooms(List<ModRoom> RoomList, int rerolls) {
             int index = (0 + 3 * rerolls);
-            Logging.LogWarning($"{index % (RoomList.Count - 1)}");
             
             ModRoom Room1 = RoomList[index % (RoomList.Count - 1)];
             ModRoom Room2 = RoomList[(index + 1) % (RoomList.Count - 1)];
             ModRoom Room3 = RoomList[(index + 2) % (RoomList.Count - 1)];
-            Logging.LogWarning(Room1.GameObj.name);
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom1").Value = Room1.GameObj;
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom2").Value = Room2.GameObj;
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom3").Value = Room3.GameObj;
-            Logging.LogWarning(ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom1").Value.name);
         }
 
         /// <summary>
