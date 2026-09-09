@@ -133,6 +133,8 @@ Please make sure you have Bepinex 6 installed as we need the IL2CPP support.
 
 * [Cinematic Unity Explorer](https://github.com/asd9176506911298/CinematicUnityExplorer/tree/master) - download BIE 6.X be.647+ IL2CPP then get the plugin into the `Blue Prince\BepInEx\plugins` folder
 
+* [FSMHelper](https://github.com/Yascob99/FSMHelper) - An extension mod for CinematicUnityExplorer and Unity Explorer which makes FSMs easier to examine in the Object Inspector.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 

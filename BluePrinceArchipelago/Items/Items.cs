@@ -1538,7 +1538,7 @@ namespace BluePrinceArchipelago.Items
             Logging.LogWarning("Updating Upgrade Disk Used States");
             if (ArchipelagoOptions.UpgradeDiskSanity)
             {
-                Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
+               // Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
                 foreach (string location in RecievedItems)
                 {
                     Logging.LogWarning($"{location}");
@@ -1739,12 +1739,12 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new UniqueItem("POWER HAMMER", Plugin.ModItemManager.GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
 
             // Showroom
-            Plugin.ModItemManager.AddItem(new UniqueItem("CHRONOGRAPH", Plugin.ModItemManager.GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("EMERALD BRACELET", Plugin.ModItemManager.GetInventoryItem("EMERALD BRACELET"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MASTER KEY", Plugin.ModItemManager.GetInventoryItem("MASTER KEY"), false, ItemSanityType.SpecialShop, true, false, ["Locksmith", "Showroom"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("MOON PENDANT", Plugin.ModItemManager.GetInventoryItem("MOON PENDANT"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("ORNATE COMPASS", Plugin.ModItemManager.GetInventoryItem("ORNATE COMPASS"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
-            Plugin.ModItemManager.AddItem(new UniqueItem("SILVER SPOON", Plugin.ModItemManager.GetInventoryItem("SLIVER SPOON"), false, ItemSanityType.SpecialShop, true, false, ["Showroom"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("CHRONOGRAPH", Plugin.ModItemManager.GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop, true, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("EMERALD BRACELET", Plugin.ModItemManager.GetInventoryItem("EMERALD BRACELET"), false, ItemSanityType.SpecialShop, true, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MASTER KEY", Plugin.ModItemManager.GetInventoryItem("MASTER KEY"), false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
+            Plugin.ModItemManager.AddItem(new UniqueItem("MOON PENDANT", Plugin.ModItemManager.GetInventoryItem("MOON PENDANT"), false, ItemSanityType.SpecialShop, true, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("ORNATE COMPASS", Plugin.ModItemManager.GetInventoryItem("ORNATE COMPASS"), false, ItemSanityType.SpecialShop, true, false));
+            Plugin.ModItemManager.AddItem(new UniqueItem("SILVER SPOON", Plugin.ModItemManager.GetInventoryItem("SLIVER SPOON"), false, ItemSanityType.SpecialShop, true, false));
             
             // Armory - TODO
             Plugin.ModItemManager.AddItem(new UniqueItem("MORNING STAR", Plugin.ModItemManager.GetInventoryItem("MORNING STAR"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
@@ -1765,8 +1765,6 @@ namespace BluePrinceArchipelago.Items
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Gems 2", null, false, "Gems", 2));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Luck 1", null, false, "Luck", 1));
             Plugin.ModItemManager.AddItem(new PermanentItem("Extra Starting Luck 2", null, false, "Luck", 2));
-            
-
 
             // Junk Items
             Plugin.ModItemManager.AddItem(new JunkItem("Extra Allowance 1", null, false, "Allowance", 1));

@@ -50,25 +50,17 @@ namespace BluePrinceArchipelago.Items
 
         public bool IsLocksmith { set; get; } = false;
 
-        public bool IsShowRoom { set; get; } = false;
-
         public SendEvent CommissaryEvent { get; set; } = null;
 
         public SendEvent DigEvent { get; set; } = null;
 
         public SendEvent LocksmithEvent { get; set; } = null;
 
-        public SendEvent ShowRoomEvent { get; set; } = null;
-
-        public SendEvent TradingEvent { get; set; } = null;
-
         public FsmState CommissaryState { get; set; } = null;
 
         public FsmState DigState { get; set; } = null;
 
         public FsmState LocksmithState { get; set; } = null;
-
-        public List<FsmState> ShowRoomStates { get; set; } = null;
 
         public FsmState TradingState { get; set; } = null;
 
@@ -113,9 +105,6 @@ namespace BluePrinceArchipelago.Items
                 else if (tag == "Locksmith") {
                     IsLocksmith = true;
                 }
-                else if (tag == "Showroom") {
-                    IsShowRoom = true;
-                }
             }
 
             FSMEventHandler.AddItemFSMEvent(name, this);
@@ -130,11 +119,7 @@ namespace BluePrinceArchipelago.Items
             if (IsLocksmith)
             {
                 LocksmithEvent = FSMEventHandler.AddBuyFSMEvent("Locksmith: Bought " + name, this).Event;
-            }
-            if (IsShowRoom) { 
-                ShowRoomEvent = FSMEventHandler.AddBuyFSMEvent("Showroom: Bought " + name, this).Event;
-            }
-            
+            } 
         }
 
         /// <summary>
@@ -211,7 +196,6 @@ namespace BluePrinceArchipelago.Items
                
             }
         }
-
 
         /// <summary>
         ///     Checks if the sanity is relevant to the current item.
@@ -334,17 +318,6 @@ namespace BluePrinceArchipelago.Items
                 {"LOCK PICK KIT", "Lockpick Kit Purchase"}
             };
 
-            Dictionary<string, List<string>> ShowRoomStates = new Dictionary<string, List<string>>()
-            {
-                {"EMERALD BRACELET", ["Em Purchase", "Em Purachase 2"] },
-                {"MOON PENDANT", ["Moon Purchase"]},
-                {"ORNATE COMPASS", ["Compass Purchase", "Compass Purchase 2"]},
-                {"MASTER KEY", ["Master Key Purchase"]},
-                {"CHRONOGRAPH", ["Chronograph Purchase"]},
-                { "SILVER SPOON", ["Silver Spoon Purchase"] }
-
-            };
-
             foreach (UniqueItem item in ModItemManager.UniqueItemList)
             {
                 // Handles start of Day Item Removal
@@ -394,21 +367,6 @@ namespace BluePrinceArchipelago.Items
                             state.AddAction(item.LocksmithEvent);
                         }
                     }
-                }
-                if (!item.HasBeenFound && item.IsShowRoom) {
-                    List<FsmState> states = new List<FsmState>();
-                    foreach (string statename in ShowRoomStates[item.Name]) {
-                        FsmState state = ModInstance.LocksmithMenu?.GetState(statename);
-                        states.Add(state);
-                        // If the item is not unlocked, prevent it from being added to inventory.
-                        if (!item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.DisableActionsOfType<ArrayListAdd>();
-                            state.AddAction(item.ShowRoomEvent);
-                        }
-                    }
-                    item.ShowRoomStates = states;
                 }
                 // Despawn Microchips if Found but not unlocked (since they don't use the spawn system).
                 if (item.HasBeenFound && item.Name == "MICROCHIP 1" && !item.IsUnlocked) { 

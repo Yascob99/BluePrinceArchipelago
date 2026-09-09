@@ -460,11 +460,9 @@ namespace BluePrinceArchipelago.Utils
             {
                 using (var writer = new StreamWriter(UpgradeDiskStatePath, false))
                 {
-                    DeathLinkData data = new DeathLinkData();
-                    data.DeathLinkEnabled = false;
-                    data.DeathLinkCount = 0;
-                    data.TotalDeathLinksSent = 0;
-                    data.BlockedDeaths = 0;
+                    UpgradeDiskData data = new UpgradeDiskData();
+                    data.FoundUpgrades = new List<string>();
+                    data.UsedUpgrades = new List<string>();
                     writer.Write(JsonConvert.SerializeObject(data));
                     writer.Flush();
                 }

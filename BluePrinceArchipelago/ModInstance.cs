@@ -506,28 +506,6 @@ namespace BluePrinceArchipelago
                                 }
                             }
                         }
-                        if (Item.IsShowRoom)
-                        {
-                            List<FsmState> states = Item.ShowRoomStates;
-                            foreach (FsmState state in states)
-                            {
-                                if (state != null)
-                                {
-                                    // If the item is not unlocked, prevent it from being added to inventory.
-                                    if (Item.IsUnlocked && Item.ApplySanity())
-                                    {
-                                        //Disable the actions that add the item to inventory.
-                                        state.EnableActionsOfType<ArrayListAdd>();
-                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                        // Check if the event we are trying to remove is the custom event we added.
-                                        if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
-                                        {
-                                            state.RemoveFirstActionOfType<SendEvent>();
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1008,6 +986,21 @@ namespace BluePrinceArchipelago
                     break;
                 case EventID.Torch_Chamber_Lit:
                     ModEventHandler.OnOtherLocation("Open the Torch Chamber Shortcut", "Torch Chamber Lit");
+                    break;
+                case EventID.Moon_Pendant_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("MOON PENDANT"));
+                    break;
+                case EventID.Master_Key_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("MASTER KEY"));
+                    break;
+                case EventID.Chronograph_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("CHRONOGRAPH"));
+                    break;
+                case EventID.Silver_Spoon_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("SILVER SPOON"));
+                    break;
+                case EventID.Emerald_Bracelet_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("EMERALD BRACELET"));
                     break;
             }
         }

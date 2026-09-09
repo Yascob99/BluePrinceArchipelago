@@ -237,31 +237,31 @@ namespace BluePrinceArchipelago.Patches
                     delay = 0f,
                     everyFrame = false
                 });
-                PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
-                if (MineUpgradeSpawn != null)
-                {
-                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
-                    FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
-                }
-                // Unsure why but this one doesn't want to play nicely otherwise.
-                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
-                if (FoundationSpawn != null)
-                {
-                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
-                    FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
-                }
+                //PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
+                //if (MineUpgradeSpawn != null)
+                //{
+                //    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
+                //    FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
+                //    CanSpawnDisk.Value = found;
+                //    MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                //}
+                //else
+                //{
+                //    Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
+                //}
+                //// Unsure why but this one doesn't want to play nicely otherwise.
+                //PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
+                //if (FoundationSpawn != null)
+                //{
+                //    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
+                //    FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
+                //    CanSpawnDisk.Value = found;
+                //    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                //}
+                //else
+                //{
+                //    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
+                //}
             }
         }
 
