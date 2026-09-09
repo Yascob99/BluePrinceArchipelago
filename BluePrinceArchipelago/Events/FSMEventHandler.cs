@@ -4,6 +4,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using Il2CppSystem;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace BluePrinceArchipelago.Events
             { "Outer Draft Start", new OuterDraftStart() },
             { "Outer Draft Reroll", new OuterDraftReroll() },
             { "Item Traded", new ItemTraded()},
+            { "Sundial Scorched", new SundialScorched()},
         };
 
         /// <summary>
@@ -626,43 +628,79 @@ namespace BluePrinceArchipelago.Events
             ModInstance.OnOuterDraftReroll();
         }
     }
-}
-
-public class ItemTraded() : RegisteredFSMEvent
-{
-    public new string Name { get; set; } = "Item Traded";
-
-    public override void OnRegister()
+    public class SundialScorched() : RegisteredFSMEvent
     {
-        ModInstance.APEventFSM.AddState(Name);
-        ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
-        // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
-        Event = new SendEvent()
+        public new string Name { get; set; } = "Sundial Scorched";
+
+        public override void OnRegister()
         {
-            eventTarget = new FsmEventTarget()
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
             {
-                target = FsmEventTarget.EventTarget.GameObject,
-                gameObject = new FsmOwnerDefault()
+                eventTarget = new FsmEventTarget()
                 {
-                    gameObject = Plugin.ModObject,
-                    ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
                 },
-                fsmName = "FSM",
-                sendToChildren = false,
-                excludeSelf = false
-            },
-            sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
-            everyFrame = false,
-            delay = 0f
-        };
-    }
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
 
-    public override void OnTrigger()
+        public override void OnTrigger()
+        {
+            ModInstance.ModEventHandler.OnOtherLocation("Scorch Sundial");
+        }
+    }
+    public class ItemTraded() : RegisteredFSMEvent
     {
-        PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
-        GameObject OfferItem = TradingPostMenu.GetGameObjectVariable("Offered_item").Value;
-        GameObject Icon = TradingPostMenu.GetGameObjectVariable("Icon").Value;
-        ModInstance.OnItemTraded(OfferItem, Icon);
+        public new string Name { get; set; } = "Item Traded";
+
+        public override void OnRegister()
+        {
+            ModInstance.APEventFSM.AddState(Name);
+            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+            Event = new SendEvent()
+            {
+                eventTarget = new FsmEventTarget()
+                {
+                    target = FsmEventTarget.EventTarget.GameObject,
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = Plugin.ModObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject
+                    },
+                    fsmName = "FSM",
+                    sendToChildren = false,
+                    excludeSelf = false
+                },
+                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+                everyFrame = false,
+                delay = 0f
+            };
+        }
+
+        public override void OnTrigger()
+        {
+            PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
+            GameObject OfferItem = TradingPostMenu.GetGameObjectVariable("Offered_item").Value;
+            GameObject Icon = TradingPostMenu.GetGameObjectVariable("Icon").Value;
+            ModInstance.OnItemTraded(OfferItem, Icon);
+        }
     }
 }
+
+
+    
 

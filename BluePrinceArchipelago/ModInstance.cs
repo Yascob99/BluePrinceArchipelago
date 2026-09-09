@@ -640,6 +640,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.TradingPostOverrides();
+                FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(GlobalManager);
@@ -1073,6 +1074,7 @@ namespace BluePrinceArchipelago
                 Plugin.ModItemManager.StartOfDay();
                 Plugin.ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.TradingPostOverrides();
+                FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(GlobalManager);

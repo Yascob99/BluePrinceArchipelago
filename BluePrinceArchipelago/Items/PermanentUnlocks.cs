@@ -310,16 +310,15 @@ namespace BluePrinceArchipelago.Items
         {
             if (!Unlocked)
             {
-                PlayMakerFSM GateOpened = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Opened").GetComponent<PlayMakerFSM>();
-                PlayMakerFSM GateClosed = GameObject.Find("TERRAIN/WEST SECTOR/_WEST SECTOR GAMEPLAY/West Gate/Gameplay Closed").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM GateOpened = GameObject.Find("TERRAIN").transform.Find("WEST SECTOR").Find("_WEST SECTOR GAMEPLAY").Find("West Gate").Find("Gameplay Opened").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM GateClosed = GameObject.Find("TERRAIN").transform.Find("WEST SECTOR").Find("_WEST SECTOR GAMEPLAY").Find("West Gate").Find("Gameplay Opened").GetComponent<PlayMakerFSM>();
                 FsmState GateIsClosed = GateOpened.AddState("GATE IS CLOSED");
                 GateIsClosed.RemoveTransitionsTo("FINISHED");
                 FsmTransition off = GateIsClosed.AddTransition("off", "Off");
                 GateIsClosed.AddAction(FSMEventHandler.RegisteredEvents["West Gate Path Unlock"].Event);
                 GateIsClosed.AddAction(new Wait() { time = 3.3f, finishEvent = off.FsmEvent, realTime = false });
                 GateOpened.GetState("Hover").ChangeTransition("click", "GATE IS CLOSED");
-                GateOpened.GetState("Off").ChangeTransition("click", "GATE IS CLOSED");
-                
+                GateOpened.GetState("Off").ChangeTransition("click", "GATE IS CLOSED"); 
             }
 
         }

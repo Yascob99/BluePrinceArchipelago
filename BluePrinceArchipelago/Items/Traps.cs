@@ -160,8 +160,7 @@ namespace BluePrinceArchipelago.Items
         {
             if (TrapType == "Steps")
             {
-                // TODO: find how to get current step count
-                var current = 50;
+                var current = ModInstance.StepManager.FindIntVariable("STEPS").value;
                 
                 var difference = current - count;
                 // change the adjustment amount.

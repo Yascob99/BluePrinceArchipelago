@@ -492,6 +492,17 @@ namespace BluePrinceArchipelago.Patches
 
                 StandaloneDoorCode.GetState("State 5").DisableAction(3);
             }
-        }   
+        }
+
+        public static void SundialOverrides() {
+            GameObject Step1 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 1");
+            GameObject Step2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 2");
+            for (int i = 0; i < 8; i++) {
+                GameObject child1 = Step1.transform.GetChild(i).gameObject;
+                GameObject child2 = Step2.transform.GetChild(i).gameObject;
+                child1.GetComponent<PlayMakerFSM>().GetState("State 9").AddAction(FSMEventHandler.RegisteredEvents["Sundial Scorched"].Event);
+                child2.GetComponent<PlayMakerFSM>().GetState("State 9").AddAction(FSMEventHandler.RegisteredEvents["Sundial Scorched"].Event);
+            }
+        }
     }
 }
