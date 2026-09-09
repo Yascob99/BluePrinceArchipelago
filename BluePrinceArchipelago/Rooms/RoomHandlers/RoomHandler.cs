@@ -20,6 +20,8 @@ public abstract class RoomHandler
     public virtual void OnAllowanceTokenCollected(string token) { }
     public virtual void OnRoomUnlocked(ModRoom room) { 
     }
+    public virtual void OnDayStart() {}
+
 
     public virtual void SetupEventHooks(){}
     

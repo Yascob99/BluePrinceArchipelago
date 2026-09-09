@@ -640,6 +640,7 @@ namespace BluePrinceArchipelago
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
+                Plugin.ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
             }
         }
@@ -1091,6 +1092,7 @@ namespace BluePrinceArchipelago
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
+                Plugin.ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
                 Plugin.ModRoomManager.HLCFix();
             }
@@ -1193,7 +1195,7 @@ namespace BluePrinceArchipelago
                 // Checks if the foundation can be drafted here.
                 Func<ModRoom, bool> foundationCheck = (room) => {
 
-                    // Check if the Foundation already exists in the house. //TODO check for foundation outer room check.
+                    // Check if the Foundation already exists in the house.
                     if (RoomsInHouse?.GetComponent<PlayMakerArrayListProxy>().arrayList.Contains("FOUNDATION") ?? false) {
                         return false;
                     }

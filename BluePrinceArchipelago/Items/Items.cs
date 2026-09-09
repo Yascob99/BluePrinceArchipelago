@@ -7,6 +7,7 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using Il2CppSystem.Collections;
+using Il2CppSystem.Runtime.Remoting.Messaging;
 using StableNameDotNet;
 using System;
 using System.Collections.Generic;
@@ -392,6 +393,18 @@ namespace BluePrinceArchipelago.Items
                     return "Cabinet Key";
                 case "Cabinet Key 2":
                     return "Cabinet Key 5";
+                case "Lucky Purse":
+                    return "lucky purse";
+                case "Pick Sound Amplifier":
+                    return "pick sound amplifier";
+                case "Burning Glass":
+                    return "burning glass";
+                case "Detector Shovel":
+                    return "detector shovel";
+                case "Power Hammer":
+                    return "power hammer";
+                case "Jack Hammer":
+                    return "jack hammer";
                 default:
                     return name;
             }
@@ -513,201 +526,207 @@ namespace BluePrinceArchipelago.Items
             GameObject item = null;
             foreach (string location in UpgradeDisks.Locations) {
                 j++;
-                
-                if (j < 10)
+                // Skips Trading Post Trade Disk, which has no normal pickup location.
+                if (j != 14)
                 {
-                    item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)00{j}")?.gameObject;
-                }
-                else {
-                    item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)0{j}")?.gameObject;
-                }
-                string scoutname = $"Upgrade Disk - {location.Replace("LADYSHIPS", "LADYSHIP\'s").Replace("AND ", "& ").Replace("FOUNDATION", "THE FOUNDATION").ToTitleCase()}";
-                GameObject You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk - " + location.ToTitleCase());
-                if (location.ToTitleCase() == "Commissary") {
-                    You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk - " + location.ToTitleCase());
-                }
-                if (You___Message != null)
-                {
-                    Transform itemModel = You___Message.transform.FindRecursive("Floppy Disk", true);
-                    if (itemModel != null)
+                    if (j < 10)
                     {
-                        //Instantiate a the AP Object at the original's position
-                        GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
-                        APGO.transform.localScale = itemModel.localScale;
-                        APGO.name = itemModel.name;
-                        itemModel.gameObject.DestroyAllChildren();
-                        APGO.MoveChildrenTo(itemModel.gameObject);
-                        GameObject.Destroy(APGO);
-
-                        //Import the template Text Prefab.  
-                        GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
-
-                        // Get the location ID of our first pickup.
-                        long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname);
-                        // Find the the details of the item that will be sent on pickup.
-                        ScoutedItemInfo scout = null;
-                        
-                        if (locationid != -1)
+                        item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)00{j}")?.gameObject;
+                    }
+                    else
+                    {
+                        item = GameObject.Find($"__SYSTEM/Pickup Spawn Pools/UPGRADE DISK(Clone)0{j}")?.gameObject;
+                    }
+                    string scoutname = $"Upgrade Disk - {location.Replace("LADYSHIPS", "LADYSHIP\'s").Replace("AND ", "& ").Replace("FOUNDATION", "THE FOUNDATION").ToTitleCase()}";
+                    GameObject You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk - " + location.ToTitleCase());
+                    if (location.ToTitleCase() == "Commissary")
+                    {
+                        You___Message = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk - " + location.ToTitleCase());
+                    }
+                    if (You___Message != null)
+                    {
+                        Transform itemModel = You___Message.transform.FindRecursive("Floppy Disk", true);
+                        if (itemModel != null)
                         {
-                            if (ArchipelagoClient.ServerData.LocationItemMap.ContainsKey(locationid))
+                            //Instantiate a the AP Object at the original's position
+                            GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
+                            APGO.transform.localScale = itemModel.localScale;
+                            APGO.name = itemModel.name;
+                            itemModel.gameObject.DestroyAllChildren();
+                            APGO.MoveChildrenTo(itemModel.gameObject);
+                            GameObject.Destroy(APGO);
+
+                            //Import the template Text Prefab.  
+                            GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
+
+                            // Get the location ID of our first pickup.
+                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname);
+                            // Find the the details of the item that will be sent on pickup.
+                            ScoutedItemInfo scout = null;
+
+                            if (locationid != -1)
                             {
-                                scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
-                            }
-                        }
-
-                        // Get the variables for creating our custom pickup message.
-                        string playerName = scout?.Player?.Name ?? "";
-                        //Check if item is being used.
-                        if (playerName != "")
-                        {
-                            string scoutItemName = scout?.ItemName ?? "";
-                            //TODO add logic for the descriptions to be different based on item importance.
-                            Logging.Log($"scoutItemName");
-                            string description = "";
-
-                            string[] itemWords = scoutItemName.Split(" ");
-                            if (itemWords.Length < 4)
-                            {
-                                scoutItemName = itemWords.Join("\n");
-                            }
-                            else
-                            {
-                                scoutItemName = scoutItemName.Minragged();
-                            }
-                            int FirstLetterCount = 0;
-                            int ItemNameCount = 0;
-                            int DescriptionCount = 0;
-                            // Update all the fonts and words to be correct
-
-                            Transform textObjects = You___Message.transform.Find("Text/GameObject");
-
-                            GameObject textObject = GameObject.Instantiate(textPrefab, textObjects.position, textObjects.rotation);
-                            Transform FirstFirstLetter = null;
-                            Transform FirstItemName = null;
-                            //Get rid of the original Text.
-                            Transform Prescription = textObject.transform.FindChild("Prescription");
-                            Transform Description = textObject.transform.FindChild($"Description (2)");
-
-                            TextMeshPro text = null;
-                            List<GameObject> toDestroy = new List<GameObject>();
-                            for (int i = 0; i < textObjects.transform.childCount; i++)
-                            {
-
-                                Transform textChild = textObjects.gameObject.transform.GetChild(i);
-                                if (textChild.TryGetComponent<TextMeshPro>(out text))
+                                if (ArchipelagoClient.ServerData.LocationItemMap.ContainsKey(locationid))
                                 {
-                                    // Add the name of the player who owns the item being spawned.
-                                    if (textChild.name.Contains("Prescription"))
-                                    {
-                                        textChild.name = "Prescription";
-                                        textChild.SetLocalPositionAndRotation(Prescription.localPosition, Prescription.localRotation);
-                                        textChild.transform.localScale = Prescription.transform.localScale;
+                                    scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
+                                }
+                            }
 
-                                        // Handle names ending in s with proper apostrophe convention
-                                        if (playerName.ToLower().EndsWith('s'))
+                            // Get the variables for creating our custom pickup message.
+                            string playerName = scout?.Player?.Name ?? "";
+                            //Check if item is being used.
+                            if (playerName != "")
+                            {
+                                string scoutItemName = scout?.ItemName ?? "";
+                                //TODO add logic for the descriptions to be different based on item importance.
+                                Logging.Log($"scoutItemName");
+                                string description = "";
+
+                                string[] itemWords = scoutItemName.Split(" ");
+                                if (itemWords.Length < 4)
+                                {
+                                    scoutItemName = itemWords.Join("\n");
+                                }
+                                else
+                                {
+                                    scoutItemName = scoutItemName.Minragged();
+                                }
+                                int FirstLetterCount = 0;
+                                int ItemNameCount = 0;
+                                int DescriptionCount = 0;
+                                // Update all the fonts and words to be correct
+
+                                Transform textObjects = You___Message.transform.Find("Text/GameObject");
+
+                                GameObject textObject = GameObject.Instantiate(textPrefab, textObjects.position, textObjects.rotation);
+                                Transform FirstFirstLetter = null;
+                                Transform FirstItemName = null;
+                                //Get rid of the original Text.
+                                Transform Prescription = textObject.transform.FindChild("Prescription");
+                                Transform Description = textObject.transform.FindChild($"Description (2)");
+
+                                TextMeshPro text = null;
+                                List<GameObject> toDestroy = new List<GameObject>();
+                                for (int i = 0; i < textObjects.transform.childCount; i++)
+                                {
+
+                                    Transform textChild = textObjects.gameObject.transform.GetChild(i);
+                                    if (textChild.TryGetComponent<TextMeshPro>(out text))
+                                    {
+                                        // Add the name of the player who owns the item being spawned.
+                                        if (textChild.name.Contains("Prescription"))
                                         {
-                                            text.text = $"{playerName}'";
+                                            textChild.name = "Prescription";
+                                            textChild.SetLocalPositionAndRotation(Prescription.localPosition, Prescription.localRotation);
+                                            textChild.transform.localScale = Prescription.transform.localScale;
+
+                                            // Handle names ending in s with proper apostrophe convention
+                                            if (playerName.ToLower().EndsWith('s'))
+                                            {
+                                                text.text = $"{playerName}'";
+                                            }
+                                            else
+                                            {
+                                                text.text = $"{playerName}'s";
+                                            }
                                         }
                                         else
                                         {
-                                            text.text = $"{playerName}'s";
+
+                                            // The first letter of each word in the item name is handled differently.
+                                            if (textChild.name.StartsWith("First Letter"))
+                                            {
+
+                                                if (FirstLetterCount != 0)
+                                                {
+                                                    toDestroy.Add(textChild.gameObject);
+                                                }
+                                                else
+                                                {
+                                                    textChild.name = $"First Letter ({FirstLetterCount + 1})";
+                                                    Transform FirstLetter = textObject.transform.FindChild($"First Letter ({FirstLetterCount + 1})");
+                                                    textChild.SetLocalPositionAndRotation(FirstLetter.localPosition, FirstLetter.localRotation);
+                                                    textChild.transform.localScale = FirstLetter.localScale;
+                                                    FirstFirstLetter = textChild;
+                                                    text.text = scoutItemName.Substring(0, 1);
+                                                    FirstLetterCount++;
+                                                }
+
+                                            }
+                                            // The rest of the word in the item name.
+                                            else if (textChild.name.StartsWith("Item Name"))
+                                            {
+                                                if (ItemNameCount != 0)
+                                                {
+                                                    toDestroy.Add(textChild.gameObject);
+                                                }
+                                                else
+                                                {
+
+                                                    FirstItemName = textChild;
+                                                    textChild.name = $"Item Name ({ItemNameCount + 1})";
+
+                                                    Transform ItemName = textObject.transform.FindChild($"Item Name ({ItemNameCount + 1})");
+                                                    textChild.SetLocalPositionAndRotation(ItemName.localPosition, ItemName.localRotation);
+                                                    textChild.transform.localScale = ItemName.localScale;
+                                                    text.text = scoutItemName.ToUpper().Substring(1);
+                                                    text.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                                                    ItemNameCount++;
+                                                }
+
+                                            }
+                                            // Handle the item description.
+                                            else if (textChild.name.StartsWith("Description"))
+                                            {
+
+                                                textChild.name = "Description";
+                                                textChild.SetLocalPositionAndRotation(Description.transform.localPosition, Description.transform.localRotation);
+                                                textChild.transform.localScale = Description.transform.localScale;
+                                                if (DescriptionCount == 0)
+                                                {
+                                                    text.text = description;
+                                                    text.horizontalAlignment = HorizontalAlignmentOptions.Right;
+                                                }
+                                                else
+                                                {
+                                                    toDestroy.Add(textChild.gameObject);
+                                                }
+                                            }
+                                            //Something else got mixed into the item prefab.
+                                            else
+                                            {
+                                                Logging.Log($"An extra game object was found, removing object \"{textChild.name}\"");
+                                                toDestroy.Add(textChild.gameObject);
+                                            }
+
                                         }
                                     }
                                     else
                                     {
-
-                                        // The first letter of each word in the item name is handled differently.
-                                        if (textChild.name.StartsWith("First Letter"))
-                                        {
-
-                                            if (FirstLetterCount != 0)
-                                            {
-                                                toDestroy.Add(textChild.gameObject);
-                                            }
-                                            else
-                                            {
-                                                textChild.name = $"First Letter ({FirstLetterCount + 1})";
-                                                Transform FirstLetter = textObject.transform.FindChild($"First Letter ({FirstLetterCount + 1})");
-                                                textChild.SetLocalPositionAndRotation(FirstLetter.localPosition, FirstLetter.localRotation);
-                                                textChild.transform.localScale = FirstLetter.localScale;
-                                                FirstFirstLetter = textChild;
-                                                text.text = scoutItemName.Substring(0, 1);
-                                                FirstLetterCount++;
-                                            }
-
-                                        }
-                                        // The rest of the word in the item name.
-                                        else if (textChild.name.StartsWith("Item Name"))
-                                        {
-                                            if (ItemNameCount != 0)
-                                            {
-                                                toDestroy.Add(textChild.gameObject);
-                                            }
-                                            else
-                                            {
-
-                                                FirstItemName = textChild;
-                                                textChild.name = $"Item Name ({ItemNameCount + 1})";
-
-                                                Transform ItemName = textObject.transform.FindChild($"Item Name ({ItemNameCount + 1})");
-                                                textChild.SetLocalPositionAndRotation(ItemName.localPosition, ItemName.localRotation);
-                                                textChild.transform.localScale = ItemName.localScale;
-                                                text.text = scoutItemName.ToUpper().Substring(1);
-                                                text.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                                                ItemNameCount++;
-                                            }
-
-                                        }
-                                        // Handle the item description.
-                                        else if (textChild.name.StartsWith("Description"))
-                                        {
-
-                                            textChild.name = "Description";
-                                            textChild.SetLocalPositionAndRotation(Description.transform.localPosition, Description.transform.localRotation);
-                                            textChild.transform.localScale = Description.transform.localScale;
-                                            if (DescriptionCount == 0)
-                                            {
-                                                text.text = description;
-                                                text.horizontalAlignment = HorizontalAlignmentOptions.Right;
-                                            }
-                                            else
-                                            {
-                                                toDestroy.Add(textChild.gameObject);
-                                            }
-                                        }
-                                        //Something else got mixed into the item prefab.
-                                        else
-                                        {
-                                            Logging.Log($"An extra game object was found, removing object \"{textChild.name}\"");
-                                            toDestroy.Add(textChild.gameObject);
-                                        }
-
+                                        toDestroy.Add(textChild.gameObject);
                                     }
                                 }
-                                else
+                                //Destroy all the game objects slated to be destroyed.
+                                foreach (GameObject desObj in toDestroy)
                                 {
-                                    toDestroy.Add(textChild.gameObject);
+                                    GameObject.Destroy(desObj);
                                 }
+                                GameObject.Destroy(textObject);
                             }
-                            //Destroy all the game objects slated to be destroyed.
-                            foreach (GameObject desObj in toDestroy)
+                            else
                             {
-                                GameObject.Destroy(desObj);
+                                Logging.LogWarning($"Unable to scout location for Upgrade Disk - {location.ToTitleCase()}");
                             }
-                            GameObject.Destroy(textObject);
                         }
                         else
                         {
-                            Logging.LogWarning($"Unable to scout location for Upgrade Disk - {location.ToTitleCase()}");
+                            Logging.LogWarning($"Unable to find the item model for Upgrade Disk - {location.ToTitleCase()}");
                         }
                     }
                     else
                     {
-                        Logging.LogWarning($"Unable to find the item model for Upgrade Disk - {location.ToTitleCase()}");
+                        Logging.LogWarning($"Unable to find You___ Notification for {scoutname.ToTitleCase()}");
                     }
-                }
-                else {
-                    Logging.LogWarning($"Unable to find You___ Notification for {scoutname.ToTitleCase()}");
                 }
             }
         }

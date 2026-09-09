@@ -67,6 +67,22 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
+        ///     Handles any room settings that need to be set on Day start
+        /// </summary>
+        public void StartOfDay() {
+            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools/");
+            foreach (Transform child in RoomSpawnPools.transform) { 
+                if (child != null)
+                {
+                    if (child.name.Contains("Foundation")) {
+                        // Remove a copy of the Foundation to prevent extra foundations from being in the pool.
+                        GetRoomByName("The Foundation").RoomPoolAdjustment = -1;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         ///     Adds a room to the tracked mod pool.
         /// </summary>
         /// <param name="room">The ModRoom of the room to add.</param>
@@ -1029,17 +1045,31 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
 
+       private int _RoomPoolAdjustment = 0;
+       public int RoomPoolAdjustment
+       { 
+            get { return _RoomPoolAdjustment; }
+            set { _RoomPoolAdjustment = value; }
+       }
+
+       private int _RoomMaxAdjustment = 0;
+       public int RoomMaxAdjustment
+       {
+            get { return _RoomMaxAdjustment; }
+            set { _RoomMaxAdjustment = value; }
+       }
+
         // tracks how many copies of the room are in the house.
         private int _RoomInHouseCount = 0;
 
-        public int RoomInHouseCount {
+       public int RoomInHouseCount {
             get { return _RoomInHouseCount;} 
-            set { _RoomInHouseCount = value; }
-        }
+            set { _RoomInHouseCount = value + _RoomMaxAdjustment; }
+       }
 
         public int RoomsLeftInPool {
             get { 
-                int left = _RoomPoolCount - RoomInHouseCount;
+                int left = _RoomPoolCount - RoomInHouseCount + _RoomPoolAdjustment;
                 return left > 0 ? left : 0; // Ensure we never return negative
             }
         }
