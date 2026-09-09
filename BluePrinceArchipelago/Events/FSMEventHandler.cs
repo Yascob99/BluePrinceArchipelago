@@ -367,10 +367,13 @@ namespace BluePrinceArchipelago.Events
                             //Disable the actions that add the item to inventory.
                             state.EnableActionsOfType<ArrayListAdd>();
                             SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                            // Check if the event we are trying to remove is the custom event we added.
-                            if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
+                            if (CustomEvent != null)
                             {
-                                state.RemoveFirstActionOfType<SendEvent>();
+                                // Check if the event we are trying to remove is the custom event we added.
+                                if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
+                                {
+                                    state.RemoveFirstActionOfType<SendEvent>();
+                                }
                             }
                         }
                     }
@@ -386,10 +389,13 @@ namespace BluePrinceArchipelago.Events
                             //Disable the actions that add the item to inventory.
                             state.EnableActionsOfType<ArrayListAdd>();
                             SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                            // Check if the event we are trying to remove is the custom event we added.
-                            if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
+                            if (CustomEvent != null)
                             {
-                                state.RemoveFirstActionOfType<SendEvent>();
+                                // Check if the event we are trying to remove is the custom event we added.
+                                if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
+                                {
+                                    state.RemoveFirstActionOfType<SendEvent>();
+                                }
                             }
                         }
                     }
