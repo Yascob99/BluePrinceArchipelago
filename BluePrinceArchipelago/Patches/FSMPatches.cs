@@ -36,6 +36,18 @@ namespace BluePrinceArchipelago.Patches
             DraftCodeStart.ChangeTransition("FINISHED", "Draft Forced Check");
             FsmState PickAnother = fsm.GetState("Pick Another ");
             PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
+
+            // Darkroom Skip Fix
+            PlayMakerFSM PlanManagement = GameObject.Find("__SYSTEM/THE DRAFT/PLAN MANAGEMENT").GetComponent<PlayMakerFSM>();
+            GameObject RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House");
+            FsmState DarkRoomLightsOn = PlanManagement.GetState("DarkRoom Lights On");
+            ArrayListContains CheckForArchives = DarkRoomLightsOn.GetFirstActionOfType<ArrayListContains>();
+            CheckForArchives.gameObject.gameObject = RoomsInHouse;
+            CheckForArchives.gameObject.GameObject = RoomsInHouse;
+            CheckForArchives.reference = "Rooms in House";
+            FsmEvent Empty = CheckForArchives.isContainedEvent;
+            CheckForArchives.isContainedEvent = CheckForArchives.isNotContainedEvent;
+            CheckForArchives.isNotContainedEvent = Empty;
         }
 
         /// <summary>
@@ -414,14 +426,14 @@ namespace BluePrinceArchipelago.Patches
                 PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 FsmState SendFreeze = StandaloneDoorCode.GetState("Send Freeze");
                 FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
-                //SendFreeze.DisableActionsOfType<CallMethod>();
-                SendFreeze.DisableActionsOfType<SendEvent>();
-                RegisteredFSMEvent OuterDraftStart = FSMEventHandler.RegisteredEvents["Outer Draft Start"];
+                SendFreeze.DisableAction(5);
+                //SendFreeze.DisableAction(7);
+                //RegisteredFSMEvent OuterDraftStart = FSMEventHandler.RegisteredEvents["Outer Draft Start"];
                 RegisteredFSMEvent OuterDraftReroll = FSMEventHandler.RegisteredEvents["Outer Draft Reroll"];
 
-                ShuffleRooms.AddAction(OuterDraftStart.Event);
-                ShuffleRooms.RemoveTransitionsTo("FINISHED");
-                SendFreeze.ChangeTransition("FINISHED", "Shuffle Rooms");
+                //ShuffleRooms.AddAction(OuterDraftStart.Event);
+                //ShuffleRooms.RemoveTransitionsTo("FINISHED");
+                //SendFreeze.ChangeTransition("FINISHED", "Shuffle Rooms");
                 StandaloneDoorCode.AddGlobalTransition("ResumeDraft", "State 1");
                 FsmState BerryCheck = MasterPicker.GetState("Berry Check");
                 FsmState OuterSlotPick = MasterPicker.GetState("Outer slot pick");

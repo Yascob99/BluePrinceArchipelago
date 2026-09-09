@@ -73,6 +73,12 @@ namespace BluePrinceArchipelago.Patches
         static void Prefix() {
             ModInstance.OnDraftBeforeInitialize();
         }
+        [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
+        [HarmonyPrefix]
+        static void OuterDraftPrefix()
+        {
+            ModInstance.OnOuterDraftStart();
+        }
 
     }
 

@@ -780,6 +780,7 @@ namespace BluePrinceArchipelago
         ///     Called when the Outer Room Draft starts. Hook currently doesn't function properly.
         /// </summary>
         public static void OnOuterDraftStart() {
+            Logging.LogWarning("Outer Draft Triggered");
             if (HasInitializedRooms) {
                 // Skip Archipelago room pool management if RoomDraftSanity is disabled
                 if (!ArchipelagoOptions.RoomDraftSanity)
