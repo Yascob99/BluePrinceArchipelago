@@ -796,8 +796,6 @@ namespace BluePrinceArchipelago
                 Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, 0);
                 PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 PlayMakerFSM DraftUI = GameObject.Find("__SYSTEM/THE DRAFT/anchor/DRAFT UI").GetComponent<PlayMakerFSM>();
-                StandaloneDoorCode.SendEvent("ResumeDraft");
-                DraftUI.SendEvent("Go");
             }
             else
             {

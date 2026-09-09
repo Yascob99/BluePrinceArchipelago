@@ -11,6 +11,7 @@
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
         <RootNamespace>BluePrinceArchipelago</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,7 +31,7 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <DebugType>none</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>$(BluePrinceDir)\BepInEx\plugins\$(AssemblyName)</OutputPath>
+        <OutputPath>bin\Release\$(AssemblyName)</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <IsPublishable>False</IsPublishable>
