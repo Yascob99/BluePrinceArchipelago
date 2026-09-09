@@ -1598,6 +1598,7 @@ namespace BluePrinceArchipelago.Items
                 //Fix location name for pickup event.
                 ModInstance.ModEventHandler.OnUgradeDiskFound(location);
             }
+            Logging.LogWarning(location.ToUpper());
             ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
         }
 

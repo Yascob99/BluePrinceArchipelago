@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker.Actions;
-using Il2CppSystem.Linq;
-using TMPro;
 using UnityEngine;
+using BluePrinceArchipelago.Items;
+using HutongGames.PlayMaker;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
@@ -37,8 +36,18 @@ public class Showroom : RoomHandler
 
     private static readonly string[] ItemStateNames = ["items A 1", "items A 2", "items A 3", "items A 4", "items A 5", "items A 6", "items B 1", "items B 2", "items B 3", "items B 4", "items B 5", "items B 6"];
 
+    private static readonly Dictionary<string, string[]> ItemPickupStates = new()
+    {
+        {"EMERALD BRACELET",["Em Purchase", "Em Purchase 2"] },
+        {"MOON PENDANT", ["Moon Purchase"]},
+        {"ORNATE COMPASS", ["Compass Purchase"]},
+        {"MASTER KEY", ["Master Key Purchase"]},
+        {"CHRONOGRAPH", ["Chronograph Purchase"]},
+        {"SILVER SPOON PURCHASE", ["Silver Spoon Purchase"]},
+    };
     private void SetupShowroomItems()
     {
+        Logging.LogWarning("Adjusting Showroom FSM");
         foreach (var stateName in ItemStateNames)
         {
             var state = _ShowroomMenuFsm.GetState(stateName);
@@ -64,6 +73,20 @@ public class Showroom : RoomHandler
                 var shopItem = LocationMap[target];
 
                 action.targetProperty.StringParameter.Value = shopItem.GetScoutHint();
+            }
+        }
+        // Prevent not unlocked items from being added to inventory.
+        foreach (var item in ItemPickupStates) {
+            string itemName = item.Key;
+            string[] stateNames = item.Value;
+            UniqueItem Item = Plugin.ModItemManager.GetUniqueItem(itemName);
+            if (Item != null) {
+                if (!Item.IsUnlocked) {
+                    foreach (string stateName in stateNames) {
+                        FsmState state = _ShowroomMenuFsm.GetState(stateName);
+                        state.DisableActionsOfType<ArrayListAdd>();
+                    }
+                }
             }
         }
     }

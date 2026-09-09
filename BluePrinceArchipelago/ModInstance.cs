@@ -286,6 +286,7 @@ namespace BluePrinceArchipelago
             if (targetName == "Archipelago")
             {
                 // If the Event is registered, trigger the event.
+                Logging.LogWarning(eventName);
                 if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
                 {
                     FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
@@ -410,6 +411,7 @@ namespace BluePrinceArchipelago
             if (OfferedItem != null)
             {
                 string itemName = OfferedItem.name;
+                Logging.Log($"Traded for {itemName}", "Trades");
                 if (itemName.Contains("UPGRADE DISK"))
                 {
                     if (ArchipelagoOptions.UpgradeDiskSanity)
@@ -428,80 +430,86 @@ namespace BluePrinceArchipelago
                 }
                 else
                 {
-                    UniqueItem Item = Plugin.ModItemManager.GetUniqueItem(OfferedItem.name);
-                    if (Item.IsUnlocked)
+                    UniqueItem Item = Plugin.ModItemManager.GetUniqueItem(itemName);
+                    
+                    if (Item != null)
                     {
-                        GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                        PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
+                        if (Item.IsUnlocked)
+                        {
+                            GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                            PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
 
-                        if (Icon != null && InventoryIcons != null)
-                        {
-                            ModItemManager.PickedUp.AddIfUnique(OfferedItem);
-                            InventoryIcons.Add(Icon, "GameObject");
-                            ModItemManager.PreSpawn.RemoveIfExists(itemName);
-                        }
-                    }
-                    else {
-                        ModItemManager.PickedUp.RemoveIfExists(itemName);
-                        ModItemManager.PreSpawn.AddIfUnique(OfferedItem);
-                    }
-                    if (!Item.HasBeenFound) { 
-                        Item.HasBeenFound = true;
-                        QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
-                        Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                        if (Item.IsCommissary)
-                        {
-                            FsmState state = Item.CommissaryState;
-                            if (state != null)
+                            if (Icon != null && InventoryIcons != null)
                             {
-                                // If the item is not unlocked, prevent it from being added to inventory.
-                                if (Item.IsUnlocked && Item.ApplySanity())
+                                ModItemManager.PickedUp.AddIfUnique(OfferedItem);
+                                InventoryIcons.Add(Icon, "GameObject");
+                                ModItemManager.PreSpawn.RemoveIfExists(itemName);
+                            }
+                        }
+                        else
+                        {
+                            ModItemManager.PickedUp.RemoveIfExists(itemName);
+                            ModItemManager.PreSpawn.AddIfUnique(OfferedItem);
+                        }
+                        if (!Item.HasBeenFound)
+                        {
+                            Item.HasBeenFound = true;
+                            QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                            Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                            if (Item.IsCommissary)
+                            {
+                                FsmState state = Item.CommissaryState;
+                                if (state != null)
                                 {
-                                    //Disable the actions that add the item to inventory.
-                                    state.EnableActionsOfType<ArrayListAdd>();
-                                    // Check if the event we are trying to remove is the custom event we added.
-                                    SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                    if (CustomEvent.sendEvent.Name.Contains("Commissary"))
+                                    // If the item is not unlocked, prevent it from being added to inventory.
+                                    if (Item.IsUnlocked && Item.ApplySanity())
                                     {
-                                        state.RemoveFirstActionOfType<SendEvent>();
+                                        //Disable the actions that add the item to inventory.
+                                        state.EnableActionsOfType<ArrayListAdd>();
+                                        // Check if the event we are trying to remove is the custom event we added.
+                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
+                                        if (CustomEvent.sendEvent.Name.Contains("Commissary"))
+                                        {
+                                            state.RemoveFirstActionOfType<SendEvent>();
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (Item.IsDig)
-                        {
-                            FsmState state = Item.DigState;
-                            if (state != null)
+                            if (Item.IsDig)
                             {
-                                // If the item is not unlocked, prevent it from being added to inventory.
-                                if (Item.IsUnlocked && Item.ApplySanity())
+                                FsmState state = Item.DigState;
+                                if (state != null)
                                 {
-                                    //Disable the actions that add the item to inventory.
-                                    state.EnableActionsOfType<ArrayListAdd>();
-                                    SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                    // Check if the event we are trying to remove is the custom event we added.
-                                    if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
+                                    // If the item is not unlocked, prevent it from being added to inventory.
+                                    if (Item.IsUnlocked && Item.ApplySanity())
                                     {
-                                        state.RemoveFirstActionOfType<SendEvent>();
+                                        //Disable the actions that add the item to inventory.
+                                        state.EnableActionsOfType<ArrayListAdd>();
+                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
+                                        // Check if the event we are trying to remove is the custom event we added.
+                                        if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
+                                        {
+                                            state.RemoveFirstActionOfType<SendEvent>();
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (Item.IsLocksmith)
-                        {
-                            FsmState state = Item.LocksmithState;
-                            if (state != null)
+                            if (Item.IsLocksmith)
                             {
-                                // If the item is not unlocked, prevent it from being added to inventory.
-                                if (Item.IsUnlocked && Item.ApplySanity())
+                                FsmState state = Item.LocksmithState;
+                                if (state != null)
                                 {
-                                    //Disable the actions that add the item to inventory.
-                                    state.EnableActionsOfType<ArrayListAdd>();
-                                    SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                    // Check if the event we are trying to remove is the custom event we added.
-                                    if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
+                                    // If the item is not unlocked, prevent it from being added to inventory.
+                                    if (Item.IsUnlocked && Item.ApplySanity())
                                     {
-                                        state.RemoveFirstActionOfType<SendEvent>();
+                                        //Disable the actions that add the item to inventory.
+                                        state.EnableActionsOfType<ArrayListAdd>();
+                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
+                                        // Check if the event we are trying to remove is the custom event we added.
+                                        if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
+                                        {
+                                            state.RemoveFirstActionOfType<SendEvent>();
+                                        }
                                     }
                                 }
                             }
@@ -1001,6 +1009,9 @@ namespace BluePrinceArchipelago
                     break;
                 case EventID.Emerald_Bracelet_Purchased:
                     ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("EMERALD BRACELET"));
+                    break;
+                case EventID.Ornate_Compass_Purchased:
+                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("ORNATE COMPASS"));
                     break;
             }
         }
