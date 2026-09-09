@@ -1,8 +1,11 @@
-﻿using BluePrinceArchipelago.Items;
+﻿using BluePrinceArchipelago;
+using BluePrinceArchipelago.Events;
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BluePrinceArchipelago.Events
 {
@@ -20,6 +23,7 @@ namespace BluePrinceArchipelago.Events
             { "Satellite Raised", new SatelliteRaised() },
             { "Outer Draft Start", new OuterDraftStart() },
             { "Outer Draft Reroll", new OuterDraftReroll() },
+            { "Item Traded", new ItemTraded()},
         };
 
         /// <summary>
@@ -623,3 +627,42 @@ namespace BluePrinceArchipelago.Events
         }
     }
 }
+
+public class ItemTraded() : RegisteredFSMEvent
+{
+    public new string Name { get; set; } = "Item Traded";
+
+    public override void OnRegister()
+    {
+        ModInstance.APEventFSM.AddState(Name);
+        ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
+        // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
+        Event = new SendEvent()
+        {
+            eventTarget = new FsmEventTarget()
+            {
+                target = FsmEventTarget.EventTarget.GameObject,
+                gameObject = new FsmOwnerDefault()
+                {
+                    gameObject = Plugin.ModObject,
+                    ownerOption = OwnerDefaultOption.SpecifyGameObject
+                },
+                fsmName = "FSM",
+                sendToChildren = false,
+                excludeSelf = false
+            },
+            sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
+            everyFrame = false,
+            delay = 0f
+        };
+    }
+
+    public override void OnTrigger()
+    {
+        PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
+        GameObject OfferItem = TradingPostMenu.GetGameObjectVariable("Offered_item").Value;
+        GameObject Icon = TradingPostMenu.GetGameObjectVariable("Icon").Value;
+        ModInstance.OnItemTraded(OfferItem, Icon);
+    }
+}
+

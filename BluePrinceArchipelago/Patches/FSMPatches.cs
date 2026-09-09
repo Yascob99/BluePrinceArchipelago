@@ -391,6 +391,14 @@ namespace BluePrinceArchipelago.Patches
             PlanPicker.GetState("Casino Add").DisableActionsOfType<ArrayListAdd>();
         }
 
+        public static void TradingPostOverrides() {
+            PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
+
+            FsmState MenuIconUpdate = TradingPostMenu.GetState("Menu Icon Update");
+            MenuIconUpdate.AddAction(FSMEventHandler.RegisteredEvents["Item Traded"].Event);
+            MenuIconUpdate.ChangeTransition("FINISHED", "TEXT ALERT - TRADE ACCEPTED!");
+        }
+
         /// <summary>
         ///     Overrides the Default Outer Draft Algorithm.
         /// </summary>
@@ -481,6 +489,8 @@ namespace BluePrinceArchipelago.Patches
                 StandaloneRedraw.AddAction(AddToRedraw);
                 StandaloneRedraw.AddAction(OuterDraftReroll.Event);
                 StandaloneRedraw.RemoveTransitionsTo("FINISHED");
+
+                StandaloneDoorCode.GetState("State 5").DisableAction(3);
             }
         }   
     }

@@ -1572,7 +1572,7 @@ namespace BluePrinceArchipelago.Items
                 if (!UsedLocations.Contains(location))
                 {
                     UsedLocations.Add(location);
-                    State.UpdateDeathLinkData();
+                    State.UpdateUpgradeDiskData();
                 }
                 if (FoundLocations.Contains(location))
                 {
@@ -1594,11 +1594,20 @@ namespace BluePrinceArchipelago.Items
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
-                State.UpdateDeathLinkData();
+                State.UpdateUpgradeDiskData();
                 //Fix location name for pickup event.
                 ModInstance.ModEventHandler.OnUgradeDiskFound(location);
             }
             ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
+        }
+
+        public void OnTrade() {
+            if (!FoundLocations.Contains("TRADING POST TRADE"))
+            {
+                FoundLocations.Add("TRADING POST TRADE");
+                State.UpdateUpgradeDiskData();
+                ModInstance.ModEventHandler.OnUgradeDiskFound("TRADING POST TRADE");
+            }
         }
 
         /// <summary>
