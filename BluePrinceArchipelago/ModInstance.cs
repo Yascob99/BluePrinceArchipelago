@@ -152,7 +152,6 @@ namespace BluePrinceArchipelago
             if (scene.name.Equals("Main Menu"))
             {
                 if (!AppliedHarmony) {
-                    Harmony.CreateAndPatchAll(typeof(FsmRoomPatches), "FsmRoomPatch");
                     Harmony.CreateAndPatchAll(typeof(EventPatches), "EventPatches"); //Apply event patches on the main menu to get some data that is not accessible later. 
                     Instance.StartCoroutine(Instance.LoadAllAssets().WrapToIl2Cpp());
                     AppliedHarmony = true;

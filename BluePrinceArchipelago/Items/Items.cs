@@ -1,5 +1,4 @@
-﻿using Archipelago.MultiClient.Net.Helpers;
-using Archipelago.MultiClient.Net.Models;
+﻿using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Utils;
@@ -7,7 +6,6 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using Il2CppSystem.Collections;
-using Il2CppSystem.Runtime.Remoting.Messaging;
 using StableNameDotNet;
 using System;
 using System.Collections.Generic;
@@ -1524,6 +1522,7 @@ namespace BluePrinceArchipelago.Items
     public class UpgradeDisks(GameObject gameObject = null) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
     {
         public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
+        public new List<string> LocationNames = ["Archives", "Trading Post Trade", "Tomb", "Commissary", "The Foundation", "Freezer", "Garage", "Great Hall", "Lost & Found", "Her Ladyship's Chamber", "Mechanarium", "Morning Room", "Office", "Trading Post Trade", "Vault", "Abandoned Mine"];
         public static List<GameObject> YouFoundObjects = new List<GameObject>();
         public List<EventID> EventNames = [EventID.Upgrade_Disk_Archives_found, EventID.Upgrade_Disk_BootLeg_found, EventID.Upgrade_Disk_Cloister_found, EventID.Upgrade_Disk_Commissary_found, EventID.Upgrade_Disk_Foundation_found, EventID.Upgrade_Disk_Freezer_found, EventID.Upgrade_Disk_Garage_found, EventID.Upgrade_Disk_GreatHall_found, EventID.Upgrade_Disk_LostFound_found, EventID.Upgrade_Disk_MasterBedroom_found, EventID.Upgrade_Disk_Mechanarium_found, EventID.Upgrade_Disk_MorningRoom_found, EventID.Upgrade_Disk_Office_found, EventID.Upgrade_Disk_TradingPost_found, EventID.Upgrade_Disk_Vault_found, EventID.Upgrade_Disk_TorchRoom_found];
         public List<string> UsedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
@@ -1627,18 +1626,7 @@ namespace BluePrinceArchipelago.Items
             {
                 FoundLocations.Add(location.ToUpper());
                 State.UpdateUpgradeDiskData();
-                //Fix location name for pickup event.
-                if (location == "FOUNDATION")
-                {
-                    ModInstance.ModEventHandler.OnUgradeDiskFound("THE FOUNDATION");
-                }
-                else if (location == "LOST & FOUND") {
-                    ModInstance.ModEventHandler.OnUgradeDiskFound("LOST & FOUND");
-                }
-                else
-                {
-                    ModInstance.ModEventHandler.OnUgradeDiskFound(location);
-                }
+                ModInstance.ModEventHandler.OnUgradeDiskFound(LocationNames[Locations.IndexOf(location.ToUpper())]);
             }
             Logging.LogWarning(location.Length);
             Logging.LogWarning(location.ToUpper());
