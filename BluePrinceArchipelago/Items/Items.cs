@@ -522,7 +522,7 @@ namespace BluePrinceArchipelago.Items
         public void ReplaceUpgradeDiskNotifications() {
             int j = 0;
             GameObject item = null;
-            foreach (string location in UpgradeDisks.Locations) {
+            foreach (string location in UpgradeDisks.ItemNames) {
                 j++;
                 // Skips Trading Post Trade Disk, which has no normal pickup location.
                 if (j != 14)
@@ -1390,7 +1390,6 @@ namespace BluePrinceArchipelago.Items
                 _Count = value;
             }
         }
-
         public override void AddItemToInventory()
         {
             if (_ItemType == "Gems")
@@ -1497,8 +1496,10 @@ namespace BluePrinceArchipelago.Items
         }
         //If it's in the prespawn list
         public bool IsPreSpawn = isPreSpawn;
-        // The names of the locations where it is found.
-        public List<string> Locations = new List<string>();
+        // The names of AP Location.
+        public List<string> LocationNames = new List<string>();
+        // The names of the AP Item.
+        public List<string> ItemNames = new List<string>();
         // The locations at which it has been found.
         public List<string> FoundLocations = new List<string>();
         // The locations to which the upgrade disk has been received for;
@@ -1510,7 +1511,7 @@ namespace BluePrinceArchipelago.Items
         {
             get
             {
-                return Locations.Count - FoundLocations.Count;
+                return LocationNames.Count - FoundLocations.Count;
             }
         }
     }
@@ -1521,8 +1522,8 @@ namespace BluePrinceArchipelago.Items
     /// <param name="gameObject">The gameobject of upgradedisk. Defaults to null.</param>
     public class UpgradeDisks(GameObject gameObject = null) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
     {
-        public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
-        public List<string> LocationNames = ["Archives", "Trading Post Trade", "Tomb", "Commissary", "The Foundation", "Freezer", "Garage", "Great Hall", "Lost & Found", "Her Ladyship's Chamber", "Mechanarium", "Morning Room", "Office", "Trading Post Trade", "Vault", "Abandoned Mine"];
+        public new List<string> ItemNames = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
+        public new List<string> LocationNames = ["Archives", "Trading Post Trade", "Tomb", "Commissary", "The Foundation", "Freezer", "Garage", "Great Hall", "Lost & Found", "Her Ladyship's Chamber", "Mechanarium", "Morning Room", "Office", "Trading Post Trade", "Vault", "Abandoned Mine"];
         public static List<GameObject> YouFoundObjects = new List<GameObject>();
         public List<EventID> EventNames = [EventID.Upgrade_Disk_Archives_found, EventID.Upgrade_Disk_BootLeg_found, EventID.Upgrade_Disk_Cloister_found, EventID.Upgrade_Disk_Commissary_found, EventID.Upgrade_Disk_Foundation_found, EventID.Upgrade_Disk_Freezer_found, EventID.Upgrade_Disk_Garage_found, EventID.Upgrade_Disk_GreatHall_found, EventID.Upgrade_Disk_LostFound_found, EventID.Upgrade_Disk_MasterBedroom_found, EventID.Upgrade_Disk_Mechanarium_found, EventID.Upgrade_Disk_MorningRoom_found, EventID.Upgrade_Disk_Office_found, EventID.Upgrade_Disk_TradingPost_found, EventID.Upgrade_Disk_Vault_found, EventID.Upgrade_Disk_TorchRoom_found];
         public List<string> UsedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
@@ -1534,8 +1535,8 @@ namespace BluePrinceArchipelago.Items
         /// <param name="locationName">The name of the location.</param>
         /// <returns>If the location was unlocked.</returns>
         public bool UnlockLocationIfExists(string locationName) {
-            foreach (string location in Locations) {
-                string lowlocation = location.ToLower().Replace("ladyships", "ladyship\'s").Replace("and ", "& ");
+            foreach (string location in ItemNames) {
+                string lowlocation = location.ToLower();
                 if (locationName.ToLower().Contains(lowlocation)) {
                     if (!FoundLocations.Contains(location))
                     {
@@ -1566,11 +1567,11 @@ namespace BluePrinceArchipelago.Items
                         AddItemToInventory(location);
                     }
                     if (FoundLocations.Contains(location.ToUpper())){
-                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
+                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[ItemNames.IndexOf(location.ToUpper())]).Value = true;
                     }
                     else
                     {
-                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = false;
+                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[ItemNames.IndexOf(location.ToUpper())]).Value = false;
                     }
                 }
             }
@@ -1584,7 +1585,7 @@ namespace BluePrinceArchipelago.Items
             Logging.Log($"Upgrade With ID {upgradeid} used.", "UpgradeDisks");
             if (RecievedItems.Count > UsedLocations.Count)
             {
-                string location = Locations[upgradeid-1];
+                string location = ItemNames[upgradeid-1];
                 if (!UsedLocations.Contains(location))
                 {
                     UsedLocations.Add(location);
@@ -1615,9 +1616,9 @@ namespace BluePrinceArchipelago.Items
             {
                 FoundLocations.Add(location.ToUpper());
                 State.UpdateUpgradeDiskData();
-                ModInstance.ModEventHandler.OnUgradeDiskFound(LocationNames[Locations.IndexOf(location.ToUpper())]);
+                ModInstance.ModEventHandler.OnUgradeDiskFound(LocationNames[ItemNames.IndexOf(location.ToUpper())]);
             }
-            ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
+            ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[ItemNames.IndexOf(location.ToUpper())]).Value = true;
         }
 
         public void OnTrade() {
@@ -1649,13 +1650,13 @@ namespace BluePrinceArchipelago.Items
         /// <summary>
         ///     Handles adding an upgrade disk to the inventory.
         /// </summary>
-        /// <param name="location">The location of the upgrade disk being added.</param>
-        public void AddItemToInventory(string location)
+        /// <param name="item">The item name of the Upgrade Disk.</param>
+        public void AddItemToInventory(string item)
         {
             Logging.LogWarning("Attempting To Add Upgrade Disk to Inventory.");
-            if (!RecievedItems.Contains(location.ToUpper()))
+            if (!RecievedItems.Contains(item))
             {
-                RecievedItems.Add(location.ToUpper());
+                RecievedItems.Add(item);
             }
             // If UpgradeDiskSanity is off, prevent adding it to inventory.
             if (!ArchipelagoOptions.UpgradeDiskSanity) {
@@ -1670,14 +1671,13 @@ namespace BluePrinceArchipelago.Items
             if (icon != null && InventoryIcons != null)
             {
                 // Prevent adding the same Upgrade disk multiple times.
-                int upgradeid = Locations.IndexOf(location) + 1;
+                int upgradeid = ItemNames.IndexOf(item) + 1;
                 if (!UpgradeDisks.Contains(upgradeid)) {
                     UpgradeDisks.Add(upgradeid, "Integer");
                     ModItemManager.PickedUp.Add(Plugin.ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
                 }
             }
-
 
         }
 
