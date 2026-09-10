@@ -19,6 +19,12 @@ class Mechanarium : RoomHandler
             CanSpawnDisk.Value = found;
             ItemDropFSM.GetState("State 7").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
             ItemDropFSM.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            
+            ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 6").GetFirstActionOfType<ArrayListContains>();
+            BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
+            ItemDropFSM.GetState("State 6").ReplaceAction(CheckFound, 4);
+            ArrayListContains CheckInInventory2 = ItemDropFSM.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
+            CheckInInventory2.isContainedEvent = CheckInInventory2.isNotContainedEvent;
         }
         else
         {

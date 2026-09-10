@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Archipelago.Commands;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
@@ -29,8 +30,6 @@ namespace BluePrinceArchipelago {
         public ManualLogSource LogSource => Log;
         public static ArchipelagoClient ArchipelagoClient;
         public static GameObject ModObject;
-        public static ModRoomManager ModRoomManager;
-        public static ModItemManager ModItemManager;
         public static UniqueItemManager UniqueItemManager;
 
         /// <summary>
@@ -60,8 +59,6 @@ namespace BluePrinceArchipelago {
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();
-            ModRoomManager = new ModRoomManager();
-            ModItemManager = new ModItemManager();
             UniqueItemManager = new UniqueItemManager();
             _instance = this;
             AssetBundle = AssetExtensions.LoadAssetBundleFromAssembly(AssetExtensions.GetResourceNameFromPath("assets/apprefabs"));

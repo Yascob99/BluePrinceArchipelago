@@ -72,6 +72,11 @@ public static class ArchipelagoOptions
     public static bool KeySanity { get; private set; } = false;
 
     /// <summary>
+    /// When true, Gift Shop and Book Shop Items are randomized.
+    /// </summary>
+    public static bool SpecialShopSanity { get; private set; } = false;
+
+    /// <summary>
     /// Death link type setting.
     /// </summary>
     public static DeathLinkType DeathLinkType { get; private set; } = DeathLinkType.option_none;
@@ -143,6 +148,7 @@ public static class ArchipelagoOptions
             WorkshopSanity = slotData.WorkShopSanity;
             UpgradeDiskSanity = slotData.UpgradeDiskSanity;
             KeySanity = slotData.KeySanity;
+            SpecialShopSanity = slotData.SpecialShopSanity;
             DeathLinkType = slotData.DeathLinkType;
             DeathLinkGrace = slotData.DeathLinkGrace;
             DeathLinkProtection = slotData.DeathLinkProtection;
@@ -186,6 +192,7 @@ public static class ArchipelagoOptions
             WorkshopSanity = GetBool(slotData, "workshop_sanity", false);
             UpgradeDiskSanity = GetBool(slotData, "upgrade_disk_sanity", false);
             KeySanity = GetBool(slotData, "key_sanity", false);
+            SpecialShopSanity = GetBool(slotData, "special_shop_sanity", false);
             DeathLinkType = (DeathLinkType)GetInt(slotData, "death_link_type", 0);
             DeathLinkGrace = GetInt(slotData, "death_link_grace", 0);
             DeathLinkMonkException = GetBool(slotData, "death_link_monk_exception", true);
@@ -215,6 +222,7 @@ public static class ArchipelagoOptions
         WorkshopSanity = false;
         UpgradeDiskSanity = false;
         KeySanity = false;
+        SpecialShopSanity = false;
         DeathLinkType = DeathLinkType.option_none;
         DeathLinkGrace = 0;
         DeathLinkMonkException = true;

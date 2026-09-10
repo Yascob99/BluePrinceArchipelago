@@ -4,10 +4,10 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
-using AsmResolver.PE.DotNet.ReadyToRun;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections.Generic;
@@ -136,7 +136,7 @@ public class ArchipelagoClient
                     ServerData.SlotName,
                     ItemsHandlingFlags.AllItems,
                     new Version(APVersion),
-                    tags: DeathLinkHandler._deathLinkEnabled ? ["AP", "DeathLink"] : ["AP"],
+                    tags: DeathLinkHandler.deathLinkEnabled ? ["AP", "DeathLink"] : ["AP"],
                     password: ServerData.Password,
                     requestSlotData: true
          );
@@ -198,7 +198,7 @@ public class ArchipelagoClient
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                     // Initialize DeathLinkHandler.
-                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                     Reconnect();
                 }
                 else {
@@ -207,7 +207,7 @@ public class ArchipelagoClient
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                     // Initialize DeathLinkHandler.
-                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                     GameRestart();
                 }
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
@@ -222,7 +222,7 @@ public class ArchipelagoClient
                 // Load options into the static ArchipelagoOptions class
                 ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                 // Initialize DeathLinkHandler.
-                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
 
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 // Creates the Locally Stored data for the locations. 
@@ -239,7 +239,7 @@ public class ArchipelagoClient
             // Update the locally stored data to match the current state.
             State.UpdateAll();
             // Run any additional code that should be run on a successful connection.
-            ModInstance.OnConnectToArchipelago();
+            ArchipelagoTriggers.OnConnectToArchipelago();
         }
         // Output an Error Message and Disconnect.
         else
@@ -266,7 +266,7 @@ public class ArchipelagoClient
                 {
                     Logging.LogWarning($"Attempting to receive Item: {item.ItemName}");
                     // Checks if the item recieved is a room.
-                    if (Plugin.ModRoomManager.GetRoomByName(item.ItemName) != null)
+                    if (ModRoomManager.GetRoomByName(item.ItemName) != null)
                     {
                         // If rooms haven't been initialized, add it to the item queue
                         if (!ModInstance.HasInitializedRooms)
@@ -315,7 +315,7 @@ public class ArchipelagoClient
                     if (item.LocationName == "Server")
                     {
                         // Checks if the item recieved is a room.
-                        if (Plugin.ModRoomManager.GetRoomByName(item.ItemName) != null)
+                        if (ModRoomManager.GetRoomByName(item.ItemName) != null)
                         {
                             // If rooms haven't been initialized, add it to the item queue
                             if (!ModInstance.HasInitializedRooms)
@@ -391,12 +391,12 @@ public class ArchipelagoClient
                 string location = ServerData.LocationDict[locationid];
                 if (location.EndsWith("First Pickup"))
                 {
-                    UniqueItem item = Plugin.ModItemManager.GetUniqueItem(location.Replace(" First Pickup", ""));
+                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace(" First Pickup", ""));
                     item.HasBeenFound = true;
                 }
                 else if (location.EndsWith("First Entering"))
                 {
-                    ModRoom room = Plugin.ModRoomManager.GetRoomByName(location.Replace(" First Entering", ""));
+                    ModRoom room = ModRoomManager.GetRoomByName(location.Replace(" First Entering", ""));
                     room.IsUnlocked = true;
                 }
                 // Try Upgrade Disks. If that fails, try Permanent Unlocks.
@@ -424,8 +424,8 @@ public class ArchipelagoClient
                     ModItemManager.UpgradeDisks.RecievedItems.Add(location);
                 }
             }
-            UniqueItem uniqueItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
-            PermanentItem permanentItem = Plugin.ModItemManager.GetPermanentItem(item.ItemName);
+            UniqueItem uniqueItem = ModItemManager.GetUniqueItem(item.ItemName);
+            PermanentItem permanentItem = ModItemManager.GetPermanentItem(item.ItemName);
             if (uniqueItem != null)
             {
                 uniqueItem.IsUnlocked = true;
@@ -794,7 +794,7 @@ public class ArchipelagoQueueManager {
                 return true;
             }
             // Checks if the item recieved is a Room (includes special mappings like classroom variants)
-            if (Plugin.ModRoomManager.IsRoomItem(item.ItemName))
+            if (ModRoomManager.IsRoomItem(item.ItemName))
             {
                 ReceiveRoom(item);
                 return true;
@@ -821,7 +821,7 @@ public class ArchipelagoQueueManager {
                 return false;
             }
             // if not handle it as an Item.
-            string itemType = Plugin.ModItemManager.GetItemType(item.ItemName);
+            string itemType = ModItemManager.GetItemType(item.ItemName);
             if (itemType == null) {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
                 return true;
@@ -860,7 +860,7 @@ public class ArchipelagoQueueManager {
         {
             ArchipelagoClient.ServerData.ReceivedItems.Add(item.ItemName);
             // Checks if the item recieved is a Room (includes special mappings like classroom variants)
-            if (Plugin.ModRoomManager.IsRoomItem(item.ItemName))
+            if (ModRoomManager.IsRoomItem(item.ItemName))
             {
                 ReceiveRoom(item);
                 return true;
@@ -892,7 +892,7 @@ public class ArchipelagoQueueManager {
                 return false;
             }
             // if not handle it as an Item.
-            string itemType = Plugin.ModItemManager.GetItemType(item.ItemName);
+            string itemType = ModItemManager.GetItemType(item.ItemName);
             if (itemType == null)
             {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
@@ -905,7 +905,7 @@ public class ArchipelagoQueueManager {
             }
             else if (itemType == "Unique") {
                
-                UniqueItem uItem = Plugin.ModItemManager.GetUniqueItem(item.ItemName);
+                UniqueItem uItem = ModItemManager.GetUniqueItem(item.ItemName);
                 if (uItem != null)
                 {
                     uItem.IsUnlocked = true;
@@ -959,7 +959,8 @@ public class ArchipelagoQueueManager {
             int upgradeId = _UpgradeUsedQueue.Dequeue() ?? -1;
             if (upgradeId > 0)
             {
-                ModItemManager.UpgradeDisks.OnUsed(upgradeId);
+                UpgradeDiskTriggers.OnUpgradeDiskUsed(upgradeId);
+                
             }
         }
     }
@@ -978,7 +979,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The archipelago ItemInfo of the room that is being received.</param>
     public void ReceiveRoom(ItemInfo item) {
         // Try to find the room, using mapping for special cases
-        ModRoom room = Plugin.ModRoomManager.GetRoomByName(item.ItemName);
+        ModRoom room = ModRoomManager.GetRoomByName(item.ItemName);
 
         bool isMappedRoom = false;
         string mappedName = null;
@@ -986,10 +987,10 @@ public class ArchipelagoQueueManager {
         // If not found with exact name, try the mapped name
         if (room == null)
         {
-            mappedName = Plugin.ModRoomManager.GetMappedRoomName(item.ItemName);
+            mappedName = ModRoomManager.GetMappedRoomName(item.ItemName);
             if (mappedName != null)
             {
-                room = Plugin.ModRoomManager.GetRoomByName(mappedName);
+                room = ModRoomManager.GetRoomByName(mappedName);
                 isMappedRoom = true;
             }
         }
@@ -1049,7 +1050,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
     public void ReceiveTrap(ItemInfo item, bool ignoreState = false) {
-        Plugin.ModItemManager.OnTrapReceived(item);
+        TrapTriggers.OnTrapReceived(item);
     }
     /// <summary>
     ///     Handles receiving a local item. (Doesn't check if it was successfully received).
@@ -1057,7 +1058,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
     public void ReceiveLocalItem(ItemInfo item, bool ignoreState = false) {
-        Plugin.ModItemManager.OnItemCheckRecieved(item);
+        ModItemManager.OnItemCheckRecieved(item);
         //This may need to be moved to a better place once the item code is better implemented.
     }
     /// <summary>
