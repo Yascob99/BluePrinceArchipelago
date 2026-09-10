@@ -18,17 +18,20 @@ class LostAndFound : RoomHandler
     }
     public override void OnRoomDrafted(GameObject roomGameObject)
     {
-        //PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetComponent<PlayMakerFSM>();
-        //if (ItemDropFSM != null)
-        //{
-        //    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
-        //    Logging.LogWarning(found);
-        //    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
-        //    CanSpawnDisk.Value = found;
-        //    ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-        //}
-        //else {
-        //    Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic.");
-        //}
+        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetComponent<PlayMakerFSM>();
+        if (ItemDropFSM != null)
+        {
+            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
+            Logging.LogWarning(found);
+            FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+            CanSpawnDisk.Value = found;
+            ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+            CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+        }
+        else
+        {
+            Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic.");
+        }
     }
 }

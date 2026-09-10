@@ -10,19 +10,21 @@ class Garage : RoomHandler
 {
     public override void OnRoomDrafted(GameObject roomGameObject)
     {
-        //PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7")?.GetComponent<PlayMakerFSM>();
-        //if (ItemDropFSM != null)
-        //{
-        //    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
-        //    Logging.LogWarning(found);
-        //    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
-        //    CanSpawnDisk.Value = found;
-        //    ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-        //}
-        //else
-        //{
-        //    Logging.LogWarning("Error changing Garage Upgrade disk spawn logic.");
-        //}
+        PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7")?.GetComponent<PlayMakerFSM>();
+        if (ItemDropFSM != null)
+        {
+            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
+            Logging.LogWarning(found);
+            FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+            CanSpawnDisk.Value = found;
+            ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+            CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+        }
+        else
+        {
+            Logging.LogWarning("Error changing Garage Upgrade disk spawn logic.");
+        }
     }
 }
 
