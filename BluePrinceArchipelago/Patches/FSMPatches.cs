@@ -252,21 +252,6 @@ namespace BluePrinceArchipelago.Patches
                 {
                     Logging.LogWarning("Error changing Abandoned Mine Upgrade disk spawn logic.");
                 }
-                // Unsure why but this one doesn't want to play nicely otherwise.
-                PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
-                if (FoundationSpawn != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
-                    FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = FoundationSpawn.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
-                }
             }
         }
 
