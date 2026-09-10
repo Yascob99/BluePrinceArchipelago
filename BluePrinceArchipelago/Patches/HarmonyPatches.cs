@@ -1,10 +1,8 @@
-﻿using BluePrince;
-using BluePrinceArchipelago.Rooms.RoomHandlers;
-using BluePrinceArchipelago.Utils;
+﻿using BluePrinceArchipelago.Rooms.RoomHandlers;
+using BluePrinceArchipelago.Triggers;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using Il2CppSystem.Runtime.Remoting.Messaging;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +28,7 @@ namespace BluePrinceArchipelago.Patches
                 // Unsure why this results in a null object in some instances.
                 if (poolName == "Pickup" && obj != null)
                 {
-                    Plugin.UniqueItemManager.OnItemSpawn(obj, poolName, transformObj, spawnedObj);
+                    ItemTriggers.OnAfterItemSpawned(obj, poolName, transformObj, spawnedObj);
                     //Can theoritically replace the game object spawned by replacing the __instance.gameObject.
                 }
             }
@@ -38,7 +36,7 @@ namespace BluePrinceArchipelago.Patches
             if (__state != null)
             {
                 Logging.Log("PmtSpawn OnEnter Postfix calling OnAfterRoomSpawned.");
-                ModInstance.OnAfterRoomSpawned(__state);
+                RoomTriggers.OnAfterRoomSpawned(__state);
             }
         }
         [HarmonyPatch(typeof(PmtSpawn), "OnEnter")]
@@ -50,12 +48,12 @@ namespace BluePrinceArchipelago.Patches
             GameObject spawnedObj = __instance.spawnedGameObject?.value;
             if (poolName == "Rooms")
             {
-                ModInstance.OnRoomSpawned(obj, transformObj);
+                RoomTriggers.OnBeforeRoomSpawned(obj, transformObj);
                 __state = obj; // Store the room GameObject in __state to be used in the Postfix
             }
             else
             {
-                ModInstance.OnOtherSpawn(obj, poolName, transformObj);
+                OtherGameObjectTriggers.OnBeforeOtherSpawn(obj, poolName, transformObj);
             }
         }
     }
@@ -68,18 +66,18 @@ namespace BluePrinceArchipelago.Patches
         [HarmonyPostfix]
         static void PostFix()
         {
-            ModInstance.OnDraftInitialize();
+            DraftTriggers.OnAfterDraftInitialize();
         }
         [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.StartDraft))]
         [HarmonyPrefix]
         static void Prefix() {
-            ModInstance.OnDraftBeforeInitialize();
+            DraftTriggers.OnDraftBeforeInitialize();
         }
         [HarmonyPatch(typeof(OuterDraftManager), nameof(OuterDraftManager.StartDraft))]
         [HarmonyPrefix]
         static void OuterDraftPrefix()
         {
-            ModInstance.OnOuterDraftStart();
+            DraftTriggers.OnBeforeOuterDraftStart();
         }
 
     }
@@ -185,7 +183,7 @@ namespace BluePrinceArchipelago.Patches
                 if (delay.value > 0) {
                     isDelayed = true;
                 }
-                ModInstance.OnEventSend(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
+                EventTriggers.OnSendEvent(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
             }
             catch (Exception e)
             {
@@ -196,13 +194,13 @@ namespace BluePrinceArchipelago.Patches
         [HarmonyPatch(typeof(StatsLogger), "BeginDay", [typeof(int)])]
         [HarmonyPostfix]
         static void PostFix(int dayNum) { 
-            ModInstance.OnDayStart(dayNum);
+            DayTriggers.OnDayStart(dayNum);
         }
         [HarmonyPatch(typeof(StatsLogger), "Record_Event", [typeof(EventID), typeof(EventFilter)])]
         [HarmonyPostfix]
         static void RecordEventPostFix(EventID id)
         {
-            ModInstance.OnRecordEvent(id);
+            EventTriggers.OnStatsLoggerRecordEvent(id);
         }
 
         [HarmonyPatch(typeof(StatsLogger), nameof(StatsLogger.EndDay))]
@@ -210,7 +208,7 @@ namespace BluePrinceArchipelago.Patches
         static void EndDayPostfix(StatsLogger __instance)
         {
             Logging.Log("StatsLogger EndDay Postfix called.", "DeathLink");
-            ModInstance.OnDayEnd();
+            DayTriggers.OnDayEnd();
         }
 
         // The game will throw an error when falling back to closet. This prevents the error from filling up the log.

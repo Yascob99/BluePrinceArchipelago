@@ -1522,7 +1522,7 @@ namespace BluePrinceArchipelago.Items
     public class UpgradeDisks(GameObject gameObject = null) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
     {
         public new List<string> Locations = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
-        public new List<string> LocationNames = ["Archives", "Trading Post Trade", "Tomb", "Commissary", "The Foundation", "Freezer", "Garage", "Great Hall", "Lost & Found", "Her Ladyship's Chamber", "Mechanarium", "Morning Room", "Office", "Trading Post Trade", "Vault", "Abandoned Mine"];
+        public List<string> LocationNames = ["Archives", "Trading Post Trade", "Tomb", "Commissary", "The Foundation", "Freezer", "Garage", "Great Hall", "Lost & Found", "Her Ladyship's Chamber", "Mechanarium", "Morning Room", "Office", "Trading Post Trade", "Vault", "Abandoned Mine"];
         public static List<GameObject> YouFoundObjects = new List<GameObject>();
         public List<EventID> EventNames = [EventID.Upgrade_Disk_Archives_found, EventID.Upgrade_Disk_BootLeg_found, EventID.Upgrade_Disk_Cloister_found, EventID.Upgrade_Disk_Commissary_found, EventID.Upgrade_Disk_Foundation_found, EventID.Upgrade_Disk_Freezer_found, EventID.Upgrade_Disk_Garage_found, EventID.Upgrade_Disk_GreatHall_found, EventID.Upgrade_Disk_LostFound_found, EventID.Upgrade_Disk_MasterBedroom_found, EventID.Upgrade_Disk_Mechanarium_found, EventID.Upgrade_Disk_MorningRoom_found, EventID.Upgrade_Disk_Office_found, EventID.Upgrade_Disk_TradingPost_found, EventID.Upgrade_Disk_Vault_found, EventID.Upgrade_Disk_TorchRoom_found];
         public List<string> UsedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
@@ -1692,6 +1692,76 @@ namespace BluePrinceArchipelago.Items
             }
 
 
+        }
+
+        /// <summary>
+        ///     Internal. Initializes the notification UI objects for when Upgrade Disks are bought or purchased.
+        /// </summary>
+        public static void InitializeUpgradeDiskNotifications()
+        {
+            GameObject YouBoughtUpgradeDisk = GameObject.Find("UI OVERLAY CAM/You Found Text/You Bought Upgrade Disk").gameObject;
+            GameObject YouFoundUpgradeDisk = GameObject.Find("UI OVERLAY CAM/You Found Text/You Found Upgrade Disk").gameObject;
+            GameObject ArchivesDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            ArchivesDiskNotification.SetActive(false);
+            ArchivesDiskNotification.name = "You Found Upgrade Disk - Archives";
+
+            GameObject TradingPostDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            TradingPostDiskNotification.SetActive(false);
+            TradingPostDiskNotification.name = "You Found Upgrade Disk - Trading Post Dynamite";
+
+            GameObject TombDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            TombDiskNotification.SetActive(false);
+            TombDiskNotification.name = "You Found Upgrade Disk - Tomb";
+
+            GameObject CommissaryDiskNotification = GameObject.Instantiate(YouBoughtUpgradeDisk, YouBoughtUpgradeDisk.transform.parent);
+            CommissaryDiskNotification.SetActive(false);
+            CommissaryDiskNotification.name = "You Bought Upgrade Disk - Commissary";
+
+            GameObject FoundationDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            FoundationDiskNotification.SetActive(false);
+            FoundationDiskNotification.name = "You Found Upgrade Disk - Foundation";
+
+            GameObject FreezerDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            FreezerDiskNotification.SetActive(false);
+            FreezerDiskNotification.name = "You Found Upgrade Disk - Freezer";
+
+            GameObject GarageDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            GarageDiskNotification.SetActive(false);
+            GarageDiskNotification.name = "You Found Upgrade Disk - Garage";
+
+            GameObject GreatHallDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            GreatHallDiskNotification.SetActive(false);
+            GreatHallDiskNotification.name = "You Found Upgrade Disk - Great Hall";
+
+            GameObject LostAndFoundDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            LostAndFoundDiskNotification.SetActive(false);
+            LostAndFoundDiskNotification.name = "You Found Upgrade Disk - Lost And Found";
+
+            GameObject HLCDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            HLCDiskNotification.SetActive(false);
+            HLCDiskNotification.name = "You Found Upgrade Disk - Her Ladyships Chamber";
+
+            GameObject MechanariumDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            MechanariumDiskNotification.SetActive(false);
+            MechanariumDiskNotification.name = "You Found Upgrade Disk - Mechanarium";
+
+            GameObject MorningRoomDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            MorningRoomDiskNotification.SetActive(false);
+            MorningRoomDiskNotification.name = "You Found Upgrade Disk - Morning Room";
+
+            GameObject OfficeDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            OfficeDiskNotification.SetActive(false);
+            OfficeDiskNotification.name = "You Found Upgrade Disk - Office";
+
+            GameObject VaultDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            VaultDiskNotification.SetActive(false);
+            VaultDiskNotification.name = "You Found Upgrade Disk - Vault";
+
+            GameObject AbandonedMineDiskNotification = GameObject.Instantiate(YouFoundUpgradeDisk, YouFoundUpgradeDisk.transform.parent);
+            AbandonedMineDiskNotification.SetActive(false);
+            AbandonedMineDiskNotification.name = "You Found Upgrade Disk - Abandoned Mine";
+
+            YouFoundObjects = [ArchivesDiskNotification, TradingPostDiskNotification, TombDiskNotification, CommissaryDiskNotification, FoundationDiskNotification, FreezerDiskNotification, GarageDiskNotification, GreatHallDiskNotification, LostAndFoundDiskNotification, HLCDiskNotification, MechanariumDiskNotification, MorningRoomDiskNotification, OfficeDiskNotification, null, VaultDiskNotification, AbandonedMineDiskNotification];
         }
     }
 

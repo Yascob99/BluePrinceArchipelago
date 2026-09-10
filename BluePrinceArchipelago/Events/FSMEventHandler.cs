@@ -1,4 +1,5 @@
 ﻿using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -19,7 +20,6 @@ namespace BluePrinceArchipelago.Events
             { "West Gate Path Unlock", new WestGatePathUnlock() },
             { "Gemstone Caverns Unlock", new GemstoneCavernsUnlock() },
             { "Satellite Raised", new SatelliteRaised() },
-            { "Outer Draft Start", new OuterDraftStart() },
             { "Outer Draft Reroll", new OuterDraftReroll() },
             { "Item Traded", new ItemTraded()},
             { "Sundial Scorched", new SundialScorched()},
@@ -539,42 +539,6 @@ namespace BluePrinceArchipelago.Events
             Item.HasBeenFound = true;
         }
     }
-
-    public class OuterDraftStart() : RegisteredFSMEvent
-    {
-        public new string Name { get; set; } = "Outer Draft Start";
-
-        public override void OnRegister()
-        {
-            ModInstance.APEventFSM.AddState(Name);
-            ModInstance.APEventFSM.AddGlobalTransition(Name, Name);
-            // Creates a new SendEvent instance that can be called by other FSMs to communicate important events to the mod (albeit a little jankily).
-            Event = new SendEvent()
-            {
-                eventTarget = new FsmEventTarget()
-                {
-                    target = FsmEventTarget.EventTarget.GameObject,
-                    gameObject = new FsmOwnerDefault()
-                    {
-                        gameObject = Plugin.ModObject,
-                        ownerOption = OwnerDefaultOption.SpecifyGameObject
-                    },
-                    fsmName = "FSM",
-                    sendToChildren = false,
-                    excludeSelf = false
-                },
-                sendEvent = Plugin.ModObject.GetComponent<PlayMakerFSM>().GetGlobalTransition(Name).FsmEvent,
-                everyFrame = false,
-                delay = 0f
-            };
-        }
-
-        public override void OnTrigger()
-        {
-            Logging.LogWarning("Outer Draft Triggered");
-            ModInstance.OnOuterDraftStart();
-        }
-    }
     public class OuterDraftReroll() : RegisteredFSMEvent
     {
         public new string Name { get; set; } = "Outer Draft Reroll";
@@ -606,7 +570,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            ModInstance.OnOuterDraftReroll();
+            DraftTriggers.OnOuterDraftReroll();
         }
     }
     public class SundialScorched() : RegisteredFSMEvent
@@ -677,7 +641,7 @@ namespace BluePrinceArchipelago.Events
             PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
             GameObject OfferItem = TradingPostMenu.GetGameObjectVariable("Offered_item").Value;
             GameObject Icon = TradingPostMenu.GetGameObjectVariable("Icon").Value;
-            ModInstance.OnItemTraded(OfferItem, Icon);
+            ItemTriggers.OnItemTraded(OfferItem, Icon);
         }
     }
 }

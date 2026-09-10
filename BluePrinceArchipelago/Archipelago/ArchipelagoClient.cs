@@ -4,10 +4,10 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
-using AsmResolver.PE.DotNet.ReadyToRun;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections.Generic;
@@ -239,7 +239,7 @@ public class ArchipelagoClient
             // Update the locally stored data to match the current state.
             State.UpdateAll();
             // Run any additional code that should be run on a successful connection.
-            ModInstance.OnConnectToArchipelago();
+            ArchipelagoTriggers.OnConnectToArchipelago();
         }
         // Output an Error Message and Disconnect.
         else

@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+﻿using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using BepInEx;
 using BepInEx.Unity.IL2CPP.Utils;
 using BluePrinceArchipelago.Utils;
+using System;
 using System.Collections;
-using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UnityEngine;
+using static Rewired.Platforms.Custom.CustomPlatformUnifiedKeyboardSource.KeyPropertyMap;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -296,7 +297,7 @@ public class DeathLinkHandler
                 return;
             }
 
-            if (ArchipelagoOptions.DeathLinkMonkException && ModInstance.GetPersistentDataString("Blessing") == "Monk")
+            if (ArchipelagoOptions.DeathLinkMonkException && ModInstance.GlobalPersistentManager.GetStringVariable("Blessing").Value == "Monk")
             {
                 ArchipelagoConsole.LogMessage("Death Link prevented due to Monk blessing.", "DeathLink");
                 return;

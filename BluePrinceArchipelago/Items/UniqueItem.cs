@@ -226,51 +226,6 @@ namespace BluePrinceArchipelago.Items
         public bool ModelsReplaced = false;
 
         /// <summary>
-        ///     Triggered by a Unique item being spawned.
-        /// </summary>
-        /// <param name="obj">The GameObject of the spawned item.</param>
-        /// <param name="poolName">The PoolName of the spawned item's spawn pool.</param>
-        /// <param name="transformObj">The GameObject with contains the position data for where the item will be spawned.</param>
-        /// <param name="spawnedObj">The GameObject for the spawned object.</param>
-        public void OnItemSpawn(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj)
-        {
-            UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
-            //Check if Connected in before replacing items.
-            if (ArchipelagoClient.Authenticated)
-            {
-                if (item != null)
-                {
-                    FsmState state = GetPickupState(obj.name);
-                    // If the item is not already in the inventory
-                    if (item.IsUnlocked)
-                    {
-                        //Re-enable the previously disabled actions.
-                        if (ModItemManager.PickedUp.Contains(obj.name))
-                        {
-                            state.EnableFirstActionOfType<ArrayListAdd>();
-                        }
-                        else
-                        {
-                            state.EnableActionsOfType<ArrayListAdd>();
-                        }
-                    }
-                    else if (item.HasBeenFound)
-                    {
-                        // If the item has been found before but isn't unlocked, destroy the spawned object.
-                        Logging.LogWarning("Despawning Item.");
-                        GameObject.Destroy(spawnedObj);
-                    }
-                }
-            }
-            else if (obj.name.ToUpper().Trim().Contains("UPGRADE DISK"))
-            {
-                string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
-                CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
-                ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
-            }
-        }
-
-        /// <summary>
         ///     Code to be run on end of day.
         /// </summary>
         public void EndOfDay()
