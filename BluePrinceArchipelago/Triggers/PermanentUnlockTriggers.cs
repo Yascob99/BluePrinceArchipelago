@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BluePrinceArchipelago.Items;
 
 namespace BluePrinceArchipelago.Triggers
 {
@@ -11,5 +7,45 @@ namespace BluePrinceArchipelago.Triggers
     /// </summary>
     public static class PermanentUnlockTriggers
     {
+        /// <summary>
+        ///     Triggers when the Apple Orchard is Unlocked.
+        /// </summary>
+        public static void OnAppleOrchardUnlock() {
+            Unlocks.AppleOrchard.FoundLocation();
+        }
+
+        /// <summary>
+        ///     Triggers when the Gemstone Caverns is Unlocked.
+        /// </summary>
+        public static void OnGemstoneCavernsUnlock()
+        {
+            Unlocks.GemstoneCaverns.FoundLocation();
+        }
+
+        /// <summary>
+        ///     Triggers when the Blackbridge Grotoo is Unlocked.
+        /// </summary>
+        public static void OnBlackBridgeGrottoUnlock()
+        {
+            Unlocks.BlackBridgeGrotto.FoundLocation();
+        }
+
+        /// <summary>
+        ///     Triggers when the Blackbridge Grotoo is Unlocked.
+        /// </summary>
+        public static void OnWestGatePathUnlock()
+        {
+            Unlocks.WestGatePath.FoundLocation();
+        }
+
+        /// <summary>
+        ///     Triggers when the Blackbridge Grotoo is Unlocked.
+        /// </summary>
+        public static void OnSatelliteRaised()
+        {
+            Unlocks.SatelliteDish.FoundLocation();
+        }
     }
+
+
 }

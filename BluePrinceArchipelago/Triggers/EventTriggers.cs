@@ -6,6 +6,8 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using HutongGames.PlayMaker.Ecosystem.Utils;
+using Il2CppSystem.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,165 +23,18 @@ namespace BluePrinceArchipelago.Triggers
     public static class EventTriggers
     {
         /// <summary>
-        ///     Fires off when an event is sent from an FSM to an FSM or GameObject.
+        ///     Triggers on a mod created event Triggering.
         /// </summary>
-        /// <param name="target">The target of the event.</param>
-        /// <param name="sendEvent">The event being sent.</param>
-        /// <param name="delay">The delay of the event (0f if not delayed).</param>
-        /// <param name="delayedEvent">The instance of the delayed event. Null if not delayed.</param>
-        /// <param name="owner">The GameObject that sent the event.</param>
-        /// <param name="isDelayed">A bool indicating if the event is delayed.</param>
-        public static void OnSendEvent(FsmEventTarget target, FsmEvent sendEvent, FsmFloat delay, DelayedEvent delayedEvent, GameObject owner, bool isDelayed)
-        {
-            string eventName = sendEvent?.name;
-            string targetType = target?.target.ToString() ?? "";
-            string targetName = target?.gameObject?.gameObject?.name ?? "";
-            string SenderName = owner != null ? owner.name ?? owner.gameObject.name : "Unknown";
-            Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}", "Events");
-            // Attempt to find the name of the GameObject being targeted.
-            if (targetName.Trim() == "")
+        /// <param name="eventName">The Name of the event.</param>
+        public static void ModEventTrigger(string eventName) {
+            Logging.Log($"Mod Event Triggered: {eventName}", "Events");
+            if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
             {
-                GameObject targetObj = target?.gameObject?.gameObject?.value;
-                if (targetObj != null && !isDelayed)
-                {
-                    targetName = targetObj.name;
-                }
-                else if (isDelayed)
-                {
-                    targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.name ?? "";
-                    if (targetName.Trim() == "")
-                    {
-                        targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.value?.name ?? "";
-                    }
-                }
+                FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
             }
-            // Triggers whenever a custom Archipelago Event is sent to Archipelago FSM.
-            if (targetName == "Archipelago")
+            else
             {
-                // If the Event is registered, trigger the event.
-
-                if (eventName != null)
-                {
-                    Logging.LogWarning(eventName);
-                    if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
-                    {
-                        FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
-                    }
-                    else
-                    {
-                        Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
-                    }
-                }
-            }
-            else if (eventName.Contains("Allowance Token Pickup"))
-            {
-                bool matched = false;
-                var path = owner.gameObject.GetPath();
-                Logging.LogWarning($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
-                foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
-                {
-                    foreach (var token in roomHandler.AllowanceTokens)
-                    {
-                        if (path.Contains(token))
-                        {
-                            Logging.LogWarning($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
-                            roomHandler.OnAllowanceTokenCollected(token);
-                            matched = true;
-                        }
-                    }
-                }
-                if (!matched)
-                {
-                    Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
-                }
-            }
-            else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
-            {
-                ModInstance.TrunkManager.OnTrunkOpen();
-            }
-            else if (targetName == "Upgrade Disks" && eventName == "Go")
-            {
-                PlayMakerArrayListProxy UpgradeIDs = ModInstance.UpgradeDisksObj.GetComponent<PlayMakerArrayListProxy>();
-                int length = UpgradeIDs.arrayList.Count;
-                int i = 0;
-                int id = -1;
-                bool exit = false;
-                while (i < length && !exit)
-                {
-                    try
-                    {
-                        id = UpgradeIDs.GetItemAt(i).Unbox<int>();
-                    }
-                    catch
-                    {
-                        id = -1;
-                        Logging.LogWarning("Error While attempting to convert Array item to integer");
-                    }
-                    if (id > -1)
-                    {
-                        if (ModInstance.QueueManager.AddUpgradeUsedToQueue(i))
-                        {
-                            exit = true;
-                            ModInstance.QueueManager.AddUpgradeUsedToQueue(id);
-                        }
-                    }
-                    i++;
-                }
-
-            }
-            else if (targetName == "Global Manager" && eventName.Contains("Pickup"))
-            {
-                Logging.Log(eventName, "Events");
-                UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
-                if (item != null)
-                {
-                    // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
-                    if (item.IsUnlocked)
-                    {
-                        // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
-                        FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
-                        if (state != null)
-                        {
-                            state.EnableActionsOfType<ArrayListAdd>();
-                        }
-                    }
-                    item.HasBeenFound = true;
-                }
-                else if (eventName.Contains("Upgrade"))
-                {
-                    ModItemManager.UpgradeDisks.OnPickup();
-                }
-            }
-            else if (eventName == "Go" && target?.gameObject?.gameObject?.Value?.transform?.parent?.name == "PLAN PICKER")
-            {
-                if (ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
-                {
-                    // Skip Archipelago room pool management if RoomDraftSanity is disabled
-                    if (!ArchipelagoOptions.RoomDraftSanity)
-                    {
-                        // Still allow force room draft for other purposes if needed
-                        Plugin.ModRoomManager.CheckForceRoomDraft();
-                        return;
-                    }
-
-                    // Reload arrays to ensure we have fresh references (game may have reset them)
-                    ModRoomManager.ReloadArrays();
-
-                    // If connected to Archipelago, ensure room unlock states are correct
-                    if (ArchipelagoClient.Authenticated)
-                    {
-                        // Only set unlock states, don't update pools yet (we'll do that below)
-                        ModRoomManager.EnsureRoomUnlockStates();
-                    }
-
-                    Plugin.ModRoomManager.CheckForceRoomDraft();
-                    Logging.Log("Updating Rooms for draft");
-                    Plugin.ModRoomManager.UpdateRoomPools();
-                }
-                else
-                {
-                    Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
-                }
+                Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
             }
         }
 
@@ -198,8 +53,7 @@ namespace BluePrinceArchipelago.Triggers
                 case EventID.Room_46_reached:
                     if (ArchipelagoOptions.GoalType == GoalType.option_room46)
                     {
-                        Plugin.ArchipelagoClient.GoalCompleted();
-                        DeathLinkHandler.OnRoom46FirstEntered(); // prevent death link from triggering before the goal completion is sent
+                        GoalTriggers.OnRoom46Goal();
                     }
                     else
                     {
@@ -209,7 +63,7 @@ namespace BluePrinceArchipelago.Triggers
                 case EventID.Antechamber_entered:
                     if (ArchipelagoOptions.GoalType == GoalType.option_antechamber)
                     {
-                        Plugin.ArchipelagoClient.GoalCompleted();
+                        GoalTriggers.OnAntechamberGoal();
                     }
                     else
                     {
@@ -219,7 +73,7 @@ namespace BluePrinceArchipelago.Triggers
                 case EventID.Throne_Room_Event:
                     if (ArchipelagoOptions.GoalType == GoalType.option_ascend)
                     {
-                        Plugin.ArchipelagoClient.GoalCompleted();
+                        GoalTriggers.OnAscendGoal();
                     }
                     break;
 
@@ -363,6 +217,47 @@ namespace BluePrinceArchipelago.Triggers
                     ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("ORNATE COMPASS"));
                     break;
             }
+        }
+
+        /// <summary>
+        ///     Triggers on the AllowanceToken Being picked up.
+        /// </summary>
+        /// <param name="owner">The GameObject that sent the event.</param>
+        public static void AllowanceTokenPickup(GameObject owner)
+        {
+            bool matched = false;
+            var path = owner.gameObject.GetPath();
+            Logging.LogWarning($"Allowance Token Pickup event sent from {owner.gameObject.name} with path {path}", "Events");
+            foreach (var roomHandler in RoomHandler.RoomHandlers.Values)
+            {
+                foreach (var token in roomHandler.AllowanceTokens)
+                {
+                    if (path.Contains(token))
+                    {
+                        Logging.LogWarning($"Allowance Token matched for room handler {roomHandler.GetType().Name} with token {token}", "ArchipelagoEvents");
+                        roomHandler.OnAllowanceTokenCollected(token);
+                        matched = true;
+                    }
+                }
+            }
+            if (!matched)
+            {
+                Logging.LogWarning($"No matching room handler found for Allowance Token Pickup event with path {path}.", "ArchipelagoEvents");
+            }
+        }
+
+        /// <summary>
+        ///     Triggers when the Sundial is Scorched.
+        /// </summary>
+        public static void OnSundailScorched() {
+            ModInstance.ModEventHandler.OnOtherLocation("Scorch Sundial");
+        }
+
+        /// <summary>
+        ///     Triggers on the Allowance token being picked up.
+        /// </summary>
+        public static void OnAllowanceEnvelopePickedUp() { 
+            
         }
     }
 }

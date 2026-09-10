@@ -13,7 +13,7 @@ namespace BluePrinceArchipelago.Events
     /// </summary>
     public static class FSMEventHandler
     {
-        public static Dictionary<string, RegisteredFSMEvent> RegisteredEvents = new()
+        public static Dictionary<string, RegisteredFSMEvent> RegisteredEvents { get; set; } = new()
         {
             { "Apple Orchard Unlock", new AppleOrchardUnlock() },
             { "Blackbridge Grotto Unlock", new BlackBridgeGrotto() },
@@ -134,7 +134,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            Unlocks.AppleOrchard.FoundLocation();
+            PermanentUnlockTriggers.OnAppleOrchardUnlock();
         }
     }
 
@@ -333,76 +333,8 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            if (!Item.HasBeenFound)
-            {
-                Item.HasBeenFound = true;
-                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                if (Item.IsCommissary)
-                {
-                    FsmState state = Item.CommissaryState;
-                    if (state != null)
-                    {
-                        // If the item is not unlocked, prevent it from being added to inventory.
-                        if (item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.EnableActionsOfType<ArrayListAdd>();
-                            // Check if the event we are trying to remove is the custom event we added.
-                            SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                            if (CustomEvent.sendEvent.Name.Contains("Commissary"))
-                            {
-                                state.RemoveFirstActionOfType<SendEvent>();
-                            }
-                        }
-                    }
-                }
-                if (Item.IsDig)
-                {
-                    FsmState state = Item.DigState;
-                    if (state != null)
-                    {
-                        // If the item is not unlocked, prevent it from being added to inventory.
-                        if (item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.EnableActionsOfType<ArrayListAdd>();
-                            SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                            if (CustomEvent != null)
-                            {
-                                // Check if the event we are trying to remove is the custom event we added.
-                                if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
-                                {
-                                    state.RemoveFirstActionOfType<SendEvent>();
-                                }
-                            }
-                        }
-                    }
-                }
-                if (Item.IsLocksmith)
-                {
-                    FsmState state = Item.LocksmithState;
-                    if (state != null)
-                    {
-                        // If the item is not unlocked, prevent it from being added to inventory.
-                        if (item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.EnableActionsOfType<ArrayListAdd>();
-                            SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                            if (CustomEvent != null)
-                            {
-                                // Check if the event we are trying to remove is the custom event we added.
-                                if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
-                                {
-                                    state.RemoveFirstActionOfType<SendEvent>();
-                                }
-                            }
-                        }
-                    }
-                }
-                ModInstance.QueueManager.AddLocationToQueue($"{item.Name.ToTitleCase()} First Pickup");
-            }
-        }
+            ItemTriggers.OnAfterItemPickup(Item);
+        }  
     }
 
     /// <summary>
@@ -443,16 +375,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            //Handle
-            if (!Item.HasBeenFound)
-            {
-                if (Item.ApplySanity())
-                {
-                    Item.HasBeenFound = true;
-                    Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
-                }
-            }
+            ItemTriggers.OnItemDugUp(Item);
         }
     }
 
@@ -491,6 +414,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
+            EventTriggers.OnAllowanceEnvelopePickedUp();
         }
     }
 
@@ -530,13 +454,7 @@ namespace BluePrinceArchipelago.Events
         }
         public override void OnTrigger()
         {
-            if (!Item.HasBeenFound)
-            {
-                Item.HasBeenFound = true;
-                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
-            }
-            Item.HasBeenFound = true;
+            ItemTriggers.OnItemBought(Item);
         }
     }
     public class OuterDraftReroll() : RegisteredFSMEvent
@@ -604,7 +522,7 @@ namespace BluePrinceArchipelago.Events
 
         public override void OnTrigger()
         {
-            ModInstance.ModEventHandler.OnOtherLocation("Scorch Sundial");
+            EventTriggers.OnSundailScorched();
         }
     }
     public class ItemTraded() : RegisteredFSMEvent

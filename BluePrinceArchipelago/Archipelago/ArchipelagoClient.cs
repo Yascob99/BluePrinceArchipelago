@@ -959,7 +959,8 @@ public class ArchipelagoQueueManager {
             int upgradeId = _UpgradeUsedQueue.Dequeue() ?? -1;
             if (upgradeId > 0)
             {
-                ModItemManager.UpgradeDisks.OnUsed(upgradeId);
+                UpgradeDiskTriggers.OnUpgradeDiskUsed(upgradeId);
+                
             }
         }
     }

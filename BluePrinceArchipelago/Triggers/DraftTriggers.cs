@@ -1,11 +1,6 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -71,6 +66,14 @@ namespace BluePrinceArchipelago.Triggers
         /// </summary>
         public static void OnOuterDraftReroll() {
             Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, ModInstance.MasterPicker.GetIntVariable("Reroll Count").Value);
+        }
+
+        /// <summary>
+        ///     Triggers when the draft validation fails due to the game's own internal requirements.
+        ///     This will result in some of the rooms being set to closets
+        /// </summary>
+        public static void OnDraftValidationFailed() {
+            Logging.Log("DraftHelper Validation ran into an error and could not run to completion.", "Draft");
         }
     }
 }

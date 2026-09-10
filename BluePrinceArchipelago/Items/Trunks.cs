@@ -1,6 +1,4 @@
-﻿using BluePrinceArchipelago.Events;
-using BluePrinceArchipelago.Utils;
-using System;
+﻿using BluePrinceArchipelago.Utils;
 using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Items
@@ -33,7 +31,7 @@ namespace BluePrinceArchipelago.Items
         ///     When a trunk is opened.
         /// </summary>
         public void OnTrunkOpen() {
-            string currentRoom = ModInstance.TheGrid.GetStringVariable("CURRENT ROOM").ToString();
+            string currentRoom = ModInstance.TheGrid.GetStringVariable("CURRENT ROOM").Value;
             if (!_TrunkCounts.ContainsKey(currentRoom))
             {
                 _TrunkCounts.Add(currentRoom, 1);

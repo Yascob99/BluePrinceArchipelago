@@ -1,5 +1,9 @@
-﻿using BluePrinceArchipelago.Rooms.RoomHandlers;
+﻿using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Triggers;
+using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -183,7 +187,104 @@ namespace BluePrinceArchipelago.Patches
                 if (delay.value > 0) {
                     isDelayed = true;
                 }
-                EventTriggers.OnSendEvent(target, sendEvent, delay, delayedEvent, __instance.owner, isDelayed);
+                string eventName = sendEvent?.name;
+                targetType = target?.target.ToString() ?? "";
+                string targetName = target?.gameObject?.gameObject?.name ?? "";
+                string SenderName = __instance.owner != null ? __instance.owner.name ?? __instance.owner.gameObject.name : "Unknown";
+                Logging.Log($"{SenderName} Sending {eventName} to {targetType}: {targetName}", "Events");
+                // Attempt to find the name of the GameObject being targeted.
+                if (targetName.Trim() == "")
+                {
+                    GameObject targetObj = target?.gameObject?.gameObject?.value;
+                    if (targetObj != null && !isDelayed)
+                    {
+                        targetName = targetObj.name;
+                    }
+                    else if (isDelayed)
+                    {
+                        targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.name ?? "";
+                        if (targetName.Trim() == "")
+                        {
+                            targetName = delayedEvent?.eventTarget?.gameObject?.gameObject?.value?.name ?? "";
+                        }
+                    }
+                }
+                // Triggers whenever a custom Archipelago Event is sent to Archipelago FSM.
+                if (targetName == "Archipelago")
+                {
+                    // If the Event is registered, trigger the event.
+                    
+                    if (eventName != null)
+                    {
+                        EventTriggers.ModEventTrigger(eventName);
+                    }
+                }
+                else if (eventName.Contains("Allowance Token Pickup"))
+                {
+                    EventTriggers.AllowanceTokenPickup(eventName, __instance.owner);
+                }
+                else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
+                {
+                    TrunkTriggers.OnTrunkOpened();
+                }
+                else if (targetName == "Upgrade Disks" && eventName == "Go")
+                {
+                    // Queues the Upgrade Disk Upgrade so operations involving PlayMakerArrayListProxies can be performed on the main thread.
+                    PlayMakerArrayListProxy UpgradeIDs = ModInstance.UpgradeDisksObj.GetComponent<PlayMakerArrayListProxy>();
+                    int length = UpgradeIDs.arrayList.Count;
+                    int i = 0;
+                    int id = -1;
+                    bool exit = false;
+                    while (i < length && !exit)
+                    {
+                        try
+                        {
+                            id = UpgradeIDs.GetItemAt(i).Unbox<int>();
+                        }
+                        catch
+                        {
+                            id = -1;
+                            Logging.LogWarning("Error While attempting to convert Array item to integer");
+                        }
+                        if (id > -1)
+                        {
+                            if (ModInstance.QueueManager.AddUpgradeUsedToQueue(i))
+                            {
+                                exit = true;
+                                ModInstance.QueueManager.AddUpgradeUsedToQueue(id);
+                            }
+                        }
+                        i++;
+                    }
+
+                }
+                else if (targetName == "Global Manager" && eventName.Contains("Pickup"))
+                {
+                    Logging.Log(eventName, "Events");
+                    UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
+                    if (item != null)
+                    {
+                        // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
+                        if (item.IsUnlocked)
+                        {
+                            // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
+                            FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                            if (state != null)
+                            {
+                                state.EnableActionsOfType<ArrayListAdd>();
+                            }
+                        }
+                        item.HasBeenFound = true;
+                    }
+                    else if (eventName.Contains("Upgrade"))
+                    {
+                        UpgradeDiskTriggers.OnUpgradeDiskPickedUp();
+                    }
+                }
+                else if (eventName == "Go" && target?.gameObject?.gameObject?.Value?.transform?.parent?.name == "PLAN PICKER")
+                {
+                    RoomTriggers.OnBeforeFloorPlanAdds();
+                }
             }
             catch (Exception e)
             {
@@ -225,9 +326,8 @@ namespace BluePrinceArchipelago.Patches
                 }
                 catch
                 {
-                    // Couldn't My Logging Methods so using the Bepinex defualt Logging.
-                    Plugin.Instance.Log.LogWarning($"[DraftCode] DraftHelper Validation ran into an error and could not run to completion.");
                     EventPatches.depth = 0;
+                    DraftTriggers.OnDraftValidationFailed();
                 }
                 return false;
             }

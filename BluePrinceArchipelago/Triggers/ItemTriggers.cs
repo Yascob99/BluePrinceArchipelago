@@ -4,10 +4,7 @@ using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -73,17 +70,16 @@ namespace BluePrinceArchipelago.Triggers
             {
                 string itemName = OfferedItem.name;
                 Logging.Log($"Traded for {itemName}", "Trades");
+                GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
                 if (itemName.Contains("UPGRADE DISK"))
                 {
                     if (ArchipelagoOptions.UpgradeDiskSanity)
                     {
-                        ModItemManager.UpgradeDisks.OnTrade();
+                        UpgradeDiskTriggers.OnUpgradeDiskTraded();
                     }
                     else
                     {
-                        GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                        PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-
                         if (Icon != null && InventoryIcons != null)
                         {
                             InventoryIcons.Add(Icon, "GameObject");
@@ -98,8 +94,6 @@ namespace BluePrinceArchipelago.Triggers
                     {
                         if (Item.IsUnlocked)
                         {
-                            GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                            PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
 
                             if (Icon != null && InventoryIcons != null)
                             {
@@ -118,65 +112,69 @@ namespace BluePrinceArchipelago.Triggers
                             Item.HasBeenFound = true;
                             ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
                             Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                            if (Item.IsCommissary)
-                            {
-                                FsmState state = Item.CommissaryState;
-                                if (state != null)
-                                {
-                                    // If the item is not unlocked, prevent it from being added to inventory.
-                                    if (Item.IsUnlocked && Item.ApplySanity())
-                                    {
-                                        //Disable the actions that add the item to inventory.
-                                        state.EnableActionsOfType<ArrayListAdd>();
-                                        // Check if the event we are trying to remove is the custom event we added.
-                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                        if (CustomEvent.sendEvent.Name.Contains("Commissary"))
-                                        {
-                                            state.RemoveFirstActionOfType<SendEvent>();
-                                        }
-                                    }
-                                }
-                            }
-                            if (Item.IsDig)
-                            {
-                                FsmState state = Item.DigState;
-                                if (state != null)
-                                {
-                                    // If the item is not unlocked, prevent it from being added to inventory.
-                                    if (Item.IsUnlocked && Item.ApplySanity())
-                                    {
-                                        //Disable the actions that add the item to inventory.
-                                        state.EnableActionsOfType<ArrayListAdd>();
-                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                        // Check if the event we are trying to remove is the custom event we added.
-                                        if (CustomEvent.sendEvent.Name.Contains("Dug Up"))
-                                        {
-                                            state.RemoveFirstActionOfType<SendEvent>();
-                                        }
-                                    }
-                                }
-                            }
-                            if (Item.IsLocksmith)
-                            {
-                                FsmState state = Item.LocksmithState;
-                                if (state != null)
-                                {
-                                    // If the item is not unlocked, prevent it from being added to inventory.
-                                    if (Item.IsUnlocked && Item.ApplySanity())
-                                    {
-                                        //Disable the actions that add the item to inventory.
-                                        state.EnableActionsOfType<ArrayListAdd>();
-                                        SendEvent CustomEvent = state.GetLastActionOfType<SendEvent>();
-                                        // Check if the event we are trying to remove is the custom event we added.
-                                        if (CustomEvent.sendEvent.Name.Contains("Locksmith"))
-                                        {
-                                            state.RemoveFirstActionOfType<SendEvent>();
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Triggers after a Unique Item has been picked up.
+        /// </summary>
+        /// <param name="Item">the Unique Item of the item that was picked up.</param>
+        public static void OnAfterItemPickup(UniqueItem Item) {
+            if (!Item.HasBeenFound)
+            {
+                Item.HasBeenFound = true;
+                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+            }
+        }
+
+        /// <summary>
+        ///     Triggers before a Unique Item has been picked up.
+        /// </summary>
+        /// <param name="Item">the Unique Item of the item that was picked up.</param>
+        public static void OnBeforeItemPickup(UniqueItem Item) {
+            // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
+            if (Item.IsUnlocked)
+            {
+                // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
+                FsmState state = Plugin.UniqueItemManager.GetPickupState(Item.Name);
+                if (state != null)
+                {
+                    state.EnableActionsOfType<ArrayListAdd>();
+                }
+            }
+            Item.HasBeenFound = true;
+        }
+
+        /// <summary>
+        ///     Triggers on a Unique Item being bought.
+        /// </summary>
+        /// <param name="Item">the Unique Item of the item that was picked up.</param>
+        public static void OnItemBought(UniqueItem Item) {
+            if (!Item.HasBeenFound)
+            {
+                Item.HasBeenFound = true;
+                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+            }
+            Item.HasBeenFound = true;
+        }
+
+        /// <summary>
+        ///     Triggers on a Unique Item being dug up.
+        /// </summary>
+        /// <param name="Item">the Unique Item of the item that was picked up.</param>
+        public static void OnItemDugUp(UniqueItem Item) {
+            if (!Item.HasBeenFound)
+            {
+                if (Item.ApplySanity())
+                {
+                    Item.HasBeenFound = true;
+                    Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
                 }
             }
         }
