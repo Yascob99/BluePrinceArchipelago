@@ -1,5 +1,4 @@
-﻿using BluePrinceArchipelago.Utils;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace BluePrinceArchipelago.Archipelago.Commands
@@ -21,15 +20,6 @@ namespace BluePrinceArchipelago.Archipelago.Commands
         {
             _LocalCommands[commandName.Trim().ToLower()] = command;
         }
-        /// <summary>
-        ///     Registers a server command.Currently not in use.
-        /// </summary>
-        /// <param name="commandName">The name of the command.</param>
-        /// <param name="command">The command Object to register.</param>
-        public static void AddServerCommand(string commandName, Command command)
-        {
-            _ServerCommands[commandName] = command;
-        }
 
         /// <summary>
         ///     Evaluates if the given message is a command and runs the relevant command.
@@ -43,19 +33,6 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             {
                 ArchipelagoConsole.LogMessage(command);
                 _LocalCommands[commandName].Run(parsedCommand.Args);
-                return;
-            }
-            ArchipelagoConsole.LogMessage($"{commandName} is not a recognized command.");
-        }
-        /// <inheritdoc cref="RunLocalCommand(string)"/>
-        public static void RunServerCommand(string command)
-        {
-            ParsedCommand parsedCommand = ParseCommand(command);
-            string commandName = parsedCommand.Command.ToLower();
-
-            if (_ServerCommands.ContainsKey(commandName))
-            {
-                _ServerCommands[commandName].Run(parsedCommand.Args);
                 return;
             }
             ArchipelagoConsole.LogMessage($"{commandName} is not a recognized command.");
@@ -98,7 +75,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
         }
 
         /// <summary>
-        ///     Parses and breaks down a command into the command and it's arguements.
+        ///     Parses and breaks down a string into the command and it's arguements.
         /// </summary>
         /// <param name="command">The Command to Parse.</param>
         /// <returns>A ParsedCommand with the command and it's arguements.</returns>
@@ -164,76 +141,6 @@ namespace BluePrinceArchipelago.Archipelago.Commands
         {
             Command = command;
             Args = args;
-        }
-    }
-
-    /// <summary>
-    ///     A command for reseting the cached and stored data about the current run.
-    /// </summary>
-    /// <param name="name">The name of the Command.</param>
-    public class ResetDataCommand(string name) : Command(name)
-    {
-        public override string Description => "Resets the stored data so a new run can be properly started.";
-
-        public override string Syntax => "Usage:\n\t/ResetData";
-
-        public override void Run(List<string> Args)
-        {
-            State.Reset();
-            State.Initialize();
-        }
-    }
-
-    /// <summary>
-    ///     A Command for simulating an in game event for testing permanent unlocks.
-    /// </summary>
-    /// <param name="name">The name of the Command.</param>
-    public class RecordEventCommand(string name) : Command(name)
-    {
-        public override string Description => "Records an event to set some of the vanilla states (for testing purposes).";
-
-        public override string Syntax => "Usage:\n\t/RecordEvent <EventName>\n\nExample:\n\t/RecordEvent Orchard_Unlocked";
-
-        public override void Run(List<string> Args)
-        {
-            var eventName = string.Join(" ", Args);
-            if (eventName.StartsWith("\"") && eventName.EndsWith("\""))
-                eventName = eventName[1..^1];
-
-            var eventID = EventID.Null;
-            switch (eventName.ToLower())
-            {
-                case "west_path_gate_unlocked":
-                case var _ when eventName.ToLower().Contains("west") && eventName.ToLower().Contains("gate") && eventName.ToLower().Contains("unlocked"):
-                    eventID = EventID.West_Path_Gate_Unlocked;
-                    break;
-
-                case "gemstone_cavern_unlocked":
-                case var _ when eventName.ToLower().Contains("gemstone") && eventName.ToLower().Contains("cavern") && eventName.ToLower().Contains("unlocked"):
-                    eventID = EventID.Gemstone_Cavern_Unlocked;
-                    break;
-
-                case "orchard_unlocked":
-                case var _ when eventName.ToLower().Contains("orchard") && eventName.ToLower().Contains("unlocked"):
-                    eventID = EventID.Orchard_Unlocked;
-                    break;
-
-                case "satellite_raised":
-                case var _ when eventName.ToLower().Contains("satellite") && eventName.ToLower().Contains("raised"):
-                    eventID = EventID.Satellite_Raised;
-                    break;
-
-                case "blackbridge_powered":
-                case var _ when eventName.ToLower().Contains("blackbridge") && eventName.ToLower().Contains("powered"):
-                    eventID = EventID.Blackbridge_Powered;
-                    break;
-
-                default:
-                    ArchipelagoConsole.LogMessage($"Unknown event name: {eventName}");
-                    return;
-            }
-
-            ModInstance.StatsLogger.GetComponent<StatsLogger>().Record_Event(eventID);
         }
     }
 }

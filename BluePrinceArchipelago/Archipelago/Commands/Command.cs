@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Archipelago.Commands
 {
     /// <summary>
-    ///     The Command Framework.
+    ///     The Command Template.
     /// </summary>
     /// <param name="name">The name of the command.</param>
     public abstract class Command(string name)

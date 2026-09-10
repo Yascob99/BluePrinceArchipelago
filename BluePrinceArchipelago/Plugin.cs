@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Archipelago.Commands;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
