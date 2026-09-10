@@ -72,6 +72,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             _LocalCommands["resetdata"] = new ResetDataCommand("ResetData");
             _LocalCommands["collect"] = new CollectCommand("Collect"); // Collect location from the Archipelago item pool, for testing purposes.
             _LocalCommands["recordevent"] = new RecordEventCommand("RecordEvent"); // records an event to set some of the vanilla states
+            _LocalCommands["deathlink"] = new DeathLinkCommand("DeathLink"); // Handles changing the local DeathLink settings.
         }
 
         /// <summary>

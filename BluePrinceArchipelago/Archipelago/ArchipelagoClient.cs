@@ -136,7 +136,7 @@ public class ArchipelagoClient
                     ServerData.SlotName,
                     ItemsHandlingFlags.AllItems,
                     new Version(APVersion),
-                    tags: DeathLinkHandler._deathLinkEnabled ? ["AP", "DeathLink"] : ["AP"],
+                    tags: DeathLinkHandler.deathLinkEnabled ? ["AP", "DeathLink"] : ["AP"],
                     password: ServerData.Password,
                     requestSlotData: true
          );
@@ -198,7 +198,7 @@ public class ArchipelagoClient
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                     // Initialize DeathLinkHandler.
-                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                     Reconnect();
                 }
                 else {
@@ -207,7 +207,7 @@ public class ArchipelagoClient
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                     // Initialize DeathLinkHandler.
-                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                    DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                     GameRestart();
                 }
                 ArchipelagoConsole.LogMessage($"Successfully Recconnected to {ServerData.Uri} as {ServerData.SlotName}!");
@@ -222,7 +222,7 @@ public class ArchipelagoClient
                 // Load options into the static ArchipelagoOptions class
                 ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                 // Initialize DeathLinkHandler.
-                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName, ArchipelagoOptions.DeathLinkType != DeathLinkType.option_none);
+                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
 
                 session.Locations.CompleteLocationChecksAsync(ServerData.CheckedLocations.ToArray());
                 // Creates the Locally Stored data for the locations. 

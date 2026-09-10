@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using static Rewired.Platforms.Custom.CustomPlatformUnifiedKeyboardSource.KeyPropertyMap;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -17,13 +16,25 @@ namespace BluePrinceArchipelago.Archipelago;
 /// </summary>
 public class DeathLinkHandler
 {
-    public static bool _deathLinkEnabled = true;
+    public static bool DeathLinkOverride = false;
+
+    public static DeathLinkType DeathLinkTypeOverride = DeathLinkType.option_none;
     public static bool deathLinkEnabled
     {
-        get => !(ArchipelagoOptions.DeathLinkType == DeathLinkType.option_none || !_deathLinkEnabled) ;
-        set
-        {
-            _deathLinkEnabled = value;
+        get {
+            if (DeathLinkOverride) {
+                return !(DeathLinkTypeOverride == DeathLinkType.option_none);
+            }
+            return !(ArchipelagoOptions.DeathLinkType == DeathLinkType.option_none);
+        }
+    }
+  
+    public static DeathLinkType deathLinkType {
+        get {
+            if (DeathLinkOverride) { 
+                return DeathLinkTypeOverride;
+            }
+            return ArchipelagoOptions.DeathLinkType;
         }
     }
 
@@ -40,13 +51,11 @@ public class DeathLinkHandler
     /// <param name="deathLinkService">The new DeathLinkService that our handler will use to send and
     /// receive death links.</param>
     /// <param name="name">The Slot name of the player.</param>
-    /// <param name="enableDeathLink">Whether we should enable death link or not on startup.</param>
-    public DeathLinkHandler(DeathLinkService deathLinkService, string name, bool enableDeathLink = true)
+    public DeathLinkHandler(DeathLinkService deathLinkService, string name)
     {
         service = deathLinkService;
         service.OnDeathLinkReceived += DeathLinkReceived;
         slotName = name;
-        deathLinkEnabled = enableDeathLink;
 
         if (deathLinkEnabled)
         {
@@ -54,25 +63,6 @@ public class DeathLinkHandler
             State.UpdateDeathLinkData();
         }
         else {
-            service.DisableDeathLink();
-            State.UpdateDeathLinkData();
-        }
-    }
-
-    /// <summary>
-    ///     Enables/Disables deathlink
-    /// </summary>
-    public void ToggleDeathLink()
-    {
-        deathLinkEnabled = !deathLinkEnabled;
-
-        if (deathLinkEnabled)
-        {
-            service.EnableDeathLink();
-            State.UpdateDeathLinkData();
-        }
-        else
-        {
             service.DisableDeathLink();
             State.UpdateDeathLinkData();
         }
@@ -204,7 +194,7 @@ public class DeathLinkHandler
     public void SendStepsDeathLink()
     {
         // If the deathlink is not based on steps, prevent it.
-        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) return;
+        if (deathLinkType != DeathLinkType.option_steps) return;
 
         // if there is already a death link in progress, prevent it.
         if (_localDeathsInProgress > 0)
@@ -227,7 +217,7 @@ public class DeathLinkHandler
     /// </summary>
     public void SendEndOfDayDeathLink()
     {
-        if (ArchipelagoOptions.DeathLinkType == DeathLinkType.option_steps) return;
+        if (deathLinkType == DeathLinkType.option_steps) return;
 
         Logging.Log("End of Day, checking for deathlink send", "DeathLink");
         if (_localDeathsInProgress > 0)
@@ -265,7 +255,7 @@ public class DeathLinkHandler
         }
 
         string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
-        if (_bedroomStrings.Any(s => currentRoom.Contains(s)) && ArchipelagoOptions.DeathLinkType == DeathLinkType.option_bedroom)
+        if (_bedroomStrings.Any(s => currentRoom.Contains(s)) && deathLinkType == DeathLinkType.option_bedroom)
         {
             _bedroom = true;
         }
@@ -277,7 +267,7 @@ public class DeathLinkHandler
             return;
         }
 
-        if (ArchipelagoOptions.DeathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
+        if (deathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
     }
 
     /// <summary>

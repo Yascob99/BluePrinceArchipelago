@@ -17,6 +17,10 @@ namespace BluePrinceArchipelago.Models
 
         public bool DeathLinkEnabled { get; set; }
 
+        public bool DeathLinkOverride {  get; set; }
+
+        public int DeathLinkTypeOverride { get; set; }
+
         public int BlockedDeaths { get; set; }
     }
 }

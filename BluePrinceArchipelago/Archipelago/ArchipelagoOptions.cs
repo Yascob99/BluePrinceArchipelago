@@ -72,7 +72,7 @@ public static class ArchipelagoOptions
     public static bool KeySanity { get; private set; } = false;
 
     /// <summary>
-    /// When true, Special Shop Items are Randomized.
+    /// When true, Gift Shop and Book Shop Items are randomized.
     /// </summary>
     public static bool SpecialShopSanity { get; private set; } = false;
 

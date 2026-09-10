@@ -1,5 +1,4 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BepInEx;
+﻿using BepInEx;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Models;
@@ -160,6 +159,8 @@ namespace BluePrinceArchipelago.Utils
                 data.DeathLinkCount = DeathLinkHandler.DeathLinkCount;
                 data.TotalDeathLinksSent = DeathLinkHandler.TotalDeathLinksSent;
                 data.BlockedDeaths = DeathLinkHandler.BlockedDeathLinks;
+                data.DeathLinkOverride = DeathLinkHandler.DeathLinkOverride;
+                data.DeathLinkTypeOverride = (int)DeathLinkHandler.DeathLinkTypeOverride;
                 writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
@@ -406,11 +407,11 @@ namespace BluePrinceArchipelago.Utils
                     try
                     {
                         DeathLinkData data = JsonConvert.DeserializeObject<DeathLinkData>(jsonData);
-                        DeathLinkHandler.deathLinkEnabled = data.DeathLinkEnabled;
                         DeathLinkHandler.DeathLinkCount = data.DeathLinkCount;
                         DeathLinkHandler.TotalDeathLinksSent = data.TotalDeathLinksSent;
                         DeathLinkHandler.BlockedDeathLinks = data.BlockedDeaths;
-
+                        DeathLinkHandler.DeathLinkOverride = data.DeathLinkOverride;
+                        DeathLinkHandler.DeathLinkTypeOverride = (DeathLinkType)data.DeathLinkTypeOverride;
                     }
                     catch (Exception ex)
                     {
@@ -427,6 +428,8 @@ namespace BluePrinceArchipelago.Utils
                     data.DeathLinkCount = 0;
                     data.TotalDeathLinksSent = 0;
                     data.BlockedDeaths = 0;
+                    data.DeathLinkOverride = false;
+                    data.DeathLinkTypeOverride = 0;
                     writer.Write(JsonConvert.SerializeObject(data));
                     writer.Flush();
                 }
@@ -515,6 +518,8 @@ namespace BluePrinceArchipelago.Utils
                 data.DeathLinkCount = 0;
                 data.TotalDeathLinksSent = 0;
                 data.BlockedDeaths = 0;
+                data.DeathLinkOverride = false;
+                data.DeathLinkTypeOverride = 0;
                 writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
