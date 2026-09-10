@@ -1609,7 +1609,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="location">The name of the location.</param>
         private void OnFind(string location)
         {
-            location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND");
+            location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND").Replace("UNDERGROUND", "TOMB");
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
