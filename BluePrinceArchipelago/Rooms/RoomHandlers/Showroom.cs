@@ -76,7 +76,7 @@ public class Showroom : RoomHandler
         foreach (var item in ItemPickupStates) {
             string itemName = item.Key;
             string[] stateNames = item.Value;
-            UniqueItem Item = Plugin.ModItemManager.GetUniqueItem(itemName);
+            UniqueItem Item = ModItemManager.GetUniqueItem(itemName);
             if (Item != null) {
                 if (!Item.IsUnlocked) {
                     foreach (string stateName in stateNames) {

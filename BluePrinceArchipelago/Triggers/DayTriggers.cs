@@ -3,11 +3,6 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -28,18 +23,18 @@ namespace BluePrinceArchipelago.Triggers
             ModItemManager.LoadInventories();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
-            Plugin.ModRoomManager.ResetRoomInHouseCounts();
+            ModRoomManager.ResetRoomInHouseCounts();
             ModRoomManager.ReloadArrays();
 
             // Sync room pools with Archipelago at the start of each day, regardless of when auth happened
             ModRoomManager.SyncRoomPoolsWithArchipelago();
             if (ModInstance.FirstLoad)
             {
-                RegisterItems.Register();
+                ModItemManager.RegisterItems();
             }
             else
             {
-                RegisterItems.ReloadGameObjects();
+                ModItemManager.ReloadGameObjects();
             }
 
             // Initialize the Star HUD so it can be properly updated when needed.
@@ -69,8 +64,8 @@ namespace BluePrinceArchipelago.Triggers
                 ModRoomManager.SyncRoomPoolsWithArchipelago();
 
                 // Handle Start of day code for Permanent items (and maybe curses later).
-                Plugin.ModItemManager.StartOfDay();
-                Plugin.ModItemManager.ReplaceItemsWithAP();
+                ModItemManager.StartOfDay();
+                ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
@@ -81,13 +76,13 @@ namespace BluePrinceArchipelago.Triggers
                 {
                     FSMPatches.OuterDraftOverrides();
                 }
-                Plugin.ModRoomManager.HLCFix();
+                ModRoomManager.HLCFix();
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
                 Unlocks.AppleOrchard.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
-                Plugin.ModRoomManager.StartOfDay();
+                ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
             }
         }

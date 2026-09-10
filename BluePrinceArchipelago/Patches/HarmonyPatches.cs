@@ -221,7 +221,7 @@ namespace BluePrinceArchipelago.Patches
                 }
                 else if (eventName.Contains("Allowance Token Pickup"))
                 {
-                    EventTriggers.AllowanceTokenPickup(eventName, __instance.owner);
+                    EventTriggers.AllowanceTokenPickup(__instance.owner);
                 }
                 else if (targetName == "Trunk Counter" && eventName == "Update Subtract")
                 {

@@ -197,9 +197,9 @@ namespace BluePrinceArchipelago
                 RDHelper = GameObject.Find("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>();
                 FSMPatches.RoomForcer(MasterPicker); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 ModRoomManager.LoadArrays();
-                Plugin.ModRoomManager.Reset(); // Clear stale room state from any previous scene load
+                ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
-                //Plugin.ModRoomManager.SetAllVanilla();
+                //ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
                 if (scene.name != PreviousSceneName)

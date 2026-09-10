@@ -47,8 +47,8 @@ namespace BluePrinceArchipelago.Triggers
                 ModItemManager.LoadInventories();
                 GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
                 // Handle Start of day code for Permanent items (and maybe curses later).
-                Plugin.ModItemManager.StartOfDay();
-                Plugin.ModItemManager.ReplaceItemsWithAP();
+                ModItemManager.StartOfDay();
+                ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
@@ -64,9 +64,9 @@ namespace BluePrinceArchipelago.Triggers
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
-                Plugin.ModRoomManager.StartOfDay();
+                ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
-                Plugin.ModRoomManager.HLCFix();
+                ModRoomManager.HLCFix();
             }
         }
     }

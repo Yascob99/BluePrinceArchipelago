@@ -84,7 +84,7 @@ public class Commissary : RoomHandler
                         {
                             GameObject model = type.GetChild(k).gameObject;
                             string itemName = model.name.Trim().Replace(" (1)", "").Replace(" (2)", "").Replace(" (3)", "").Replace(" (4)", "").ToUpper();
-                            UniqueItem item = Plugin.ModItemManager.GetUniqueItem(itemName);
+                            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
                             if (item != null)
                             {
                                 // if the item has note been found yet.
@@ -161,7 +161,7 @@ public class Commissary : RoomHandler
                         {
                             var itemName = setFsmString.setValue.Value;
 
-                            UniqueItem item = Plugin.ModItemManager.GetUniqueItem(itemName);
+                            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
                             if (itemName.Contains("Upgrade Disk"))
                                 itemName += " - Commissary";
 

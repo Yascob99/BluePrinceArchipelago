@@ -15,7 +15,7 @@ namespace BluePrinceArchipelago.Triggers
         /// </summary>
         /// <param name="obj">The spawned room object.</param>
         public static void OnAfterRoomSpawned(GameObject obj) {
-            ModRoom room = Plugin.ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
+            ModRoom room = ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
             room?.Handler?.OnAfterRoomDrafted(obj);
         }
 
@@ -37,16 +37,16 @@ namespace BluePrinceArchipelago.Triggers
                     roomname = "HER LADYSHIP\'S CHAMBER";
                 }
                 Logging.LogWarning($"Room Drafted: {roomname}", "Room");
-                if (Plugin.ModRoomManager.ForcedRoom != null)
+                if (ModRoomManager.ForcedRoom != null)
                 {
-                    if (roomname.ToUpper() == Plugin.ModRoomManager.ForcedRoom.Name.ToUpper())
+                    if (roomname.ToUpper() == ModRoomManager.ForcedRoom.Name.ToUpper())
                     {
                         ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = false;
-                        ModRoomManager.ForceRoomQueue.Remove(Plugin.ModRoomManager.ForcedRoom);
-                        Plugin.ModRoomManager.ForcedRoom = null;
+                        ModRoomManager.ForceRoomQueue.Remove(ModRoomManager.ForcedRoom);
+                        ModRoomManager.ForcedRoom = null;
                     }
                 }
-                ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomname.ToUpper().Trim());
+                ModRoom room = ModRoomManager.GetRoomByName(roomname.ToUpper().Trim());
                 if (room != null)
                 {
                     room.RoomInHouseCount++;
@@ -69,7 +69,7 @@ namespace BluePrinceArchipelago.Triggers
                 if (!ArchipelagoOptions.RoomDraftSanity)
                 {
                     // Still allow force room draft for other purposes if needed
-                    Plugin.ModRoomManager.CheckForceRoomDraft();
+                    ModRoomManager.CheckForceRoomDraft();
                     return;
                 }
 
@@ -83,9 +83,9 @@ namespace BluePrinceArchipelago.Triggers
                     ModRoomManager.EnsureRoomUnlockStates();
                 }
 
-                Plugin.ModRoomManager.CheckForceRoomDraft();
+                ModRoomManager.CheckForceRoomDraft();
                 Logging.Log("Updating Rooms for draft");
-                Plugin.ModRoomManager.UpdateRoomPools();
+                ModRoomManager.UpdateRoomPools();
             }
             else
             {

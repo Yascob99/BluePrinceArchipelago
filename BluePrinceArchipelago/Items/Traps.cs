@@ -28,7 +28,7 @@ namespace BluePrinceArchipelago.Items
     {
         public override void ActivateTrap()
         {
-            Plugin.ModItemManager.LoseRandomItem();
+            ModItemManager.LoseRandomItem();
         }
     }
     /// <summary>

@@ -17,7 +17,7 @@ namespace BluePrinceArchipelago.Triggers
         {
             if (ArchipelagoClient.Authenticated)
             {
-                Plugin.ModRoomManager.RecheckRoomUnlockStatus();
+                ModRoomManager.RecheckRoomUnlockStatus();
             }
         }
 
@@ -28,7 +28,7 @@ namespace BluePrinceArchipelago.Triggers
         {
             if (ArchipelagoClient.Authenticated)
             {
-                Plugin.ModRoomManager.RecheckRoomUnlockStatus();
+                ModRoomManager.RecheckRoomUnlockStatus();
             }
         }
 
@@ -43,15 +43,15 @@ namespace BluePrinceArchipelago.Triggers
                 // Skip Archipelago room pool management if RoomDraftSanity is disabled
                 if (!ArchipelagoOptions.RoomDraftSanity)
                 {
-                    Plugin.ModRoomManager.CheckForceRoomDraft();
+                    ModRoomManager.CheckForceRoomDraft();
                     return;
                 }
 
-                Plugin.ModRoomManager.UpdateRoomPools();
+                ModRoomManager.UpdateRoomPools();
 
-                ModRoomManager.OuterDraftRooms = Plugin.ModRoomManager.OuterDraftPrePickShuffling();
+                ModRoomManager.OuterDraftRooms = ModRoomManager.OuterDraftPrePickShuffling();
                 ModInstance.MasterPicker.GetIntVariable("Reroll Count").Value = 0;
-                Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, 0);
+                ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, 0);
                 PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 PlayMakerFSM DraftUI = GameObject.Find("__SYSTEM/THE DRAFT/anchor/DRAFT UI").GetComponent<PlayMakerFSM>();
             }
@@ -65,7 +65,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on an outer draft being rerolled.
         /// </summary>
         public static void OnOuterDraftReroll() {
-            Plugin.ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, ModInstance.MasterPicker.GetIntVariable("Reroll Count").Value);
+            ModRoomManager.SetOuterDraftRooms(ModRoomManager.OuterDraftRooms, ModInstance.MasterPicker.GetIntVariable("Reroll Count").Value);
         }
 
         /// <summary>

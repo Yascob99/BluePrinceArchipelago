@@ -199,22 +199,22 @@ namespace BluePrinceArchipelago.Triggers
                     ModEventHandler.OnOtherLocation("Open the Torch Chamber Shortcut", "Torch Chamber Lit");
                     break;
                 case EventID.Moon_Pendant_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("MOON PENDANT"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("MOON PENDANT"));
                     break;
                 case EventID.Master_Key_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("MASTER KEY"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("MASTER KEY"));
                     break;
                 case EventID.Chronograph_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("CHRONOGRAPH"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("CHRONOGRAPH"));
                     break;
                 case EventID.Silver_Spoon_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("SILVER SPOON"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("SILVER SPOON"));
                     break;
                 case EventID.Emerald_Bracelet_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("EMERALD BRACELET"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("EMERALD BRACELET"));
                     break;
                 case EventID.Ornate_Compass_Purchased:
-                    ModEventHandler.OnFirstFound(Plugin.ModItemManager.GetUniqueItem("ORNATE COMPASS"));
+                    ModEventHandler.OnFirstFound(ModItemManager.GetUniqueItem("ORNATE COMPASS"));
                     break;
             }
         }

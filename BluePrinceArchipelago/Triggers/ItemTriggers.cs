@@ -23,7 +23,7 @@ namespace BluePrinceArchipelago.Triggers
         /// <param name="spawnedObj">The GameObject for the spawned object.</param>
         public static void OnAfterItemSpawned(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj) 
         {
-            UniqueItem item = Plugin.ModItemManager.GetUniqueItem(obj.name);
+            UniqueItem item = ModItemManager.GetUniqueItem(obj.name);
             //Check if Connected in before replacing items.
             if (ArchipelagoClient.Authenticated)
             {
@@ -88,7 +88,7 @@ namespace BluePrinceArchipelago.Triggers
                 }
                 else
                 {
-                    UniqueItem Item = Plugin.ModItemManager.GetUniqueItem(itemName);
+                    UniqueItem Item = ModItemManager.GetUniqueItem(itemName);
 
                     if (Item != null)
                     {
@@ -111,7 +111,7 @@ namespace BluePrinceArchipelago.Triggers
                         {
                             Item.HasBeenFound = true;
                             ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
-                            Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                            ModItemManager.RemoveUniqueItemAPSwirly(Item);
                         }
                     }
                 }
@@ -126,7 +126,7 @@ namespace BluePrinceArchipelago.Triggers
             if (!Item.HasBeenFound)
             {
                 Item.HasBeenFound = true;
-                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
             }
         }
@@ -157,7 +157,7 @@ namespace BluePrinceArchipelago.Triggers
             if (!Item.HasBeenFound)
             {
                 Item.HasBeenFound = true;
-                Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
             }
             Item.HasBeenFound = true;
@@ -173,7 +173,7 @@ namespace BluePrinceArchipelago.Triggers
                 if (Item.ApplySanity())
                 {
                     Item.HasBeenFound = true;
-                    Plugin.ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                    ModItemManager.RemoveUniqueItemAPSwirly(Item);
                     ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
                 }
             }

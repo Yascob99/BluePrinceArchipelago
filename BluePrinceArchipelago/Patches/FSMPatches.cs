@@ -1,5 +1,6 @@
 ﻿using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -443,7 +444,7 @@ namespace BluePrinceArchipelago.Patches
                 FsmState BerryCheck = MasterPicker.GetState("Berry Check");
                 FsmState OuterSlotPick = MasterPicker.GetState("Outer slot pick");
                 BerryCheck.ChangeTransition("FINISHED", "Outer slot pick");
-                GameObject Closet = Plugin.ModRoomManager.GetRoomByName("CLOSET").GameObj;
+                GameObject Closet = ModRoomManager.GetRoomByName("CLOSET").GameObj;
                 FsmGameObject OuterRoom1 = MasterPicker.AddFsmGameObject("OuterRoom1", Closet);
                 FsmGameObject OuterRoom2 = MasterPicker.AddFsmGameObject("OuterRoom2", Closet);
                 FsmGameObject OuterRoom3 = MasterPicker.AddFsmGameObject("OuterRoom3", Closet);

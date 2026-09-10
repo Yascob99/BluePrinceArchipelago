@@ -167,7 +167,7 @@ namespace BluePrinceArchipelago.Items
             {
                 if (_IsPrespawn)
                 {
-                    GameObj = Plugin.ModItemManager.GetInventoryItem(Name);
+                    GameObj = ModItemManager.GetInventoryItem(Name);
                 }
             }
             if (GameObj != null)

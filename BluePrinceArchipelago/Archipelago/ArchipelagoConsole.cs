@@ -626,9 +626,9 @@ public class RoomCommand(string name) : Command(name)
     ///     Prints out the mod details and counts of the current room pool.
     /// </summary>
     /// <param name="unlockedOnly">Whether to display only rooms that have been unlocked.</param>
-    private void ListRooms(bool unlockedOnly)
+    private static void ListRooms(bool unlockedOnly)
     {
-        var rooms = Plugin.ModRoomManager.Rooms;
+        var rooms = ModRoomManager.Rooms;
         if (rooms == null || rooms.Count == 0)
         {
             ArchipelagoConsole.LogMessage("No rooms have been initialized yet.");
@@ -660,9 +660,9 @@ public class RoomCommand(string name) : Command(name)
     ///     Adds a Room to the room pool.
     /// </summary>
     /// <param name="roomName">The name of the room to add.</param>
-    private void AddRoomToPool(string roomName)
+    private static void AddRoomToPool(string roomName)
     {
-        ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomName.ToUpper());
+        ModRoom room = ModRoomManager.GetRoomByName(roomName.ToUpper());
         if (room == null)
         {
             ArchipelagoConsole.LogMessage($"Error: '{roomName}' is not a valid room name.");
@@ -671,7 +671,7 @@ public class RoomCommand(string name) : Command(name)
 
         room.IsUnlocked = true;
         room.RoomPoolCount++;
-        Plugin.ModRoomManager.UpdateRoomPools();
+        ModRoomManager.UpdateRoomPools();
         ArchipelagoConsole.LogMessage($"Added '{room.Name}' to the pool. Pool count: {room.RoomPoolCount}");
     }
 
@@ -679,9 +679,9 @@ public class RoomCommand(string name) : Command(name)
     ///     Removes a room from the current room pool.
     /// </summary>
     /// <param name="roomName">The name of the room to remove.</param>
-    private void RemoveRoomFromPool(string roomName)
+    private static void RemoveRoomFromPool(string roomName)
     {
-        ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomName.ToUpper());
+        ModRoom room = ModRoomManager.GetRoomByName(roomName.ToUpper());
         if (room == null)
         {
             ArchipelagoConsole.LogMessage($"Error: '{roomName}' is not a valid room name.");
@@ -695,29 +695,29 @@ public class RoomCommand(string name) : Command(name)
         }
 
         room.IsUnlocked = false;
-        Plugin.ModRoomManager.UpdateRoomPools();
+        ModRoomManager.UpdateRoomPools();
         ArchipelagoConsole.LogMessage($"Removed '{room.Name}' from the pool.");
     }
 
     /// <summary>
     ///     Empties the current room pool.
     /// </summary>
-    private void ClearPool()
+    private static void ClearPool()
     {
-        Plugin.ModRoomManager.EmptyDraftPool();
-        Plugin.ModRoomManager.UpdateRoomPools();
+        ModRoomManager.EmptyDraftPool();
+        ModRoomManager.UpdateRoomPools();
         ArchipelagoConsole.LogMessage("Cleared all non-vanilla rooms from the pool.");
     }
 
     /// <summary>
     ///     Clears all the rooms for archipelago then rebuilds the room pool based on received items and settings.
     /// </summary>
-    private void ClearAllForArchipelago()
+    private static void ClearAllForArchipelago()
     {
-        Plugin.ModRoomManager.ClearAllRoomsForArchipelago();
+        ModRoomManager.ClearAllRoomsForArchipelago();
         if (ModInstance.IsInRun)
         {
-            Plugin.ModRoomManager.UpdateRoomPools();
+            ModRoomManager.UpdateRoomPools();
         }
         ArchipelagoConsole.LogMessage("Cleared ALL rooms and disabled vanilla mode for Archipelago.");
     }
@@ -936,7 +936,7 @@ public class ItemCommand(string name) : Command(name)
             string subcommand = Args[0];
             if (subcommand.ToLower() == "list")
             {
-                ArchipelagoConsole.LogMessage($"Item List\n{Plugin.ModItemManager.ListItems(Args[1])}");
+                ArchipelagoConsole.LogMessage($"Item List\n{ModItemManager.ListItems(Args[1])}");
                 return;
             }
             else if (subcommand.ToLower() == "add")
@@ -949,7 +949,7 @@ public class ItemCommand(string name) : Command(name)
 
                 ArchipelagoConsole.LogMessage($"Attemping to add item {itemName}");
 
-                GameObject item = Plugin.ModItemManager.GetInventoryItem(itemName);
+                GameObject item = ModItemManager.GetInventoryItem(itemName);
                 
                 //Handle items that don't start in the prespawn pool.
                 if (item == null)
@@ -984,7 +984,7 @@ public class ItemCommand(string name) : Command(name)
                 }
                 else {
                     // Check PreSpawn EstateItems, PickedUp, CoatCheck, UsedItems
-                    if (Plugin.ModItemManager.IsItemSpawnable(item) || true)
+                    if (ModItemManager.IsItemSpawnable(item) || true)
                     {
                         GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
                         PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
@@ -1015,7 +1015,7 @@ public class ItemCommand(string name) : Command(name)
                 {
                     itemName += Args[i];
                 }
-                GameObject item = Plugin.ModItemManager.GetPickedUpItem(itemName);
+                GameObject item = ModItemManager.GetPickedUpItem(itemName);
                 if (item == null)
                 {
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
@@ -1097,7 +1097,7 @@ public class ForceCommand(string name) : Command(name)
     public override void Run(List<string> Args)
     {
         string roomName = string.Join(" ", Args);
-        ModRoom room = Plugin.ModRoomManager.GetRoomByName(roomName);
+        ModRoom room = ModRoomManager.GetRoomByName(roomName);
         if (room != null)
         {
             ModRoomManager.ForceRoomQueue.Add(room);
@@ -1176,7 +1176,7 @@ public class SyncCommand(string name) : Command(name)
         ModRoomManager.ReloadArrays();
 
         // First, clear ALL rooms for Archipelago mode (disables vanilla handling too)
-        Plugin.ModRoomManager.ClearAllRoomsForArchipelago();
+        ModRoomManager.ClearAllRoomsForArchipelago();
 
         int syncedCount = 0;
         int skippedCount = 0;
@@ -1186,7 +1186,7 @@ public class SyncCommand(string name) : Command(name)
         {
             foreach (string itemName in receivedItems)
             {
-                if (Plugin.ModRoomManager.UnlockRoomForArchipelago(itemName))
+                if (ModRoomManager.UnlockRoomForArchipelago(itemName))
                 {
                     syncedCount++;
                 }
@@ -1199,7 +1199,7 @@ public class SyncCommand(string name) : Command(name)
         }
 
         // Update the pools after sync
-        Plugin.ModRoomManager.UpdateRoomPools();
+        ModRoomManager.UpdateRoomPools();
 
         ArchipelagoConsole.LogMessage($"Room sync complete: {syncedCount} rooms unlocked, {skippedCount} non-room items skipped.");
         ArchipelagoConsole.LogMessage("All rooms set to Archipelago mode (vanilla handling disabled).");
@@ -1225,7 +1225,7 @@ public class SyncCommand(string name) : Command(name)
         {
             foreach (string itemName in receivedItems)
             {
-                if (Plugin.ModRoomManager.GetRoomByName(itemName.ToUpper()) != null)
+                if (ModRoomManager.GetRoomByName(itemName.ToUpper()) != null)
                 {
                     receivedRoomCount++;
                 }
@@ -1233,7 +1233,7 @@ public class SyncCommand(string name) : Command(name)
         }
 
         // Count unlocked rooms
-        foreach (var room in Plugin.ModRoomManager.Rooms)
+        foreach (var room in ModRoomManager.Rooms)
         {
             if (room.IsUnlocked && !room.UseVanilla)
             {
@@ -1321,11 +1321,11 @@ public class ReceivedCommand(string name) : Command(name)
     /// <param name="receivedItems">A list of items received from Archipelago.</param>
     private void ListReceivedRooms(List<string> receivedItems)
     {
-        var rooms = receivedItems.Where(i => Plugin.ModRoomManager.GetRoomByName(i.ToUpper()) != null).ToList();
+        var rooms = receivedItems.Where(i => ModRoomManager.GetRoomByName(i.ToUpper()) != null).ToList();
         ArchipelagoConsole.LogMessage($"=== Received Rooms ({rooms.Count}) ===");
         foreach (var room in rooms)
         {
-            ModRoom modRoom = Plugin.ModRoomManager.GetRoomByName(room.ToUpper());
+            ModRoom modRoom = ModRoomManager.GetRoomByName(room.ToUpper());
             string poolInfo = modRoom != null ? $" [Pool: {modRoom.RoomsLeftInPool}/{modRoom.RoomPoolCount}]" : "";
             ArchipelagoConsole.LogMessage($"  {room}{poolInfo}");
         }
@@ -1337,11 +1337,11 @@ public class ReceivedCommand(string name) : Command(name)
     /// <param name="receivedItems"></param>
     private void ListReceivedNonRooms(List<string> receivedItems)
     {
-        var nonRooms = receivedItems.Where(i => Plugin.ModRoomManager.GetRoomByName(i.ToUpper()) == null).ToList();
+        var nonRooms = receivedItems.Where(i => ModRoomManager.GetRoomByName(i.ToUpper()) == null).ToList();
         ArchipelagoConsole.LogMessage($"=== Received Non-Room Items ({nonRooms.Count}) ===");
         foreach (var item in nonRooms)
         {
-            string type = Plugin.ModItemManager.GetItemType(item) ?? "Unknown";
+            string type = ModItemManager.GetItemType(item) ?? "Unknown";
             ArchipelagoConsole.LogMessage($"  [{type}] {item}");
         }
     }
@@ -1359,13 +1359,13 @@ public class ReceivedCommand(string name) : Command(name)
 
         foreach (var item in receivedItems)
         {
-            if (Plugin.ModRoomManager.GetRoomByName(item.ToUpper()) != null)
+            if (ModRoomManager.GetRoomByName(item.ToUpper()) != null)
             {
                 roomCount++;
             }
             else
             {
-                string type = Plugin.ModItemManager.GetItemType(item);
+                string type = ModItemManager.GetItemType(item);
                 if (type == "Permanent") permanentCount++;
                 else if (type == "Junk") junkCount++;
                 else unknownCount++;
@@ -1389,8 +1389,8 @@ public class ReceivedCommand(string name) : Command(name)
         ArchipelagoConsole.LogMessage($"=== All Received Items ({receivedItems.Count}) ===");
         foreach (var item in receivedItems)
         {
-            bool isRoom = Plugin.ModRoomManager.GetRoomByName(item.ToUpper()) != null;
-            string type = isRoom ? "Room" : (Plugin.ModItemManager.GetItemType(item) ?? "Unknown");
+            bool isRoom = ModRoomManager.GetRoomByName(item.ToUpper()) != null;
+            string type = isRoom ? "Room" : (ModItemManager.GetItemType(item) ?? "Unknown");
             ArchipelagoConsole.LogMessage($"  [{type}] {item}");
         }
     }
@@ -1709,7 +1709,7 @@ public class DebugCommand(string name) : Command(name)
                 }
 
                 // Check our ModRoom status
-                var modRoom = Plugin.ModRoomManager.GetRoomByName(roomName);
+                var modRoom = ModRoomManager.GetRoomByName(roomName);
                 string modStatus = modRoom != null ? (modRoom.IsUnlocked ? "Unlocked" : "Locked") : "Not tracked";
 
                 ArchipelagoConsole.LogMessage($"  [{i}] {roomName} - FSM:{poolRemovalStatus}, Mod:{modStatus}");
