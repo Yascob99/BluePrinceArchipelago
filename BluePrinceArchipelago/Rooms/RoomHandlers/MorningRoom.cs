@@ -13,7 +13,7 @@ class MorningRoom : RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/_Pickup Items/12")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("MORNING ROOM");
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("MORNING ROOM");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;

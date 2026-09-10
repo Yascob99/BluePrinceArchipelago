@@ -21,7 +21,7 @@ class LostAndFound : RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST AND FOUND");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;

@@ -13,7 +13,7 @@ class Freezer : RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/ICE DOORS/Door 20/6")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("FREEZER");
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("FREEZER");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;

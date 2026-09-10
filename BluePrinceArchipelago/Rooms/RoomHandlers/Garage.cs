@@ -13,8 +13,7 @@ class Garage : RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
-            Logging.LogWarning(found);
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;
             ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;

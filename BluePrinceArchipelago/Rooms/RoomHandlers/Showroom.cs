@@ -57,23 +57,20 @@ public class Showroom : RoomHandler
                 continue;
             }
 
-            var propSetActions = state.GetActionsOfType<SetProperty>();
-            foreach (var action in propSetActions)
+            SetProperty propSetActions = state.GetFirstActionOfType<SetProperty>();
+            var target = propSetActions.targetProperty.StringParameter.Value;
+
+            if (!LocationMap.ContainsKey(target))
             {
-                var target = action.targetProperty.StringParameter.Value;
-
-                if (!LocationMap.ContainsKey(target))
+                LocationMap.Add(target, new Models.ShopItem
                 {
-                    LocationMap.Add(target, new Models.ShopItem
-                    {
-                        Name = target,
-                    });
-                }
-
-                var shopItem = LocationMap[target];
-
-                action.targetProperty.StringParameter.Value = shopItem.GetScoutHint();
+                    Name = target,
+                });
             }
+
+            var shopItem = LocationMap[target];
+
+            propSetActions.targetProperty.StringParameter.Value = shopItem.GetScoutHint();
         }
         // Prevent not unlocked items from being added to inventory.
         foreach (var item in ItemPickupStates) {
@@ -84,7 +81,14 @@ public class Showroom : RoomHandler
                 if (!Item.IsUnlocked) {
                     foreach (string stateName in stateNames) {
                         FsmState state = _ShowroomMenuFsm.GetState(stateName);
-                        state.DisableActionsOfType<ArrayListAdd>();
+                        if (stateName != "Chronograph Purchase")
+                        {
+                            state.DisableAction(2);
+                        }
+                        else { 
+                            state.DisableAction(3);
+                        }
+                        state.DisableAction(4);
                     }
                 }
             }

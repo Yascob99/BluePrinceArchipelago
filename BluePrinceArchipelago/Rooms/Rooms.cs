@@ -575,6 +575,7 @@ namespace BluePrinceArchipelago.Rooms
         public void SetPoolRemovalVar(string name, bool value = false) {
             string roomPath = "__SYSTEM/The Room Engines/" + name;
             GameObject roomEngine = GameObject.Find(roomPath);
+            Logging.LogWarning(name);
             if (roomEngine != null)
             {
                 PlayMakerFSM fsm = roomEngine.GetComponent<PlayMakerFSM>();

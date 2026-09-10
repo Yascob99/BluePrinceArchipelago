@@ -98,6 +98,7 @@ namespace BluePrinceArchipelago.Patches
 
                     checks[0].containsString = "adyship"; // Fix HLC check
                     checks[3].containsString = "omb"; // Fix Tomb Check
+                    checks[15].falseEvent = checks[2].trueEvent; // Foundation Upgrade Disk Fix
                     state.DisableActionsOfType<SendEvent>(); //Prevents the Game from Getting Softlocked by a Freeze.
                     FsmStateAction freeze = state.GetFirstActionOfType<SendEvent>();
 
@@ -237,14 +238,14 @@ namespace BluePrinceArchipelago.Patches
                     delay = 0f,
                     everyFrame = false
                 });
-                PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND").transform.Find("Candle Room").Find("_CULLABLE - candle room").Find("_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
                 if (MineUpgradeSpawn != null)
                 {
-                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
+                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
                     FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                    ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
                     CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
                 }
                 else
@@ -255,7 +256,7 @@ namespace BluePrinceArchipelago.Patches
                 PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
                 if (FoundationSpawn != null)
                 {
-                    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
+                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation");
                     FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;

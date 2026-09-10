@@ -286,14 +286,18 @@ namespace BluePrinceArchipelago
             if (targetName == "Archipelago")
             {
                 // If the Event is registered, trigger the event.
-                Logging.LogWarning(eventName);
-                if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
+                
+                if (eventName != null)
                 {
-                    FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
-                }
-                else
-                {
-                    Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
+                    Logging.LogWarning(eventName);
+                    if (FSMEventHandler.RegisteredEvents.ContainsKey(eventName))
+                    {
+                        FSMEventHandler.RegisteredEvents[eventName].OnTrigger();
+                    }
+                    else
+                    {
+                        Logging.LogWarning($"The custom Archipelago event {eventName} doesn't appear to be registered. It is likely mispelled or not fully implemented.", "Events");
+                    }
                 }
             }
             else if (eventName.Contains("Allowance Token Pickup"))
@@ -1196,7 +1200,7 @@ namespace BluePrinceArchipelago
                 Func<ModRoom, bool> foundationCheck = (room) => {
 
                     // Check if the Foundation already exists in the house.
-                    if (RoomsInHouse?.GetComponent<PlayMakerArrayListProxy>().arrayList.Contains("FOUNDATION") ?? false) {
+                    if (ModInstance.GlobalPersistentManager.GetBoolVariable("Foundation").Value) {
                         return false;
                     }
                     //If the game has set the foundation to be removed.

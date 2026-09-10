@@ -21,7 +21,7 @@ class Tomb : RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_GAMEPLAY/Sliding Wall A Anchor/Gold Pay Off/3")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("TOMB");
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("TOMB");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;

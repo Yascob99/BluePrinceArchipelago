@@ -1566,6 +1566,13 @@ namespace BluePrinceArchipelago.Items
                     {
                         AddItemToInventory(location);
                     }
+                    if (FoundLocations.Contains(location.ToUpper())){
+                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
+                    }
+                    else
+                    {
+                        ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = false;
+                    }
                 }
             }
         }
@@ -1597,6 +1604,9 @@ namespace BluePrinceArchipelago.Items
                 {
                     ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
                 }
+                else {
+                    ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = false;
+                }
             }
             else {
                 Logging.LogWarning("Unable to set Location as used, no received locations are currently unused.", "UpgradeDisks");
@@ -1610,13 +1620,27 @@ namespace BluePrinceArchipelago.Items
         private void OnFind(string location)
         {
             location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND").Replace("UNDERGROUND", "ABANDONED MINE");
+            if (location == "") {
+                location = "FOUNDATION";
+            }
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
                 State.UpdateUpgradeDiskData();
                 //Fix location name for pickup event.
-                ModInstance.ModEventHandler.OnUgradeDiskFound(location);
+                if (location == "FOUNDATION")
+                {
+                    ModInstance.ModEventHandler.OnUgradeDiskFound("THE FOUNDATION");
+                }
+                else if (location == "LOST & FOUND") {
+                    ModInstance.ModEventHandler.OnUgradeDiskFound("LOST & FOUND");
+                }
+                else
+                {
+                    ModInstance.ModEventHandler.OnUgradeDiskFound(location);
+                }
             }
+            Logging.LogWarning(location.Length);
             Logging.LogWarning(location.ToUpper());
             ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
         }

@@ -13,7 +13,7 @@ class Archives: RoomHandler
         PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1")?.GetComponent<PlayMakerFSM>();
         if (ItemDropFSM != null)
         {
-            bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("ARCHIVES");
+            bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ARCHIVES");
             Logging.LogWarning(found);
             FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = found;
