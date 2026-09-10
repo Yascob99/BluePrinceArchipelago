@@ -70,8 +70,9 @@ namespace BluePrinceArchipelago.Rooms
         ///     Handles any room settings that need to be set on Day start
         /// </summary>
         public void StartOfDay() {
-            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools/");
-            foreach (Transform child in RoomSpawnPools.transform) { 
+            Transform RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools/").transform;
+            for (int i = 0; i < RoomSpawnPools.childCount; i++) {
+                Transform child = RoomSpawnPools.GetChild(i);
                 if (child != null)
                 {
                     if (child.name.Contains("Foundation")) {
@@ -607,7 +608,6 @@ namespace BluePrinceArchipelago.Rooms
             List<string> OuterRooms = ["TOOLSHED", "BOMB SHELTER", "SCHOOLHOUSE", "SHRINE", "ROOT CELLAR", "HOVEL", "TRADING POST", "TOMB"];
             List<string> NewList = new List<string>();
             List<ModRoom> Output = new List<ModRoom>();
-            PlayMakerArrayListProxy StandaloneArray = ModInstance.PlanPicker.transform.GetChild(56).gameObject.GetComponent<PlayMakerArrayListProxy>();
 
             // Keep on the rooms that are unlocked.
             foreach (string room in OuterRooms) {
@@ -782,7 +782,6 @@ namespace BluePrinceArchipelago.Rooms
             if (ModInstance.RDHelper.EnableDraxus || colorBools[6]) {
                 NewList.FindAndInsert("TOMB");
             }
-
             return GenerateOuterList(NewList);
         }
 
@@ -839,12 +838,17 @@ namespace BluePrinceArchipelago.Rooms
             return colorBools;
         }
 
+        /// <summary>
+        ///     Sets Variables in the MasterPicker for use in the Outer Draft Override.
+        /// </summary>
+        /// <param name="RoomList"></param>
+        /// <param name="rerolls"></param>
         public void SetOuterDraftRooms(List<ModRoom> RoomList, int rerolls) {
             int index = (0 + 3 * rerolls);
-            
-            ModRoom Room1 = RoomList[index % (RoomList.Count - 1)];
-            ModRoom Room2 = RoomList[(index + 1) % (RoomList.Count - 1)];
-            ModRoom Room3 = RoomList[(index + 2) % (RoomList.Count - 1)];
+
+            ModRoom Room1 = RoomList[index % (RoomList.Count)];
+            ModRoom Room2 = RoomList[(index + 1) % (RoomList.Count)];
+            ModRoom Room3 = RoomList[(index + 2) % (RoomList.Count)];
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom1").Value = Room1.GameObj;
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom2").Value = Room2.GameObj;
             ModInstance.MasterPicker.GetGameObjectVariable("OuterRoom3").Value = Room3.GameObj;
