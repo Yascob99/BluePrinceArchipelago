@@ -70,6 +70,16 @@ namespace BluePrinceArchipelago.Items
                         ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[ItemNames.IndexOf(location.ToUpper())]).Value = false;
                     }
                 }
+                // Despawn Foundation Upgrade Disk
+                if (ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation"))
+                {
+                    Transform FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
+                    if (FoundationSpawn.childCount > 0)
+                    {
+                        Logging.LogWarning("Despawning Foundation Upgrade Disk.");
+                        GameObject.Destroy(FoundationSpawn.GetChild(0).gameObject);
+                    }
+                }
             }
         }
 

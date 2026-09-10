@@ -1,4 +1,5 @@
 ﻿using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -214,6 +215,16 @@ namespace BluePrinceArchipelago.Rooms
                         // Remove a copy of the Foundation to prevent extra foundations from being in the pool.
                         GetRoomByName("The Foundation").RoomPoolAdjustment = -1;
                     }
+                }
+            }
+            // Despawn Foundation Upgrade Disk
+            if (ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation"))
+            {
+                Transform FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
+                if (FoundationSpawn.childCount > 0)
+                {
+                    Logging.LogWarning("Despawning Foundation Upgrade Disk.");
+                    GameObject.Destroy(FoundationSpawn.GetChild(0).gameObject);
                 }
             }
         }
