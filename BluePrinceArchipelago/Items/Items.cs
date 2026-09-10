@@ -1577,20 +1577,11 @@ namespace BluePrinceArchipelago.Items
         }
 
         /// <summary>
-        ///     Handles the pickup of the Upgrade Disk. The Vanilla code handles the rest.
-        /// </summary>
-        public void OnPickup() {
-            string roomname = ModInstance.RoomText.GetStringVariable("Current Room").Value;
-            roomname = roomname.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE").Replace(" AND", " &"); // HLC, TP Dynamite, and Lost & Found name fix
-            OnFind(roomname);
-        }
-
-        /// <summary>
         ///     Handles setting the game state when an upgrade disk is used.
         /// </summary>
         /// <param name="upgradeid">The Id of the upgrade disk.</param>
         public void OnUsed(int upgradeid) {
-            Logging.LogWarning($"Upgrade With ID {upgradeid} used.");
+            Logging.Log($"Upgrade With ID {upgradeid} used.", "UpgradeDisks");
             if (RecievedItems.Count > UsedLocations.Count)
             {
                 string location = Locations[upgradeid-1];
@@ -1599,9 +1590,11 @@ namespace BluePrinceArchipelago.Items
                     UsedLocations.Add(location);
                     State.UpdateUpgradeDiskData();
                 }
-                if (FoundLocations.Contains(location))
+                // Prevent the bool for being set for trading post trade specifically.
+                if (FoundLocations.Contains(location) && location != "TRADING POST TRADE")
                 {
                     ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = true;
+
                 }
                 else {
                     ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[upgradeid - 1]).Value = false;
@@ -1616,20 +1609,14 @@ namespace BluePrinceArchipelago.Items
         ///     Sends the location for the found upgrade disk.   
         /// </summary>
         /// <param name="location">The name of the location.</param>
-        private void OnFind(string location)
+        public void OnFind(string location)
         {
-            location = location.Replace("LADYSHIPS", "LADYSHIP's").Replace(" &", " AND").Replace("UNDERGROUND", "ABANDONED MINE");
-            if (location == "") {
-                location = "FOUNDATION";
-            }
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());
                 State.UpdateUpgradeDiskData();
                 ModInstance.ModEventHandler.OnUgradeDiskFound(LocationNames[Locations.IndexOf(location.ToUpper())]);
             }
-            Logging.LogWarning(location.Length);
-            Logging.LogWarning(location.ToUpper());
             ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[Locations.IndexOf(location.ToUpper())]).Value = true;
         }
 
