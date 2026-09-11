@@ -349,7 +349,7 @@ namespace BluePrinceArchipelago.Rooms
                 if (room.IsUnlocked)
                 {
                     // If there are still copies in today's pool (or a safety for if extra copies are added without the mod tracking it.)
-                    if (room.IsUnlocked && (room.RoomInHouseCount > 0 || room.RoomsLeftInPool > 0))
+                    if (room.RoomsLeftInPool > 0)
                     {
                         // Confirm all dependencies of the room have been met. If one is not met, turn the room off until the next draft. (very important for Foundation)
                         foreach (Func<ModRoom, bool> dependency in room.Dependencies)
@@ -358,14 +358,7 @@ namespace BluePrinceArchipelago.Rooms
                             {
                                 SetPoolRemovalVar(room.GameObjectName, true);
                             }
-                            else
-                            {
-                                SetPoolRemovalVar(room.GameObjectName);
-                            }
                         }
-                    }
-                    else {
-                        SetPoolRemovalVar(room.GameObjectName, true);
                     }
                 }
                 else
