@@ -3,11 +3,6 @@ using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -30,6 +25,7 @@ namespace BluePrinceArchipelago.Triggers
                 Plugin.ArchipelagoClient.CheckLocation(e.LocationName);
             }
         }
+
         /// <summary>
         ///     Triggered when a connection to the Archipelago server has been established.
         /// </summary>

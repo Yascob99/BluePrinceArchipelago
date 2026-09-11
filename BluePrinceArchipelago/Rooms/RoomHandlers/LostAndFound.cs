@@ -27,8 +27,11 @@ class LostAndFound : RoomHandler
             CanSpawnDisk.Value = found;
             ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
             ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-            BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
-            ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
+            if (CheckInInventory != null)
+            {
+                BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
+                ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
+            }
         }
         else
         {

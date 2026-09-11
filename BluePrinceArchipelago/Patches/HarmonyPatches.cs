@@ -283,7 +283,7 @@ namespace BluePrinceArchipelago.Patches
                 }
                 else if (eventName == "Go" && target?.gameObject?.gameObject?.Value?.transform?.parent?.name == "PLAN PICKER")
                 {
-                    RoomTriggers.OnBeforeFloorPlanAdds();
+                    DraftTriggers.OnBeforeFloorPlanAdds();
                 }
             }
             catch (Exception e)

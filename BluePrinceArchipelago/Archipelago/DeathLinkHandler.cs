@@ -68,6 +68,25 @@ public class DeathLinkHandler
         }
     }
 
+    public bool ChangeDeathLinkType(DeathLinkType type) {
+        if (type == deathLinkType) {
+            DeathLinkTypeOverride = type;
+            return false;
+        }
+        bool previousEnabled = deathLinkEnabled;
+        DeathLinkOverride = true;
+        DeathLinkTypeOverride = type;
+        if (deathLinkEnabled != previousEnabled) {
+            if (deathLinkEnabled) { 
+                service.EnableDeathLink();
+                return true;
+            }
+            service.DisableDeathLink();
+            return true;
+        }
+        return true;
+    }
+
     /// <summary>
     ///     What happens when we receive a deathLink
     /// </summary>

@@ -216,17 +216,7 @@ namespace BluePrinceArchipelago.Rooms
                         GetRoomByName("The Foundation").RoomPoolAdjustment = -1;
                     }
                 }
-            }
-            // Despawn Foundation Upgrade Disk
-            if (ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation"))
-            {
-                Transform FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
-                if (FoundationSpawn.childCount > 0)
-                {
-                    Logging.LogWarning("Despawning Foundation Upgrade Disk.");
-                    GameObject.Destroy(FoundationSpawn.GetChild(0).gameObject);
-                }
-            }
+            }      
         }
 
         /// <summary>
@@ -351,8 +341,9 @@ namespace BluePrinceArchipelago.Rooms
         /// </summary>
         public static void RecheckRoomUnlockStatus()
         {
+            Logging.LogWarning(_Rooms.Count);
             // Forcibly set certain rooms as removed from the pool so they are not actually draftable.
-            foreach (ModRoom room in Rooms)
+            foreach (ModRoom room in _Rooms)
             {
                 // If the room is unlocked.
                 if (room.IsUnlocked)
@@ -366,15 +357,21 @@ namespace BluePrinceArchipelago.Rooms
                             if (!dependency.Invoke(room))
                             {
                                 SetPoolRemovalVar(room.GameObjectName, true);
-                                return;
+                            }
+                            else
+                            {
+                                SetPoolRemovalVar(room.GameObjectName);
                             }
                         }
-                        SetPoolRemovalVar(room.GameObjectName);
-                        return;
+                    }
+                    else {
+                        SetPoolRemovalVar(room.GameObjectName, true);
                     }
                 }
-                SetPoolRemovalVar(room.GameObjectName, true);
-                return;
+                else
+                {
+                    SetPoolRemovalVar(room.GameObjectName, true);
+                }
             }
         }
 
@@ -388,7 +385,6 @@ namespace BluePrinceArchipelago.Rooms
             {
                 room.RoomPoolCount -= 1;
             }
-            room.IsUnlocked = false;
         }
         /// <summary>
         ///     A fix for the HLC being deactivated for days 8+ on veteran mode.
@@ -747,9 +743,7 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="value">The value to set it to.</param>
         public static void SetPoolRemovalVar(string name, bool value = false)
         {
-            string roomPath = "__SYSTEM/The Room Engines/" + name;
-            GameObject roomEngine = GameObject.Find(roomPath);
-            Logging.LogWarning(name);
+            GameObject roomEngine = GameObject.Find("__SYSTEM").transform.Find("The Room Engines").Find(name).gameObject;
             if (roomEngine != null)
             {
                 PlayMakerFSM fsm = roomEngine.GetComponent<PlayMakerFSM>();
@@ -1097,12 +1091,6 @@ namespace BluePrinceArchipelago.Rooms
                 int targetTile = ModInstance.TheGrid.GetIntVariable("Target Tile").Value;
                 return room.RoomInHouseCount == 0 && targetRank > 3 && targetRank < 9 && currentRank <= targetRank && targetTile % 5 != 0; // Rank 4-8, not drafted south, and only on the west side of the house.
             };
-            // Checks if the player is drafting north or south (not east/west).
-            Func<ModRoom, bool> verticalDraftCheck = (room) => {
-                float direction = ModInstance.TheGrid.GetFloatVariable("Cardinal Direction").Value;
-                // Use the raw direction since the North South Variable seems to be wrong sometimes.
-                return (direction > 150f && direction < 210f) || direction > 330f || direction < 60f;
-            };
             // Checks if the foundation can be drafted here.
             Func<ModRoom, bool> foundationCheck = (room) => {
 
@@ -1261,8 +1249,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("TRADING POST", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("TREASURE TROVE", ["FRONTBACK G - RARE", "CORNER - RARE G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G", "NORTH PIERCE G", "CENTER - Tier 3 G"], false);
             AddRoom("TROPHY ROOM", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G", "Center Rare G"], true);
-            AddRoom("TUNNEL", ["CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST"], false)
-                .AddDependency(verticalDraftCheck);
+            AddRoom("TUNNEL", ["CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST"], false);
             AddRoom("UTILITY CLOSET", ["FRONT - Tier 1", "FRONTBACK - RARE", "CORNER - Tier 1", "CENTER - Tier 2", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("VAULT", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G", "Center Rare G"], true);
             AddRoom("VERANDA", ["EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G"], true);

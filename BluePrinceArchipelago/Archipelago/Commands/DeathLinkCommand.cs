@@ -21,25 +21,27 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             {
                 string subcommand = Args[0];
                 if (subcommand.ToLower() == "type") { 
-                    string value = Args[1];
+                    string value = Args[1].ToLower().Trim();
+
                     int type = -1;
-                    switch (value.ToLower()){
-                        case "none":
-                            type = 0;
-                            break;
-                        case "eod":
-                            type = 1;
-                            break;
-                        case "bedroom":
-                            type = 2;
-                            break;
-                        case "steps":
-                            type = 3;
-                            break;
+                    if (value == "none") {
+                        type = 0;
                     }
-                    if (type > 0) {
-                        DeathLinkHandler.DeathLinkOverride = true;
-                        DeathLinkHandler.DeathLinkTypeOverride = (DeathLinkType)type;
+                    else if (value == "eod") {
+                        type = 1;
+                    }
+                    else if (value == "bedroom") {
+                        type = 2;
+                    }
+                    else if (value == "steps") {
+                        type = 3;
+                    }
+                    if (type > -1) {
+                        if (Plugin.ArchipelagoClient.DeathLinkHandler.ChangeDeathLinkType((DeathLinkType)type)) {
+                            ArchipelagoConsole.LogMessage($"Deathlink Changed to {Args[1]}.");
+                            return;
+                        }
+                        ArchipelagoConsole.LogMessage($"Deathlink already set to {Args[1]}.");
                         return;
                     }
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name}: {value} is not a valid DeathLink type.");

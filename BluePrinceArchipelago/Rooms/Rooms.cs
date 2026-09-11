@@ -89,36 +89,6 @@ namespace BluePrinceArchipelago.Rooms
             get { return _IsUnlocked; }
             set {
                 // Update the FSM bool variable to control pool removal
-                string roomPath = "__SYSTEM/The Room Engines/" + _GameObjectName;
-                GameObject roomEngine = GameObject.Find(roomPath);
-                if (roomEngine != null)
-                {
-                    PlayMakerFSM fsm = roomEngine.GetComponent<PlayMakerFSM>();
-                    if (fsm != null)
-                    {
-                        FsmBool poolRemovalVar = fsm.GetBoolVariable("POOL REMOVAL");
-                        if (poolRemovalVar != null)
-                        {
-                            // POOL REMOVAL = true means room is NOT available (removed from pool)
-                            // POOL REMOVAL = false means room IS available (in pool)
-                            poolRemovalVar.Value = !value;
-                            Logging.LogDebug($"Room '{Name}' (GO: {_GameObjectName}) POOL REMOVAL set to {!value} (IsUnlocked={value})");
-                        }
-                        else
-                        {
-                            Logging.LogWarning($"Room '{Name}' (GO: {_GameObjectName}): Could not find 'POOL REMOVAL' variable in FSM");
-                        }
-                    }
-                    else
-                    {
-                        Logging.LogWarning($"Room '{Name}' (GO: {_GameObjectName}): Could not find FSM named '{_GameObjectName}'");
-                    }
-                }
-                else
-                {
-                    // This is expected if scene isn't loaded yet
-                    Logging.LogDebug($"Room '{Name}': Room engine not found at '{roomPath}' (scene may not be loaded)");
-                }
                 _IsUnlocked = value;
                 Handler?.OnRoomUnlocked(this);
             }
