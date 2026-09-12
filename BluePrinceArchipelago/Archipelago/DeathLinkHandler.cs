@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using BepInEx;
 using BepInEx.Unity.IL2CPP.Utils;
+using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections;
@@ -28,10 +29,10 @@ public class DeathLinkHandler
             return !(ArchipelagoOptions.DeathLinkType == DeathLinkType.option_none);
         }
     }
-  
+
     public static DeathLinkType deathLinkType {
         get {
-            if (DeathLinkOverride) { 
+            if (DeathLinkOverride) {
                 return DeathLinkTypeOverride;
             }
             return ArchipelagoOptions.DeathLinkType;
@@ -77,7 +78,7 @@ public class DeathLinkHandler
         DeathLinkOverride = true;
         DeathLinkTypeOverride = type;
         if (deathLinkEnabled != previousEnabled) {
-            if (deathLinkEnabled) { 
+            if (deathLinkEnabled) {
                 service.EnableDeathLink();
                 return true;
             }
@@ -206,7 +207,7 @@ public class DeathLinkHandler
 
     private bool _bedroom = false;
     private static readonly string[] _bedroomStrings = ["adyship", "aster", "uarters", "unk", "edroom", "quarium", "oudoir", "ormitory", "ovel", "aid", "ursery", "ampsite"];
-    
+
     /// <summary>
     ///     Attempts to send a death link from running out of steps.
     /// </summary>
@@ -225,8 +226,34 @@ public class DeathLinkHandler
 
         // if death link is not enabled, prevent it.
         if (!deathLinkEnabled) return;
+        
+        GameObject roomTextObj = GameObject.Find("__SYSTEM/HUD/Room Text");
+        if (roomTextObj == null)
+        {
+            Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+            GameObject parent = GameObject.Find("__SYSTEM/HUD");
+            if (parent != null)
+            {
+                roomTextObj = parent.transform.Find("Room Text")?.gameObject;
+            }
+            else
+            {
+                Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+                parent = GameObject.Find("__SYSTEM/");
+                if (parent != null)
+                {
+                    roomTextObj = parent.transform.Find("HUD/Room Text")?.gameObject;
+                }
+                else
+                {
+                    Logging.LogError("Could not find parent objects for death link end of day message. Room information will not be included in death link messages.", "DeathLink");
+                }
+            }
+        }
 
-        string deathLinkMsg = $"{slotName} ran out of steps";
+        string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
+
+        string deathLinkMsg = GetDeathLinkCauseMsg(currentRoom);
 
         SendDeathLink(deathLinkMsg);
     }
@@ -279,12 +306,7 @@ public class DeathLinkHandler
             _bedroom = true;
         }
 
-        string deathLinkMsg = $"{slotName} ended the day in {currentRoom}";
-        if (currentRoom.IsNullOrWhiteSpace())
-        {
-            deathLinkMsg = $"{slotName} ended the day";
-            return;
-        }
+        string deathLinkMsg = GetDeathLinkCauseMsg(currentRoom);
 
         if (deathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
     }
@@ -319,7 +341,7 @@ public class DeathLinkHandler
                 return;
             }
 
-            ArchipelagoConsole.LogMessage($"Sent {cause} DeathLink", "DeathLink");
+            ArchipelagoConsole.LogMessage($"{cause}", "DeathLink");
 
             // add the cause here
             var linkToSend = new DeathLink(slotName, cause);
@@ -334,4 +356,24 @@ public class DeathLinkHandler
             Logging.LogError(e, "DeathLink");
         }
     }
+
+    private string GetDeathLinkCauseMsg(string currentRoom)
+    {
+        string deathLinkMsg = $"{slotName} ended the day in {currentRoom}";
+        if (currentRoom.IsNullOrWhiteSpace())
+        {
+            return $"{slotName} ended the day";
+        }
+        if (DeathLinkMessages.DeathLinkMsgDict.ContainsKey(currentRoom)){
+            string[] messages = DeathLinkMessages.DeathLinkMsgDict[currentRoom];
+            if (messages.Length > 1)
+            {
+                return string.Format(messages[System.Random.Shared.Next(messages.Length)], slotName);
+            }
+            return messages[0];
+        }
+        return deathLinkMsg;
+    }
 }
+
+

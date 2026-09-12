@@ -40,6 +40,7 @@ public class ArchipelagoClient
     {
     }
 
+
     /// <summary>
     ///     Returns the locationid from the name or -1 if It can't be found.
     ///     Not Case Sensitive.

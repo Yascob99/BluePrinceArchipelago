@@ -1,18 +1,8 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
-using HutongGames.PlayMaker.Ecosystem.Utils;
-using Il2CppSystem.Net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers

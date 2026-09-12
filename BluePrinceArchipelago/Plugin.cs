@@ -4,7 +4,6 @@ using BepInEx.Unity.IL2CPP;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Archipelago.Commands;
 using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
@@ -49,7 +48,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("Locations", LogLevel.Info);
             Logging.SetLogLevel("Trades", LogLevel.Info);
             //Logging.SetLogLevel("Rooms", LogLevel.Info);
-            //Logging.SetLogLevel("Events", LogLevel.Info);
+            Logging.SetLogLevel("Events", LogLevel.Info);
             Logging.SetLogLevel("StatEvents", LogLevel.Info);
             Logging.SetLogLevel("Connection", LogLevel.Info);
             //Logging.SetLogLevel("APData", LogLevel.Info);
