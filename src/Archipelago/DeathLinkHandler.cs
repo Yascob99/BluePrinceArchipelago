@@ -1,0 +1,396 @@
+﻿using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+#if Bep
+using BepInEx;
+using BepInEx.Unity.IL2CPP.Utils;
+using TMPro;
+#endif
+#if ML
+using Il2CppTMPro;
+using MelonLoader;
+#endif
+using BluePrinceArchipelago.Utils;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace BluePrinceArchipelago.Archipelago;
+
+/// <summary>
+///     The handler for Deathlinks and related settings.
+/// </summary>
+public class DeathLinkHandler
+{
+    public static bool DeathLinkOverride = false;
+
+    public static DeathLinkType DeathLinkTypeOverride = DeathLinkType.option_none;
+    public static bool deathLinkEnabled
+    {
+        get {
+            if (DeathLinkOverride) {
+                return !(DeathLinkTypeOverride == DeathLinkType.option_none);
+            }
+            return !(ArchipelagoOptions.DeathLinkType == DeathLinkType.option_none);
+        }
+    }
+
+    public static DeathLinkType deathLinkType {
+        get {
+            if (DeathLinkOverride) {
+                return DeathLinkTypeOverride;
+            }
+            return ArchipelagoOptions.DeathLinkType;
+        }
+    }
+
+    public static int DeathLinkCount { get; set; } = 0;
+    public static int TotalDeathLinksSent = 0;
+    private string slotName;
+    private readonly DeathLinkService service;
+    private readonly Queue<DeathLink> deathLinks = new();
+    public static int BlockedDeathLinks = 0;
+
+    /// <summary>
+    ///     Instantiates our death link handler, sets up the hook for receiving death links, and enables death link if needed
+    /// </summary>
+    /// <param name="deathLinkService">The new DeathLinkService that our handler will use to send and
+    /// receive death links.</param>
+    /// <param name="name">The Slot name of the player.</param>
+    public DeathLinkHandler(DeathLinkService deathLinkService, string name)
+    {
+        service = deathLinkService;
+        service.OnDeathLinkReceived += DeathLinkReceived;
+        slotName = name;
+        DeathLinkMessages.Initialize();
+
+        if (deathLinkEnabled)
+        {
+            service.EnableDeathLink();
+            State.UpdateDeathLinkData();
+        }
+        else {
+            service.DisableDeathLink();
+            State.UpdateDeathLinkData();
+        }
+    }
+
+    public bool ChangeDeathLinkType(DeathLinkType type) {
+        if (type == deathLinkType) {
+            DeathLinkTypeOverride = type;
+            return false;
+        }
+        bool previousEnabled = deathLinkEnabled;
+        DeathLinkOverride = true;
+        DeathLinkTypeOverride = type;
+        if (deathLinkEnabled != previousEnabled) {
+            if (deathLinkEnabled) {
+                service.EnableDeathLink();
+                return true;
+            }
+            service.DisableDeathLink();
+            return true;
+        }
+        return true;
+    }
+
+    /// <summary>
+    ///     What happens when we receive a deathLink
+    /// </summary>
+    /// <param name="deathLink">Received Death Link object to handle</param>
+    private void DeathLinkReceived(DeathLink deathLink)
+    {
+        deathLinks.Enqueue(deathLink);
+
+        Logging.Log(string.IsNullOrWhiteSpace(deathLink.Cause)
+            ? $"Received Death Link from: {deathLink.Source}"
+            : deathLink.Cause, "DeathLink");
+
+        KillPlayer();
+    }
+
+    /// <summary>
+    ///     Can be called when in a valid state to kill the player, dequeueing and immediately killing the player with a
+    ///     message if we have a death link in the queue
+    /// </summary>
+    public void KillPlayer()
+    {
+        try
+        {
+            if (!ModInstance.IsInRun) return;
+            if (deathLinks.Count < 1) return;
+            if (!deathLinkEnabled) return;
+
+            var deathLink = deathLinks.Dequeue();
+            var cause = string.IsNullOrWhiteSpace(deathLink.Cause) ? GetDeathLinkCause(deathLink) : deathLink.Cause;
+
+            if (ArchipelagoOptions.DeathLinkProtection > BlockedDeathLinks)
+            {
+                BlockedDeathLinks++;
+                State.UpdateDeathLinkData();
+                ArchipelagoConsole.LogMessage($"{cause}. Blocked by protection. Blocks remaining until next: {ArchipelagoOptions.DeathLinkProtection - BlockedDeathLinks}", "DeathLink");
+                return;
+            }
+            else
+            {
+                BlockedDeathLinks = 0;
+                State.UpdateDeathLinkData();
+            }
+#if Bep
+            ModInstance.Instance.StartCoroutine(KillPlayer(cause, deathLink));
+#endif
+#if ML
+            MelonCoroutines.Start(KillPlayer(cause, deathLink));
+#endif
+        }
+        catch (Exception e)
+        {
+            Logging.Log(e, "DeathLink");
+        }
+    }
+
+    /// <summary>
+    ///     Forcibly kills the player regaurdless of all other settings.
+    /// </summary>
+    /// <param name="cause">The cause of the player death.</param>
+    public static void ForceKillPlayer(string cause)
+    {
+        try
+        {
+#if Bep
+            ModInstance.Instance.StartCoroutine(KillPlayer(cause));
+#endif
+#if ML
+            MelonCoroutines.Start(KillPlayer(cause));
+#endif
+        }
+        catch (Exception e)
+        {
+            Logging.LogError(e, "DeathLink");
+        }
+    }
+
+    private static int _localDeathsInProgress = 0;
+
+    /// <summary>
+    ///     Prevents entering room46 for the first time from killing the player since this automatically ends the current day.
+    /// </summary>
+    public static void OnRoom46FirstEntered()
+    {
+        _localDeathsInProgress += 1;
+    }
+
+    /// <summary>
+    ///     An enumerator for processing a received deathlink.
+    /// </summary>
+    /// <param name="cause">The cause of the death.</param>
+    /// <param name="deathLink">The received deathlink. Defaults to null.</param>
+    /// <returns></returns>
+    private static IEnumerator KillPlayer(string cause, DeathLink deathLink = null)
+    {
+        yield return null;
+        _localDeathsInProgress += 1;
+        ArchipelagoConsole.LogMessage($"{cause}, {_localDeathsInProgress} local deaths in progress.", "DeathLink");
+
+        ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000;
+        yield return null;
+        try
+        {
+            ModInstance.StepManager.SendEvent("Update");
+        }
+        catch (Exception e)
+        {
+            Logging.LogFatal(e, "DeathLink");
+            if (deathLink != null)
+            {
+                Plugin.ArchipelagoClient.DeathLinkHandler.deathLinks.Enqueue(deathLink);
+            }
+        }
+
+        // ZERO STEP ENDING: Send Event- State 8
+    }
+
+    /// <summary>
+    ///     Returns message for the player to see when a death link is received without a cause
+    /// </summary>
+    /// <param name="deathLink">death link object to get relevant info from</param>
+    /// <returns>The deathlink cause as a string.</returns>
+    private string GetDeathLinkCause(DeathLink deathLink)
+    {
+        return $"Received death from {deathLink.Source}";
+    }
+
+    private bool _bedroom = false;
+    private static readonly string[] _bedroomStrings = ["Nurse's Station", "Nursery", "Dormitory", "Quest Bedroom", "Bedroom", "Aquarium", "Boudoir", "Bunk Room", "Master Bedroom", "Hovel", "Maid's Chamber", "Spare Bedroom",
+                                                        "Spare Master Bedroom", "Starfish Aquarium", "Spare Servant's Quarters", "Servant's Quarter", "Campsite", "Geist Bedroom", "Goldfish Aquarium", "Guess Bedroom", "Guest Bedroom",
+                                                        "Her Ladyship's Chamber", "Her Ladyship's Spare Room"];
+
+    /// <summary>
+    ///     Attempts to send a death link from running out of steps.
+    /// </summary>
+    public void SendStepsDeathLink()
+    {
+        // If the deathlink is not based on steps, prevent it.
+        if (deathLinkType != DeathLinkType.option_steps) return;
+
+        // if there is already a death link in progress, prevent it.
+        if (_localDeathsInProgress > 0)
+        {
+            Logging.Log($"Steps deathlink prevented due to local death in progress. {_localDeathsInProgress} local deaths in progress.", "DeathLink");
+            _localDeathsInProgress -= 1;
+            return;
+        }
+
+        // if death link is not enabled, prevent it.
+        if (!deathLinkEnabled) return;
+        
+        GameObject roomTextObj = GameObject.Find("__SYSTEM/HUD/Room Text");
+        if (roomTextObj == null)
+        {
+            Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+            GameObject parent = GameObject.Find("__SYSTEM/HUD");
+            if (parent != null)
+            {
+                roomTextObj = parent.transform.Find("Room Text")?.gameObject;
+            }
+            else
+            {
+                Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+                parent = GameObject.Find("__SYSTEM/");
+                if (parent != null)
+                {
+                    roomTextObj = parent.transform.Find("HUD/Room Text")?.gameObject;
+                }
+                else
+                {
+                    Logging.LogError("Could not find parent objects for death link end of day message. Room information will not be included in death link messages.", "DeathLink");
+                }
+            }
+        }
+
+        string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
+
+        string deathLinkMsg = GetDeathLinkCauseMsg(currentRoom);
+
+        SendDeathLink(deathLinkMsg);
+    }
+
+    /// <summary>
+    ///     Sends a deathlink resulting from ending the day.
+    /// </summary>
+    public void SendEndOfDayDeathLink()
+    {
+        if (deathLinkType == DeathLinkType.option_steps) return;
+
+        Logging.Log("End of Day, checking for deathlink send", "DeathLink");
+        if (_localDeathsInProgress > 0)
+        {
+            Logging.Log($"End of Day deathlink prevented due to local death in progress. {_localDeathsInProgress} local deaths in progress.", "DeathLink");
+            _localDeathsInProgress -= 1;
+            return;
+        }
+        Logging.Log($"Deathlink Enabled: {deathLinkEnabled}");
+        if (!deathLinkEnabled) return;
+        // Check Current Room
+        GameObject roomTextObj = GameObject.Find("__SYSTEM/HUD/Room Text");
+
+        if (roomTextObj == null)
+        {
+            Logging.LogWarning("Could not find RoomText object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+            GameObject parent = GameObject.Find("__SYSTEM/HUD");
+            if (parent != null)
+            {
+                roomTextObj = parent.transform.Find("Room Text")?.gameObject;
+            }
+            else
+            {
+                Logging.LogWarning("Could not find HUD object for death link end of day message. Attempting to find parent and search again.", "DeathLink");
+                parent = GameObject.Find("__SYSTEM/");
+                if (parent != null)
+                {
+                    roomTextObj = parent.transform.Find("HUD/Room Text")?.gameObject;
+                }
+                else
+                {
+                    Logging.LogError("Could not find parent objects for death link end of day message. Room information will not be included in death link messages.", "DeathLink");
+                }
+            }
+        }
+
+        string currentRoom = roomTextObj?.GetComponent<TextMeshPro>()?.text ?? "";
+        if (_bedroomStrings.Contains(currentRoom) && deathLinkType == DeathLinkType.option_bedroom)
+        {
+            _bedroom = true;
+        }
+
+        string deathLinkMsg = GetDeathLinkCauseMsg(currentRoom);
+
+        if (deathLinkType != DeathLinkType.option_steps) SendDeathLink(deathLinkMsg);
+    }
+
+    /// <summary>
+    ///     Called to send a death link to the multiworld
+    /// </summary>
+    /// <param name="cause">The cause of the death link.</param>
+    public void SendDeathLink(string cause = null)
+    {
+        try
+        {
+            if (!deathLinkEnabled) return;
+
+            if (_bedroom)
+            {
+                Logging.Log($"End of Day deathlink prevented by sleeping in a bedroom (or at the Campsite).", "DeathLink");
+                _bedroom = false;
+                return;
+            }
+
+            if (ArchipelagoOptions.DeathLinkMonkException && ModInstance.GlobalPersistentManager.GetStringVariable("Blessing").Value == "Monk")
+            {
+                ArchipelagoConsole.LogMessage("Death Link prevented due to Monk blessing.", "DeathLink");
+                return;
+            }
+
+            if (ArchipelagoOptions.DeathLinkGrace > DeathLinkCount)
+            {
+                DeathLinkCount++;
+                ArchipelagoConsole.LogMessage($"Death Link grace active. Deaths until next deathlink can be sent: {ArchipelagoOptions.DeathLinkGrace - DeathLinkCount}", "DeathLink");
+                return;
+            }
+
+            ArchipelagoConsole.LogMessage($"{cause}", "DeathLink");
+
+            // add the cause here
+            var linkToSend = new DeathLink(slotName, cause);
+
+            service.SendDeathLink(linkToSend);
+            DeathLinkCount = 0;
+            TotalDeathLinksSent += 1;
+            State.UpdateDeathLinkData();
+        }
+        catch (Exception e)
+        {
+            Logging.LogError(e, "DeathLink");
+        }
+    }
+
+    private string GetDeathLinkCauseMsg(string currentRoom)
+    {
+        string deathLinkMsg = $"[DeathLink] {slotName} ended the day in {currentRoom}";
+        if (string.IsNullOrWhiteSpace(currentRoom))
+        {
+            return $"[DeathLink] {slotName} ended the day.";
+        }
+        if (DeathLinkMessages.DeathLinkMsgDict.ContainsKey(currentRoom)){
+            string[] messages = DeathLinkMessages.DeathLinkMsgDict[currentRoom];
+            if (messages.Length > 1)
+            {
+                return string.Format("[DeathLink] " + messages[System.Random.Shared.Next(messages.Length)], slotName);
+            }
+            return string.Format(messages[0], slotName);
+        }
+        return deathLinkMsg;
+    }
+}
+
+

@@ -1,8 +1,12 @@
 .vs/*
 */.vs/*
-BluePrinceArchipelago/obj/*
-BluePrinceArchipelago/bin/*
-BluePrinceArchipelago/BluePrinceArchipelago.csproj.user
+src/obj/*
+src/bin/*
+BluePrinceArchipelago.BepInEx/obj/*
+BluePrinceArchipelago.BepInEx/bin/*
+BluePrinceArchipelago.MelonLoader/obj/*
+BluePrinceArchipelago.MelonLoader/bin/*
+src/BluePrinceArchipelago.csproj.user
 *.csproj.user
 Directory.Build.props
 BluePrinceArchipelago/BluePrinceArchipelago.csproj.lscache

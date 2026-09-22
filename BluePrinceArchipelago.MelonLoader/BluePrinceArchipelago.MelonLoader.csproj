@@ -1,0 +1,115 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+        <TargetFramework>net6</TargetFramework>
+        <DefineConstants>ML</DefineConstants>
+        <Platforms>AnyCPU;x64</Platforms>
+    </PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>True</Optimize>
+		<OutputPath>$(BluePrinceMelonLoaderDir)\Mods\</OutputPath>
+		<ErrorReport>prompt</ErrorReport>
+		<IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="0Harmony">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\0Harmony.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="WebSocketDotNet">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\WebSocketDotNet.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="IndexRange">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\IndexRange.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="MelonLoader">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\MelonLoader.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="MelonLoader.NativeHost">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\MelonLoader.NativeHost.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Assembly-CSharp-firstpass">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Assembly-CSharp-firstpass.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppSystem">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppSystem.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppSystem.Core">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppSystem.Core.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.AudioModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.AudioModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.IMGUIModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.PhysicsModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.PhysicsModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppRewired.Core">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppRewired_Core.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppRewired.Windows">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppRewired_Windows.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppRewired.Windows.Functions">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppRewired_Windows_Functions.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Il2CppPlayMaker">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2CppPlaymaker.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+</Project>

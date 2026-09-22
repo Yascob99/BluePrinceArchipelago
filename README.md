@@ -163,19 +163,63 @@ If you prefer a simpler install we do have a [Thunderstore version](https://thun
     dotnet add package BepInEx.Unity.IL2CPP --version 6.0.0-be.755
     dotnet add package Archipelago.MultiClient.Net --version 6.7.1
     ```
-6. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BluePrinceHere/" with the path to your Blue Prince Installation:
-```
+
+6. Go to [SteamDB](https://steamdb.info/app/1569580/depots/), find the depot for your platform. Then go to manifests. Switch it to Steam Console then click the copy icon next to the newest manifest. Open steam console when prompted.
+
+7. Download [MelonLoader 0.7.3](https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3) for your platform. Install it on the version of Blue Prince that you downloaded with the Steam Console.
+
+8. In Steam choose "Add a Game" from the bottom right and choose "Add Non-Steam Game" navigate the the melonmodded version. This will be your Melonmodded version of Blue Prince. Like Bepinex run the game once without any mods installed.
+
+9. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BepInEx/BluePrinceHere/" with the path to your BepInEx Blue Prince Installation and "Path/To/MelonLoader/BluePrinceHere/" with your MelonLoader Installation.
+It will be on the lines marked with:
+`<BluePrinceBepInExDir>`
+and
+`<BluePrinceMelonLoaderDir>`
+```xml
 <Project>
 	<PropertyGroup>
-		<BluePrinceDir>Path/To/BluePrinceHere/</BluePrinceDir>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>BluePrinceArchipelago</AssemblyName>
+        <Description>Blue Prince Archipelago</Description>
+        <Version>0.1.5</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <!-- you may need this for getting the multiclient dll and Newtonsoft.Json.dll to output for .net 6 and netstandard 2.0 -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDependencyFile>false</GenerateDependencyFile>
+        <RootNamespace>BluePrinceArchipelago</RootNamespace>
+        <Configurations>Debug;Release</Configurations>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<BluePrinceBepInExDir>Path/To/BepInEx/BluePrinceHere/</BluePrinceBepInExDir>
+		<BluePrinceMelonLoaderDir>Path/To/MelonLoader/BluePrinceHere/</BluePrinceMelonLoaderDir>
+    </PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>none</DebugType>
+		<Optimize>true</Optimize>
+		<OutputPath>$(SolutionDir)\bin\Release\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<IsPublishable>False</IsPublishable>
 	</PropertyGroup>
+	 <ItemGroup>
+        <Compile Include="../src/**" LinkBase="."/>
+    </ItemGroup>
+	
+	<ItemGroup>
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.1" IncludeAssets="all" />
+        <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="2.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" IncludeAssets="all" />
+		<EmbeddedResource Include="assets/apprefabs" />
+	</ItemGroup>
 </Project>
 ```
-7. After you have built for the first time you will need to copy the Archipelago dll into the BluePrinceArchipelago folder.  This will appear by default in `C:\Users\USERNAME\.nuget\packages\archipelago.multiclient.net\6.7.1\lib\net6.0\Archipelago.MultiClient.Net.dll`.  Copy this into the Blue Prince\BepInEx\plugins\BluePrinceArchipelago folder
-
-8. After Building the mod you may need to copy the apprefabs file from the assets folder in to the root of the mods install. I have tried getting it to copy on building but haven't been able to get it working correctly.
-
-
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
