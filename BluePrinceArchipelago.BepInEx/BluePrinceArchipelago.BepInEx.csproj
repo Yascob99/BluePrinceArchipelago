@@ -16,6 +16,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.755" IncludeAssets="compile" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" IncludeAssets="all" />
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(BluePrinceBepInExDir)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
 			<Private>False</Private>

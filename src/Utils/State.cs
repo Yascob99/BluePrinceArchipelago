@@ -25,7 +25,7 @@ namespace BluePrinceArchipelago.Utils
         public static string PluginPath => Paths.PluginPath;
 #endif
 #if ML
-        public static string PluginPath => LoaderConfig.Current.Loader.BaseDirectory;
+        public static string PluginPath => Path.Combine(LoaderConfig.Current.Loader.BaseDirectory, "Mods");
 #endif
         public static string ModFolder => Path.Combine(PluginPath, Plugin.PluginName);
 

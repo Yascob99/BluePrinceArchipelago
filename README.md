@@ -194,8 +194,8 @@ and
         <PlatformTarget>AnyCPU</PlatformTarget>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<BluePrinceBepInExDir>Path/To/BepInEx/BluePrinceHere/</BluePrinceBepInExDir>
-		<BluePrinceMelonLoaderDir>Path/To/MelonLoader/BluePrinceHere/</BluePrinceMelonLoaderDir>
+		<BluePrinceBepInExDir>C:\Program Files (x86)\Steam\steamapps\common\Blue Prince</BluePrinceBepInExDir>
+		<BluePrinceMelonLoaderDir>C:\Program Files (x86)\Steam\steamapps\common\Blue Prince - MelonModded</BluePrinceMelonLoaderDir>
     </PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>none</DebugType>
@@ -215,7 +215,6 @@ and
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" IncludeAssets="all" />
 		<EmbeddedResource Include="assets/apprefabs" />
 	</ItemGroup>
 </Project>
