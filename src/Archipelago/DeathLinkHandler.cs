@@ -222,7 +222,7 @@ public class DeathLinkHandler
 
     private bool _bedroom = false;
     private static readonly string[] _bedroomStrings = ["Nurse's Station", "Nursery", "Dormitory", "Quest Bedroom", "Bedroom", "Aquarium", "Boudoir", "Bunk Room", "Master Bedroom", "Hovel", "Maid's Chamber", "Spare Bedroom",
-                                                        "Spare Master Bedroom", "Starfish Aquarium", "Spare Servant's Quarters", "Servant's Quarter", "Campsite", "Geist Bedroom", "Goldfish Aquarium", "Guess Bedroom", "Guest Bedroom",
+                                                        "Spare Master Bedroom", "Starfish Aquarium", "Spare Servant's Quarters", "Servant's Quarters", "Campsite", "Geist Bedroom", "Goldfish Aquarium", "Guess Bedroom", "Guest Bedroom",
                                                         "Her Ladyship's Chamber", "Her Ladyship's Spare Room"];
 
     /// <summary>

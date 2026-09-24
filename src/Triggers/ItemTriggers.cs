@@ -36,6 +36,7 @@ namespace BluePrinceArchipelago.Triggers
             {
                 if (item != null)
                 {
+                    Logging.Log($"Item Spawned: {item.Name}.", "Items");
                     FsmState state = Plugin.UniqueItemManager.GetPickupState(obj.name);
                     // If the item is not already in the inventory
                     if (item.IsUnlocked)

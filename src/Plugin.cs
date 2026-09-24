@@ -52,9 +52,12 @@ namespace BluePrinceArchipelago {
 
         public static GameObject FsmMethods;
         public static UniqueItemManager UniqueItemManager;
-
+#if Bep
         public static HarmonyPatch Harmony { get; } = new HarmonyPatch(PluginGUID);
-
+#endif
+#if ML
+        public static new HarmonyPatch Harmony { get; } = new HarmonyPatch(PluginGUID);
+#endif
         public void StartLoad() {
             Logging.SetLogLevel("Entrance Hall", LogLevel.Info);
             Logging.SetLogLevel("Cloister", LogLevel.Info);

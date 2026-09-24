@@ -7,6 +7,7 @@ BluePrinceArchipelago.BepInEx/bin/*
 BluePrinceArchipelago.MelonLoader/obj/*
 BluePrinceArchipelago.MelonLoader/bin/*
 src/BluePrinceArchipelago.csproj.user
+bin/*
 *.csproj.user
 Directory.Build.props
 BluePrinceArchipelago/BluePrinceArchipelago.csproj.lscache

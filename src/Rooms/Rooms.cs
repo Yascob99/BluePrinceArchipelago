@@ -3,8 +3,12 @@ using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if Bep
+using HutongGames.PlayMaker;
+#endif
 #if ML
 using Il2Cpp;
+using Il2CppHutongGames.PlayMaker;
 #endif
 
 namespace BluePrinceArchipelago.Rooms
@@ -18,8 +22,7 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="pickerArrays">List of picker arrays this room can appear in</param>
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
-    /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
-    public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted)
+    public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla)
     {
         private int _HighestDrafted = 0;
         public override bool HasBeenDrafted { 
@@ -51,11 +54,10 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="pickerArrays">List of picker arrays this room can appear in</param>
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
-    /// <param name="hasBeenDrafted">Whether this room has been drafted this run</param>
     /// <param name="upgradeObjs">The GameObjects for the Upgraded versions of the Room.</param>
     /// <param name="upgradeID">The Upgrade ID of this instance of the Room</param>
     /// <param name="aliases">Alternative names for the room.</param>
-    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, List<GameObject> upgradeObjs = null, int upgradeID = 0, string[] aliases = null)
+    public class ModRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, List<GameObject> upgradeObjs = null, int upgradeID = 0, string[] aliases = null)
     {
 #pragma warning disable CS9124 // Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
         private string _Name = name;
@@ -97,7 +99,7 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         // Stores if the room has been drafted for tracking checks.
-        private bool _HasBeenDrafted = hasBeenDrafted;
+        private bool _HasBeenDrafted = false;
         public virtual bool HasBeenDrafted { 
             get { return _HasBeenDrafted; } 
             set {
@@ -177,30 +179,33 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="array">The Picker Array to add it to</param>
         /// <param name="count">The number to add to the pool</param>
         public void AddToPool(PlayMakerArrayListProxy array, int count = 1) {
-            // Ensure we have a valid GameObject to add
+            // Try to get the GameObject from the Room Engines using the game object name
             if (_GameObj == null)
             {
-                // Try to get the GameObject from the Room Engines using the game object name
                 _GameObj = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName);
-                if (_GameObj == null)
-                {
-                    Logging.LogWarning($"Cannot add {Name} to pool: GameObject is null (looked for '{_GameObjectName}')");
-                    return;
-                }
-                for (int i = 0; i < count; i++)
-                {
-                    array.Add(_GameObj, "GameObject");
-                    Logging.Log($"Adding {Name} to {array.name}", "Rooms");
-                }
             }
-            
+            if (_GameObj == null)
+            {
+                Logging.LogWarning($"Cannot add {Name} to pool: GameObject is null (looked for '{_GameObjectName}')", "Rooms");
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                array.Add(_GameObj, "GameObject");
+                Logging.Log($"Adding {Name} to {array.name}", "Rooms");
+            }
+
         }
         /// <summary>
         ///     Removes copy(s) of the room from the picker array.
         /// </summary>
         /// <param name="array">The array to remove from</param>
         /// <param name="count">The number to remove from the pool.</param>
-        private void RemoveFromPool(PlayMakerArrayListProxy array, int count = 1) {
+        public void RemoveFromPool(PlayMakerArrayListProxy array, int count = 1) {
+            if (_GameObj == null)
+            {
+                _GameObj = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName);
+            }
             if (_GameObj == null)
             {
                 Logging.LogWarning($"Cannot remove {Name} from pool: GameObject is null");
@@ -255,39 +260,31 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="array">The array to update</param>
         /// <param name="count">The number of copies that should be in the pool.</param>
         public void UpdateArray(PlayMakerArrayListProxy array, int count) {
-            if (RoomsLeftInPool > 0)
+            // If the room has at least one copy currently in the pool
+            if (count > 0 && _IsUnlocked && !_UseVanilla)
             {
-                // If the room has at least one copy currently in the pool
-                if ((count > 0 && _IsUnlocked && !_UseVanilla))
+                if (count - RoomPoolCount > 0 && count - RoomPoolCount > RoomsLeftInPool && !ModRoomManager.CantCopy.Contains(Name))
                 {
-                    // check if there are more copies than there should be
-                    if (count > RoomsLeftInPool)
-                    {
-                        RemoveFromPool(array, count - RoomsLeftInPool);
-                        count -= (count - RoomsLeftInPool);
-                    }
-                    // check if there less copies than there should be
-                    else if (RoomsLeftInPool > count)
-                    {
-                        AddToPool(array, RoomsLeftInPool - count);
-                        count += RoomsLeftInPool - count;
-                    }
+                    AddToPool(array, count - RoomPoolCount);
+                    SetPoolRemovalVar(false);
                 }
-                // check if there are still rooms that should be in the pool but aren't
-                else if (RoomsLeftInPool > 0 && _IsUnlocked && !_UseVanilla)
+                // check if there are more copies than there should be
+                else if (count > RoomsLeftInPool)
+                {
+                    RemoveFromPool(array, count - RoomsLeftInPool);
+                }
+                // check if there less copies than there should be
+                else
                 {
                     AddToPool(array, RoomsLeftInPool);
-                }
-                // Handle extra copies of rooms that use vanilla logic. Assume always 1 is default (no extra copies), and that the rest is extra.
-                else if (_RoomPoolCount > 1 && _RoomPoolCount -1 != count && _UseVanilla && ! ModRoomManager.CantCopy.Contains(Name)) {
-                    AddToPool(array, _RoomPoolCount -1);
-                }
-                // If copies in pool and not set to use vanilla logic, remove from pool.
-                else if (count > 0 && !_UseVanilla)
-                {
-                    RemoveFromPool(array, count);
+                    SetPoolRemovalVar(false);
                 }
             }
+            else if (!_IsUnlocked && !_UseVanilla)
+            {
+                RemoveFromPool(array, count);
+            }
+            
         }
 
         /// <summary>
@@ -304,6 +301,38 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="dependencies">A collection of functions that check if dependencies for those rooms are met.</param>
         public void AddDependencies(params Func<ModRoom, bool>[] dependencies) {
             Dependencies.AddRange(dependencies);
+        }
+
+        /// <summary>
+        ///     Sets the variable the game uses to remove rooms from the pool with repellant. Useful for our purposes.
+        /// </summary>
+        /// <param name="value">The value to set it to.</param>
+        public void SetPoolRemovalVar(bool value = false)
+        {
+            GameObject roomEngine = GameObject.Find("__SYSTEM").transform.Find("The Room Engines").Find(_Name).gameObject;
+            if (roomEngine != null)
+            {
+                PlayMakerFSM fsm = roomEngine.GetComponent<PlayMakerFSM>();
+                if (fsm != null)
+                {
+                    FsmBool poolRemovalVar = fsm.GetBoolVariable("POOL REMOVAL");
+                    if (poolRemovalVar != null)
+                    {
+                        // POOL REMOVAL = true means room is NOT available (removed from pool)
+                        // POOL REMOVAL = false means room IS available (in pool)
+                        poolRemovalVar.Value = value;
+                        Logging.Log($"Room '{_Name.ToTitleCase()}' (GO: {_Name}) POOL REMOVAL set to {value} (IsUnlocked={!value})", "Rooms");
+                    }
+                    else
+                    {
+                        Logging.LogWarning($"Room '{_Name.ToTitleCase()}' (GO: {Name}): Could not find 'POOL REMOVAL' variable in FSM", "Rooms");
+                    }
+                }
+                else
+                {
+                    Logging.LogWarning($"Room 'Room '{_Name.ToTitleCase()}' (GO: {_Name}): Could not find FSM named '{_Name}'", "Rooms");
+                }
+            }
         }
     }
 }

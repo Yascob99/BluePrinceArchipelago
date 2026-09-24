@@ -45,6 +45,7 @@ namespace BluePrinceArchipelago.Triggers
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 ModItemManager.StartOfDay();
                 ModItemManager.ReplaceItemsWithAP();
+                FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)

@@ -7,11 +7,13 @@ using HutongGames.PlayMaker.Actions;
 #endif
 #if ML
 using Il2Cpp;
+using Il2CppCirrusPlay.PortalLibrary;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms
@@ -151,11 +153,12 @@ namespace BluePrinceArchipelago.Rooms
                     room.IsUnlocked = false;
                 }
             }
-
-            // Unlock rooms we've received from Archipelago
             foreach (string itemName in receivedItems)
             {
-                UnlockRoomForArchipelago(itemName);
+                ModRoom room = GetRoomByName(itemName);
+                if (room != null) {
+                    room.IsUnlocked = true;
+                }
             }
         }
 
@@ -355,19 +358,22 @@ namespace BluePrinceArchipelago.Rooms
                 // If the room is unlocked.
                 if (room.IsUnlocked)
                 {
-                    bool found = false;
-                    // Confirm all dependencies of the room have been met. If one is not met, turn the room off until the next draft. (very important for Foundation)
-                    foreach (Func<ModRoom, bool> dependency in room.Dependencies)
+                    if (room.Dependencies.Count > 0)
                     {
-                        if (!dependency.Invoke(room))
+                        bool found = false;
+                        // Confirm all dependencies of the room have been met. If one is not met, turn the room off until the next draft. (very important for Foundation)
+                        foreach (Func<ModRoom, bool> dependency in room.Dependencies)
                         {
-                            SetPoolRemovalVar(room.GameObjectName, true);
-                            found = true;
+                            if (!dependency.Invoke(room))
+                            {
+                                SetPoolRemovalVar(room.GameObjectName, true);
+                                found = true;
+                            }
                         }
-                    }
-                    if (!found && room.Dependencies.Count > 0)
-                    {
-                        SetPoolRemovalVar(room.GameObjectName, false);
+                        if (!found && room.RoomsLeftInPool > 0)
+                        {
+                            SetPoolRemovalVar(room.GameObjectName, false);
+                        }
                     }
                 }
                 else
@@ -477,6 +483,7 @@ namespace BluePrinceArchipelago.Rooms
             foreach (ModRoom room in _Rooms)
             {
                 room.RoomInHouseCount = 0;
+                room.RoomPoolCount = 0;
             }
             Logging.Log("Reset all room in-house counts for new day.");
         }
@@ -515,9 +522,14 @@ namespace BluePrinceArchipelago.Rooms
         /// <summary>
         ///     Adds a room with the same name for both the room and its game object path.
         /// </summary>
-        public static ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, string[] aliases = null)
+        /// <param name="name">The name used internally by the mod (e.g., "CLASSROOM (1)")</param>
+        /// <param name="pickerArrays">The Picker Arrays the room uses.</param>
+        /// <param name="isUnlocked">If the room is unlocked.</param>
+        /// <param name="useVanilla">Whether to Use Vanilla handling</param>
+        /// <param name="aliases">Alternative names for the room.</param>
+        public static ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, string[] aliases = null)
         {
-            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted);
+            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla);
         }
 
         /// <summary>
@@ -528,9 +540,8 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="pickerArrays">The Picker Arrays the room uses.</param>
         /// <param name="isUnlocked">If the room is unlocked.</param>
         /// <param name="useVanilla">Whether to Use Vanilla handling</param>
-        /// <param name="hasBeenDrafted">If the room has been drafted at least once.</param>
         /// <param name="aliases">Alternative names for the room.</param>
-        public static ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, bool hasBeenDrafted = false, string[] aliases = null)
+        public static ModRoom AddRoom(string name, string gameObjectName, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, string[] aliases = null)
         {
             string roomPath = "__SYSTEM/The Room Engines/" + gameObjectName;
             GameObject roomObj = GameObject.Find(roomPath);
@@ -541,7 +552,7 @@ namespace BluePrinceArchipelago.Rooms
 
             if (name == "CLASSROOM")
             {
-                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted));
+                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla));
             }
             // rooms only have children if they have upgrades.
             if (roomObj.transform.childCount > 0)
@@ -565,9 +576,9 @@ namespace BluePrinceArchipelago.Rooms
                 {
                     Logging.LogWarning($"UpgradeID variable could not be found for {name}.");
                 }
-                return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted, UpgradeObjs, UpgradeID, aliases));
+                return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, UpgradeObjs, UpgradeID, aliases));
             }
-            return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, hasBeenDrafted, null, 0, aliases));
+            return AddRoom(new ModRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, null, 0, aliases));
         }
 
         /// <summary>
@@ -592,6 +603,7 @@ namespace BluePrinceArchipelago.Rooms
                         {
                             if (RoomCounts.ContainsKey(room.name))
                             {
+                                
                                 RoomCounts[room.name]++;
                             }
                             else
@@ -600,34 +612,24 @@ namespace BluePrinceArchipelago.Rooms
                             }
                         }
                     }
-                    List<string> updated = [];
-                    foreach (string roomName in RoomCounts.Keys)
+                    foreach (ModRoom modroom in _Rooms)
                     {
-                         ModRoom modRoom = GetRoomByName(roomName);
-                        if (modRoom != null)
+                        if (!modroom.IsUnlocked)
                         {
-                            if (FoundFloorplans.Contains(roomName)) {
-                                Logging.Log($"Attempting to add/remove {room} to {pair.Key}.\n\tAP Pool Count: {modRoom.RoomPoolCount}\n\tRoom Left In Pool Count: {modRoom.RoomsLeftInPool}", "Rooms");
-                            }
-                            modRoom.UpdateArray(array, RoomCounts[roomName]);
-                            updated.Add(roomName);
-                        }
-                        else
-                        {
-                            Logging.Log($"Unable to find room: {roomName}", "Rooms");
-                        }
-                    }
-                    foreach (ModRoom Modroom in _Rooms)
-                    {
-                        if (!updated.Contains(Modroom.Name) && Modroom.PickerArrays.Contains(pair.Key) && Modroom.IsUnlocked)
-                        {
-                            if (Modroom.RoomsLeftInPool > 0 && Modroom.RoomsLeftInPool < Modroom.RoomPoolCount)
+                            if (RoomCounts.ContainsKey(modroom.Name))
                             {
-                                Modroom.AddToPool(array, Modroom.RoomsLeftInPool);
-                                if (FoundFloorplans.Contains(Modroom.Name))
-                                {
-                                    Logging.Log($"Attempting to add/remove {room} to {pair.Key}.\n\tAP Pool Count: {Modroom.RoomPoolCount}\n\tRoom Left In Pool Count: {Modroom.RoomsLeftInPool}", "Rooms");
-                                }
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                            SetPoolRemovalVar(modroom.Name, true);
+                        }
+                        else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
+                        {
+                            if (RoomCounts.ContainsKey(modroom.Name))
+                            {
+                                modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                            }
+                            else {
+                                modroom.UpdateArray(array, modroom.RoomsLeftInPool);
                             }
                         }
                     }
@@ -708,7 +710,15 @@ namespace BluePrinceArchipelago.Rooms
 
             if (room != null)
             {
-                room.IsUnlocked = true;
+                if (!room.IsUnlocked)
+                {
+                    room.IsUnlocked = true;
+                    room.RoomPoolCount = 1;
+                }
+                else
+                {
+                    room.RoomPoolCount++;
+                }
 
                 // Update the RoomRecords to simulate the room as having been drafted once. This makes it so the directory properly displays the unlocked room pool.
                 if (!room.AddedToDirectory)
@@ -1249,8 +1259,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("EAST WING HALL", ["EDGECREEP EAST", "EDGEPIERCE EAST"], true);
             AddRoom("FOYER", ["FRONTBACK G - RARE", "CENTER - Tier 2 G", "EDGECREEP - RARE G"], true);
             AddRoom("FURNACE", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 3", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
-            AddRoom("FREEZER", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true)
-                .AddDependency(room46Reached);
+            AddRoom("FREEZER", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("GALLERY", ["FRONT - Tier 1", "FRONTBACK - RARE", "CENTER - Tier 3", "EDGECREEP - RARE"], false);
             AddRoom("GARAGE", ["EDGE ADVANCE WESTWING - G", "EDGEPIERCE G"], true)
                 .AddDependency(garageRankCheck);
@@ -1301,7 +1310,7 @@ namespace BluePrinceArchipelago.Rooms
                 .AddDependency(secretPassageCheck);
             AddRoom("SECURITY", ["NORTH PIERCE G", "CENTER - Tier 1 G", "EDGEPIERCE G"], true);
             AddRoom("SERVANT\'S QUARTERS", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
-            AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true, false, false, ["SHELTER"]);
+            AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true, false, ["SHELTER"]);
             AddRoom("SHOWROOM", ["FRONTBACK G - RARE", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "Center Rare G"], true);
             AddRoom("SHRINE", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("SOLARIUM", ["CORNER - RARE G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G", "CENTER - Tier 2 G"], false);

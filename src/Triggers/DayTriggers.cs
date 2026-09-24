@@ -45,9 +45,6 @@ namespace BluePrinceArchipelago.Triggers
                 FSMPatches.AddedFloorPlanOverrides();
                 if (ModInstance.FirstLoad)
                 {
-                    // Rebuild the state if it couldn't be done on the Reconnect from crash.
-                    //State.FirstLoad();
-
                     if (!ArchipelagoClient.StateRebuilt && ArchipelagoClient.Reconnected)
                     {
                         Logging.LogWarning("Rebuilding State");
@@ -66,6 +63,7 @@ namespace BluePrinceArchipelago.Triggers
                 // Handle Start of day code for Permanent items (and maybe curses later).
                 ModItemManager.StartOfDay();
                 ModItemManager.ReplaceItemsWithAP();
+                FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
