@@ -214,11 +214,22 @@ namespace BluePrinceArchipelago.Items
 
                             //Import the template Text Prefab.  
                             GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
-
-                            // Get the location ID of our first pickup.
                             long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname.ToTitleCase() + " First Pickup");
-                            // Find the the details of the item that will be sent on pickup.
-                            ScoutedItemInfo scout = null;
+                            // Get the location ID of our first pickup.
+                            if (scoutname == "CABINET KEY 1")
+                            {
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Patio First Pickup");
+                            }
+                            else if (scoutname == "CABINET KEY 2")
+                            {
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Laundry Room First Pickup");
+                            }
+                            else if (scoutname == "CABINET KEY 3")
+                            {
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                            }
+                                // Find the the details of the item that will be sent on pickup.
+                                ScoutedItemInfo scout = null;
                             if (locationid != -1)
                             {
                                 if (ArchipelagoClient.ServerData.LocationItemMap.ContainsKey(locationid))
@@ -1164,9 +1175,9 @@ namespace BluePrinceArchipelago.Items
             AddItem(new UniqueItem("MICROCHIP 1", GetInventoryItem("MICROCHIP 1"), false, ItemSanityType.Key, true, true));
             AddItem(new UniqueItem("MICROCHIP 2", GetInventoryItem("MICROCHIP 2"), false, ItemSanityType.Key, true, true));
             AddItem(new UniqueItem("MICROCHIP 3", GetInventoryItem("MICROCHIP 3"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("CABINET KEY 1", GetInventoryItem("CABINET KEY 1"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("CABINET KEY 2", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("CABINET KEY 3", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("CABINET KEY 1", GetInventoryItem("CABINET KEY 1"), false, ItemSanityType.Key, true, true)); //Patio
+            AddItem(new UniqueItem("CABINET KEY 2", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true)); //Laundry
+            AddItem(new UniqueItem("CABINET KEY 3", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true)); //
 
             //  Standard Items
             AddItem(new UniqueItem("BATTERY PACK", GetInventoryItem("BATTERY PACK"), false, ItemSanityType.Standard));

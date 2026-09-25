@@ -184,7 +184,22 @@ namespace BluePrinceArchipelago.Triggers
                 {
                     Item.HasBeenFound = true;
                     ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    if (Item.Name == "CABINET KEY 1")
+                    {
+                        ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Patio First Pickup");
+                    }
+                    else if (Item.Name == "CABINET KEY 2")
+                    {
+                        ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Laundry Room First Pickup");
+                    }
+                    else if (Item.Name == "CABINET KEY 3")
+                    {
+                        ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                    }
+                    else
+                    {
+                        ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    }
                 }
             }
         }
