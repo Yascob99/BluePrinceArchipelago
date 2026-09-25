@@ -6,11 +6,13 @@ using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using PathologicalGames;
 #endif
 #if ML
 using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
+using Il2CppPathologicalGames;
 #endif
 using System;
 using System.Collections.Generic;
@@ -203,6 +205,9 @@ namespace BluePrinceArchipelago.Items
                     {
                         ModInstance.RunningEngine.SendEvent("Update");
                     }
+                    if (Name == "STOPWATCH") {
+                        GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
+                    }
                 }
                
             }
@@ -346,6 +351,7 @@ namespace BluePrinceArchipelago.Items
                 else if (item.HasBeenFound && item.Name == "MICROCHIP 3" && !item.IsUnlocked) {
                     GameObject.Find("TERRAIN/EAST SECTOR/_GROTTO/_GROTTO GAMEPLAY/Microchip Pillar/Microchip 3").SetActive(false);
                 }
+                
             }
         }
 
@@ -453,7 +459,6 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The FsmState of the item's pickup handling.</returns>
         public FsmState GetPickupState(string name)
         {
-
             // Fixes a name differences
             name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "").Replace("_0", "").Replace("lunch", "luch");
             if (name.Contains("cabinet key")) {
@@ -479,7 +484,7 @@ namespace BluePrinceArchipelago.Items
                         if (name == "treasure map") {
                             ModInstance.GlobalManager.GetBoolVariable("Treasure Already").Value = true;
                             return ModInstance.GlobalManager.GetState("Treasure Map Pickup");
-                        }
+                        } 
                         //Return the state the transition found goes to.
                         return transition.ToFsmState;
                     }

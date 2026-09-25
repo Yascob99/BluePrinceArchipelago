@@ -4,8 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+#if Bep
+using PathologicalGames;
+#endif
+
 #if ML
 using Il2Cpp;
+using Il2CppPathologicalGames;
 #endif
 
 namespace BluePrinceArchipelago.Items
@@ -74,7 +79,7 @@ namespace BluePrinceArchipelago.Items
                     }
                 }
                 // Despawn Foundation Upgrade Disk
-                if (ModItemManager.UpgradeDisks.FoundLocations.Contains("Foundation"))
+                if (ModItemManager.UpgradeDisks.FoundLocations.Contains("THE FOUNDATION"))
                 {
                     Transform FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
                     if (FoundationSpawn.childCount > 0)
@@ -82,6 +87,20 @@ namespace BluePrinceArchipelago.Items
                         Logging.LogWarning("Despawning Foundation Upgrade Disk.");
                         GameObject.Destroy(FoundationSpawn.GetChild(0).gameObject);
                     }
+                }
+                else
+                {
+                    Logging.LogWarning("Attempting to Spawn UPGRADE DISK");
+                    GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject.SetActive(true);
+                    Vector3 pos = Vector3.zero;
+                    Quaternion rot = Quaternion.identity;
+                    GameObject value = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject;
+                    if (value != null)
+                    {
+                        pos = value.transform.position;
+                        rot = value.transform.rotation;
+                    }
+                    Transform spawnedTransform = PoolManager.Pools["Pickup"].Spawn(ModItemManager.GetInventoryItem("UPGRADE DISK").transform, pos, rot);
                 }
             }
         }

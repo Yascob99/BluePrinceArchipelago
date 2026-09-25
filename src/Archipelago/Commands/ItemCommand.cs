@@ -102,6 +102,10 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                                 {
                                     ModInstance.RunningEngine.SendEvent("Update");
                                 }
+                                if (Name == "STOPWATCH")
+                                {
+                                    GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
+                                }
                                 return;
                             }
                             ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name");

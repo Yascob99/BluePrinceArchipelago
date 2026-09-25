@@ -1,4 +1,5 @@
-﻿using BluePrinceArchipelago.Items;
+﻿using BluePrinceArchipelago.FsmMethods;
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
@@ -262,11 +263,21 @@ namespace BluePrinceArchipelago.Patches
                         // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
                         if (item.IsUnlocked)
                         {
-                            // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
-                            FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
-                            if (state != null)
+                            if (item.Name == "MICROCHIP 1")
                             {
-                                state.EnableActionsOfType<ArrayListAdd>();
+                                FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
+                                FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
+                                state1.EnableActionsOfType<ArrayListAdd>();
+                                state2.EnableActionsOfType<ArrayListAdd>();
+                            }
+                            else
+                            {
+                                // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
+                                FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                                if (state != null)
+                                {
+                                    state.EnableActionsOfType<ArrayListAdd>();
+                                }
                             }
                         }
                         item.HasBeenFound = true;

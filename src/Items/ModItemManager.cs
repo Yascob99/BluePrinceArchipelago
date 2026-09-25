@@ -83,11 +83,23 @@ namespace BluePrinceArchipelago.Items
                 // If the item has not been found yet.
                 if (!item.HasBeenFound && item.ApplySanity())
                 {
-                    FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
-                    if (state != null)
+                    if (item.Name == "MICROCHIP 1")
                     {
-                        state.DisableActionsOfType<ArrayListAdd>();
-                        state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
+                        FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
+                        FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
+                        state1.DisableActionsOfType<ArrayListAdd>();
+                        state1.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
+                        state2.DisableActionsOfType<ArrayListAdd>();
+                        state2.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
+                    }
+                    else
+                    {
+                        FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                        if (state != null)
+                        {
+                            state.DisableActionsOfType<ArrayListAdd>();
+                            state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
+                        }
                     }
                     GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
                     if (prefab != null)
@@ -183,8 +195,14 @@ namespace BluePrinceArchipelago.Items
                             // Make a clone of the original gameObject parented under the ModObject for easy editing/retreival later.
                             GameObject clone = GameObject.Instantiate(child.gameObject, Plugin.ModObject.transform);
                             clone.SetActive(false); //Make sure the clone is not visible.
-                            clone.name = child.name;//Make the Name match the original so it can be replaced later.
-
+                            if (youName == "Cabinet Key 5")
+                            {
+                                clone.name = itemName.ToTitleCase();
+                            }
+                            else
+                            {
+                                clone.name = child.name;//Make the Name match the original so it can be replaced later.
+                            }
 
                             //Instantiate a the AP Object at the original's position
                             GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
@@ -402,6 +420,8 @@ namespace BluePrinceArchipelago.Items
                     return "Cabinet Key";
                 case "Cabinet Key 2":
                     return "Cabinet Key 5";
+                case "Cabinet Key 3":
+                    return "Cabinet Key 5";
                 case "Lucky Purse":
                     return "lucky purse";
                 case "Pick Sound Amplifier":
@@ -442,6 +462,8 @@ namespace BluePrinceArchipelago.Items
                 case "CABINET KEY 1":
                     return "cabinet key";
                 case "CABINET KEY 2":
+                    return "cabinet key";
+                case "CABINET KEY 3":
                     return "cabinet key";
                 case "PRISM KEY_0":
                     return "Prism Key";
@@ -484,12 +506,19 @@ namespace BluePrinceArchipelago.Items
             GameObject spawnObj = FindSpawnObject(item.Name);
             if (spawnObj == null)
             {
+                spawnObj = item.GameObj;
+            }
+            if (spawnObj == null)
+            {
                 Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab with name: {item.Name}(Clone)001");
                 return;
             }
             // Delete the AP Swirly SubObject.
-            GameObject.Destroy(spawnObj.transform.FindChild("AP Swirlie").gameObject);
-            item.ModelReplaced = false;
+            if (spawnObj.transform.FindChild("AP Swirlie") != null)
+            {
+                GameObject.Destroy(spawnObj.transform.FindChild("AP Swirlie").gameObject);
+                item.ModelReplaced = false;
+            }
         }
 
         /// <summary>

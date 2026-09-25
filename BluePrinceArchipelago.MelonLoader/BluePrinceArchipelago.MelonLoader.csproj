@@ -87,6 +87,10 @@
 			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.PhysicsModule.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="UnityEngine.ParticleSystemModule">
+			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 		<Reference Include="UnityEngine.InputLegacyModule">
 			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
 			<Private>False</Private>

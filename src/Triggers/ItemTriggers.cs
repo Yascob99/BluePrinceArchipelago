@@ -41,13 +41,15 @@ namespace BluePrinceArchipelago.Triggers
                     // If the item is not already in the inventory
                     if (item.IsUnlocked)
                     {
-                        //Re-enable the previously disabled actions.
-                        if (ModItemManager.PickedUp.Contains(obj.name))
+                        if (item.Name == "MICROCHIP 1")
                         {
-                            state.EnableFirstActionOfType<ArrayListAdd>();
+                            FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
+                            FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
+                            state1.EnableActionsOfType<ArrayListAdd>();
+                            state2.EnableActionsOfType<ArrayListAdd>();
                         }
                         else
-                        {
+                        { 
                             state.EnableActionsOfType<ArrayListAdd>();
                         }
                     }

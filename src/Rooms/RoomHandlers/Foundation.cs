@@ -19,20 +19,20 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
 
         public override void OnAfterRoomDrafted(GameObject roomGameObject)
         {
-            PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
-            if (FoundationSpawn != null)
-            {
-                bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("FOUNDATION");
-                FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
-                CanSpawnDisk.Value = found;
-                FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                ArrayListContains CheckInInventory = FoundationSpawn.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-            }
-            else
-            {
-                Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
-            }
+            //PlayMakerFSM FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5")?.GetComponent<PlayMakerFSM>();
+            //if (FoundationSpawn != null)
+            //{
+            //    bool found = !ModItemManager.UpgradeDisks.FoundLocations.Contains("FOUNDATION");
+            //    FsmBool CanSpawnDisk = FoundationSpawn.AddBoolVariable("CanSpawnDisk");
+            //    CanSpawnDisk.Value = found;
+            //    FoundationSpawn.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            //    ArrayListContains CheckInInventory = FoundationSpawn.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+            //    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+            //}
+            //else
+            //{
+            //    Logging.LogWarning("Error changing Foundation Upgrade disk spawn logic.");
+            //}
         }
     }
 }
