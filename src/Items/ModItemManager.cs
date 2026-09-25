@@ -122,7 +122,7 @@ namespace BluePrinceArchipelago.Items
                                 if (APswirly != null)
                                 {
                                     // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-                                    APswirly.transform.parent = spawnObj.transform;
+                                    APswirly.transform.parent = spawnObj.transform.GetChild(0);
                                     item.ModelReplaced = true;
                                     ReplaceAPItemNotifications(item.Name, spawnObj);
                                 }
@@ -546,7 +546,7 @@ namespace BluePrinceArchipelago.Items
                         GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
                         if (APswirly != null)
                         {
-                            APswirly.transform.parent = spawnObj.transform;
+                            APswirly.transform.parent = spawnObj.transform.GetChild(0);
                             GameObject.Destroy(APGO);
                         }
                     }
@@ -587,11 +587,12 @@ namespace BluePrinceArchipelago.Items
                         if (itemModel != null)
                         {
                             //Instantiate a the AP Object at the original's position
-                            GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
+                            GameObject APGO = GameObject.Instantiate(item.transform.GetChild(0).gameObject, itemModel.position, itemModel.rotation, itemModel.parent);
                             APGO.transform.localScale = itemModel.localScale;
                             APGO.name = itemModel.name;
                             itemModel.gameObject.DestroyAllChildren();
                             APGO.MoveChildrenTo(itemModel.gameObject);
+                           
                             GameObject.Destroy(APGO);
 
                             //Import the template Text Prefab.  

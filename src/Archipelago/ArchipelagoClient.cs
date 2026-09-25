@@ -650,7 +650,6 @@ public class ArchipelagoClient
     public void GoalCompleted()
     {
         session.SetGoalAchieved();
-        State.Reset(); //Resets the State. 
     }
 }
 

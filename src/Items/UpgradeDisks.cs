@@ -90,17 +90,28 @@ namespace BluePrinceArchipelago.Items
                 }
                 else
                 {
-                    Logging.LogWarning("Attempting to Spawn UPGRADE DISK");
-                    GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject.SetActive(true);
                     Vector3 pos = Vector3.zero;
                     Quaternion rot = Quaternion.identity;
-                    GameObject value = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject;
-                    if (value != null)
+                    GameObject GO = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject;
+                    if (GO != null)
                     {
-                        pos = value.transform.position;
-                        rot = value.transform.rotation;
+                        pos = GO.transform.position;
+                        rot = GO.transform.rotation;
+                        Transform spawnedTransform = PoolManager.Pools["Pickup"].Spawn(GameObjectExtensions.FindGameObject("UPGRADE DISK").transform, pos, rot);
+                        if (spawnedTransform != null)
+                        {
+                            spawnedTransform.SetParent((GO.transform == null) ? null : GO.transform, true);
+                            Logging.LogWarning("Foundation Upgrade Disk Successfully spawned.");
+                        }
+                        else
+                        {
+                            Logging.LogWarning("Unable to Successfuly Spawn Upgrade Disk");
+                        }
                     }
-                    Transform spawnedTransform = PoolManager.Pools["Pickup"].Spawn(ModItemManager.GetInventoryItem("UPGRADE DISK").transform, pos, rot);
+                    else {
+                        Logging.LogWarning("Unable to Successfuly Spawn Upgrade Disk");
+                    }
+                    
                 }
             }
         }

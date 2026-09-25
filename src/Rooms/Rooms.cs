@@ -263,15 +263,18 @@ namespace BluePrinceArchipelago.Rooms
             // If the room has at least one copy currently in the pool
             if (count > 0 && _IsUnlocked && !_UseVanilla)
             {
-                if (count - RoomPoolCount > 0 && count - RoomPoolCount > RoomsLeftInPool && !ModRoomManager.CantCopy.Contains(Name))
-                {
-                    AddToPool(array, count - RoomPoolCount);
-                    SetPoolRemovalVar(false);
-                }
+                //if (count - RoomPoolCount > 0 && count - RoomPoolCount > RoomsLeftInPool && !ModRoomManager.CantCopy.Contains(Name))
+                //{
+                //    AddToPool(array, count - RoomPoolCount);
+                //    SetPoolRemovalVar(false);
+                //}
                 // check if there are more copies than there should be
-                else if (count > RoomsLeftInPool)
+                if (count > RoomsLeftInPool)
                 {
                     RemoveFromPool(array, count - RoomsLeftInPool);
+                    if (RoomsLeftInPool == 0) {
+                        SetPoolRemovalVar(true);
+                    }
                 }
                 // check if there less copies than there should be
                 else
@@ -283,6 +286,10 @@ namespace BluePrinceArchipelago.Rooms
             else if (!_IsUnlocked && !_UseVanilla)
             {
                 RemoveFromPool(array, count);
+                if (RoomsLeftInPool == 0)
+                {
+                    SetPoolRemovalVar(true);
+                }
             }
             
         }
