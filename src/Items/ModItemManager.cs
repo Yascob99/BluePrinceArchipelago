@@ -122,7 +122,7 @@ namespace BluePrinceArchipelago.Items
                                 if (APswirly != null)
                                 {
                                     // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-                                    APswirly.transform.parent = spawnObj.transform.GetChild(0);
+                                    APswirly.transform.parent = spawnObj.transform;
                                     item.ModelReplaced = true;
                                     ReplaceAPItemNotifications(item.Name, spawnObj);
                                 }
