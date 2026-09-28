@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Il2CppSystem.Net;
 
 namespace BluePrinceArchipelago.Utils
 {
@@ -384,9 +385,9 @@ namespace BluePrinceArchipelago.Utils
         public static TAction GetLastActionOfType<TAction>(this FsmState state) where TAction : FsmStateAction
         {
             int lastActionIndex = -1;
-            for (int i = state.Actions.Length - 1; i >= 0; i--)
+            for (int i = state.ActionData.ActionNames.Count - 1; i >= 0; i--)
             {
-                if (state.Actions[i] is TAction)
+                if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
                 {
                     lastActionIndex = i;
                     break;
@@ -465,7 +466,6 @@ namespace BluePrinceArchipelago.Utils
             Actions[0] = action;
             state.Actions.CopyTo(Actions, 1);
             state.Actions = Actions;
-            state.actions = Actions;
             action.Init(state);
         }
         /// <summary>
@@ -479,7 +479,6 @@ namespace BluePrinceArchipelago.Utils
             actions[state.Actions.Length] = action;
             state.Actions.CopyTo(actions, 0);
             state.Actions = actions;
-            state.actions = actions;
             action.Init(state);
         }
 
@@ -602,9 +601,9 @@ namespace BluePrinceArchipelago.Utils
             List<T> actions = [];
             for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
             {
-                if (state.ActionData.ActionNames[i] == typeof(T).FullName) // REVISIT: A bit hacky, but it works.
+                if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) // REVISIT: A bit hacky, but it works.
                 {
-                    actions.Add(state.actions[i].TryCast<T>());
+                    actions.Add(state.Actions[i].TryCast<T>());
                 }
             }
             return actions.ToArray();
@@ -619,9 +618,9 @@ namespace BluePrinceArchipelago.Utils
         {
             for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
             {
-                if (state.ActionData.ActionNames[i] == typeof(T).FullName) // REVISIT: A bit hacky, but it works.
+                if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) // REVISIT: A bit hacky, but it works.
                 {
-                    return state.actions[i].TryCast<T>();
+                    return state.Actions[i].TryCast<T>();
                 }
             }
             return null;
