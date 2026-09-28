@@ -12,7 +12,6 @@ using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
 #endif
-using Il2CppInterop.Runtime;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Patches
@@ -296,13 +295,9 @@ namespace BluePrinceArchipelago.Patches
             // This just replaces a fade to black that would've been removed anyway
             fsm.Fsm.GetState("State 8").actions[0] = fsm.Fsm.GetState("Logo Slates").actions[1];
             // Remove the 3 second delay
-            var wait = fsm.Fsm.GetState("State 8").actions[2].Cast<Wait>();
+            var wait = fsm.Fsm.GetState("State 8").Actions[2].Cast<Wait>();
             wait.time = new FsmFloat(0f);
 
-        }
-
-        public static void PrintHelloWorld(string message) {
-            Logging.LogWarning(message);
         }
 
         /// <summary>
@@ -315,8 +310,7 @@ namespace BluePrinceArchipelago.Patches
             FsmState PlanetariumAddState = PlanetariumYesButton.GetState("State 8");
             PlanetariumAddState.DisableFirstActionOfType<SendEvent>();
             // Get the second Send Event so it can be unfrozen.
-            SendEvent[] SendEvents = PlanetariumAddState.GetActionsOfType<SendEvent>();
-            SendEvent Unfreeze = SendEvents[1];
+            SendEvent Unfreeze = PlanetariumAddState.Actions[2].Cast<SendEvent>();
 
             //Conservatory
             PlayMakerFSM ConservatoryYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Conservatory Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
