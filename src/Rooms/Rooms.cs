@@ -85,7 +85,9 @@ namespace BluePrinceArchipelago.Rooms
 
         private bool _IsUnlocked = isUnlocked;
 
-        public List<Func<ModRoom,bool>> Dependencies = new List<Func<ModRoom, bool>>();
+        public List<Func<ModRoom,bool>> EarlyDraftDependencies = new List<Func<ModRoom, bool>>();
+
+        public List<Func<ModRoom, bool>> LaterDraftDependencies = new List<Func<ModRoom, bool>>();
 
         public bool AddedToDirectory = false;
 
@@ -295,19 +297,36 @@ namespace BluePrinceArchipelago.Rooms
         }
 
         /// <summary>
-        ///     Adds a Dependency to the room
+        ///     Adds a Dependency to the room early in the draft process
         /// </summary>
         /// <param name="dependency">A Function that checks the dependency.</param>
-        public void AddDependency(Func<ModRoom, bool> dependency)
+        public void AddEarlyDraftDependency(Func<ModRoom, bool> dependency)
         {
-            Dependencies.Add(dependency);
+            EarlyDraftDependencies.Add(dependency);
         }
         /// <summary>
-        ///     Adds a collection of dependencies to a room
+        ///     Adds a Dependency to the room early in the draft process
         /// </summary>
         /// <param name="dependencies">A collection of functions that check if dependencies for those rooms are met.</param>
-        public void AddDependencies(params Func<ModRoom, bool>[] dependencies) {
-            Dependencies.AddRange(dependencies);
+        public void AddEarlyDraftDependencies(params Func<ModRoom, bool>[] dependencies) {
+            EarlyDraftDependencies.AddRange(dependencies);
+        }
+
+        /// <summary>
+        ///     Adds a Dependency to the room that is checked later in draft process.
+        /// </summary>
+        /// <param name="dependency">A Function that checks the dependency.</param>
+        public void AddLaterDraftDependency(Func<ModRoom, bool> dependency)
+        {
+            LaterDraftDependencies.Add(dependency);
+        }
+        /// <summary>
+        ///     Adds a collection of dependencies to a room later in the draft process.
+        /// </summary>
+        /// <param name="dependencies">A collection of functions that check if dependencies for those rooms are met.</param>
+        public void AddLaterDraftDependencies(params Func<ModRoom, bool>[] dependencies)
+        {
+            LaterDraftDependencies.AddRange(dependencies);
         }
 
         /// <summary>

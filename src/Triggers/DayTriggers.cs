@@ -23,11 +23,11 @@ namespace BluePrinceArchipelago.Triggers
             ModItemManager.LoadInventories();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
-            ModRoomManager.ResetRoomInHouseCounts();
+            //ModRoomManager.ResetRoomInHouseCounts();
             ModRoomManager.ReloadArrays();
 
             // Sync room pools with Archipelago at the start of each day, regardless of when auth happened
-            ModRoomManager.SyncRoomPoolsWithArchipelago();
+            //ModRoomManager.SyncRoomPoolsWithArchipelago();
             if (ModInstance.FirstLoad)
             {
                 ModItemManager.RegisterItems();

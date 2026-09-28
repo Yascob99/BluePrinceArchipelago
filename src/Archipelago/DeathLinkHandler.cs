@@ -192,10 +192,11 @@ public class DeathLinkHandler
         _localDeathsInProgress += 1;
         ArchipelagoConsole.LogMessage($"{cause}, {_localDeathsInProgress} local deaths in progress.", "DeathLink");
 
-        ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000;
+       
         yield return null;
         try
         {
+            ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000000;
             ModInstance.StepManager.SendEvent("Update");
         }
         catch (Exception e)

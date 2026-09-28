@@ -358,11 +358,11 @@ namespace BluePrinceArchipelago.Rooms
                 // If the room is unlocked.
                 if (room.IsUnlocked)
                 {
-                    if (room.Dependencies.Count > 0)
+                    if (room.LaterDraftDependencies.Count > 0)
                     {
                         bool found = false;
                         // Confirm all dependencies of the room have been met. If one is not met, turn the room off until the next draft. (very important for Foundation)
-                        foreach (Func<ModRoom, bool> dependency in room.Dependencies)
+                        foreach (Func<ModRoom, bool> dependency in room.LaterDraftDependencies)
                         {
                             if (!dependency.Invoke(room))
                             {
@@ -614,7 +614,20 @@ namespace BluePrinceArchipelago.Rooms
                     }
                     foreach (ModRoom modroom in _Rooms)
                     {
-                        if (!modroom.IsUnlocked)
+                        if (modroom.EarlyDraftDependencies.Count > 0) {
+                            foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
+                            {
+                                if (!dependency.Invoke(modroom))
+                                {
+                                    if (RoomCounts.ContainsKey(modroom.Name))
+                                    {
+                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                    }
+                                    SetPoolRemovalVar(modroom.Name, true);
+                                }
+                            }
+                        }
+                        else if (!modroom.IsUnlocked)
                         {
                             if (RoomCounts.ContainsKey(modroom.Name))
                             {
@@ -628,7 +641,8 @@ namespace BluePrinceArchipelago.Rooms
                             {
                                 modroom.UpdateArray(array, RoomCounts[modroom.Name]);
                             }
-                            else {
+                            else
+                            {
                                 modroom.UpdateArray(array, modroom.RoomsLeftInPool);
                             }
                         }
@@ -1170,8 +1184,9 @@ namespace BluePrinceArchipelago.Rooms
             Func<ModRoom, bool> garageRankCheck = (room) => {
                 int targetRank = ModInstance.TheGrid.GetIntVariable("Taret Rank").Value;
                 int currentRank = ModInstance.TheGrid.GetIntVariable("Current Rank").Value;
+                int currentTile = ModInstance.TheGrid.GetIntVariable("Current Tile").Value;
                 int targetTile = ModInstance.TheGrid.GetIntVariable("Target Tile").Value;
-                return room.RoomInHouseCount == 0 && targetRank > 3 && targetRank < 9 && currentRank <= targetRank && targetTile % 5 != 0; // Rank 4-8, not drafted south, and only on the west side of the house.
+                return room.RoomInHouseCount == 0 && targetRank > 3 && targetRank < 9 && currentRank <= targetRank && targetTile % 5 != 0 && currentTile > 10 && currentTile != 12; // Rank 4-8, not drafted south, and only on the west side of the house.
             };
             // Checks if the foundation can be drafted here.
             Func<ModRoom, bool> foundationCheck = (room) => {
@@ -1262,9 +1277,9 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("FREEZER", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("GALLERY", ["FRONT - Tier 1", "FRONTBACK - RARE", "CENTER - Tier 3", "EDGECREEP - RARE"], false);
             AddRoom("GARAGE", ["EDGE ADVANCE WESTWING - G", "EDGEPIERCE G"], true)
-                .AddDependency(garageRankCheck);
+                .AddLaterDraftDependency(garageRankCheck);
             AddRoom("GIFT SHOP", ["CENTER - Tier 2", "FRONT - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], false)
-                .AddDependency(room46Reached);
+                .AddEarlyDraftDependency(room46Reached);
             AddRoom("GREAT HALL", ["CENTER - Tier 3"], true);
             AddRoom("GREENHOUSE", ["EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G"], true);
             AddRoom("GUEST BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
@@ -1278,7 +1293,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("LAVATORY", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("LIBRARY", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("LOCKER ROOM", ["FRONT - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "CENTER - Tier 2 G"], false)
-                .AddDependency(poolCheck);
+                .AddEarlyDraftDependency(poolCheck);
             AddRoom("LOCKSMITH", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], false);
             AddRoom("MAID\'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
@@ -1297,17 +1312,17 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("PATIO", ["EDGE ADVANCE WESTWING - G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
             AddRoom("PLANETARIUM", ["CENTER - Tier 2", "FRONT - Tier 1", "CORNER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST", "NORTH PIERCE"], false);
             AddRoom("PUMP ROOM", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST", "NORTH PIERCE", "CENTER - Tier 2"], true, false)
-                .AddDependency(poolCheck);
+                .AddEarlyDraftDependency(poolCheck);
             AddRoom("ROOM 8", [], false, false);
             AddRoom("ROOT CELLAR", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("ROTUNDA", ["CENTER - Tier 2 G"], true);
             AddRoom("RUMPUS ROOM", ["FRONTBACK G - RARE", "CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "Center Rare G"], true);
             AddRoom("SAUNA", ["CENTER - Tier 1", "FRONT - Tier 1", "CORNER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST", "NORTH PIERCE"], true, false)
-                .AddDependency(poolCheck);
+                .AddEarlyDraftDependency(poolCheck);
             AddRoom("SCHOOLHOUSE", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("SECRET GARDEN", [""], true, false);
             AddRoom("SECRET PASSAGE", ["CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "Center Rare G"], true)
-                .AddDependency(secretPassageCheck);
+                .AddLaterDraftDependency(secretPassageCheck);
             AddRoom("SECURITY", ["NORTH PIERCE G", "CENTER - Tier 1 G", "EDGEPIERCE G"], true);
             AddRoom("SERVANT\'S QUARTERS", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true, false, ["SHELTER"]);
@@ -1319,9 +1334,9 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("STUDY", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE", "Center Rare"], true);
             AddRoom("TERRACE", ["EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("THE ARMORY", ["CENTER - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G"], false)
-                .AddDependency(chessPowerRook);
+                .AddEarlyDraftDependency(chessPowerRook);
             AddRoom("THE FOUNDATION", ["CENTER - Tier 1", "CENTER - Tier 2", "CENTER - Tier 3"], true)
-                .AddDependency(foundationCheck);
+                .AddEarlyDraftDependency(foundationCheck);
             AddRoom("THE KENNEL", ["FRONT - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "CENTER - Tier 1"], false);
             AddRoom("THE POOL", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "Center Rare G"], true);
             AddRoom("THRONE ROOM", ["EDGEPIERCE - RARE G", "CENTER - Tier 2 G"], false);

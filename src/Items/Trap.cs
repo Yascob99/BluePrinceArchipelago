@@ -72,7 +72,8 @@ namespace BluePrinceArchipelago.Items
         public override void ActivateTrap()
         {
             //Sets the Zero Step Ending to on, regardless of steps. Seems to be the easiest Ending to trigger. May add a custom ending later.
-            GameObject.Find("ZERO STEP ENDING").SetActive(true);
+            ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000000;
+            ModInstance.StepManager.SendEvent("Update");
         }
     }
 
