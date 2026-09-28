@@ -1013,29 +1013,7 @@ public class ArchipelagoQueueManager {
                 room.AddedToDirectory = true;
             }
         }
-        // Special handling for CLASSROOM: always increment pool count
-        // This allows receiving multiple "Classroom" items to add multiple copies to the pool
-        // The base game will randomly pick which grade appears when drafted
-        string roomNameUpper = room.Name.ToUpper().Trim();
-        if (roomNameUpper == "CLASSROOM")
-        {
-            room.RoomPoolCount++;
-            Logging.Log($"Received '{item.ItemName}': Pool count now {room.RoomPoolCount}");
-        }
-        // For mapped rooms, always increment pool count
-        else if (isMappedRoom)
-        {
-            room.RoomPoolCount++;
-            Logging.Log($"Received '{item.ItemName}' (maps to '{mappedName}'): Pool count now {room.RoomPoolCount}");
-        }
-        // For other rooms, only increment if pool is already full
-        else
-        {
-            if (room.RoomsLeftInPool == 0)
-            {
-                room.RoomPoolCount++;
-            }
-        }
+        room.RoomPoolCount++;
         // Update the pools immediately if we're in a run
         room.Handler?.OnRoomUnlocked(room);
         Logging.Log($"Room '{room.Name}' unlocked and added to pool.");

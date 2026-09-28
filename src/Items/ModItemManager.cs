@@ -1,9 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Utils;
-using HarmonyLib;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
