@@ -10,6 +10,7 @@ using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
+using BluePrinceArchipelago.Archipelago;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
@@ -17,23 +18,26 @@ class Freezer : RoomHandler
 {
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
-        roomGameObject = ModRoomManager.GetRoomInstance("Freezer");
-        if (roomGameObject != null)
+        if (ArchipelagoOptions.UpgradeDiskSanity)
         {
-            PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/ICE DOORS/Door 20/6")?.GetComponent<PlayMakerFSM>();
-            if (ItemDropFSM != null)
+            roomGameObject = ModRoomManager.GetRoomInstance("Freezer");
+            if (roomGameObject != null)
             {
-                bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("FREEZER");
-                Logging.LogWarning(found);
-                FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
-                CanSpawnDisk.Value = found;
-                ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-            }
-            else
-            {
-                Logging.LogWarning("Error changing Freezer Upgrade disk spawn logic.");
+                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/ICE DOORS/Door 20/6")?.GetComponent<PlayMakerFSM>();
+                if (ItemDropFSM != null)
+                {
+                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("FREEZER");
+                    Logging.LogWarning(found);
+                    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+                    CanSpawnDisk.Value = found;
+                    ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                }
+                else
+                {
+                    Logging.LogWarning("Error changing Freezer Upgrade disk spawn logic.");
+                }
             }
         }
     }

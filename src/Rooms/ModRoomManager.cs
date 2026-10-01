@@ -529,7 +529,7 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="aliases">Alternative names for the room.</param>
         public static ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, string[] aliases = null)
         {
-            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla);
+            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, aliases);
         }
 
         /// <summary>
@@ -552,7 +552,7 @@ namespace BluePrinceArchipelago.Rooms
 
             if (name == "CLASSROOM")
             {
-                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla));
+                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, aliases));
             }
             // rooms only have children if they have upgrades.
             if (roomObj.transform.childCount > 0)
@@ -691,13 +691,6 @@ namespace BluePrinceArchipelago.Rooms
                 return true;
             }
 
-            // Try mapped name (for classrooms and other special cases)
-            string mappedName = MapArchipelagoRoomName(itemName);
-            if (mappedName != null && GetRoomByName(mappedName) != null)
-            {
-                return true;
-            }
-
             return false;
         }
 
@@ -713,15 +706,6 @@ namespace BluePrinceArchipelago.Rooms
             ModRoom room = GetRoomByName(roomName);
 
             // If not found, try special mappings for classroom variants
-            if (room == null)
-            {
-                string mappedName = MapArchipelagoRoomName(roomName);
-                if (mappedName != null)
-                {
-                    room = GetRoomByName(mappedName);
-                }
-            }
-
             if (room != null)
             {
                 if (!room.IsUnlocked)
@@ -752,31 +736,6 @@ namespace BluePrinceArchipelago.Rooms
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Gets the mapped room name for an Archipelago item name.
-        /// Returns the mapped name if a mapping exists, null otherwise.
-        /// Public method for use by other classes that need the mapping.
-        /// </summary>
-        public static string GetMappedRoomName(string apRoomName)
-        {
-            return MapArchipelagoRoomName(apRoomName);
-        }
-
-        /// <summary>
-        /// Maps Archipelago room names to actual game room names.
-        /// Handles special cases for rooms with non-standard naming.
-        /// </summary>
-        private static string MapArchipelagoRoomName(string apRoomName)
-        {
-            // Add other special mappings here as needed in the future
-
-            return apRoomName switch
-            {
-                "Progressive Classroom" => "CLASSROOM", // Map all classroom variants to the base classroom name
-                _ => null
-            };
         }
 
         /// <summary>
@@ -1253,7 +1212,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("CHAPEL", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             // CLASSROOM is a single room that can appear as different "grades" (1-9) when drafted
             // All "Classroom X" items from Archipelago map to this single CLASSROOM entry
-            AddRoom("CLASSROOM", ["CENTER - Tier 1 G", "FRONT - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true, false);
+            AddRoom("CLASSROOM", ["CENTER - Tier 1 G", "FRONT - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], false, false, ["Progressive Classroom"]);
             AddRoom("CLOCK TOWER", ["CENTER - Tier 2 G", "FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], false);
             AddRoom("CLOISTER", ["CENTER - Tier 2 G"], true);
             AddRoom("CLOSED EXHIBIT", ["FRONTBACK - RARE", "NORTH PIERCE", "EDGEPIERCE - RARE", "EDGECREEP - RARE", "CENTER - Tier 2"], false);

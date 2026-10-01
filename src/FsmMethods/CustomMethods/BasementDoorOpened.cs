@@ -23,7 +23,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public override void OnCalled()
         {
-            Unlocks.BlackBridgeGrotto.FoundLocation();
+            
         }
     }
 }

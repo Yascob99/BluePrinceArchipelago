@@ -10,6 +10,7 @@ using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
+using BluePrinceArchipelago.Archipelago;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
@@ -25,32 +26,35 @@ class LostAndFound : RoomHandler
     }
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
-        GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
-        roomGameObject = ModRoomManager.GetRoomInstance("Lost & Found");
-        if (roomGameObject != null)
+        if (ArchipelagoOptions.UpgradeDiskSanity)
         {
-            PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetFsm("Go Items Random");
-
-            if (ItemDropFSM != null)
+            GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
+            roomGameObject = ModRoomManager.GetRoomInstance("Lost & Found");
+            if (roomGameObject != null)
             {
-                bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST & FOUND");
-                Logging.LogWarning(found);
-                FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
-                CanSpawnDisk.Value = found;
-                ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                if (CheckInInventory != null)
+                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/9")?.gameObject?.GetFsm("Go Items Random");
+
+                if (ItemDropFSM != null)
                 {
-                    BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
-                    ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
+                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST & FOUND");
+                    Logging.LogWarning(found);
+                    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+                    CanSpawnDisk.Value = found;
+                    ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                    if (CheckInInventory != null)
+                    {
+                        BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
+                        ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
+                        return;
+                    }
+                    Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic.");
                     return;
                 }
-                Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic.");
+                Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic. Couldn't get Item Drop FSM.S");
                 return;
             }
-            Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic. Couldn't get Item Drop FSM.S");
-            return;
+            Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic. Couldn't Find Room Instance.");
         }
-        Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic. Couldn't Find Room Instance.");
     }
 }

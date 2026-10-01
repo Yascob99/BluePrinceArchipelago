@@ -77,10 +77,11 @@ Special Thanks to:
 - ChaseoQueso for the inital item code and the custom archipelago swirly asset.
 - Mac for helping out on the mod and APworld
 - deefdragon and BatemenzDW for their work on the APworld.
-- Shavnir for helping out with the mod.
-- Zygan for some custom art assets.
+- ZigZaugg and Shavnir for helping out with the mod.
+- Zygan for some custom art assets used in and related to the mod.
 - The Blue Prince community on the Archipelago Discord for all of their fantastic ideas.
-- The Silksong/HK community for a lot of great tools which made modding so much easier.
+- The Archipelago Discord for all their assistance in helping me figure out how to start this mod.
+- The Silksong/HK community for a lot of great tools which made modding this game so much easier.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

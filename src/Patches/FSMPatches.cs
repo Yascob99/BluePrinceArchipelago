@@ -293,7 +293,7 @@ namespace BluePrinceArchipelago.Patches
 
             // Because we skip Logo Slates we have to copy the music start action here.
             // This just replaces a fade to black that would've been removed anyway
-            fsm.Fsm.GetState("State 8").actions[0] = fsm.Fsm.GetState("Logo Slates").actions[1];
+            fsm.Fsm.GetState("State 8").Actions[0] = fsm.Fsm.GetState("Logo Slates").Actions[1];
             // Remove the 3 second delay
             var wait = fsm.Fsm.GetState("State 8").Actions[2].Cast<Wait>();
             wait.time = new FsmFloat(0f);
