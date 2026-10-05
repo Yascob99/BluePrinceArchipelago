@@ -301,10 +301,11 @@ Original credit for these instructions goes to RacgiMan on the Archipelago disco
    git remote set-url origin github_username/repo_name
    git remote -v # confirm the changes
    ```
-4. Add extra nuget package locations
-```dotnet nuget add source https://nuget.bepinex.dev/v3/index.json --name Bepinex
+4. Add extra nuget package locations:
+```
+   dotnet nuget add source https://nuget.bepinex.dev/v3/index.json --name Bepinex
    dotnet nuget add source https://nuget.samboy.dev/v3/index.json --name Samboy
- ```
+   ```
 
 5. If nuget didn't install the required dependencies and the previous step didn't fully fix the issue, you will need to run the following to install these packages by running these commands in the **project** folder.
     ```
@@ -312,14 +313,14 @@ Original credit for these instructions goes to RacgiMan on the Archipelago disco
     dotnet add package Archipelago.MultiClient.Net --version 6.7.1
     ```
 
-6. Go to [SteamDB](https://steamdb.info/app/1569580/depots/), find the depot for your platform. Then go to manifests. Switch it to Steam Console then click the copy icon next to the newest manifest. Open steam console when prompted.
+6. Go to [SteamDB](https://steamdb.info/app/1569580/depots/), find the depot for your platform. Then go to manifests. Switch it to Steam Console then click the copy icon next to the newest manifest. Open Steam Console when prompted. Once in Steam Console, paste and run the copied download command.
 
 7. Download [MelonLoader 0.7.3](https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3) for your platform. Install it on the version of Blue Prince that you downloaded with the Steam Console.
 
 8. In Steam choose "Add a Game" from the bottom left and choose "Add Non-Steam Game" navigate the the melonmodded version. This will be your Melonmodded version of Blue Prince. Like Bepinex run the game once without any mods installed.
 	8.1 If on Linux, you might need to rename Blue Prince.exe to Blue_Prince.exe and Blue Prince_Data to Blue_Prince_Data. Then make sure it is using Proton compatibility.
 
-9. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BepInEx/BluePrinceHere/" with the path to your BepInEx Blue Prince Installation and "Path/To/MelonLoader/BluePrinceHere/" with your MelonLoader Installation.
+9. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BepInEx/BluePrinceFolderHere" with the path to your BepInEx Blue Prince Installation and "Path/To/MelonLoader/BluePrinceFolderHere" with your MelonLoader Installation.
 It will be on the lines marked with:
 `<BluePrinceBepInExDir>`
 and
@@ -343,8 +344,8 @@ and
         <PlatformTarget>AnyCPU</PlatformTarget>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<BluePrinceBepInExDir>Path/To/BepInEx/BluePrinceHere/</BluePrinceBepInExDir>
-		<BluePrinceMelonLoaderDir>Path/To/MelonLoader/BluePrinceHere/</BluePrinceMelonLoaderDir>
+		<BluePrinceBepInExDir>Path/To/BepInEx/BluePrinceFolderHere</BluePrinceBepInExDir>
+		<BluePrinceMelonLoaderDir>Path/To/MelonLoader/BluePrinceFolderHere</BluePrinceMelonLoaderDir>
     </PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 		<DebugType>none</DebugType>

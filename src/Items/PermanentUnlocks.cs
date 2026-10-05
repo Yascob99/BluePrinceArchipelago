@@ -185,10 +185,7 @@ namespace BluePrinceArchipelago.Items
         ///     A function for simulating the effect of the unlock. Used when the unlock is received at the start of a day.
         /// </summary>
         public void ApplyEffects() {
-            FsmInt AdjustmentAmount = ModInstance.StepManager.FindIntVariable("Adjustment Amount");
-            AdjustmentAmount.Value = AdjustmentAmount.Value + 20;
-            // Send the "Update" event and the step counter should update.
-            ModInstance.StepManager.SendEvent("Update");
+            ResourceManager.AdjustSteps(20);
         }
 
     }
@@ -275,10 +272,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void ApplyEffects()
         {
-            FsmInt AdjustmentAmount = ModInstance.GemManager.FindIntVariable("Adjustment Amount");
-            AdjustmentAmount.Value = AdjustmentAmount.Value + 2;
-            // Send the "Update" event and the step counter should update.
-            ModInstance.GemManager.SendEvent("Update");
+            ResourceManager.AdjustGems(2);
         }
     }
 

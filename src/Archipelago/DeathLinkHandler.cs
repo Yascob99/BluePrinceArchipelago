@@ -14,6 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using BluePrinceArchipelago.Items;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -192,16 +193,10 @@ public class DeathLinkHandler
         _localDeathsInProgress += 1;
         ArchipelagoConsole.LogMessage($"{cause}, {_localDeathsInProgress} local deaths in progress.", "DeathLink");
 
-       
         yield return null;
-        try
+        if (!ResourceManager.AdjustSteps(-1000000))
         {
-            ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000000;
-            ModInstance.StepManager.SendEvent("Update");
-        }
-        catch (Exception e)
-        {
-            Logging.LogFatal(e, "DeathLink");
+            Logging.LogFatal("There was an error sending the deathlink.", "DeathLink");
             if (deathLink != null)
             {
                 Plugin.ArchipelagoClient.DeathLinkHandler.deathLinks.Enqueue(deathLink);

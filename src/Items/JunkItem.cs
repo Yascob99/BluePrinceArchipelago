@@ -54,42 +54,7 @@ namespace BluePrinceArchipelago.Items
 
         public override void AddItemToInventory()
         {
-            if (_ItemType == "Gems")
-            {
-                AdjustGems(_Count);
-            }
-            else if (_ItemType == "Steps")
-            {
-                AdjustSteps(_Count);
-            }
-            else if (_ItemType == "Gold")
-            {
-                AdjustGold(_Count);
-            }
-            else if (_ItemType == "Dice")
-            {
-                AdjustDice(_Count);
-            }
-            else if (_ItemType == "Keys")
-            {
-                AdjustKeys(_Count);
-            }
-            else if (_ItemType == "Luck")
-            {
-                AdjustLuck(_Count);
-            }
-            else if (_ItemType == "Stars")
-            {
-                AdjustStars(_Count);
-            }
-            else if (_ItemType == "Allowance")
-            {
-                AdjustAllowance(_Count);
-            }
-            else
-            {
-                Logging.LogWarning($"{_ItemType} is an invalid type, or is not currently supported.");
-            }
+            ResourceManager.AdjustResource(_ItemType, _Count);
         }
 
         /// <summary>
