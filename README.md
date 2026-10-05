@@ -317,6 +317,7 @@ Original credit for these instructions goes to RacgiMan on the Archipelago disco
 7. Download [MelonLoader 0.7.3](https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3) for your platform. Install it on the version of Blue Prince that you downloaded with the Steam Console.
 
 8. In Steam choose "Add a Game" from the bottom left and choose "Add Non-Steam Game" navigate the the melonmodded version. This will be your Melonmodded version of Blue Prince. Like Bepinex run the game once without any mods installed.
+	8.1 If on Linux, you might need to rename Blue Prince.exe to Blue_Prince.exe and Blue Prince_Data to Blue_Prince_Data. Then make sure it is using Proton compatibility.
 
 9. Create a new file in the root of the repository and call it Directory.Build.props. Add this to the file replacing the directory "Path/To/BepInEx/BluePrinceHere/" with the path to your BepInEx Blue Prince Installation and "Path/To/MelonLoader/BluePrinceHere/" with your MelonLoader Installation.
 It will be on the lines marked with:
