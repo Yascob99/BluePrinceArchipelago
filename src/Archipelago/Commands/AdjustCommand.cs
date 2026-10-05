@@ -42,74 +42,27 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                 return;
             }
             string subcommand = Args[0];
-            if (!int.TryParse(Args[1], out int count){
+            if (!int.TryParse(Args[1], out int count))
+            {
                 ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
                 return;
             }
-            switch (subcommand.ToLower())
+            if (!ResourceManager.IsValidResourceType(subcommand))
             {
-                case "gems":
-                    ResourceManager.AdjustGems(count);
-                    ArchipelagoConsole.LogMessage($"Adjusted Gems by {count}.");
-                    return;
-                case "gold":
-                    ResourceManager.AdjustGold(count);
-                    ArchipelagoConsole.LogMessage($"Adjusted Gold by {count}.");
-                    return;
-                case "steps":
-                    ResourceManager.AdjustSteps(count);
-                    ArchipelagoConsole.LogMessage($"Adjusted Steps by {count}.");
-                    return;
-                case "keys":
-                    ResourceManager.AdjustKeys(count);
-                    ArchipelagoConsole.LogMessage($"Adjusted Keys by {count}.");
-                    return;
-                case "dice":
-                    ResourceManager.AdjustDice(count);
-                    ArchipelagoConsole.LogMessage($"Adjusted Dice by {count}.");
-                    return;
-                case "stars":
-                    int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
-                    if (totalStars + count > 0)
-                    {
-                        ModInstance.StarManager.FindIntVariable("TotalStars").Value = totalStars + count;
-
-                    }
-                    else
-                    {
-                        ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
-                    }
-                    ArchipelagoConsole.LogMessage($"Adjusted Stars by {count}.");
-                    return;
-                case "luck":
-                    int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
-                    if (luck + count > 0)
-                    {
-                        ModInstance.LuckManager.FindIntVariable("LUCK").Value = luck + count;
-
-                    }
-                    else
-                    {
-                        ModInstance.LuckManager.FindIntVariable("LUCK").Value = 0;
-                    }
-                    ArchipelagoConsole.LogMessage($"Adjusted Luck by {count}.");
-                    return;
-                case "allowance":
-                    try
-                    {
-                        GameObject.Find("DAY").GetComponent<PlayMakerFSM>().FindIntVariable("allowance").Value += count;
-                    }
-                    catch (Exception ex)
-                    {
-                        ArchipelagoConsole.LogMessage(ex.Message);
-                        Logging.Log(ex, "Items");
-                    }
-                    return;
-                default:
-                    ArchipelagoConsole.LogMessage($"Error Running Command {Name}: invalid subcommand {subcommand}");
-                    return;
-
+                ArchipelagoConsole.LogMessage($"Error Running Command {Name}: invalid subcommand {subcommand}");
             }
+
+            //Make the adjustment
+            if (ResourceManager.AdjustResource(subcommand, count))
+            {
+                ArchipelagoConsole.LogMessage($"Adjusted {subcommand} by {count}.");
+            } 
+            else
+            {
+                ArchipelagoConsole.LogMessage($"There was an unknown error adjusting {subcommand}.");
+            }
+
+
         }
     }
 }
