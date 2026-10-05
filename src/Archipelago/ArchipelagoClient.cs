@@ -793,7 +793,7 @@ public class ArchipelagoQueueManager {
                 unlock.UnlockItem();
                 return true;
             }
-            // Checks if the item recieved is a Room (includes special mappings like classroom variants)
+            // Checks if the item recieved is a Room
             if (ModRoomManager.IsRoomItem(item.ItemName))
             {
                 ReceiveRoom(item);
@@ -976,18 +976,6 @@ public class ArchipelagoQueueManager {
     public void ReceiveRoom(ItemInfo item) {
         // Try to find the room, using mapping for special cases
         ModRoom room = ModRoomManager.GetRoomByName(item.ItemName);
-
-        string mappedName = null;
-
-        // If not found with exact name, try the mapped name
-        if (room == null)
-        {
-            mappedName = ModRoomManager.GetMappedRoomName(item.ItemName);
-            if (mappedName != null)
-            {
-                room = ModRoomManager.GetRoomByName(mappedName);
-            }
-        }
 
         if (room == null)
         {

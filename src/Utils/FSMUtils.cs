@@ -332,7 +332,17 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="state">The state</param>
         /// <param name="index">The index of the action</param>
 
-        public static TAction GetAction<TAction>(this FsmState state, int index) where TAction : FsmStateAction => state.Actions[index] as TAction;
+        public static TAction GetAction<TAction>(this FsmState state, int index) where TAction : FsmStateAction
+        {
+            for (int i = 0; i < state.Actions.Count; i++)
+            {
+                if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
+                {
+                    return state.Actions[i].TryCast<TAction>();
+                }
+            }
+            return null;
+        }
 
         /// <inheritdoc cref="GetAction{TAction}(PlayMakerFSM, string, int)"/>
 

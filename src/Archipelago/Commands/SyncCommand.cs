@@ -1,4 +1,5 @@
 ﻿using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.Pickers;
 using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Archipelago.Commands
@@ -71,7 +72,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             var receivedItems = ArchipelagoClient.ServerData.ReceivedItems;
 
             // Re-load arrays first to ensure we have fresh references
-            ModRoomManager.ReloadArrays();
+            PickerManager.ReloadArrays();
 
             // First, clear ALL rooms for Archipelago mode (disables vanilla handling too)
             ModRoomManager.ClearAllRoomsForArchipelago();

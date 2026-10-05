@@ -4,6 +4,7 @@ using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 #if Bep
@@ -210,7 +211,7 @@ namespace BluePrinceArchipelago
                 ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>();
                 UpgradeDisksObj = GameObject.Find("__SYSTEM/Upgrade Disks");
                 RDHelper = GameObject.Find("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
-                ModRoomManager.LoadArrays();
+                PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
                 //ModRoomManager.SetAllVanilla();

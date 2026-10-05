@@ -529,5 +529,196 @@ namespace BluePrinceArchipelago.Patches
                 child2.GetComponent<PlayMakerFSM>().GetState("State 9").AddAction(CustomFsmMethodManager.GetCallMethod("SundialScorched"));
             }
         }
+
+        public static void PickerOverrides()
+        {
+            ModInstance.MasterPicker.AddFsmBool("TunnelUnlocked", false);
+            ModInstance.MasterPicker.AddFsmBool("GarageUnlocked", false);
+            ModInstance.MasterPicker.AddFsmBool("SecretPassageUnlocked", false);
+            ModInstance.MasterPicker.AddFsmBool("FoundationUnlocked", false);
+
+            FsmOwnerDefault MasterPickerFOD = new FsmOwnerDefault()
+                            {
+                                gameObject = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE"),
+                                ownerOption = OwnerDefaultOption.SpecifyGameObject
+                            };
+
+            // Front - Tier 1
+            PlayMakerFSM FrontTier1 = ModInstance.PlanPicker.transform.Find("FRONT - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
+            FrontTier1.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // FrontBack - Rare
+            PlayMakerFSM FrontBackRare = ModInstance.PlanPicker.transform.Find("FRONTBACK - RARE").gameObject.GetComponent<PlayMakerFSM>();
+            FrontBackRare.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // South Pierce
+            PlayMakerFSM SouthPierce = ModInstance.PlanPicker.transform.Find("SOUTH PIERCE").gameObject.GetComponent<PlayMakerFSM>();
+            SouthPierce.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // North Pierce
+            PlayMakerFSM NorthPierce = ModInstance.PlanPicker.transform.Find("NORTH PIERCE").gameObject.GetComponent<PlayMakerFSM>();
+            NorthPierce.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // Corner Tier 1
+            PlayMakerFSM CornerTier1 = ModInstance.PlanPicker.transform.Find("CORNER - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
+            CornerTier1.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // Corner Rare
+            PlayMakerFSM CornerRare = ModInstance.PlanPicker.transform.Find("CORNER - RARE").GetComponent<PlayMakerFSM>();
+            CornerRare.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            //Center Tier 1
+            PlayMakerFSM CenterTier1 = ModInstance.PlanPicker.transform.Find("CENTER - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
+           
+            
+            //  Tunnel Check
+            GetFsmBool CT1TunnelCheck = CenterTier1.GetState("TUNNEL CHECK").GetAction<GetFsmBool>(0);
+            CT1TunnelCheck.gameObject = MasterPickerFOD;
+            CT1TunnelCheck.variableName = "TunnelUnlocked";  
+
+            //  Foundation Check
+            GetFsmBool CT1FoundationCheck = CenterTier1.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
+            CT1FoundationCheck.gameObject = MasterPickerFOD;
+            CT1FoundationCheck.variableName = "FoundationUnlocked";
+            CenterTier1.GetState("Check").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            //Center Tier 2
+            PlayMakerFSM CenterTier2 = ModInstance.PlanPicker.transform.Find("CENTER - Tier 2").gameObject.GetComponent<PlayMakerFSM>();
+            
+            //  Tunnel Check
+            GetFsmBool CT2TunnelCheck = CenterTier2.GetState("TUNNEL CHECK 2").GetAction<GetFsmBool>(0);
+            CT2TunnelCheck.gameObject = MasterPickerFOD;
+            CT2TunnelCheck.variableName = "TunnelUnlocked"; 
+
+            //  Foundation Check
+            GetFsmBool CT2FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);
+            CT2FoundationCheck.gameObject = MasterPickerFOD;
+            CT2FoundationCheck.variableName = "FoundationUnlocked";
+            CenterTier2.GetState("Check 4").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            //Center Tier 3
+            PlayMakerFSM CenterTier3 = ModInstance.PlanPicker.transform.Find("CENTER - Tier 3").gameObject.GetComponent<PlayMakerFSM>();
+           
+            //  Tunnel Check
+            GetFsmBool CT3TunnelCheck = CenterTier2.GetState("TUNNEL CHECK 2").GetAction<GetFsmBool>(0);
+            CT3TunnelCheck.gameObject = MasterPickerFOD;
+            CT3TunnelCheck.variableName = "TunnelUnlocked";
+
+             //  Foundation Check
+            GetFsmBool CT3FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
+            CT3FoundationCheck.gameObject = MasterPickerFOD;
+            CT3FoundationCheck.variableName = "FoundationUnlocked";
+            CenterTier3.GetState("Check 4").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            //Edge Advance Eastwing - G
+            PlayMakerFSM EdgeAdvanceEast = ModInstance.PlanPicker.transform.Find("EDGE ADVANCE EASTWING - G").gameObject.GetComponent<PlayMakerFSM>();
+           
+            //  Secret Passage Check
+            FsmBool EAESecretPassageUnlocked = EdgeAdvanceEast.AddFsmBool("SecretPassageUnlocked", false);
+            EdgeAdvanceEast.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                fsmName = "FSM",
+                variableName = "SecretPassageUnlocked",
+                storeValue = EAESecretPassageUnlocked,
+                everyFrame = false
+            });
+            EdgeAdvanceEast.GetState("Rank Check fo SP").AddAction(new BoolTest()
+            {
+                boolVariable = EAESecretPassageUnlocked,
+                isTrue = EdgeAdvanceEast.GetState("Rank Check fo SP").GetAction<IntCompare>(3).greaterThan,
+                everyFrame = false
+            });
+            EdgeAdvanceEast.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            //Edge Advance Westwing - G
+            PlayMakerFSM EdgeAdvanceWest = ModInstance.PlanPicker.transform.Find("EDGE ADVANCE WESTWING - G").gameObject.GetComponent<PlayMakerFSM>();
+            
+            //  Secret Passage Check
+            FsmBool EAWSecretPassageUnlocked = EdgeAdvanceWest.AddFsmBool("SecretPassageUnlocked", false);
+            EdgeAdvanceWest.GetState("Rank Check fo SP 2").AddAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                fsmName = "FSM",
+                variableName = "SecretPassageUnlocked",
+                storeValue = EAWSecretPassageUnlocked,
+                everyFrame = false
+            });
+            EdgeAdvanceWest.GetState("Rank Check fo SP 2").AddAction(new BoolTest()
+            {
+                boolVariable = EAWSecretPassageUnlocked,
+                isTrue = EdgeAdvanceWest.GetState("Rank Check fo SP 2").GetAction<IntCompare>(3).greaterThan,
+                everyFrame = false
+            });
+
+            //  Garage Check
+            FsmBool EAWGarageUnlocked = EdgeAdvanceWest.AddFsmBool("GarageUnlocked", false);
+            
+            EdgeAdvanceWest.GetState("Garage Check").InsertAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                fsmName = "FSM",
+                variableName = "GarageUnlocked",
+                storeValue = EAWGarageUnlocked,
+                everyFrame = false
+            }, 0);
+            EdgeAdvanceWest.GetState("Garage Check").InsertAction(new BoolTest()
+            {
+                boolVariable = EAWGarageUnlocked,
+                isTrue = EdgeAdvanceWest.GetTransition("Garage Check", "2").fsmEvent,
+                everyFrame = false
+            }, 1);
+            EdgeAdvanceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // Edge Retreat Eastwing - G
+            PlayMakerFSM EdgeRetreatEast = ModInstance.PlanPicker.transform.Find("EDGE RETREAT EASTTWING -  G").gameObject.GetComponent<PlayMakerFSM>();
+            
+            // Secret Passsage Check
+            FsmBool ERESecretPassageUnlocked = EdgeRetreatEast.AddFsmBool("SecretPassageUnlocked", false);
+            EdgeRetreatEast.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                fsmName = "FSM",
+                variableName = "SecretPassageUnlocked",
+                storeValue = ERESecretPassageUnlocked,
+                everyFrame = false
+            });
+            EdgeRetreatEast.GetState("Rank Check fo SP").AddAction(new BoolTest()
+            {
+                boolVariable = ERESecretPassageUnlocked,
+                isTrue = EdgeRetreatEast.GetState("Rank Check fo SP").GetAction<IntCompare>(2).greaterThan,
+                everyFrame = false
+            });
+            EdgeRetreatEast.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+             // Edge Retreat Westwing - G
+            PlayMakerFSM EdgeRetreatWest = ModInstance.PlanPicker.transform.Find("EDGE RETREAT WESTWING -  G").gameObject.GetComponent<PlayMakerFSM>();
+            
+            // Secret Passsage Check
+            FsmBool ERWSecretPassageUnlocked = EdgeRetreatWest.AddFsmBool("SecretPassageUnlocked", false);
+            EdgeRetreatWest.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                fsmName = "FSM",
+                variableName = "SecretPassageUnlocked",
+                storeValue = ERWSecretPassageUnlocked,
+                everyFrame = false
+            });
+            EdgeRetreatWest.GetState("Rank Check fo SP").AddAction(new BoolTest()
+            {
+                boolVariable = ERWSecretPassageUnlocked,
+                isTrue = EdgeRetreatWest.GetState("Rank Check fo SP").GetAction<IntCompare>(2).greaterThan,
+                everyFrame = false
+            });
+            EdgeRetreatWest.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // Edge Pierce East
+            PlayMakerFSM EdgePierceEast = ModInstance.PlanPicker.transform.Find("EDGEPIERCE EAST").gameObject.GetComponent<PlayMakerFSM>();
+            EdgePierceEast.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+
+            // Edge Pierce West
+            PlayMakerFSM EdgePierceWest = ModInstance.PlanPicker.transform.Find("EDGEPIERCE WEST").gameObject.GetComponent<PlayMakerFSM>();
+            EdgePierceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
+        }
     }
 }

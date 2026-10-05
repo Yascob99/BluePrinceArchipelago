@@ -3,6 +3,8 @@ using BluePrinceArchipelago.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using BluePrinceArchipelago.Rooms.Pickers;
+
 #if ML
 using Il2Cpp;
 #endif
@@ -172,13 +174,13 @@ namespace BluePrinceArchipelago.Archipelago.Commands
         {
             ArchipelagoConsole.LogMessage("=== All Picker Arrays ===");
 
-            if (ModRoomManager.PickerDict == null || ModRoomManager.PickerDict.Count == 0)
+            if (PickerManager.PickerDict == null || PickerManager.PickerDict.Count == 0)
             {
                 ArchipelagoConsole.LogMessage("No picker arrays loaded.");
                 return;
             }
 
-            foreach (var kvp in ModRoomManager.PickerDict)
+            foreach (var kvp in PickerManager.PickerDict)
             {
                 int count = kvp.Value?.GetCount() ?? 0;
                 ArchipelagoConsole.LogMessage($"  {kvp.Key}: {count} rooms");
@@ -196,7 +198,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                     string proxyInfo = proxy != null ? $" [Array: {proxy.GetCount()}]" : "";
 
                     // Check if this is in our PickerDict
-                    bool tracked = ModRoomManager.PickerDict.ContainsKey(child.name.Trim());
+                    bool tracked = PickerManager.PickerDict.ContainsKey(child.name.Trim());
                     string trackedInfo = tracked ? "" : " *NOT TRACKED*";
 
                     ArchipelagoConsole.LogMessage($"  [{i}] {child.name}{proxyInfo}{trackedInfo}");
@@ -282,18 +284,18 @@ namespace BluePrinceArchipelago.Archipelago.Commands
         /// </summary>
         public void InspectPoolArray(string arrayName)
         {
-            if (!ModRoomManager.PickerDict.ContainsKey(arrayName))
+            if (!PickerManager.PickerDict.ContainsKey(arrayName))
             {
                 ArchipelagoConsole.LogMessage($"Array '{arrayName}' not found in PickerDict.");
                 ArchipelagoConsole.LogMessage("Available arrays:");
-                foreach (var key in ModRoomManager.PickerDict.Keys.Take(20))
+                foreach (var key in PickerManager.PickerDict.Keys.Take(20))
                 {
                     ArchipelagoConsole.LogMessage($"  - {key}");
                 }
                 return;
             }
 
-            var array = ModRoomManager.PickerDict[arrayName];
+            var array = PickerManager.PickerDict[arrayName];
             ArchipelagoConsole.LogMessage($"=== Pool Array: {arrayName} ({array.GetCount()} rooms) ===");
 
             for (int i = 0; i < array.GetCount(); i++)

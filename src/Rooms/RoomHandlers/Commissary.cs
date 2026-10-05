@@ -92,7 +92,7 @@ public class Commissary : RoomHandler
                             UniqueItem item = ModItemManager.GetUniqueItem(itemName);
                             if (item != null)
                             {
-                                // if the item has note been found yet.
+                                // if the item has not been found yet.
                                 if (!item.HasBeenFound)
                                 {
                                     ReplaceWithAPModel(itemName, model);

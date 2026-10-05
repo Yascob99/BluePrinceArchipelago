@@ -1,6 +1,7 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Rooms.Pickers;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -38,8 +39,7 @@ namespace BluePrinceArchipelago.Rooms
         public static List<string> CantCopy = ["ANTECHAMBER", "ENTRANCE HALL", "ROOM 46", "FOUNDATION", ""];
         public static List<string> FoundFloorplans { get; set; } = ["PLANETARIUM", "CONSERVATORY", "TUNNEL", "THRONE ROOM", "TREASURE TROVE", "MECHANARIUM", "LOST & FOUND", "CLOSED EXHIBIT", "CLOCK TOWER", "THE KENNEL", "VESTIBULE", "DOVECOTE", "SOLARIUM", "DORMITORY", "CASINO", "SAUNA", "LOCKER ROOM", "MORNING ROOM", "CLASSROOM"];
         public static List<ModRoom> OuterDraftRooms = new();
-        public static Dictionary<string, PlayMakerArrayListProxy> PickerDict { set; get; } = [];
-        public static Dictionary<string, PlayMakerArrayListProxy> UntouchedPickers { set; get; } = [];
+
 
         public static Dictionary<string, string> UpgradeIDs = new Dictionary<string, string>()
         {
@@ -60,8 +60,7 @@ namespace BluePrinceArchipelago.Rooms
             {"NOOK", "Upgrade Nool"}
         };
 
-        public static List<string> CurrentPickerArrays = [];
-        public static List<string> CurrentPickerLists = [];
+
 
         public static List<ModRoom> ForceRoomQueue = new(); // Not actually a queue, but is handled like that by the functions that interact with it.
 
@@ -76,18 +75,6 @@ namespace BluePrinceArchipelago.Rooms
             ForcedRoom = null;
             IsForcingDraft = false;
             Logging.Log("ModRoomManager reset.");
-        }
-
-        /// <summary>
-        /// Re-loads the picker arrays. Call this when arrays may have been reset by the game.
-        /// </summary>
-        public static void ReloadArrays()
-        {
-            Logging.Log("Reloading picker arrays...");
-            PickerDict.Clear();
-            UntouchedPickers.Clear();
-            LoadArrays();
-            Logging.Log($"Reloaded {PickerDict.Count} picker arrays.");
         }
 
         /// <summary>
@@ -160,44 +147,6 @@ namespace BluePrinceArchipelago.Rooms
                     room.IsUnlocked = true;
                 }
             }
-        }
-
-        //TODO update this to be less hacky.
-        /// <summary>
-        ///     loads the list of picker arrays the rooms can be added to. 
-        ///     May rewrite to use names instead of the id of the child for better forward compatibility.
-        /// </summary>
-        public static void LoadArrays()
-        {
-            // Core picker arrays (indexes 2-32, 55-56, 58-61)
-            PlayMakerArrayListProxy array = null;
-            List<int> coreChildIDs = [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32];
-            for (int i = 0; i < coreChildIDs.Count; i++)
-            {
-                array = ModInstance.PlanPicker.transform.GetChild(coreChildIDs[i]).gameObject.GetComponent<PlayMakerArrayListProxy>();
-                if (array != null)
-                {
-
-                    PickerDict[array.name.Trim()] = array;
-                }
-            }
-
-            // Standalone Array Full
-            array = ModInstance.PlanPicker.transform.GetChild(56).gameObject.GetComponent<PlayMakerArrayListProxy>();
-            if (array != null)
-            {
-                UntouchedPickers["STANDALONE ARRAY"] = array;
-            }
-
-            //// Additional arrays that may be needed for special drafts (like Entrance Hall, first draft, etc.)
-            //List<int> additionalChildIDs = [0, 33, 34, 35, 36, 37, 38, 39, 40, 44, 45, 57];
-            //for (int i = 0; i < additionalChildIDs.Count; i++) {
-            //    PlayMakerArrayListProxy array = PlanPicker.transform.GetChild(additionalChildIDs[i]).gameObject?.GetComponent<PlayMakerArrayListProxy>();
-            //    if (array != null) {
-            //        PickerDict[array.name.Trim()] = array;
-            //        Logging.Log($"Loaded additional array: {array.name} with {array.GetCount()} rooms");
-            //    }
-            //}
         }
 
         /// <summary>
@@ -322,7 +271,7 @@ namespace BluePrinceArchipelago.Rooms
                         {
                             while (!draftable && j < room.PickerArrays.Count)
                             {
-                                if (CurrentPickerArrays.Contains(room.PickerArrays[j]))
+                                if (PickerManager.CurrentPickerArrays.Contains(room.PickerArrays[j]))
                                 {
                                     draftable = true;
 
@@ -381,86 +330,6 @@ namespace BluePrinceArchipelago.Rooms
                     SetPoolRemovalVar(room.GameObjectName, true);
                 }
             }
-            //CheckPoolTooEmpty();
-        }
-
-        private static void CheckPoolTooEmpty()
-        {
-            PlayMakerArrayListProxy Array1  = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>().GetGameObjectVariable("Array 1").Value.GetComponent<PlayMakerArrayListProxy>();
-            PlayMakerArrayListProxy Array1G = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>().GetGameObjectVariable("Array 1 G").Value.GetComponent<PlayMakerArrayListProxy>();
-            PlayMakerArrayListProxy Array2 = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>().GetGameObjectVariable("Array 2").Value.GetComponent<PlayMakerArrayListProxy>();
-            PlayMakerArrayListProxy Array2G = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>().GetGameObjectVariable("Array 2 G").Value.GetComponent<PlayMakerArrayListProxy>();
-            List<GameObject> List = [];
-            if (Array1 != null)
-            {
-                for (int i = 0; i < Array1.arrayList.Count; i++)
-                {
-                    GameObject item = Array1?.arrayList[i]?.TryCast<GameObject>();
-                    List.Add(GetRoomByName(item.name).GameObj);
-                    Logging.Log(item.name, "Rooms");
-                }
-            }
-            if (Array2 != null)
-            {
-                for (int i = 0; i < Array2.arrayList.Count; i++)
-                {
-                    GameObject item = Array2?.arrayList[i]?.TryCast<GameObject>();
-                    List.Add(GetRoomByName(item.name).GameObj);
-                    Logging.Log(item.name, "Rooms");
-                }
-            }
-            if (Array1G != null)
-            {
-                for (int i = 0; i < Array1G.arrayList.Count; i++)
-                {
-                    GameObject item = Array1G?.arrayList[i]?.TryCast<GameObject>();
-                    List.Add(GetRoomByName(item.name).GameObj);
-                    Logging.Log(item.name, "Rooms");
-                }
-            }
-            if (Array2G != null)
-            {
-                for (int i = 0; i < Array2G.arrayList.Count; i++)
-                {
-                    GameObject item = Array2G?.arrayList[i]?.TryCast<GameObject>();
-                    List.Add(GetRoomByName(item.name).GameObj);
-                    Logging.Log(item.name, "Rooms");
-                }
-            }
-            GameObject Closet = GetRoomByName("Closet").GameObj;
-            int count = List.Count;
-            
-            if (count < 4)
-            {
-                Logging.Log("Using small Room Pool Fallback Draft", "Rooms");
-                if (count == 0)
-                {
-                    Logging.Log("Using small Room Pool Fallback Draft", "Rooms");
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom2").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom3").Value = Closet;
-                }
-                if (count == 1)
-                {
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom2").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom3").Value = Closet;
-                }
-                if (count == 2)
-                {
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom2").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom3").Value = Closet;
-                }
-                if (count == 3)
-                {
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom2").Value = Closet;
-                    GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE").GetComponent<PlayMakerFSM>().GetGameObjectVariable("ForcedRoom3").Value = Closet;
-                }
-                ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = true;
-            }
-
         }
 
         /// <summary>
@@ -529,7 +398,7 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="aliases">Alternative names for the room.</param>
         public static ModRoom AddRoom(string name, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, string[] aliases = null)
         {
-            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla);
+            return AddRoom(name, name, pickerArrays, isUnlocked, useVanilla, aliases);
         }
 
         /// <summary>
@@ -552,7 +421,7 @@ namespace BluePrinceArchipelago.Rooms
 
             if (name == "CLASSROOM")
             {
-                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla));
+                return AddRoom(new ClassRoom(name, gameObjectName, roomObj, pickerArrays, isUnlocked, useVanilla, aliases));
             }
             // rooms only have children if they have upgrades.
             if (roomObj.transform.childCount > 0)
@@ -587,7 +456,7 @@ namespace BluePrinceArchipelago.Rooms
         public static void UpdateRoomPools()
         {
             Logging.Log("Updating Room Pools", "Rooms");
-            foreach (var pair in PickerDict)
+            foreach (var pair in PickerManager.PickerDict)
             {
                 
                 PlayMakerArrayListProxy array = pair.Value;
@@ -614,36 +483,40 @@ namespace BluePrinceArchipelago.Rooms
                     }
                     foreach (ModRoom modroom in _Rooms)
                     {
-                        if (modroom.EarlyDraftDependencies.Count > 0) {
-                            foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
-                            {
-                                if (!dependency.Invoke(modroom))
+                        // Skip Garage and use Vanilla Removal for it.
+                        if(modroom.Name != "GARAGE"){
+                            if (modroom.EarlyDraftDependencies.Count > 0) {
+                                foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
                                 {
-                                    if (RoomCounts.ContainsKey(modroom.Name))
+                                    if (!dependency.Invoke(modroom))
                                     {
-                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                        if (RoomCounts.ContainsKey(modroom.Name))
+                                        {
+                                            modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                        }
+                                        SetPoolRemovalVar(modroom.Name, true);
                                     }
-                                    SetPoolRemovalVar(modroom.Name, true);
                                 }
                             }
-                        }
-                        else if (!modroom.IsUnlocked)
-                        {
-                            if (RoomCounts.ContainsKey(modroom.Name))
-                            {
-                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            else if (!modroom.IsUnlocked)
+                            {   
+                                if (RoomCounts.ContainsKey(modroom.Name))
+                                {
+                                    modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                }
+                                SetPoolRemovalVar(modroom.Name, true);
+                            
                             }
-                            SetPoolRemovalVar(modroom.Name, true);
-                        }
-                        else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
-                        {
-                            if (RoomCounts.ContainsKey(modroom.Name))
+                            else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
                             {
-                                modroom.UpdateArray(array, RoomCounts[modroom.Name]);
-                            }
-                            else
-                            {
-                                modroom.UpdateArray(array, modroom.RoomsLeftInPool);
+                                if (RoomCounts.ContainsKey(modroom.Name))
+                                {
+                                    modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                                }
+                                else
+                                {
+                                    modroom.UpdateArray(array, modroom.RoomsLeftInPool);
+                                }
                             }
                         }
                     }
@@ -690,14 +563,6 @@ namespace BluePrinceArchipelago.Rooms
             {
                 return true;
             }
-
-            // Try mapped name (for classrooms and other special cases)
-            string mappedName = MapArchipelagoRoomName(itemName);
-            if (mappedName != null && GetRoomByName(mappedName) != null)
-            {
-                return true;
-            }
-
             return false;
         }
 
@@ -711,16 +576,6 @@ namespace BluePrinceArchipelago.Rooms
         {
             // Try to find room with exact name first
             ModRoom room = GetRoomByName(roomName);
-
-            // If not found, try special mappings for classroom variants
-            if (room == null)
-            {
-                string mappedName = MapArchipelagoRoomName(roomName);
-                if (mappedName != null)
-                {
-                    room = GetRoomByName(mappedName);
-                }
-            }
 
             if (room != null)
             {
@@ -752,31 +607,6 @@ namespace BluePrinceArchipelago.Rooms
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Gets the mapped room name for an Archipelago item name.
-        /// Returns the mapped name if a mapping exists, null otherwise.
-        /// Public method for use by other classes that need the mapping.
-        /// </summary>
-        public static string GetMappedRoomName(string apRoomName)
-        {
-            return MapArchipelagoRoomName(apRoomName);
-        }
-
-        /// <summary>
-        /// Maps Archipelago room names to actual game room names.
-        /// Handles special cases for rooms with non-standard naming.
-        /// </summary>
-        private static string MapArchipelagoRoomName(string apRoomName)
-        {
-            // Add other special mappings here as needed in the future
-
-            return apRoomName switch
-            {
-                "Progressive Classroom" => "CLASSROOM", // Map all classroom variants to the base classroom name
-                _ => null
-            };
         }
 
         /// <summary>
@@ -1122,8 +952,8 @@ namespace BluePrinceArchipelago.Rooms
         {
             PlayMakerFSM grid = ModInstance.TheGrid;
             PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").value?.GetComponent<PlayMakerFSM>();
-            CurrentPickerArrays.Clear();
-            CurrentPickerLists.Clear();
+            PickerManager.CurrentPickerArrays.Clear();
+            PickerManager.CurrentPickerLists.Clear();
             //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
             if (planPicker != null)
             {
@@ -1132,20 +962,20 @@ namespace BluePrinceArchipelago.Rooms
                     foreach (SetFsmGameObject action in state.GetActionsOfType<SetFsmGameObject>())
                     {
                         //Add the array to the list if it's getting set as a picker array, and it's not already on the list (some pickers use dupe lists).
-                        if (action.variableName.value.Contains("Array") && !CurrentPickerArrays.Contains(action.setValue.Value.name))
+                        if (action.variableName.value.Contains("Array") && !PickerManager.CurrentPickerArrays.Contains(action.setValue.Value.name))
                         {
                             if (action.setValue.Value.name.Contains("CENTER"))
                             {
-                                CurrentPickerArrays.Add("CENTER - Tier 1");
-                                CurrentPickerArrays.Add("CENTER - Tier 2");
-                                CurrentPickerArrays.Add("CENTER - Tier 3");
-                                CurrentPickerArrays.Add("CENTER - Tier 1 G");
-                                CurrentPickerArrays.Add("CENTER - Tier 2 G");
-                                CurrentPickerArrays.Add("CENTER - Tier 3 G");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1 G");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2 G");
+                                PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3 G");
                             }
                             else
                             {
-                                CurrentPickerArrays.Add(action.setValue.Value.name);
+                                PickerManager.CurrentPickerArrays.Add(action.setValue.Value.name);
                             }
                         }
                     }
@@ -1264,7 +1094,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("CHAPEL", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             // CLASSROOM is a single room that can appear as different "grades" (1-9) when drafted
             // All "Classroom X" items from Archipelago map to this single CLASSROOM entry
-            AddRoom("CLASSROOM", ["CENTER - Tier 1 G", "FRONT - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true, false);
+            AddRoom("CLASSROOM", ["CENTER - Tier 1 G", "FRONT - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], false, false, ["Progressive Classroom"]);
             AddRoom("CLOCK TOWER", ["CENTER - Tier 2 G", "FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], false);
             AddRoom("CLOISTER", ["CENTER - Tier 2 G"], true);
             AddRoom("CLOSED EXHIBIT", ["FRONTBACK - RARE", "NORTH PIERCE", "EDGEPIERCE - RARE", "EDGECREEP - RARE", "CENTER - Tier 2"], false);
@@ -1287,8 +1117,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("FURNACE", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 3", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
             AddRoom("FREEZER", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("GALLERY", ["FRONT - Tier 1", "FRONTBACK - RARE", "CENTER - Tier 3", "EDGECREEP - RARE"], false);
-            AddRoom("GARAGE", ["EDGE ADVANCE WESTWING - G", "EDGEPIERCE G"], true)
-                .AddLaterDraftDependency(garageRankCheck).AddEarlyDraftDependencies(checkEarlyUnlockStatus, checkGarageEarlyUnlock);
+            AddRoom("GARAGE", ["EDGE ADVANCE WESTWING - G", "EDGEPIERCE G"], true);
             AddRoom("GIFT SHOP", ["CENTER - Tier 2", "FRONT - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], false)
                 .AddEarlyDraftDependency(room46Reached);
             AddRoom("GREAT HALL", ["CENTER - Tier 3"], true);
@@ -1332,8 +1161,7 @@ namespace BluePrinceArchipelago.Rooms
                 .AddEarlyDraftDependency(poolCheck);
             AddRoom("SCHOOLHOUSE", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("SECRET GARDEN", [""], true, false);
-            AddRoom("SECRET PASSAGE", ["CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "Center Rare G"], true)
-                .AddLaterDraftDependency(secretPassageCheck);
+            AddRoom("SECRET PASSAGE", ["CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "Center Rare G"], true);
             AddRoom("SECURITY", ["NORTH PIERCE G", "CENTER - Tier 1 G", "EDGEPIERCE G"], true);
             AddRoom("SERVANT\'S QUARTERS", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 2 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("BOMB SHELTER", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true, false, ["SHELTER"]);
@@ -1346,8 +1174,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("TERRACE", ["EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("THE ARMORY", ["CENTER - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G"], false)
                 .AddEarlyDraftDependency(chessPowerRook);
-            AddRoom("THE FOUNDATION", ["CENTER - Tier 1", "CENTER - Tier 2", "CENTER - Tier 3"], true)
-                .AddEarlyDraftDependency(foundationCheck).AddEarlyDraftDependency(checkEarlyUnlockStatus);
+            AddRoom("THE FOUNDATION", ["CENTER - Tier 1", "CENTER - Tier 2", "CENTER - Tier 3"], true);
             AddRoom("THE KENNEL", ["FRONT - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "CENTER - Tier 1"], false);
             AddRoom("THE POOL", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "Center Rare G"], true);
             AddRoom("THRONE ROOM", ["EDGEPIERCE - RARE G", "CENTER - Tier 2 G"], false);

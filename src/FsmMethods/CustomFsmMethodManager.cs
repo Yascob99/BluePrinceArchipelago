@@ -31,6 +31,7 @@ namespace BluePrinceArchipelago.FsmMethods
             { "SundialScorched", new SundialScorched()},
             { "GarageOpened", new GarageOpened() },
             { "ShowroomMenuOpened", new ShowroomMenuOpened() },
+            { "BeforeDraftStart", new BeforeDraftStart()},
         };
 
         public static void RegisterMethods() {

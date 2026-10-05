@@ -1,5 +1,6 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 #if ML
@@ -35,30 +36,25 @@ namespace BluePrinceArchipelago.Triggers
             }
         }
 
-        /// <summary>
-        ///     Triggers before the game adds the copies of the Additional Floorplans to the pool and before a draft occurs.
+         /// <summary>
+        ///     Triggers just before the MasterPicker Arrays are set (last chance to edit picker lists);
         /// </summary>
-        public static void OnBeforeFloorPlanAdds()
+        public static void OnBeforeDraftStart()
         {
             if (ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated)
             {
                 // Skip Archipelago room pool management if RoomDraftSanity is disabled
                 if (!ArchipelagoOptions.RoomDraftSanity)
                 {
-                    // Still allow force room draft for other purposes if needed
-                    ModRoomManager.CheckForceRoomDraft();
                     return;
                 }
 
                 // Reload arrays to ensure we have fresh references (game may have reset them)
-                ModRoomManager.ReloadArrays();
+                PickerManager.ReloadArrays();
 
-                // If connected to Archipelago, ensure room unlock states are correct
-                if (ArchipelagoClient.Authenticated)
-                {
-                    // Only set unlock states, don't update pools yet (we'll do that below)
-                    ModRoomManager.EnsureRoomUnlockStates();
-                }
+
+                // Only set unlock states, don't update pools yet (we'll do that below)
+                ModRoomManager.EnsureRoomUnlockStates();
 
                 ModRoomManager.CheckForceRoomDraft();
                 Logging.Log("Updating Rooms for draft");
@@ -67,6 +63,20 @@ namespace BluePrinceArchipelago.Triggers
             else
             {
                 Logging.Log("Unable to update Room Pool because Rooms have not been initialized.");
+            }
+        }
+
+        /// <summary>
+        ///     Triggers before the game adds the copies of the Additional Floorplans to the pool and before a draft occurs.
+        /// </summary>
+        public static void OnBeforeFloorPlanAdds()
+        {
+            if (ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated && ArchipelagoOptions.RoomDraftSanity)
+            {
+                ModInstance.MasterPicker.GetBoolVariable("TunnelUnlocked").Value = ModRoomManager.GetRoomByName("Tunnel").IsUnlocked;
+                ModInstance.MasterPicker.GetBoolVariable("GarageUnlocked").Value = ModRoomManager.GetRoomByName("Garage").IsUnlocked;
+                ModInstance.MasterPicker.GetBoolVariable("SecretPassageUnlocked").Value = ModRoomManager.GetRoomByName("Secret Passage").IsUnlocked;
+                ModInstance.MasterPicker.GetBoolVariable("FoundationUnlocked").Value = ModRoomManager.GetRoomByName("The Foundation").IsUnlocked;
             }
         }
 

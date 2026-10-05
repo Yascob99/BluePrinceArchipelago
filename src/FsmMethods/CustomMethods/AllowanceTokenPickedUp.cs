@@ -1,6 +1,4 @@
-﻿using BluePrinceArchipelago.Events;
-using BluePrinceArchipelago.Triggers;
-using BluePrinceArchipelago.Utils;
+﻿using BluePrinceArchipelago.Triggers;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -10,12 +8,6 @@ using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
 #endif
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 {

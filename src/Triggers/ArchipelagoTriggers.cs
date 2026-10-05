@@ -3,6 +3,7 @@ using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.Pickers;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -35,7 +36,7 @@ namespace BluePrinceArchipelago.Triggers
             // Only sync if rooms are already initialized (connected mid-run, not from main menu)
             if (ModInstance.HasInitializedRooms)
             {
-                ModRoomManager.ReloadArrays();
+                PickerManager.ReloadArrays();
                 ModRoomManager.SyncRoomPoolsWithArchipelago();
             }
             if (ModInstance.IsInRun && !ModInstance.RanStartOfDay)
@@ -48,15 +49,18 @@ namespace BluePrinceArchipelago.Triggers
                 FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
+               
                 if (ModInstance.FirstLoad) {
                     ModInstance.TrunkManager.Initialize();
                 }
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(ModInstance.GlobalManager);
+                    
                 }
                 if (ArchipelagoOptions.RoomDraftSanity)
                 {
+                    FSMPatches.PickerOverrides();
                     FSMPatches.OuterDraftOverrides();
                 }
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs

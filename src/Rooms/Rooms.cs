@@ -22,7 +22,8 @@ namespace BluePrinceArchipelago.Rooms
     /// <param name="pickerArrays">List of picker arrays this room can appear in</param>
     /// <param name="isUnlocked">Whether the room is initially unlocked</param>
     /// <param name="useVanilla">Whether to use vanilla handling for this room</param>
-    public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla)
+    /// <param name="aliases">Alternative names for the classrooms.</param>
+    public class ClassRoom(string name, string gameObjectName, GameObject gameObject, List<string> pickerArrays, bool isUnlocked, bool useVanilla = false, string[] aliases = null) : ModRoom(name, gameObjectName, gameObject, pickerArrays, isUnlocked, useVanilla, null, 0, aliases)
     {
         private int _HighestDrafted = 0;
         public override bool HasBeenDrafted { 

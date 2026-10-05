@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
+using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace BluePrinceArchipelago.Triggers
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
             //ModRoomManager.ResetRoomInHouseCounts();
-            ModRoomManager.ReloadArrays();
+            PickerManager.ReloadArrays();
 
             // Sync room pools with Archipelago at the start of each day, regardless of when auth happened
             //ModRoomManager.SyncRoomPoolsWithArchipelago();
@@ -58,7 +59,7 @@ namespace BluePrinceArchipelago.Triggers
                 ModInstance.QueueManager.ReleaseAllQueuedLocations();
 
                 //Reload the Picker Arrays, Resync the room pools with archipelago.
-                ModRoomManager.ReloadArrays();
+                PickerManager.ReloadArrays();
                 ModRoomManager.SyncRoomPoolsWithArchipelago();
 
                 // Handle Start of day code for Permanent items (and maybe curses later).
@@ -67,12 +68,14 @@ namespace BluePrinceArchipelago.Triggers
                 FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
+                FSMPatches.PickerOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(ModInstance.GlobalManager);
                 }
                 if (ArchipelagoOptions.RoomDraftSanity)
                 {
+                    FSMPatches.PickerOverrides();
                     FSMPatches.OuterDraftOverrides();
                 }
                 Unlocks.AttemptPrePatch(); //Apply patches to the FSMs
