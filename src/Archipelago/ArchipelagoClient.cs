@@ -977,7 +977,6 @@ public class ArchipelagoQueueManager {
         // Try to find the room, using mapping for special cases
         ModRoom room = ModRoomManager.GetRoomByName(item.ItemName);
 
-        bool isMappedRoom = false;
         string mappedName = null;
 
         // If not found with exact name, try the mapped name
@@ -987,7 +986,6 @@ public class ArchipelagoQueueManager {
             if (mappedName != null)
             {
                 room = ModRoomManager.GetRoomByName(mappedName);
-                isMappedRoom = true;
             }
         }
 
