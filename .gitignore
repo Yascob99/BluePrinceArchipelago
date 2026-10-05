@@ -2,6 +2,7 @@
 */.vs/*
 src/obj/*
 src/bin/*
+BluePrinceArchipelago/obj/*
 BluePrinceArchipelago.BepInEx/obj/*
 BluePrinceArchipelago.BepInEx/bin/*
 BluePrinceArchipelago.MelonLoader/obj/*

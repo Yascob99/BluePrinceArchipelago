@@ -72,8 +72,7 @@ namespace BluePrinceArchipelago.Items
         public override void ActivateTrap()
         {
             //Sets the Zero Step Ending to on, regardless of steps. Seems to be the easiest Ending to trigger. May add a custom ending later.
-            ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -1000000;
-            ModInstance.StepManager.SendEvent("Update");
+            ResourceManager.AdjustSteps(-1000000);
         }
     }
 
@@ -87,70 +86,7 @@ namespace BluePrinceArchipelago.Items
     {
         public override void ActivateTrap()
         {
-            if (TrapType == "Steps")
-            {
-                // change the adjustment amount.
-                ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -count;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.StepManager.SendEvent("Update");
-            }
-            if (TrapType == "Gems")
-            {
-                // change the adjustment amount.
-                ModInstance.GemManager.FindIntVariable("Adjustment Amount").Value = -count;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.GemManager.SendEvent("Update");
-            }
-            else if (TrapType == "Gold")
-            {
-                // change the adjustment amount.
-                ModInstance.GoldManager.FindIntVariable("Adjustment Amount").Value = count;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.GoldManager.SendEvent("Update");
-            }
-            else if (TrapType == "Allowance")
-            {
-                GameObject.Find("DAY").GetFsm("FSM").FindIntVariable("allowance").Value -= count;
-            }
-            else if (TrapType == "Dice")
-            {
-                // change the adjustment amount.
-                ModInstance.DiceManager.FindIntVariable("Adjustment Amount").Value = -count;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.DiceManager.SendEvent("Update");
-            }
-            else if (TrapType == "Keys")
-            {
-                // change the adjustment amount.
-                ModInstance.KeyManager.FindIntVariable("Adjustment Amount").Value = -count;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.KeyManager.SendEvent("Update");
-            }
-            else if (TrapType == "Luck")
-            {
-                int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
-                if (luck - count > 0)
-                {
-                    ModInstance.LuckManager.FindIntVariable("LUCK").Value -= count;
-                }
-                else
-                {
-                    ModInstance.LuckManager.FindIntVariable("Luck").Value = 0;
-                }
-            }
-            else if (TrapType == "Stars")
-            {
-                int totalStars = ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value;
-                if (totalStars + 1 > 0)
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value += 1;
-                }
-                else
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value = 0;
-                }
-                ModInstance.StarManager.SendEvent("Update");
-            }
+            ResourceManager.AdjustResource(TrapType, count);
         }
     }
 
@@ -169,10 +105,7 @@ namespace BluePrinceArchipelago.Items
                 var current = ModInstance.StepManager.FindIntVariable("STEPS").value;
                 
                 var difference = current - count;
-                // change the adjustment amount.
-                ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = -difference;
-                // Send the "Update" event and the step counter should update.
-                ModInstance.StepManager.SendEvent("Update");
+                ResourceManager.AdjustSteps(-difference);
             }
         }
     }

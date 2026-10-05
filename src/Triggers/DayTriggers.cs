@@ -80,6 +80,9 @@ namespace BluePrinceArchipelago.Triggers
                 Unlocks.SatelliteDish.PreventDefault();
                 Plugin.UniqueItemManager.StartOfDay();
                 ModRoomManager.StartOfDay();
+#if DEBUG
+                ResourceManager.GodMode();
+#endif
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
             }
         }

@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using BluePrinceArchipelago.Items;
+
 #if ML
 using Il2Cpp;
 #endif
@@ -34,164 +36,33 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                 ArchipelagoConsole.LogMessage("You are not currently in a run, you can only run this command during a run.");
                 return;
             }
-            if (Args.Count == 2)
+            if (Args.Count != 2)
             {
-                string subcommand = Args[0];
-                if (subcommand.ToLower() == "gems")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        ModInstance.GemManager.FindIntVariable("Gem Adjustment Amount").Value = count;
-                        ModInstance.GemManager.SendEvent("Update with Sound");
-                        ArchipelagoConsole.LogMessage($"Adjusted Gems by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "gold")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        ModInstance.GoldManager.FindIntVariable("Adjustment Amount").Value = count;
-                        ModInstance.GoldManager.SendEvent("Update");
-                        ArchipelagoConsole.LogMessage($"Adjusted Gold by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "steps")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value = count;
-                        ModInstance.StepManager.SendEvent("Update");
-                        ArchipelagoConsole.LogMessage($"Adjusted Steps by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "dice")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        ModInstance.DiceManager.FindIntVariable("Adjustment Amount").Value = count;
-                        ModInstance.DiceManager.SendEvent("Update");
-                        ArchipelagoConsole.LogMessage($"Adjusted Dice by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "keys")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        ModInstance.KeyManager.FindIntVariable("Adjustment Amount").Value = count;
-                        ModInstance.KeyManager.SendEvent("Update");
-                        ArchipelagoConsole.LogMessage($"Adjusted Keys by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "stars")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        int totalStars = ModInstance.StarManager.FindIntVariable("TotalStars").Value;
-                        if (totalStars + count > 0)
-                        {
-                            ModInstance.StarManager.FindIntVariable("TotalStars").Value = totalStars + count;
-
-                        }
-                        else
-                        {
-                            ModInstance.StarManager.FindIntVariable("TotalStars").Value = 0;
-                        }
-                        ArchipelagoConsole.LogMessage($"Adjusted Stars by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "luck")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-                        int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
-                        if (luck + count > 0)
-                        {
-                            ModInstance.LuckManager.FindIntVariable("LUCK").Value = luck + count;
-
-                        }
-                        else
-                        {
-                            ModInstance.LuckManager.FindIntVariable("LUCK").Value = 0;
-                        }
-                        ArchipelagoConsole.LogMessage($"Adjusted Luck by {count}.");
-                        return;
-                    }
-                    catch
-                    {
-                        ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
-                        return;
-                    }
-
-                }
-                else if (subcommand.ToLower() == "allowance")
-                {
-                    try
-                    {
-                        int count = int.Parse(Args[1]);
-
-                        GameObject.Find("DAY").GetComponent<PlayMakerFSM>().FindIntVariable("allowance").Value += count;
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        ArchipelagoConsole.LogMessage(ex.Message);
-                        Logging.Log(ex, "Items");
-                        return;
-                    }
-                }
-                ArchipelagoConsole.LogMessage($"Error Running Command {Name}: invalid subcommand {subcommand}");
+                ArchipelagoConsole.LogMessage($"Error Running Command {Name}: no parameters provided.");
                 return;
             }
-            ArchipelagoConsole.LogMessage($"Error Running Command {Name}: no parameters provided.");
+            string subcommand = Args[0];
+            if (!int.TryParse(Args[1], out int count))
+            {
+                ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {Args[1]} is not a valid integer.");
+                return;
+            }
+            if (!ResourceManager.IsValidResourceType(subcommand))
+            {
+                ArchipelagoConsole.LogMessage($"Error Running Command {Name}: invalid subcommand {subcommand}");
+            }
+
+            //Make the adjustment
+            if (ResourceManager.AdjustResource(subcommand, count))
+            {
+                ArchipelagoConsole.LogMessage($"Adjusted {subcommand} by {count}.");
+            } 
+            else
+            {
+                ArchipelagoConsole.LogMessage($"There was an unknown error adjusting {subcommand}.");
+            }
+
+
         }
     }
 }
