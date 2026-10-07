@@ -168,7 +168,8 @@ If you prefer a simpler install we do have a [Thunderstore version]([https://thu
 3. Download the Latest mod release from [here](https://github.com/Yascob99/BluePrinceArchipelago/releases) and if you haven't already the APworld Release from [here](https://github.com/BatmenzDW/Archipelago/releases).
 
 4. Extract the contents of the mod to <YourBluePrinceInstallLocationHere>/BepInEx/plugins/BluePrinceArchipelago. Your final folder should look something like this:
-<img width="598" height="149" alt="image" src="https://github.com/user-attachments/assets/9b6a8ec9-44dd-481f-b2f1-07839efcbfcd" />
+<img width="654" height="142" alt="image" src="https://github.com/user-attachments/assets/8d3ce17f-9531-4e37-8a1c-f4254e52f269" />
+
 
 5. Start the game. You will notice a new UI at the top. It is best to connect here before starting a new profile. This UI can be shown by pressing "/" and dismissed by pressing "ESC". This also doubles as your game client. Tying /help in the command box will show all the local commands. You can also run archipelago server commands from this console once connected. A lot of the commands are intended for dev usage to allow for progress when there is an issue with the mod.
 
