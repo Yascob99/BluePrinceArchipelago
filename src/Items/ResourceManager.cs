@@ -1,8 +1,4 @@
-﻿using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.Utils;
-using System;
-using System.Xml.Linq;
-using UnityEngine;
+﻿using BluePrinceArchipelago.Utils;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -12,12 +8,62 @@ namespace BluePrinceArchipelago.Items
 	/// </summary>
 	public static class ResourceManager
 	{
-		/// <summary>
-		/// Add or remove Gems from Simon's resources.
-		/// </summary>
-		/// <param name="count">The number to add (positive) or remove (negative).</param>
+
+        public static int StartingGems = 0;
+        public static int StartingKeys = 0;
+        public static int StartingDice = 0;
+        public static int StartingSteps = 0;
+        public static int StartingLuck = 0;
+
+        /// <summary>
+        ///     Recalculates the amount of starting items the player should have.
+        /// </summary>
+        public static void RecalculculateStartingItems() {
+            StartingGems = 0;
+            StartingKeys = 0;
+            StartingDice = 0;
+            StartingSteps = 0;
+            StartingLuck = 0;
+            if (ModItemManager.PermanentItemList.Count > 0)
+            {
+                foreach (PermanentItem item in ModItemManager.PermanentItemList)
+                {
+                    if (item.UnlockedCount > 0)
+                    {
+                        switch (item.ItemType)
+                        {
+                            case "Gems":
+                                StartingGems += item.UnlockedCount * item.Count;
+                                break;
+                            case "Keys":
+                                StartingKeys += item.UnlockedCount * item.Count;
+                                break;
+                            case "Dice":
+                                StartingDice += item.UnlockedCount * item.Count;
+                                break;
+                            case "Steps":
+                                StartingSteps += item.UnlockedCount * item.Count;
+                                break;
+                            case "Luck":
+                                StartingLuck += item.UnlockedCount * item.Count;
+                                break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        public static bool AddStartingItems() {
+            return (AdjustGems(StartingGems) && AdjustKeys(StartingKeys) && AdjustDice(StartingDice) && AdjustSteps(StartingSteps) && AdjustLuck(StartingLuck));
+        }
+
+        /// <summary>
+        /// Add or remove Gems from Simon's resources.
+        /// </summary>
+        /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-		public static bool AdjustGems(int count)
+        public static bool AdjustGems(int count)
 		{
 			try
 			{

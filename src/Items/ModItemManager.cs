@@ -985,32 +985,13 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public static void StartOfDay()
         {
-            AddAllPermanenentItems();
+            ResourceManager.RecalculculateStartingItems();
+            ResourceManager.AddStartingItems();
             // Run upgrade disk start of day code if Upgrade Disk Sanity is on.
             if (ArchipelagoOptions.UpgradeDiskSanity) {
                 UpgradeDisks.StartOfDay();
             }
             
-        }
-
-        /// <summary>
-        ///     Adds all permanent items to inventory, meant to be run at start of day.
-        /// </summary>
-        public static void AddAllPermanenentItems()
-        {
-            Logging.LogWarning("Adding Permanent Items", "Items");
-            if (PermanentItemList.Count > 0)
-            {
-                foreach (PermanentItem item in PermanentItemList)
-                {
-                    if (item.UnlockedCount > 0)
-                    {
-                        Logging.LogWarning($"Adding {item.UnlockedCount} x {item.Count} {item.ItemType}(s)", "Items");
-                        item.AddItemToInventory();
-                    }
-                }
-
-            }
         }
 
         /// <summary>

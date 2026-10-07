@@ -574,7 +574,8 @@ namespace BluePrinceArchipelago.Patches
             //  Tunnel Check
             GetFsmBool CT1TunnelCheck = CenterTier1.GetState("TUNNEL CHECK").GetAction<GetFsmBool>(0);
             CT1TunnelCheck.gameObject = MasterPickerFOD;
-            CT1TunnelCheck.variableName = "TunnelUnlocked";  
+            CT1TunnelCheck.variableName = "TunnelUnlocked";
+            CenterTier1.GetState("TUNNEL CHECK").GetAction<BoolTest>(1).isFalse = CenterTier1.GetTransition("TUNNEL CHECK", "0").fsmEvent;
 
             //  Foundation Check
             GetFsmBool CT1FoundationCheck = CenterTier1.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
@@ -588,7 +589,8 @@ namespace BluePrinceArchipelago.Patches
             //  Tunnel Check
             GetFsmBool CT2TunnelCheck = CenterTier2.GetState("TUNNEL CHECK 2").GetAction<GetFsmBool>(0);
             CT2TunnelCheck.gameObject = MasterPickerFOD;
-            CT2TunnelCheck.variableName = "TunnelUnlocked"; 
+            CT2TunnelCheck.variableName = "TunnelUnlocked";
+            CenterTier2.GetState("TUNNEL CHECK 2").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 2", "0").fsmEvent;
 
             //  Foundation Check
             GetFsmBool CT2FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);
@@ -603,8 +605,9 @@ namespace BluePrinceArchipelago.Patches
             GetFsmBool CT3TunnelCheck = CenterTier2.GetState("TUNNEL CHECK 2").GetAction<GetFsmBool>(0);
             CT3TunnelCheck.gameObject = MasterPickerFOD;
             CT3TunnelCheck.variableName = "TunnelUnlocked";
+            CenterTier2.GetState("TUNNEL CHECK 3").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 3", "0").fsmEvent;
 
-             //  Foundation Check
+            //  Foundation Check
             GetFsmBool CT3FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
             CT3FoundationCheck.gameObject = MasterPickerFOD;
             CT3FoundationCheck.variableName = "FoundationUnlocked";

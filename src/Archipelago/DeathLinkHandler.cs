@@ -202,7 +202,10 @@ public class DeathLinkHandler
                 Plugin.ArchipelagoClient.DeathLinkHandler.deathLinks.Enqueue(deathLink);
             }
         }
-
+        else
+        {
+            _localDeathsInProgress -= 1;
+        }
         // ZERO STEP ENDING: Send Event- State 8
     }
 
