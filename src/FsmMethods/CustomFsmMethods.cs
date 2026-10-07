@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using BluePrinceArchipelago.FsmMethods.CustomMethods;
+
 #if ML
 using MelonLoader;
 #endif
@@ -26,8 +28,12 @@ namespace BluePrinceArchipelago.FsmMethods
             Logging.Log($"Attempting to find method {methodname}", "CustomFsmMethods");
             foreach (string key in CustomFsmMethodManager.RegisteredCustomFsmMethods.Keys) {
                 if (methodname == key) {
-                    CustomFsmMethodManager.RegisteredCustomFsmMethods[key].Update();
-                    CustomFsmMethodManager.RegisteredCustomFsmMethods[key].OnCalled();
+                    RegisteredCustomFsmMethod method = CustomFsmMethodManager.RegisteredCustomFsmMethods[key];
+                    Logging.Log($"Run Update: {method.UpdateBeforeRun}", "CustomFsmMethods");
+                    if (method.UpdateBeforeRun){
+                        method.Update();
+                    }
+                    method.OnCalled();
                     return;
                 }
             }

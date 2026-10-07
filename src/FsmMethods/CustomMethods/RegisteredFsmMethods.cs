@@ -16,6 +16,11 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         public string Name { get; set; }
 
         /// <summary>
+        ///     A bool that defines whether the Update() should be invoked before running. Defaults to true;
+        /// </summary>
+        public bool UpdateBeforeRun { get; set; } = true;
+
+        /// <summary>
         ///     The code for when an event occurs.
         /// </summary>
         public abstract void OnCalled();
