@@ -90,6 +90,7 @@ Special Thanks to:
 - ChaseoQueso for the inital item code and the custom archipelago swirly asset.
 - Mac for helping out on the mod and APworld
 - deefdragon and BatemenzDW for their work on the APworld.
+- Ezra 3 for some logic fixes on the APworld.
 - ZigZuagg and Shavnir for helping out with the mod.
 - Zygan for some custom art assets.
 - The Blue Prince community on the Archipelago Discord for all of their fantastic ideas.

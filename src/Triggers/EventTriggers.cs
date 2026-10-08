@@ -4,6 +4,8 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
+using System;
+
 #if ML
 using Il2Cpp;
 #endif
@@ -250,6 +252,16 @@ namespace BluePrinceArchipelago.Triggers
         /// </summary>
         public static void OnAllowanceEnvelopePickedUp() { 
             
+        }
+
+        public static void OnBasementDoorOpened(string location)
+        {
+            ModInstance.ModEventHandler.OnUnlockBasementDoor(location);
+        }
+
+        internal static void OnEntranceHallVaseBroken(string location)
+        {
+            ModInstance.ModEventHandler.OnVaseBroken(location);
         }
     }
 }

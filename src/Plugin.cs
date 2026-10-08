@@ -78,7 +78,8 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("ArchipelagoConsole", LogLevel.Info);
             //Logging.SetLogLevel("ItemQueue", LogLevel.Info);
             Logging.SetLogLevel("ArchipelagoEvents", LogLevel.Info);
-            Logging.SetLogLevel("CustomFsmMethods", LogLevel.Info);
+            Logging.SetLogLevel("Traps", LogLevel.Info);
+            //Logging.SetLogLevel("CustomFsmMethods", LogLevel.Info);
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();

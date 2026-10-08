@@ -804,8 +804,8 @@ public class ArchipelagoQueueManager {
                 // If a trap is received while in run receive it.
                 if (ModInstance.IsInRun)
                 {
-                    ReceiveTrap(item, ignoreState);
-                    return true;
+                    
+                    return ReceiveTrap(item, ignoreState);
                 }
                 return false;
             }
@@ -870,8 +870,7 @@ public class ArchipelagoQueueManager {
                 // If a trap is received while in run receive it.
                 if (ModInstance.IsInRun)
                 {
-                    ReceiveTrap(item);
-                    return true;
+                    return ReceiveTrap(item, ignoreState);
                 }
                 return false;
             }
@@ -1009,9 +1008,43 @@ public class ArchipelagoQueueManager {
     /// </summary>
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
-    public void ReceiveTrap(ItemInfo item, bool ignoreState = false) {
-        TrapTriggers.OnTrapReceived(item);
+    public bool ReceiveTrap(ItemInfo item, bool ignoreState = false) {
+        Trap trap = ModItemManager.GetTrap(item.ItemName);
+        if (TrapManager.QueueTrap(trap.Name, trap.TrapType))
+        {
+            // Only Requeue if traps have been cleared.
+            if (trapAttempts == 0){
+                RequeueTraps();
+            }
+        }
+        return false;
     }
+    private static int trapAttempts = 0;
+    private static Action RequeueTrapsEverySecond = new Action(() => RequeueTraps());
+    /// <summary>
+    ///     A helper function for requeueing traps up to 5 times.
+    /// </summary>
+    private static void RequeueTraps()
+    {
+        if (trapAttempts < 5)
+        {
+            if (ModInstance.IsInRun){
+                if (!TrapManager.DequeueTraps())
+                {
+                    trapAttempts += 1;
+                    GeneralUtils.RunAfterDelay(1f, RequeueTrapsEverySecond);
+                }
+                trapAttempts = 0;
+                return;
+            }
+        }
+        else
+        {
+            Logging.LogWarning("Failed to Dequeue Traps after 5 attempts");
+            trapAttempts = 0;
+        }
+    }
+
     /// <summary>
     ///     Handles receiving a local item. (Doesn't check if it was successfully received).
     /// </summary>

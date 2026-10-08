@@ -1,11 +1,19 @@
 ﻿using Archipelago.MultiClient.Net.Enums;
 using Il2CppInterop.Runtime;
+#if ML
+using MelonLoader;
+#endif
+#if Bep
+using BepInEx.Unity.IL2CPP.Utils.Collections;
+#endif
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -330,12 +338,18 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="parent">The parent object to search.</param>
         /// <param name="name">The name of the child object to find.</param>
         /// <returns>The child GameObject. Null if not found.</returns>
-        public static GameObject GetChild(this GameObject parent, string name) {
+        public static GameObject GetChild(this GameObject parent, string name, bool caseSensitive = false) {
             for (int i = 0; i < parent.transform.childCount; i++)
             {
                 Transform child = parent.transform.GetChild(i);
-                
-                if (child.name.ToLower() == name.ToLower()) {
+                if (caseSensitive)
+                {
+                    if (child.name.ToLower() == name.ToLower())
+                    {
+                         return child.gameObject;
+                    }
+                }
+                else if (child.name.ToLower() == name.ToLower()) {
                     return child.gameObject;
                 }
             }
@@ -578,6 +592,33 @@ namespace BluePrinceArchipelago.Utils
                 }
                 count++;
             }
+        }
+    }
+    public static class MonoBehaviorExtensions
+    {
+        #if ML
+        public static object StartCoroutine(this MonoBehaviour mb, IEnumerator routine) => MelonCoroutines.Start(routine);
+        public static void StopCouroutine(this MonoBehaviour mb, object routine) => MelonCoroutines.Stop(routine);
+        #endif
+        #if Bep
+        public static object StartCoroutine(this MonoBehaviour mb, IEnumerator routine) => mb.StartCoroutine(routine.WrapToIl2Cpp());
+        public static void StopCoroutine(this MonoBehaviour mb, object routine) => mb.StopCoroutine((Coroutine)routine);
+        #endif
+
+    }
+
+    public static class GeneralUtils
+    {
+        private static System.Collections.IEnumerator RunAfterDelayRoutine(float delay, Action actionToRun)
+        {
+            yield return new WaitForSeconds(delay);
+
+            actionToRun.Invoke();
+        }
+
+        public static void RunAfterDelay(float delay, Action actionToRun)
+        {
+            ModInstance.Instance.StartCoroutine(RunAfterDelayRoutine(delay, actionToRun));
         }
     }
 }

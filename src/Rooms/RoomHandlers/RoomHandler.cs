@@ -21,7 +21,6 @@ public abstract class RoomHandler
 
     public virtual void OnRoomDrafted(GameObject roomGameObject) {}
     public virtual void OnAfterRoomDrafted(GameObject roomGameObject) { }
-    public virtual void OnFSMStateChanged(Fsm fsm, string gameObjectName, string newState) { }
     public virtual void OnAllowanceTokenCollected(string token) { }
     public virtual void OnRoomUnlocked(ModRoom room) { 
     }
@@ -32,10 +31,7 @@ public abstract class RoomHandler
     
     public static readonly Dictionary<string, RoomHandler> RoomHandlers = new Dictionary<string, RoomHandler>()
     {
-        {"BASEMENT", new Basement()},
-        {"THE WELL", new Well()},
         {"UNDERPASS", new Underpass()},
-        {"TUNNEL AREA", new TunnelArea()},
         {"SANCTUMS", new Sanctums()},
     };
 

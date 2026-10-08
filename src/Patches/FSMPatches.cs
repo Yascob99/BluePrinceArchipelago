@@ -530,6 +530,31 @@ namespace BluePrinceArchipelago.Patches
             }
         }
 
+        public static void BasementDoorHooks()
+        {
+            //Foundation
+            PlayMakerFSM FoundationDoor1 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            FoundationDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+            PlayMakerFSM FoundationDoor2 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            FoundationDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+
+            //Well
+            PlayMakerFSM WellDoor1 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            WellDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+            PlayMakerFSM WellDoor2 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            WellDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+
+            // Tunnel
+            PlayMakerFSM TunnelDoor = GameObject.Find("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
+            TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
+        }
+
+        public static void ZeroStepEndingHook()
+        {
+            PlayMakerFSM ZeroStepEnding = GameObject.Find("UI OVERLAY CAM").GetChild("ZERO STEP ENDING").GetComponent<PlayMakerFSM>();
+            ZeroStepEnding.GetState("State 3").AddAction(CustomFsmMethodManager.GetCallMethod("ZeroStepEnding"));
+        }
+
         public static void PickerOverrides()
         {
             ModInstance.MasterPicker.AddFsmBool("TunnelUnlocked", false);
@@ -605,7 +630,7 @@ namespace BluePrinceArchipelago.Patches
             GetFsmBool CT3TunnelCheck = CenterTier2.GetState("TUNNEL CHECK 2").GetAction<GetFsmBool>(0);
             CT3TunnelCheck.gameObject = MasterPickerFOD;
             CT3TunnelCheck.variableName = "TunnelUnlocked";
-            CenterTier2.GetState("TUNNEL CHECK 3").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 3", "0").fsmEvent;
+            CenterTier2.GetState("TUNNEL CHECK 2").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 2", "0").fsmEvent;
 
             //  Foundation Check
             GetFsmBool CT3FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   

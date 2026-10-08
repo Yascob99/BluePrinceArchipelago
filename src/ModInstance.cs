@@ -10,7 +10,6 @@ using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 #endif
 using System;
 using System.Collections.Generic;
@@ -148,6 +147,8 @@ namespace BluePrinceArchipelago
             }
             ArchipelagoPrefabsLoaded = true;
         }
+
+
         /// <summary>
         ///     Called whenver a scene is loaded (triggered by the scene manager).
         /// </summary>
@@ -161,12 +162,7 @@ namespace BluePrinceArchipelago
                 if (!AppliedHarmony) {
                     Plugin.Harmony.PatchAll(typeof(EventPatches));
                     //Apply event patches on the main menu to get some data that is not accessible later. 
-#if Bep
-                    Instance.StartCoroutine(Instance.LoadAllAssets().WrapToIl2Cpp());
-#endif
-#if ML
-                    MelonCoroutines.Start(Instance.LoadAllAssets());
-#endif
+                    Instance.StartCoroutine(Instance.LoadAllAssets());
                     AppliedHarmony = true;
                 }
                

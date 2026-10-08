@@ -979,6 +979,15 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
+        /// <summary>
+        ///     Gets a trap by name
+        /// </summary>
+        /// <param name="name">The name of the trap to find.</param>
+        /// <returns>The trap if it exists, or null if it doesn't.</returns>
+        public static Trap GetTrap(string name)
+        {
+            return TrapList.FirstOrDefault(trap => trap.Name.ToLower() == name.ToLower());
+        }
 
         /// <summary>
         ///     The code related to items that should be run on day start.

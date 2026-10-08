@@ -1,7 +1,5 @@
 ﻿using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 #if Bep
-using BepInEx;
-using BepInEx.Unity.IL2CPP.Utils;
 using TMPro;
 #endif
 #if ML
@@ -10,7 +8,6 @@ using MelonLoader;
 #endif
 using BluePrinceArchipelago.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -137,12 +134,7 @@ public class DeathLinkHandler
                 BlockedDeathLinks = 0;
                 State.UpdateDeathLinkData();
             }
-#if Bep
             ModInstance.Instance.StartCoroutine(KillPlayer(cause, deathLink));
-#endif
-#if ML
-            MelonCoroutines.Start(KillPlayer(cause, deathLink));
-#endif
         }
         catch (Exception e)
         {
@@ -158,12 +150,7 @@ public class DeathLinkHandler
     {
         try
         {
-#if Bep
             ModInstance.Instance.StartCoroutine(KillPlayer(cause));
-#endif
-#if ML
-            MelonCoroutines.Start(KillPlayer(cause));
-#endif
         }
         catch (Exception e)
         {
@@ -187,7 +174,7 @@ public class DeathLinkHandler
     /// <param name="cause">The cause of the death.</param>
     /// <param name="deathLink">The received deathlink. Defaults to null.</param>
     /// <returns></returns>
-    private static IEnumerator KillPlayer(string cause, DeathLink deathLink = null)
+    private static System.Collections.IEnumerator KillPlayer(string cause, DeathLink deathLink = null)
     {
         yield return null;
         _localDeathsInProgress += 1;

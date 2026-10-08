@@ -4,6 +4,8 @@ using HutongGames.PlayMaker;
 #endif
 #if ML
 using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
+
 #endif
 using UnityEngine;
 
@@ -14,10 +16,13 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     /// <param name="name">The name of the trap</param>
     /// <param name="trapType">The type of the trap.</param>
-    public abstract class Trap (string name, string trapType)
+    /// <param name="count">An amount the trap changes something by.</param>
+    public abstract class Trap (string name, string trapType, int count = 0)
     {
         public string Name = name;
         public string TrapType = trapType;
+
+        public int Count = count;
 
         /// <summary>
         ///     Handles what happens on trap activation.
@@ -51,10 +56,11 @@ namespace BluePrinceArchipelago.Items
             {
                 
                 ModInstance.GlobalPersistentManager.GetBoolVariable("YesterFreezer").Value = true;
-                Logging.LogWarning(ModInstance.GemManager.GetIntVariable("Gems").Value);
-                Logging.LogWarning(ModInstance.GoldManager.GetIntVariable("Gold").Value);
-                int gems = ModInstance.GemManager.GetIntVariable("Gems").Value;
-                int gold = ModInstance.GoldManager.GetIntVariable("Gold").Value;
+                Logging.LogWarning(ModInstance.GemManager.GetIntVariable("GEMS").Value);
+                Logging.LogWarning(ModInstance.GoldManager.GetIntVariable("GOLD").Value);
+                int gems = ModInstance.GemManager.GetIntVariable("GEMS").Value;
+                int gold = ModInstance.GoldManager.GetIntVariable("GOLD").Value;
+                ModInstance.GoldManager.GetIntVariable("GEMS").Value = gems;
                 ModInstance.GoldManager.SendEvent("Freeze");
                 ModInstance.GemManager.SendEvent("Freeze");
                 ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value = gems;
@@ -72,7 +78,7 @@ namespace BluePrinceArchipelago.Items
         public override void ActivateTrap()
         {
             //Sets the Zero Step Ending to on, regardless of steps. Seems to be the easiest Ending to trigger. May add a custom ending later.
-            ResourceManager.AdjustSteps(-1000000);
+            ResourceManager.AdjustSteps(-1000000, true);
         }
     }
 
@@ -82,11 +88,11 @@ namespace BluePrinceArchipelago.Items
     /// <param name="name">The name of the trap</param>
     /// <param name="trapType">The type of the trap.</param>
     /// <param name="count">The number of that resource to adjust by. Defaults to -1</param>
-    public class LoseTrap(string name, string trapType, int count = -1) : Trap(name, trapType)
+    public class LoseTrap(string name, string trapType, int count = 0) : Trap(name, trapType, count)
     {
         public override void ActivateTrap()
         {
-            ResourceManager.AdjustResource(TrapType, count);
+            ResourceManager.AdjustResource(TrapType, Count);
         }
     }
 
@@ -96,7 +102,7 @@ namespace BluePrinceArchipelago.Items
     /// <param name="name">The name of the trap</param>
     /// <param name="trapType">The type of the trap.</param>
     /// <param name="count">The count to set the player's resource to.</param>
-    public class SetTrap(string name, string trapType, int count = 0) : Trap(name, trapType)
+    public class SetTrap(string name, string trapType, int count = 0) : Trap(name, trapType, count)
     {
         public override void ActivateTrap()
         {
@@ -104,9 +110,9 @@ namespace BluePrinceArchipelago.Items
             {
                 var current = ModInstance.StepManager.FindIntVariable("STEPS").value;
                 
-                var difference = current - count;
+                var difference = current - Count;
                 // change the adjustment amount.
-                ResourceManager.AdjustSteps(-difference);
+                ResourceManager.AdjustSteps(-difference, true);
             }
         }
     }

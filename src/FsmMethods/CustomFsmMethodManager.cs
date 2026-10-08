@@ -32,6 +32,12 @@ namespace BluePrinceArchipelago.FsmMethods
             { "GarageOpened", new GarageOpened() },
             { "ShowroomMenuOpened", new ShowroomMenuOpened() },
             { "BeforeDraftStart", new BeforeDraftStart()},
+            { "FoundationBasementDoorOpened", new FoundationBasementDoorOpened()},
+            { "TunnelBasementDoorOpened", new TunnelBasementDoorOpened()},
+            { "WellBasementDoorOpened", new WellBasementDoorOpened()},
+            { "EntranceHallVaseBrokenEast", new EntranceHallVaseBroken("East")},
+            { "EntranceHallVaseBrokenWest", new EntranceHallVaseBroken("West")},
+            { "ZeroStepEnding", new ZeroStepEnding()},
         };
 
         public static void RegisterMethods() {

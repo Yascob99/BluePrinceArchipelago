@@ -49,7 +49,8 @@ namespace BluePrinceArchipelago.Triggers
                 FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.SundialOverrides();
-               
+                FSMPatches.BasementDoorHooks();
+                FSMPatches.ZeroStepEndingHook();
                 if (ModInstance.FirstLoad) {
                     ModInstance.TrunkManager.Initialize();
                 }
@@ -70,6 +71,7 @@ namespace BluePrinceArchipelago.Triggers
                 Plugin.UniqueItemManager.StartOfDay();
                 ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
+                TrapManager.DequeueTraps();
             }
         }
     }
