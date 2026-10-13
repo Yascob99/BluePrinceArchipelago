@@ -154,6 +154,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="location">The name of the location.</param>
         public void OnFind(string location)
         {
+            Logging.LogWarning(location);
             if (!FoundLocations.Contains(location.ToUpper()))
             {
                 FoundLocations.Add(location.ToUpper());

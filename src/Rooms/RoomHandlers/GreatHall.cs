@@ -32,7 +32,7 @@ class GreatHall : RoomHandler
                     {
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GREAT HALL");
                         Logging.LogWarning(found);
-                        FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+                        FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;
                         ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                         ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();

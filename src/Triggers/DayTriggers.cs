@@ -68,10 +68,9 @@ namespace BluePrinceArchipelago.Triggers
                 ModItemManager.StartOfDay();
                 ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.RoomForcer();
-                FSMPatches.BasementDoorHooks();
+                FSMPatches.StaticLocationHooks();
                 FSMPatches.ZeroStepEndingHook();
                 FSMPatches.TradingPostOverrides();
-                FSMPatches.SundialOverrides();
                 FSMPatches.PickerOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {

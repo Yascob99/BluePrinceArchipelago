@@ -250,8 +250,8 @@ namespace BluePrinceArchipelago.Triggers
         /// <summary>
         ///     Triggers on the Allowance token being picked up.
         /// </summary>
-        public static void OnAllowanceEnvelopePickedUp() { 
-            
+        public static void OnAllowanceEnvelopePickedUp() {
+            ResourceManager.AddStartingItems();
         }
 
         public static void OnBasementDoorOpened(string location)
@@ -259,7 +259,7 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.ModEventHandler.OnUnlockBasementDoor(location);
         }
 
-        internal static void OnEntranceHallVaseBroken(string location)
+        public static void OnEntranceHallVaseBroken(string location)
         {
             ModInstance.ModEventHandler.OnVaseBroken(location);
         }

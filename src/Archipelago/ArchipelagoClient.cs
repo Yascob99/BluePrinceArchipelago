@@ -621,11 +621,18 @@ public class ArchipelagoClient
         if (locationid > 0)
         {
             CheckLocation(locationid);
+            return;
         }
-        else 
-        {
-            Logging.Log($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
+        // Shelter backwards Compatibility Fix.
+        else if (locationName == "Bomb Shelter First Entering") {
+            locationid = GetLocationFromName("Shelter First Entering");
+            if (locationid > 0)
+            {
+                CheckLocation(locationid);
+                return;
+            }
         }
+        Logging.Log($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
     }
     /// <summary>
     ///     Sends to the server that the location has been checked.

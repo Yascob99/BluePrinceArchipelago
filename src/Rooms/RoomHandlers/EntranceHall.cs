@@ -27,9 +27,9 @@ public class EntranceHall : RoomHandler
     {
         roomGameObject = ModRoomManager.GetRoomInstance("Entrance Hall");
         PlayMakerFSM Vase1 = roomGameObject.transform.Find("VASES").Find("Vase 1").gameObject.GetComponent<PlayMakerFSM>();
-        Vase1.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenEast"));
+        Vase1.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("OuterEntranceHallVaseBrokenEast"));
         PlayMakerFSM Vase2 = roomGameObject.transform.Find("VASES").Find("Vase 2").gameObject.GetComponent<PlayMakerFSM>();
-        Vase2.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBroken"));
+        Vase2.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("OuterEntranceHallVaseBrokenWest"));
     }
 
     public override void OnAllowanceTokenCollected(string token)

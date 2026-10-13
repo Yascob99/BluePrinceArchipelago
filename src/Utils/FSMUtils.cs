@@ -648,18 +648,8 @@ namespace BluePrinceArchipelago.Utils
         /// <returns>The newly created FsmBool.</returns>
         public static FsmBool AddFsmBool(this PlayMakerFSM fsm, string name, bool value)
         {
-            FsmBool fb = new FsmBool(name)
-            {
-                value = value
-            };
-            FsmBool[] Bools = new FsmBool[fsm.FsmVariables.BoolVariables.Length + 1];
-            FsmBool[] bools = new FsmBool[fsm.FsmVariables.boolVariables.Length + 1];
-            fsm.FsmVariables.BoolVariables.CopyTo(Bools, 0);
-            fsm.FsmVariables.boolVariables.CopyTo(bools, 0);
-            bools[bools.Length - 1] = fb;
-            Bools[Bools.Length - 1] = fb;
-            fsm.FsmVariables.BoolVariables = Bools;
-            fsm.FsmVariables.boolVariables = bools;
+            FsmBool fb = fsm.fsm.GetBoolVariable(name);
+            fb.Value = value;
             return fb;
         }
         /// <summary>
@@ -673,7 +663,10 @@ namespace BluePrinceArchipelago.Utils
         {
             FsmInt fi = new FsmInt(name)
             {
-                value = value
+                value = value,
+                Value = value,
+                name = name,
+                Name = name
             };
 
             FsmInt[] Ints = new FsmInt[fsm.FsmVariables.IntVariables.Length + 1];
@@ -699,7 +692,10 @@ namespace BluePrinceArchipelago.Utils
         {
             FsmGameObject fgo = new FsmGameObject(name)
             {
-                value = value
+                value = value,
+                Value = value,
+                name = name,
+                Name = name
             };
             FsmGameObject[] gos = new FsmGameObject[fsm.FsmVariables.gameObjectVariables.Length + 1];
             fsm.FsmVariables.gameObjectVariables.CopyTo(gos, 0);
@@ -1692,7 +1688,7 @@ namespace BluePrinceArchipelago.Utils
         {
             TVar[] newArray = new TVar[orig.Length + 1];
             orig.CopyTo(newArray, 0);
-            newArray[orig.Length] = new TVar { Name = name };
+            newArray[orig.Length] = new TVar { Name = name, name = name };
             return newArray;
         }
 

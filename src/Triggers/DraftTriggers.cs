@@ -73,10 +73,11 @@ namespace BluePrinceArchipelago.Triggers
         {
             if (ModInstance.HasInitializedRooms && ArchipelagoClient.Authenticated && ArchipelagoOptions.RoomDraftSanity)
             {
-                ModInstance.MasterPicker.GetBoolVariable("TunnelUnlocked").Value = ModRoomManager.GetRoomByName("Tunnel").IsUnlocked;
-                ModInstance.MasterPicker.GetBoolVariable("GarageUnlocked").Value = ModRoomManager.GetRoomByName("Garage").IsUnlocked;
-                ModInstance.MasterPicker.GetBoolVariable("SecretPassageUnlocked").Value = ModRoomManager.GetRoomByName("Secret Passage").IsUnlocked;
-                ModInstance.MasterPicker.GetBoolVariable("FoundationUnlocked").Value = ModRoomManager.GetRoomByName("The Foundation").IsUnlocked;
+                PlayMakerFSM MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
+                MasterPicker.GetBoolVariable("TunnelUnlocked").Value = ModRoomManager.GetRoomByName("Tunnel").IsUnlocked;
+                MasterPicker.GetBoolVariable("GarageUnlocked").Value = ModRoomManager.GetRoomByName("Garage").IsUnlocked;
+                MasterPicker.GetBoolVariable("SecretPassageUnlocked").Value = ModRoomManager.GetRoomByName("Secret Passage").IsUnlocked;
+                MasterPicker.GetBoolVariable("FoundationUnlocked").Value = ModRoomManager.GetRoomByName("The Foundation").IsUnlocked;
             }
         }
 

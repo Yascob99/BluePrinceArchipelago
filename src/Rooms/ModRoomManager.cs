@@ -483,40 +483,73 @@ namespace BluePrinceArchipelago.Rooms
                     }
                     foreach (ModRoom modroom in _Rooms)
                     {
-                        // Skip Garage and use Vanilla Removal for it.
-                        if(modroom.Name != "GARAGE"){
-                            if (modroom.EarlyDraftDependencies.Count > 0) {
-                                foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
-                                {
-                                    if (!dependency.Invoke(modroom))
-                                    {
-                                        if (RoomCounts.ContainsKey(modroom.Name))
-                                        {
-                                            modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
-                                        }
-                                        SetPoolRemovalVar(modroom.Name, true);
-                                    }
-                                }
+                        if (modroom.Name == "THE FOUNDATION" || modroom.Name == "GARAGE")
+                        {
+                            if (RoomCounts.ContainsKey(modroom.Name) && !modroom.IsUnlocked)
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
                             }
-                            else if (!modroom.IsUnlocked)
-                            {   
-                                if (RoomCounts.ContainsKey(modroom.Name))
-                                {
-                                    modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
-                                }
-                                SetPoolRemovalVar(modroom.Name, true);
-                            
+                            else if (modroom.IsUnlocked) {
+                                SetPoolRemovalVar(modroom.Name, false);
                             }
-                            else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
+                        }
+                        else if (modroom.Name == "Tunnel") {
+                            if (modroom.IsUnlocked)
                             {
                                 if (RoomCounts.ContainsKey(modroom.Name))
                                 {
-                                    modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                                    if (RoomCounts[modroom.Name] > modroom.RoomsLeftInPool)
+                                    {
+                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name] - modroom.RoomsLeftInPool);
+                                    }
+                                    // check if there less copies than there should be
+                                    else
+                                    {
+                                        modroom.AddToPool(array, modroom.RoomsLeftInPool);
+                                    }
                                 }
                                 else
                                 {
-                                    modroom.UpdateArray(array, modroom.RoomsLeftInPool);
+                                    modroom.AddToPool(array, modroom.RoomsLeftInPool);
                                 }
+                            }
+                            else if (RoomCounts.ContainsKey(modroom.Name) && !modroom.IsUnlocked)
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                        }
+                        else if (modroom.EarlyDraftDependencies.Count > 0)
+                        {
+                            foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
+                            {
+                                if (!dependency.Invoke(modroom))
+                                {
+                                    if (RoomCounts.ContainsKey(modroom.Name))
+                                    {
+                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                    }
+                                    SetPoolRemovalVar(modroom.Name, true);
+                                }
+                            }
+                        }
+                        else if (!modroom.IsUnlocked)
+                        {
+                            if (RoomCounts.ContainsKey(modroom.Name))
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                            SetPoolRemovalVar(modroom.Name, true);
+
+                        }
+                        else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
+                        {
+                            if (RoomCounts.ContainsKey(modroom.Name))
+                            {
+                                modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                            }
+                            else
+                            {
+                                modroom.UpdateArray(array, modroom.RoomsLeftInPool);
                             }
                         }
                     }
