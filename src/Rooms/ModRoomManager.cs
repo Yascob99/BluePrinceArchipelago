@@ -545,7 +545,10 @@ namespace BluePrinceArchipelago.Rooms
                         {
                             if (RoomCounts.ContainsKey(modroom.Name))
                             {
-                                modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                                if (RoomCounts[modroom.Name] != modroom.RoomsLeftInPool)
+                                {
+                                    modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                                }
                             }
                             else
                             {
