@@ -217,7 +217,6 @@ namespace BluePrinceArchipelago
                 {
                     ModEventHandler.LocationFound += ArchipelagoTriggers.OnLocalLocationSent;
                 }
-                
                 UpgradeDisks.InitializeUpgradeDiskNotifications();
                 HasInitializedRooms = true;
             }

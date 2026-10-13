@@ -1,4 +1,6 @@
-﻿using BluePrinceArchipelago.Utils;
+﻿using Archipelago.MultiClient.Net.MessageLog.Parts;
+using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Utils;
 #if ML
 using Il2CppTMPro;
 #endif
@@ -33,36 +35,55 @@ namespace BluePrinceArchipelago.Items
             StartingLuck = 0;
             if (ModItemManager.PermanentItemList.Count > 0)
             {
+                foreach (PermanentItem item in ModItemManager.PermanentItemList) {
+                    item.UnlockedCount = 0;
+                }
+                foreach (string itemname in ArchipelagoClient.ServerData.ReceivedItems)
+                {
+                    if (itemname.ToLower().Contains("starting"))
+                    {
+                        Logging.LogWarning(itemname);
+                        PermanentItem item = ModItemManager.GetPermanentItem(itemname);
+                        item.UnlockedCount++;
+                    } 
+                }
                 foreach (PermanentItem item in ModItemManager.PermanentItemList)
                 {
-                    if (item.UnlockedCount > 0)
+                    switch (item.ItemType)
                     {
-                        switch (item.ItemType)
-                        {
-                            case "Gems":
-                                StartingGems += item.UnlockedCount * item.Count;
-                                break;
-                            case "Keys":
-                                StartingKeys += item.UnlockedCount * item.Count;
-                                break;
-                            case "Dice":
-                                StartingDice += item.UnlockedCount * item.Count;
-                                break;
-                            case "Steps":
-                                StartingSteps += item.UnlockedCount * item.Count;
-                                break;
-                            case "Luck":
-                                StartingLuck += item.UnlockedCount * item.Count;
-                                break;
-                        }
+                        case "Gems":
+                            StartingGems += item.UnlockedCount * item.Count;
+                            break;
+                        case "Keys":
+                            StartingKeys += item.UnlockedCount * item.Count;
+                            break;
+                        case "Dice":
+                            StartingDice += item.UnlockedCount * item.Count;
+                            break;
+                        case "Steps":
+                            StartingSteps += item.UnlockedCount * item.Count;
+                            break;
+                        case "Luck":
+                            StartingLuck += item.UnlockedCount * item.Count;
+                            break;
                     }
+
                 }
 
             }
         }
 
-        public static bool AddStartingItems() {
-            return (AdjustGems(StartingGems) && AdjustKeys(StartingKeys) && AdjustDice(StartingDice) && AdjustSteps(StartingSteps) && AdjustLuck(StartingLuck));
+        public static void AddStartingItems() {
+            Logging.LogWarning($"Gems: {StartingGems}");
+            AdjustGems(StartingGems);
+            Logging.LogWarning($"Keys: {StartingKeys}");
+            AdjustKeys(StartingKeys);
+            Logging.LogWarning($"Dice: {StartingDice}");
+            AdjustDice(StartingDice);
+            Logging.LogWarning($"Steps: {StartingSteps}");
+            AdjustSteps(StartingSteps);
+            Logging.LogWarning($"Luck: {StartingLuck}");
+            AdjustLuck(StartingLuck);
         }
 
         /// <summary>

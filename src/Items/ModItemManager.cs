@@ -994,7 +994,6 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public static void StartOfDay()
         {
-            ResourceManager.RecalculculateStartingItems();
             // Run upgrade disk start of day code if Upgrade Disk Sanity is on.
             if (ArchipelagoOptions.UpgradeDiskSanity) {
                 UpgradeDisks.StartOfDay();
