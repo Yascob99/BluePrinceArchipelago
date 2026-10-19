@@ -48,8 +48,7 @@ namespace BluePrinceArchipelago.Triggers
                 ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
-                FSMPatches.SundialOverrides();
-                FSMPatches.BasementDoorHooks();
+                FSMPatches.StaticLocationHooks();
                 FSMPatches.ZeroStepEndingHook();
                 if (ModInstance.FirstLoad) {
                     ModInstance.TrunkManager.Initialize();

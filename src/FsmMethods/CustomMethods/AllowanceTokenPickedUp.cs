@@ -14,10 +14,9 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
     /// <summary>
     ///     On the allowance token being picked up.
     /// </summary>
-    /// <param name="name">The name of the event.</param>
-    public class AllowanceEnvelopePickedUp(string name) : RegisteredCustomFsmMethod
+    public class AllowanceEnvelopePickedUp() : RegisteredCustomFsmMethod
     {
-        public new string Name { get; set; } = name;
+        public new string Name { get; set; } = "AllowanceEnvelopePickedUp";
 
         public override void OnCalled()
         {

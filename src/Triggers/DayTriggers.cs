@@ -22,6 +22,9 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.IsInRun = true;
             TrapManager.EODTrapToday = false;
             TrapManager.FrozenToday = false;
+            ModInstance.GemManager.SendEvent("Update");
+            ModInstance.KeyManager.SendEvent("Update");
+            ModInstance.DiceManager.SendEvent("Update");
             // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
 
@@ -68,10 +71,9 @@ namespace BluePrinceArchipelago.Triggers
                 ModItemManager.StartOfDay();
                 ModItemManager.ReplaceItemsWithAP();
                 FSMPatches.RoomForcer();
-                FSMPatches.BasementDoorHooks();
+                FSMPatches.StaticLocationHooks();
                 FSMPatches.ZeroStepEndingHook();
                 FSMPatches.TradingPostOverrides();
-                FSMPatches.SundialOverrides();
                 FSMPatches.PickerOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
@@ -91,6 +93,7 @@ namespace BluePrinceArchipelago.Triggers
                 
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
                 TrapManager.DequeueTraps();
+                ResourceManager.RecalculculateStartingItems();
             }
         }
 

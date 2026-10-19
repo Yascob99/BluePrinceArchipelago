@@ -455,6 +455,7 @@ namespace BluePrinceArchipelago.Rooms
         public static void UpdateRoomPools()
         {
             Logging.Log("Updating Room Pools", "Rooms");
+            // Check each picker array
             foreach (var pair in PickerManager.PickerDict)
             {
                 
@@ -464,6 +465,7 @@ namespace BluePrinceArchipelago.Rooms
                     int length = array.arrayList.Count;
                     GameObject room = null;
                     Dictionary<string, int> RoomCounts = new Dictionary<string, int>();
+                    // for each room in the picker array, count how many copies of each room there is.
                     for (int i = 0; i < length; i++)
                     {
                         room = array.arrayList[i].TryCast<GameObject>();
@@ -480,8 +482,10 @@ namespace BluePrinceArchipelago.Rooms
                             }
                         }
                     }
+                    // Foreach room in rooms
                     foreach (ModRoom modroom in _Rooms)
                     {
+<<<<<<< HEAD
                         bool failed = false;
                         // Skip Garage and use Vanilla Removal for it.
                         if (modroom.Name != "GARAGE"){
@@ -510,14 +514,106 @@ namespace BluePrinceArchipelago.Rooms
                             
                             }
                             else if ((modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name)) && !failed)
+=======
+                        // Foundation and Garage are handled by vanilla code mostly.
+                        if (modroom.Name == "THE FOUNDATION" || modroom.Name == "GARAGE")
+                        {
+                            // Handle copies the game adds if the room is not unlocked.
+                            if (RoomCounts.ContainsKey(modroom.Name) && !modroom.IsUnlocked)
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                            // Prevent the room from being removed if the room is unlocked.
+                            else if (modroom.IsUnlocked) {
+                                SetPoolRemovalVar(modroom.Name, false);
+                            }
+                        }
+                        // Handle the tunnel case. This will not prevent follow up tunnels added by consecutive tunnel drafts. 
+                        // Tunnels RemoveFromPool var is set by the vanilla code.
+                        else if (modroom.Name == "Tunnel") {
+                            if (modroom.IsUnlocked)
+>>>>>>> 1c6fc1d12f2a598547962510933cee47e650d138
                             {
                                 if (RoomCounts.ContainsKey(modroom.Name))
                                 {
-                                    modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+                                    // If there are more copies than there should be.
+                                    if (RoomCounts[modroom.Name] > modroom.RoomsLeftInPool)
+                                    {
+                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name] - modroom.RoomsLeftInPool);
+                                    }
+                                    // check if there less copies than there should be.
+                                    else
+                                    {
+                                        modroom.AddToPool(array, modroom.RoomsLeftInPool);
+                                    }
                                 }
                                 else
                                 {
-                                    modroom.UpdateArray(array, modroom.RoomsLeftInPool);
+                                    modroom.AddToPool(array, modroom.RoomsLeftInPool);
+                                }
+                            }
+                            else if (RoomCounts.ContainsKey(modroom.Name) && !modroom.IsUnlocked)
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                        }
+                        // If the room is not unlocked, remove all copies from the pool and set pool removal var to true.
+                        else if (!modroom.IsUnlocked)
+                        {
+                            if (RoomCounts.ContainsKey(modroom.Name))
+                            {
+                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                            }
+                            SetPoolRemovalVar(modroom.Name, true);
+
+                        }
+                        // If the room is in the picker array, or the room can appear in that picker array, and the room is unlocked.
+                        else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
+                        {
+                            // If there was a copy in the room in the array
+                            if (RoomCounts.ContainsKey(modroom.Name))
+                            {
+                                // If the number in the array and the number of rooms left in the pool don't match.
+                                if (RoomCounts[modroom.Name] != modroom.RoomsLeftInPool)
+                                {
+                                    modroom.UpdateArray(array, RoomCounts[modroom.Name]);
+
+                                }
+                                // If the number does match and none are left in pool, make sure the pool removal var is true.
+                                else if (modroom.RoomsLeftInPool == 0)
+                                {
+                                    SetPoolRemovalVar(modroom.Name, true);
+                                }
+                                // If the number in the pool matches the expected number, and there are copies, make sure the room is not removed from the pool.
+                                else
+                                {
+                                    SetPoolRemovalVar(modroom.Name, false);
+                                }
+                            }
+                            // If there are still rooms  left in the pool, but not in the picker array, add the copies.
+                            else if (modroom.RoomsLeftInPool > 0)
+                            {
+                                // Else, add copies to the pool to match the total number.
+                                modroom.AddToPool(array, modroom.RoomsLeftInPool);
+                                SetPoolRemovalVar(modroom.Name, false);
+                            }
+                            // If there are none left in the pool, set pool removal var to true.
+                            else {
+                                SetPoolRemovalVar(modroom.Name, true);
+                            }
+                        }
+                        // Check early dependencies. Set the room removal to true if a room dependency is not met.
+                        if (modroom.EarlyDraftDependencies.Count > 0)
+                        {
+                            foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
+                            {
+                                if (!dependency.Invoke(modroom))
+                                {
+                                    if (RoomCounts.ContainsKey(modroom.Name))
+                                    {
+                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
+                                    }
+                                    SetPoolRemovalVar(modroom.Name, true);
                                 }
                             }
                         }

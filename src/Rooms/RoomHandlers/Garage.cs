@@ -34,7 +34,7 @@ class Garage : RoomHandler
                 if (ItemDropFSM != null)
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
-                    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();

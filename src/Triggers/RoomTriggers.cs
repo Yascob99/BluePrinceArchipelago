@@ -17,7 +17,7 @@ namespace BluePrinceArchipelago.Triggers
             ModRoom room = ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
             room?.Handler?.OnAfterRoomDrafted(obj);
             // Turn off the forced draft.
-            ModInstance.MasterPicker.GetBoolVariable("Force Draft").Value = false;
+            ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = false;
         }
 
         /// <summary>

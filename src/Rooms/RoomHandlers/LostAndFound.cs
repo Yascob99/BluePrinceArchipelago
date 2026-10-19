@@ -38,7 +38,7 @@ class LostAndFound : RoomHandler
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST & FOUND");
                     Logging.LogWarning(found);
-                    FsmBool CanSpawnDisk = ItemDropFSM.AddBoolVariable("CanSpawnDisk");
+                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();

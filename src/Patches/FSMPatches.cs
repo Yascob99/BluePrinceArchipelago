@@ -29,14 +29,14 @@ namespace BluePrinceArchipelago.Patches
         public static void RoomForcer()
         {
             PlayMakerFSM fsm = ModInstance.MasterPicker;
-            FsmBool isDraftForced = fsm.AddFsmBool("ForceDraft", false);
+            FsmBool isDraftForced = fsm.GetBoolVariable("ForceDraft");
             FsmState ForceDraft = fsm.AddState("Force Room Draft");
             FsmState DraftForcedCheck = fsm.AddState("Draft Forced Check");
             FsmState DraftForcedSlot1 = fsm.AddState("Draft Forced Slot 1");
             FsmState DraftForcedSlot3 = fsm.AddState("Draft Forced Slot 3");
-            FsmGameObject ForcedRoom = fsm.AddFsmGameObject("ForcedRoom", null);
-            FsmGameObject ForcedRoom2 = fsm.AddFsmGameObject("ForcedRoom2", null);
-            FsmGameObject ForcedRoom3 = fsm.AddFsmGameObject("ForcedRoom3", null);
+            FsmGameObject ForcedRoom = fsm.GetGameObjectVariable("ForcedRoom");
+            FsmGameObject ForcedRoom2 = fsm.GetGameObjectVariable("ForcedRoom2");
+            FsmGameObject ForcedRoom3 = fsm.GetGameObjectVariable("ForcedRoom3");
             DraftForcedCheck.RemoveTransitionsTo("FINISHED");
             FsmTransition Slot1 = ForceDraft.AddTransition("1", "Draft Forced Slot 1");
             FsmTransition Slot3 = ForceDraft.AddTransition("3", "Draft Forced Slot 3");
@@ -241,8 +241,6 @@ namespace BluePrinceArchipelago.Patches
 
                 FsmState UpgradeDiskPurchaseState = CommissaryMenu.GetState("Upgrade Disk Purchase 2");
                 UpgradeDiskPurchaseState.DisableActionsOfType<ArrayListAdd>();
-                // Attempt to create a SendEvent to send info the 
-                // There's a solid chance this just breaks.
                 UpgradeDiskPurchaseState.DisableFirstActionOfType<ActivateGameObject>();
                 UpgradeDiskPurchaseState.InsertAction(3, new SendEventByName()
                 {
@@ -266,7 +264,7 @@ namespace BluePrinceArchipelago.Patches
                 if (MineUpgradeSpawn != null)
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
-                    FsmBool CanSpawnDisk = MineUpgradeSpawn.AddBoolVariable("CanSpawnDisk");
+                    FsmBool CanSpawnDisk = MineUpgradeSpawn.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
@@ -435,7 +433,8 @@ namespace BluePrinceArchipelago.Patches
             if (MasterPicker.GetState("Pick Outer Slot") == null)
             {
                 // Prevent Default Draft Code Calls.
-                FsmInt RerollCount = MasterPicker.AddFsmInt("Reroll Count", 0);
+                FsmInt RerollCount = MasterPicker.GetIntVariable("Reroll Count");
+                RerollCount = 0;
                 PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 FsmState SendFreeze = StandaloneDoorCode.GetState("Send Freeze");
                 FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
@@ -519,34 +518,50 @@ namespace BluePrinceArchipelago.Patches
             }
         }
 
-        public static void SundialOverrides() {
+        public static void StaticLocationHooks()
+        {
+            //Basement Door Hooks:
+            // Foundation
+            PlayMakerFSM FoundationDoor1 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            FoundationDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+            FoundationDoor1.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+            PlayMakerFSM FoundationDoor2 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            FoundationDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+            FoundationDoor2.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+
+            // Well
+            PlayMakerFSM WellDoor1 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            WellDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+            WellDoor1.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+            PlayMakerFSM WellDoor2 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            WellDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+            WellDoor2.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
+
+            // Tunnel
+            PlayMakerFSM TunnelDoor = GameObject.Find("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
+            TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
+
+            //Sundial Hooks:
             GameObject Step1 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 1");
             GameObject Step2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 2");
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++)
+            {
                 GameObject child1 = Step1.transform.GetChild(i).gameObject;
                 GameObject child2 = Step2.transform.GetChild(i).gameObject;
                 child1.GetComponent<PlayMakerFSM>().GetState("State 9").AddAction(CustomFsmMethodManager.GetCallMethod("SundialScorched"));
                 child2.GetComponent<PlayMakerFSM>().GetState("State 9").AddAction(CustomFsmMethodManager.GetCallMethod("SundialScorched"));
             }
-        }
 
-        public static void BasementDoorHooks()
-        {
-            //Foundation
-            PlayMakerFSM FoundationDoor1 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
-            FoundationDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
-            PlayMakerFSM FoundationDoor2 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
-            FoundationDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
+            //Entrance Hall Vase Hooks
+            PlayMakerFSM Vase1 = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 1").GetComponent<PlayMakerFSM>();
+            Vase1.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenEast"));
+            PlayMakerFSM Vase2 = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2").GetComponent<PlayMakerFSM>();
+            Vase2.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenWest"));
 
-            //Well
-            PlayMakerFSM WellDoor1 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
-            WellDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
-            PlayMakerFSM WellDoor2 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
-            WellDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
-
-            // Tunnel
-            PlayMakerFSM TunnelDoor = GameObject.Find("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
-            TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
+            //Entrance Hall Allowance Envelope Hooks
+            GameObject AllowanceEvenvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
+            AllowanceEvenvelope.SetActive(true);
+            AllowanceEvenvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
         }
 
         public static void ZeroStepEndingHook()
@@ -557,10 +572,10 @@ namespace BluePrinceArchipelago.Patches
 
         public static void PickerOverrides()
         {
-            ModInstance.MasterPicker.AddFsmBool("TunnelUnlocked", false);
-            ModInstance.MasterPicker.AddFsmBool("GarageUnlocked", false);
-            ModInstance.MasterPicker.AddFsmBool("SecretPassageUnlocked", false);
-            ModInstance.MasterPicker.AddFsmBool("FoundationUnlocked", false);
+            ModInstance.MasterPicker.GetBoolVariable("TunnelUnlocked");
+            ModInstance.MasterPicker.GetBoolVariable("GarageUnlocked");
+            ModInstance.MasterPicker.GetBoolVariable("SecretPassageUnlocked");
+            ModInstance.MasterPicker.GetBoolVariable("FoundationUnlocked");
 
             FsmOwnerDefault MasterPickerFOD = new FsmOwnerDefault()
                             {
@@ -568,33 +583,32 @@ namespace BluePrinceArchipelago.Patches
                                 ownerOption = OwnerDefaultOption.SpecifyGameObject
                             };
 
-            // Front - Tier 1
+            //Front - Tier 1
             PlayMakerFSM FrontTier1 = ModInstance.PlanPicker.transform.Find("FRONT - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
             FrontTier1.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
-            // FrontBack - Rare
+            //FrontBack - Rare
             PlayMakerFSM FrontBackRare = ModInstance.PlanPicker.transform.Find("FRONTBACK - RARE").gameObject.GetComponent<PlayMakerFSM>();
             FrontBackRare.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
-            // South Pierce
+            //South Pierce
             PlayMakerFSM SouthPierce = ModInstance.PlanPicker.transform.Find("SOUTH PIERCE").gameObject.GetComponent<PlayMakerFSM>();
             SouthPierce.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
-            // North Pierce
+            //North Pierce
             PlayMakerFSM NorthPierce = ModInstance.PlanPicker.transform.Find("NORTH PIERCE").gameObject.GetComponent<PlayMakerFSM>();
             NorthPierce.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
-            // Corner Tier 1
+            //Corner Tier 1
             PlayMakerFSM CornerTier1 = ModInstance.PlanPicker.transform.Find("CORNER - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
             CornerTier1.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
-            // Corner Rare
+            //Corner Rare
             PlayMakerFSM CornerRare = ModInstance.PlanPicker.transform.Find("CORNER - RARE").GetComponent<PlayMakerFSM>();
             CornerRare.GetState("State 2").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
             //Center Tier 1
             PlayMakerFSM CenterTier1 = ModInstance.PlanPicker.transform.Find("CENTER - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
-           
             
             //  Tunnel Check
             GetFsmBool CT1TunnelCheck = CenterTier1.GetState("TUNNEL CHECK").GetAction<GetFsmBool>(0);
@@ -603,9 +617,21 @@ namespace BluePrinceArchipelago.Patches
             CenterTier1.GetState("TUNNEL CHECK").GetAction<BoolTest>(1).isFalse = CenterTier1.GetTransition("TUNNEL CHECK", "0").fsmEvent;
 
             //  Foundation Check
-            GetFsmBool CT1FoundationCheck = CenterTier1.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
-            CT1FoundationCheck.gameObject = MasterPickerFOD;
-            CT1FoundationCheck.variableName = "FoundationUnlocked";
+            FsmBool CT1Bool = CenterTier1.GetBoolVariable("FoundationUnlocked");
+            CT1Bool.Value = true;
+            CenterTier1.GetState("Foundation Removal").InsertAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                variableName = "FoundationUnlocked",
+                storeValue = CT1Bool,
+                everyFrame = false
+            }, 4);
+            CenterTier1.GetState("Foundation Removal").InsertAction(new BoolTest()
+            {
+                boolVariable = CT1Bool,
+                isFalse = CenterTier1.GetTransition("Foundation Removal", "0").fsmEvent,
+                everyFrame = false
+            }, 5);
             CenterTier1.GetState("Check").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
             //Center Tier 2
@@ -618,9 +644,21 @@ namespace BluePrinceArchipelago.Patches
             CenterTier2.GetState("TUNNEL CHECK 2").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 2", "0").fsmEvent;
 
             //  Foundation Check
-            GetFsmBool CT2FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);
-            CT2FoundationCheck.gameObject = MasterPickerFOD;
-            CT2FoundationCheck.variableName = "FoundationUnlocked";
+            FsmBool CT2Bool = CenterTier2.GetBoolVariable("FoundationUnlocked");
+            CT2Bool.Value = true;
+            CenterTier2.GetState("Foundation Removal").InsertAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                variableName = "FoundationUnlocked",
+                storeValue = CT2Bool,
+                everyFrame = false
+            }, 4);
+            CenterTier2.GetState("Foundation Removal").InsertAction(new BoolTest()
+            {
+                boolVariable = CT2Bool,
+                isFalse = CenterTier1.GetTransition("Foundation Removal", "0").fsmEvent,
+                everyFrame = false
+            }, 5);
             CenterTier2.GetState("Check 4").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
             //Center Tier 3
@@ -633,16 +671,28 @@ namespace BluePrinceArchipelago.Patches
             CenterTier2.GetState("TUNNEL CHECK 2").GetAction<BoolTest>(1).isFalse = CenterTier2.GetTransition("TUNNEL CHECK 2", "0").fsmEvent;
 
             //  Foundation Check
-            GetFsmBool CT3FoundationCheck = CenterTier2.GetState("Foundation Removal").GetAction<GetFsmBool>(2);   
-            CT3FoundationCheck.gameObject = MasterPickerFOD;
-            CT3FoundationCheck.variableName = "FoundationUnlocked";
+            FsmBool CT3Bool = CenterTier3.GetBoolVariable("FoundationUnlocked");
+            CT3Bool.Value = true;
+            CenterTier3.GetState("Foundation Removal").InsertAction(new GetFsmBool()
+            {
+                gameObject = MasterPickerFOD,
+                variableName = "FoundationUnlocked",
+                storeValue = CT3Bool,
+                everyFrame = false
+            }, 4);
+            CenterTier3.GetState("Foundation Removal").InsertAction(new BoolTest()
+            {
+                boolVariable = CT3Bool,
+                isFalse = CenterTier1.GetTransition("Foundation Removal", "0").fsmEvent,
+                everyFrame = false
+            }, 5);
             CenterTier3.GetState("Check 4").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
 
             //Edge Advance Eastwing - G
             PlayMakerFSM EdgeAdvanceEast = ModInstance.PlanPicker.transform.Find("EDGE ADVANCE EASTWING - G").gameObject.GetComponent<PlayMakerFSM>();
            
             //  Secret Passage Check
-            FsmBool EAESecretPassageUnlocked = EdgeAdvanceEast.AddFsmBool("SecretPassageUnlocked", false);
+            FsmBool EAESecretPassageUnlocked = EdgeAdvanceEast.GetBoolVariable("SecretPassageUnlocked");
             EdgeAdvanceEast.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,
@@ -663,7 +713,7 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgeAdvanceWest = ModInstance.PlanPicker.transform.Find("EDGE ADVANCE WESTWING - G").gameObject.GetComponent<PlayMakerFSM>();
             
             //  Secret Passage Check
-            FsmBool EAWSecretPassageUnlocked = EdgeAdvanceWest.AddFsmBool("SecretPassageUnlocked", false);
+            FsmBool EAWSecretPassageUnlocked = EdgeAdvanceWest.GetBoolVariable("SecretPassageUnlocked");
             EdgeAdvanceWest.GetState("Rank Check fo SP 2").AddAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,
@@ -680,9 +730,9 @@ namespace BluePrinceArchipelago.Patches
             });
 
             //  Garage Check
-            FsmBool EAWGarageUnlocked = EdgeAdvanceWest.AddFsmBool("GarageUnlocked", false);
+            FsmBool EAWGarageUnlocked = EdgeAdvanceWest.GetBoolVariable("GarageUnlocked");
             
-            EdgeAdvanceWest.GetState("Garage Check").InsertAction(new GetFsmBool()
+            EdgeAdvanceWest.GetState("Rank Check (for garage)").InsertAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,
                 fsmName = "FSM",
@@ -690,10 +740,10 @@ namespace BluePrinceArchipelago.Patches
                 storeValue = EAWGarageUnlocked,
                 everyFrame = false
             }, 0);
-            EdgeAdvanceWest.GetState("Garage Check").InsertAction(new BoolTest()
+            EdgeAdvanceWest.GetState("Rank Check (for garage)").InsertAction(new BoolTest()
             {
                 boolVariable = EAWGarageUnlocked,
-                isTrue = EdgeAdvanceWest.GetTransition("Garage Check", "2").fsmEvent,
+                isFalse = EdgeAdvanceWest.GetTransition("Rank Check (for garage)", "no").fsmEvent,
                 everyFrame = false
             }, 1);
             EdgeAdvanceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
@@ -702,7 +752,7 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgeRetreatEast = ModInstance.PlanPicker.transform.Find("EDGE RETREAT EASTTWING -  G").gameObject.GetComponent<PlayMakerFSM>();
             
             // Secret Passsage Check
-            FsmBool ERESecretPassageUnlocked = EdgeRetreatEast.AddFsmBool("SecretPassageUnlocked", false);
+            FsmBool ERESecretPassageUnlocked = EdgeRetreatEast.GetBoolVariable("SecretPassageUnlocked");
             EdgeRetreatEast.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,
@@ -723,7 +773,7 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgeRetreatWest = ModInstance.PlanPicker.transform.Find("EDGE RETREAT WESTWING -  G").gameObject.GetComponent<PlayMakerFSM>();
             
             // Secret Passsage Check
-            FsmBool ERWSecretPassageUnlocked = EdgeRetreatWest.AddFsmBool("SecretPassageUnlocked", false);
+            FsmBool ERWSecretPassageUnlocked = EdgeRetreatWest.GetBoolVariable("SecretPassageUnlocked");
             EdgeRetreatWest.GetState("Rank Check fo SP").AddAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,

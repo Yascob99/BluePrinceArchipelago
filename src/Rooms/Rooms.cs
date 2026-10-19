@@ -275,9 +275,13 @@ namespace BluePrinceArchipelago.Rooms
                 if (count > RoomsLeftInPool)
                 {
                     RemoveFromPool(array, count - RoomsLeftInPool);
-                    if (RoomsLeftInPool == 0) {
+                    if (RoomsLeftInPool == 0)
+                    {
                         SetPoolRemovalVar(true);
                     }
+                }
+                else if (count == RoomsLeftInPool && count != 0) {
+                    SetPoolRemovalVar(false);
                 }
                 // check if there less copies than there should be
                 else
