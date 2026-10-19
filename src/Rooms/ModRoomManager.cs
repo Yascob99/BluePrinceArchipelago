@@ -8,7 +8,6 @@ using HutongGames.PlayMaker.Actions;
 #endif
 #if ML
 using Il2Cpp;
-using Il2CppCirrusPlay.PortalLibrary;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
 #endif
@@ -483,9 +482,11 @@ namespace BluePrinceArchipelago.Rooms
                     }
                     foreach (ModRoom modroom in _Rooms)
                     {
+                        bool failed = false;
                         // Skip Garage and use Vanilla Removal for it.
-                        if(modroom.Name != "GARAGE"){
+                        if (modroom.Name != "GARAGE"){
                             if (modroom.EarlyDraftDependencies.Count > 0) {
+                               
                                 foreach (Func<ModRoom, bool> dependency in modroom.EarlyDraftDependencies)
                                 {
                                     if (!dependency.Invoke(modroom))
@@ -494,11 +495,12 @@ namespace BluePrinceArchipelago.Rooms
                                         {
                                             modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
                                         }
+                                        failed = true;
                                         SetPoolRemovalVar(modroom.Name, true);
                                     }
                                 }
                             }
-                            else if (!modroom.IsUnlocked)
+                            if (!modroom.IsUnlocked)
                             {   
                                 if (RoomCounts.ContainsKey(modroom.Name))
                                 {
@@ -507,7 +509,7 @@ namespace BluePrinceArchipelago.Rooms
                                 SetPoolRemovalVar(modroom.Name, true);
                             
                             }
-                            else if (modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name))
+                            else if ((modroom.PickerArrays.Contains(pair.Key) || RoomCounts.ContainsKey(modroom.Name)) && !failed)
                             {
                                 if (RoomCounts.ContainsKey(modroom.Name))
                                 {
