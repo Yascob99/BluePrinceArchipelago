@@ -4,7 +4,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
-using System;
+using BluePrinceArchipelago.UI;
 
 #if ML
 using Il2Cpp;
@@ -74,6 +74,7 @@ namespace BluePrinceArchipelago.Triggers
                 case EventID.Shelter_Safe_Opened:
                     ModEventHandler.OnSafeOpened("Shelter Safe");
                     break;
+                // This may be sent by things it isn't supposed to. May need to find new hook.
                 case EventID.Mayait_Opened:
                     ModEventHandler.OnGateOpened("Underpass Gate");
                     break;
@@ -251,6 +252,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on the Allowance token being picked up.
         /// </summary>
         public static void OnAllowanceEnvelopePickedUp() {
+            ResourceManager.RecalculculateStartingItems();
             ResourceManager.AddStartingItems();
         }
 

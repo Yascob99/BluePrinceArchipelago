@@ -81,5 +81,9 @@
 			<HintPath>$(BluePrinceBepInExDir)\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>$(BluePrinceBepInExDir)\BepInEx\interop\UnityEngine.UI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 	</ItemGroup>
 </Project>

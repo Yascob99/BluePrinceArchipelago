@@ -15,6 +15,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using BluePrinceArchipelago.UI;
+
 #if ML
 using Il2Cpp;
 using MelonLoader;
@@ -28,9 +30,6 @@ namespace BluePrinceArchipelago
     /// <summary>
     ///     The actual instance of the mod.
     /// </summary>
-#if ML
-    [RegisterTypeInIl2Cpp]
-#endif
     internal class ModInstance : MonoBehaviour
     {
         // A reference to the instance of this MonoBehavior.
@@ -165,8 +164,9 @@ namespace BluePrinceArchipelago
                     Instance.StartCoroutine(Instance.LoadAllAssets());
                     AppliedHarmony = true;
                 }
-               
+                UIManager.InitializeMainMenu();
                 FSMPatches.IntroSkip();
+                FSMPatches.MainMenuHooks();
             }
             if (scene.name.Equals("Mount Holly Estate"))
             {

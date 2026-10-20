@@ -93,7 +93,8 @@ namespace BluePrinceArchipelago.Triggers
                 
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
                 TrapManager.DequeueTraps();
-                ResourceManager.RecalculculateStartingItems();
+                GameObject AllowanceEvenvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
+                AllowanceEvenvelope.SetActive(true);
             }
         }
 

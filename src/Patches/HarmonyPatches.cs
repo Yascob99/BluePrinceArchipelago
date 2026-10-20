@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Triggers;
+using BluePrinceArchipelago.UI;
 using BluePrinceArchipelago.Utils;
 using HarmonyLib;
 #if Bep
@@ -157,7 +158,7 @@ namespace BluePrinceArchipelago.Patches
                         }
                     }
                 }
-                else if (eventName.Contains("Allowance Token Pickup"))
+                if (eventName.Contains("Allowance Token Pickup"))
                 {
                     EventTriggers.AllowanceTokenPickup(__instance.owner);
                 }
@@ -238,6 +239,28 @@ namespace BluePrinceArchipelago.Patches
             {
                 Logging.LogError(e, "EventPatches");
             }
+        }
+
+        // Fixes an error when an empty substring is passed to the GetSubstring method.
+        [HarmonyPatch(typeof(GetSubstring), "DoGetSubstring")]
+        [HarmonyPrefix]
+        static bool DoGetFsmBoolPostfix(GetSubstring __instance) {
+            try
+            {
+                if (__instance.stringVariable != null && __instance.storeResult != null)
+                {
+                    if (__instance.stringVariable.Value.Length == 0) {
+                        __instance.storeResult.Value = "";
+                        return false;
+                    }
+                    __instance.storeResult.Value = __instance.stringVariable.Value.Substring(__instance.startIndex.Value, __instance.length.Value);
+                }
+
+            }
+            catch (Exception e) {
+                Logging.LogError($"Error Getting substring: {e.Message}");
+            }
+            return false;
         }
 
         [HarmonyPatch(typeof(StatsLogger), "BeginDay", [typeof(int)])]

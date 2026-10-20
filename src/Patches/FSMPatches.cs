@@ -295,7 +295,20 @@ namespace BluePrinceArchipelago.Patches
             // Remove the 3 second delay
             var wait = fsm.Fsm.GetState("State 8").Actions[2].Cast<Wait>();
             wait.time = new FsmFloat(0f);
+        }
 
+        public static void MainMenuHooks() {
+            PlayMakerFSM Layout = GameObject.Find("MAIN MENU").transform.Find("MAINMENU LAYOUT").Find("Layout Setup").GetComponent<PlayMakerFSM>();
+            Layout.GetState("No Save Files").DisableActionsOfType<SetPosition>();
+            Layout.GetState("No Save Files").InsertAction(CustomFsmMethodManager.GetCallMethod("MainMenuLoaded"), 14);
+            Layout.GetState("1 Save File Found").DisableActionsOfType<SetPosition>();
+            Layout.GetState("1 Save File Found").InsertAction(CustomFsmMethodManager.GetCallMethod("MainMenuLoaded"), 17);
+            Layout.GetState("2 Save File Found").DisableActionsOfType<SetPosition>();
+            Layout.GetState("2 Save File Found").InsertAction(CustomFsmMethodManager.GetCallMethod("MainMenuLoaded"), 17);
+            Layout.GetState("NEW GAME + PROFILE").DisableActionsOfType<SetPosition>();
+            Layout.GetState("NEW GAME + PROFILE").InsertAction(CustomFsmMethodManager.GetCallMethod("MainMenuLoaded"), 17);
+            Layout.GetState("Is NOT console and save IS found").DisableActionsOfType<SetPosition>();
+            Layout.GetState("Is NOT console and save IS NOT found").DisableActionsOfType<SetPosition>();
         }
 
         /// <summary>
@@ -560,7 +573,6 @@ namespace BluePrinceArchipelago.Patches
 
             //Entrance Hall Allowance Envelope Hooks
             GameObject AllowanceEvenvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
-            AllowanceEvenvelope.SetActive(true);
             AllowanceEvenvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
         }
 
@@ -578,10 +590,16 @@ namespace BluePrinceArchipelago.Patches
             ModInstance.MasterPicker.GetBoolVariable("FoundationUnlocked");
 
             FsmOwnerDefault MasterPickerFOD = new FsmOwnerDefault()
-                            {
-                                gameObject = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE"),
-                                ownerOption = OwnerDefaultOption.SpecifyGameObject
-                            };
+            {
+                gameObject = new FsmGameObject() {
+                    value = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
+                },
+                GameObject = new FsmGameObject()
+                {
+                    Value = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
+                },
+                ownerOption = OwnerDefaultOption.SpecifyGameObject
+            };
 
             //Front - Tier 1
             PlayMakerFSM FrontTier1 = ModInstance.PlanPicker.transform.Find("FRONT - Tier 1").gameObject.GetComponent<PlayMakerFSM>();
@@ -624,7 +642,9 @@ namespace BluePrinceArchipelago.Patches
                 gameObject = MasterPickerFOD,
                 variableName = "FoundationUnlocked",
                 storeValue = CT1Bool,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
+                fsmName = "FSM"
             }, 4);
             CenterTier1.GetState("Foundation Removal").InsertAction(new BoolTest()
             {
@@ -646,12 +666,15 @@ namespace BluePrinceArchipelago.Patches
             //  Foundation Check
             FsmBool CT2Bool = CenterTier2.GetBoolVariable("FoundationUnlocked");
             CT2Bool.Value = true;
+
             CenterTier2.GetState("Foundation Removal").InsertAction(new GetFsmBool()
             {
                 gameObject = MasterPickerFOD,
                 variableName = "FoundationUnlocked",
                 storeValue = CT2Bool,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
+                fsmName = "FSM"
             }, 4);
             CenterTier2.GetState("Foundation Removal").InsertAction(new BoolTest()
             {
@@ -678,7 +701,9 @@ namespace BluePrinceArchipelago.Patches
                 gameObject = MasterPickerFOD,
                 variableName = "FoundationUnlocked",
                 storeValue = CT3Bool,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
+                fsmName = "FSM"
             }, 4);
             CenterTier3.GetState("Foundation Removal").InsertAction(new BoolTest()
             {
@@ -720,7 +745,8 @@ namespace BluePrinceArchipelago.Patches
                 fsmName = "FSM",
                 variableName = "SecretPassageUnlocked",
                 storeValue = EAWSecretPassageUnlocked,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker
             });
             EdgeAdvanceWest.GetState("Rank Check fo SP 2").AddAction(new BoolTest()
             {
@@ -738,7 +764,8 @@ namespace BluePrinceArchipelago.Patches
                 fsmName = "FSM",
                 variableName = "GarageUnlocked",
                 storeValue = EAWGarageUnlocked,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
             }, 0);
             EdgeAdvanceWest.GetState("Rank Check (for garage)").InsertAction(new BoolTest()
             {
@@ -759,7 +786,8 @@ namespace BluePrinceArchipelago.Patches
                 fsmName = "FSM",
                 variableName = "SecretPassageUnlocked",
                 storeValue = ERESecretPassageUnlocked,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
             });
             EdgeRetreatEast.GetState("Rank Check fo SP").AddAction(new BoolTest()
             {
@@ -780,7 +808,8 @@ namespace BluePrinceArchipelago.Patches
                 fsmName = "FSM",
                 variableName = "SecretPassageUnlocked",
                 storeValue = ERWSecretPassageUnlocked,
-                everyFrame = false
+                everyFrame = false,
+                fsm = ModInstance.MasterPicker,
             });
             EdgeRetreatWest.GetState("Rank Check fo SP").AddAction(new BoolTest()
             {

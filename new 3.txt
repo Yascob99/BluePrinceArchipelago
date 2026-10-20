@@ -1,0 +1,26 @@
+Pause Menu:
+- Get "UI OVERLAY CAM/PAUSE"
+- Settings are in "UI OVERLAY CAM/PAUSE/SETTINGS"
+- Clone an Existing Menu Option, then remove all it's submenus.
+- Remove certain Components such as the PlayMakerFSM (might manually recreate this so controllers work).
+- Create all the mod submenus
+- In each submenu create it's related page.
+- Parent the created menu option to Pause object.
+- Add in our custom submenu options.
+- Controller Selectable has some events that we can trigger. I assume this is how we initialize certain FSMs on clicking.
+- The set spacing of options based on option types.
+
+Pause Menu (simpler less scalable method):
+- Add a new button, based on an existing button then shift it down vertically from the lowest existing button's location. 
+The existing button's locations could also be shifted dynamically as new ones are added.
+- The layout lists may need to be overridden.
+- For submenus the same tweak could be applied.
+- For custom pages, they will need to be implemented similar to above.
+
+Pause Menu (Implement a full API):
+- Go with something based on the first method, and implement a custom API for creating dynamic menus.
+- Could also be based on a combination of 1 and a custom code based on the UIController.
+- Other mods would be able to add their own menus with their own sub pages, would be more involved, but more usable to the community as a whole.
+
+Todos:
+- Add custom UI elements such as text entry boxes if they don't already exist.

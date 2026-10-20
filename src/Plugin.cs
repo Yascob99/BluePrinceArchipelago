@@ -3,10 +3,13 @@ using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
+using BluePrince.Inputs;
 #endif
 #if ML
 using MelonLoader;
 using Il2Cpp;
+using Il2CppInterop.Runtime.Injection;
+using Il2CppBluePrince.Inputs;
 #endif
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Archipelago.Commands;
@@ -15,6 +18,8 @@ using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.FsmMethods;
 using HarmonyPatch = HarmonyLib.Harmony;
+using BluePrinceArchipelago.UI;
+
 #if ML
 [assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.1.6", "Yascob", null)]
     [assembly: MelonGame("Dogubomb", "BLUE PRINCE")]
@@ -71,7 +76,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("Locations", LogLevel.Info);
             Logging.SetLogLevel("Trades", LogLevel.Info);
             Logging.SetLogLevel("Rooms", LogLevel.Info);
-            //Logging.SetLogLevel("Events", LogLevel.Info);
+            Logging.SetLogLevel("Events", LogLevel.Info);
             Logging.SetLogLevel("StatEvents", LogLevel.Info);
             Logging.SetLogLevel("Connection", LogLevel.Info);
             //Logging.SetLogLevel("APData", LogLevel.Info);
@@ -89,10 +94,12 @@ namespace BluePrinceArchipelago {
             Logging.LogWarning($"Plugin {PluginGUID} is loaded!");
 
             //Inject custom Object for Mod Handling
-#if Bep
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();
             ClassInjector.RegisterTypeInIl2Cpp<CustomFsmMethods>();
-#endif
+            ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
+            { 
+                Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])
+            });
             ModObject = new GameObject("Archipelago");
             FsmMethods = new GameObject("CustomFsmMethods");
 

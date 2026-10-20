@@ -418,6 +418,48 @@ namespace BluePrinceArchipelago.Utils
             return newArray;
         }
 
+        public static Il2CppReferenceArray<TVal> InsertItemInArray<TVal>(this Il2CppReferenceArray<TVal> origArray, TVal Value, int index) where TVal : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
+        {
+            Il2CppReferenceArray<TVal> newArray = new Il2CppReferenceArray<TVal>(origArray.Length + 1);
+            int j = 0;
+            for (int i = 0; i < origArray.Length + 1; i++)
+            {
+                if (i == index)
+                {
+                    newArray[i] = Value;
+                }
+                else
+                {
+                    newArray[i] = origArray[j];
+                    j++;
+                }
+            }
+            return newArray;
+        }
+
+        public static Il2CppReferenceArray<TVal> InsertIfUnique<TVal>(this Il2CppReferenceArray<TVal> origArray, TVal Value, int index) where TVal : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
+        {
+            Il2CppReferenceArray<TVal> newArray = new Il2CppReferenceArray<TVal>(origArray.Length + 1);
+            int j = 0;
+            for (int i = 0; i < origArray.Length + 1; i++)
+            {
+                // If value already exists, return the original array.
+                if (newArray[i] == origArray[j]) {
+                    return origArray;
+                }
+                if (i == index)
+                {
+                    newArray[i] = Value;
+                }
+                else
+                {
+                    newArray[i] = origArray[j];
+                    j++;
+                }
+            }
+            return newArray;
+        }
+
         /// <summary>
         ///     Adds a state to a PlayMakerFSM.
         /// </summary>

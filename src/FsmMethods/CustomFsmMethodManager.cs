@@ -40,7 +40,8 @@ namespace BluePrinceArchipelago.FsmMethods
             { "OuterEntranceHallVaseBrokenEast", new EntranceHallVaseBroken("East", true)},
             { "OuterEntranceHallVaseBrokenWest", new EntranceHallVaseBroken("West", true)},
             { "ZeroStepEnding", new ZeroStepEnding()},
-            { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()}
+            { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()},
+            { "MainMenuLoaded", new MainMenuLoaded()},
         };
 
         public static void RegisterMethods() {

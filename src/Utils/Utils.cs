@@ -13,7 +13,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -307,6 +306,22 @@ namespace BluePrinceArchipelago.Utils
             return null;
 
         }
+
+        public static GameObject GetRootGameObject(string name)
+        {
+            foreach (GameObject go in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                if (go != null)
+                {
+                    if (go.name == name)
+                    {
+                        return go;
+                    }
+                }
+            }
+            return null;
+        }
+
         /// <summary>
         ///     Destroys all children of a given game object.
         /// </summary>

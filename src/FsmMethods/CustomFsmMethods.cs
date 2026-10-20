@@ -9,10 +9,6 @@ using MelonLoader;
 
 namespace BluePrinceArchipelago.FsmMethods
 {
-#if ML
-    [RegisterTypeInIl2Cpp]
-#endif
-
     internal class CustomFsmMethods : MonoBehaviour
     {
         public static CustomFsmMethods Instance;
