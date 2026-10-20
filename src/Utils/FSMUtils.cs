@@ -1758,6 +1758,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmFloat>(fsm.Variables.FloatVariables, name);
             fsm.Variables.FloatVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1771,6 +1772,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmInt>(fsm.Variables.IntVariables, name);
             fsm.Variables.IntVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1798,6 +1800,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmString>(fsm.Variables.StringVariables, name);
             fsm.Variables.StringVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1809,6 +1812,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmEnum>(fsm.Variables.EnumVariables, name);
             fsm.Variables.EnumVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1822,6 +1826,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmVector2>(fsm.Variables.Vector2Variables, name);
             fsm.Variables.Vector2Variables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1835,6 +1840,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmVector3>(fsm.Variables.Vector3Variables, name);
             fsm.Variables.Vector3Variables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1848,6 +1854,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmColor>(fsm.Variables.ColorVariables, name);
             fsm.Variables.ColorVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1861,6 +1868,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmRect>(fsm.Variables.RectVariables, name);
             fsm.Variables.RectVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1874,6 +1882,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmQuaternion>(fsm.Variables.QuaternionVariables, name);
             fsm.Variables.QuaternionVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
@@ -1887,6 +1896,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmGameObject>(fsm.Variables.GameObjectVariables, name);
             fsm.Variables.GameObjectVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 
