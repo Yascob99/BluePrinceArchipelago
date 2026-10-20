@@ -164,7 +164,7 @@ namespace BluePrinceArchipelago
                     Instance.StartCoroutine(Instance.LoadAllAssets());
                     AppliedHarmony = true;
                 }
-                UIManager.InitializeMainMenu();
+                //UIManager.InitializeMainMenu();
                 FSMPatches.IntroSkip();
                 FSMPatches.MainMenuHooks();
             }
@@ -218,6 +218,7 @@ namespace BluePrinceArchipelago
                     ModEventHandler.LocationFound += ArchipelagoTriggers.OnLocalLocationSent;
                 }
                 UpgradeDisks.InitializeUpgradeDiskNotifications();
+                FSMPatches.AllowanceEnvelopeSpawnFix();
                 HasInitializedRooms = true;
             }
             else {

@@ -1,4 +1,5 @@
-﻿using BluePrinceArchipelago.Utils.Actions;
+﻿
+using BluePrinceArchipelago.Utils.Actions;
 #if Bep
 using HutongGames.PlayMaker;
 #endif
@@ -10,6 +11,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -552,6 +554,7 @@ namespace BluePrinceArchipelago.Utils
             }
             actions[index] = action;
             state.Actions = actions;
+            state.actionData.actionNames.Insert(index, action.GetType().ToString());
             action.Init(state);
             //state.SaveActions();
         }
@@ -659,7 +662,15 @@ namespace BluePrinceArchipelago.Utils
             {
                 if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) // REVISIT: A bit hacky, but it works.
                 {
-                    actions.Add(state.Actions[i].TryCast<T>());
+                    try
+                    {
+                        T action = state.actions[i].Cast<T>();
+                        actions.Add(action);
+                    }
+                    catch
+                    {
+                        Logging.LogWarning($"Failed to convert action to {typeof(T).FullName}");
+                    }
                 }
             }
             return actions.ToArray();
@@ -672,11 +683,11 @@ namespace BluePrinceArchipelago.Utils
         /// <returns>An FsmStateAction of the given type.</returns>
         public static T GetFirstActionOfType<T>(this FsmState state) where T : FsmStateAction
         {
-            for (int i = 0; i < state.ActionData.ActionNames.Count; i++)
+            for (int i = 0; i < state.actionData.actionNames.Count; i++)
             {
-                if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) // REVISIT: A bit hacky, but it works.
+                if (typeof(T).FullName.Contains(state.actionData.actionNames[i])) // REVISIT: A bit hacky, but it works.
                 {
-                    return state.Actions[i].TryCast<T>();
+                    return state.actions[i].TryCast<T>();
                 }
             }
             return null;
@@ -1024,11 +1035,9 @@ namespace BluePrinceArchipelago.Utils
 
         public static void InsertAction(this FsmState state, int index, FsmStateAction action)
         {
-            FsmStateAction[] actions = InsertItemIntoArray(state.Actions, action, index);
-            FsmStateAction[] Actions = InsertItemIntoArray(state.actions, action, index);
+            FsmStateAction[] actions = InsertItemIntoArray(state.actions, action, index);
             state.Actions = actions;
-            state.actions = Actions;
-            action.Init(state);
+            state.ActionData.ActionNames.Insert(index, action.GetType().ToString());
         }
 
         /// <summary>

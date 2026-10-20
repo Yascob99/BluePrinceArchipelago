@@ -74,7 +74,6 @@ namespace BluePrinceArchipelago.Triggers
                 FSMPatches.StaticLocationHooks();
                 FSMPatches.ZeroStepEndingHook();
                 FSMPatches.TradingPostOverrides();
-                FSMPatches.PickerOverrides();
                 if (ArchipelagoOptions.UpgradeDiskSanity)
                 {
                     FSMPatches.UpgradeDiskOverride(ModInstance.GlobalManager);
@@ -93,8 +92,8 @@ namespace BluePrinceArchipelago.Triggers
                 
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
                 TrapManager.DequeueTraps();
-                GameObject AllowanceEvenvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
-                AllowanceEvenvelope.SetActive(true);
+                GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
+                AllowanceEnvelope.SetActive(true);
             }
         }
 

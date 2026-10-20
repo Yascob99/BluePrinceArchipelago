@@ -8,7 +8,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public override void OnCalled()
         {
-            UIManager.ChangeMenuLayout();
+            //UIManager.ChangeMenuLayout();
         }
     }
 }

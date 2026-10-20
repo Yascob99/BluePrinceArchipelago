@@ -275,28 +275,16 @@ namespace BluePrinceArchipelago.Rooms
                 if (count > RoomsLeftInPool)
                 {
                     RemoveFromPool(array, count - RoomsLeftInPool);
-                    if (RoomsLeftInPool == 0)
-                    {
-                        SetPoolRemovalVar(true);
-                    }
-                }
-                else if (count == RoomsLeftInPool && count != 0) {
-                    SetPoolRemovalVar(false);
                 }
                 // check if there less copies than there should be
-                else
+                else if ( count < RoomsLeftInPool && count != 0)
                 {
                     AddToPool(array, RoomsLeftInPool);
-                    SetPoolRemovalVar(false);
                 }
             }
             else if (!_IsUnlocked && !_UseVanilla)
             {
                 RemoveFromPool(array, count);
-                if (RoomsLeftInPool == 0)
-                {
-                    SetPoolRemovalVar(true);
-                }
             }
             
         }
@@ -356,7 +344,6 @@ namespace BluePrinceArchipelago.Rooms
                         // POOL REMOVAL = true means room is NOT available (removed from pool)
                         // POOL REMOVAL = false means room IS available (in pool)
                         poolRemovalVar.Value = value;
-                        Logging.Log($"Room '{_Name.ToTitleCase()}' (GO: {_Name}) POOL REMOVAL set to {value} (IsUnlocked={!value})", "Rooms");
                     }
                     else
                     {

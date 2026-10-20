@@ -572,8 +572,13 @@ namespace BluePrinceArchipelago.Patches
             Vase2.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenWest"));
 
             //Entrance Hall Allowance Envelope Hooks
-            GameObject AllowanceEvenvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
-            AllowanceEvenvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
+            GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
+            AllowanceEnvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
+        }
+
+        public static void AllowanceEnvelopeSpawnFix() {
+            PlayMakerFSM Day = GameObject.Find("DAY").GetComponent<PlayMakerFSM>();
+            Day.GetState("Allowance").DisableFirstActionOfType<IntCompare>();
         }
 
         public static void ZeroStepEndingHook()

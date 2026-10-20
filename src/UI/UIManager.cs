@@ -5,13 +5,6 @@ using static BluePrinceArchipelago.UI.UIManager;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-
-
-
-
-
-
-
 #if Bep
 using TMPro;
 using BluePrince.Inputs;

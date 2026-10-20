@@ -14,7 +14,6 @@ namespace BluePrinceArchipelago.Rooms.Pickers;
         public static Dictionary<string, PlayMakerArrayListProxy> UntouchedPickers { set; get; } = [];
 
         public static List<string> CurrentPickerArrays = [];
-        public static List<string> CurrentPickerLists = [];
 
         /// <summary>
         /// Re-loads the picker arrays. Call this when arrays may have been reset by the game.

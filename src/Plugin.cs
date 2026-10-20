@@ -75,8 +75,8 @@ namespace BluePrinceArchipelago {
             //Logging.SetLogLevel("Items", LogLevel.Info);
             Logging.SetLogLevel("Locations", LogLevel.Info);
             Logging.SetLogLevel("Trades", LogLevel.Info);
-            Logging.SetLogLevel("Rooms", LogLevel.Info);
-            Logging.SetLogLevel("Events", LogLevel.Info);
+            //Logging.SetLogLevel("Rooms", LogLevel.Info);
+            //Logging.SetLogLevel("Events", LogLevel.Info);
             Logging.SetLogLevel("StatEvents", LogLevel.Info);
             Logging.SetLogLevel("Connection", LogLevel.Info);
             //Logging.SetLogLevel("APData", LogLevel.Info);
@@ -85,6 +85,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("ArchipelagoEvents", LogLevel.Info);
             Logging.SetLogLevel("Traps", LogLevel.Info);
             //Logging.SetLogLevel("CustomFsmMethods", LogLevel.Info);
+            Logging.SetLogLevel("RoomsUnlocked", LogLevel.Info);
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();

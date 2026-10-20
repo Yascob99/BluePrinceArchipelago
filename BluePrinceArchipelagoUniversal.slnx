@@ -4,11 +4,9 @@
     <Platform Name="x64" />
   </Configurations>
   <Project Path="BluePrinceArchipelago.BepInEx/BluePrinceArchipelago.BepInEx.csproj">
-    <BuildType Solution="Debug|Any CPU" Project="Release" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="BluePrinceArchipelago.MelonLoader/BluePrinceArchipelago.MelonLoader.csproj">
-    <BuildType Solution="Debug|Any CPU" Project="Release" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
 </Solution>
