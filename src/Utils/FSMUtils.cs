@@ -1784,6 +1784,7 @@ namespace BluePrinceArchipelago.Utils
         {
             var tmp = MakeNewVariableArray<FsmBool>(fsm.Variables.BoolVariables, name);
             fsm.Variables.BoolVariables = tmp;
+            fsm.Variables.AddVariableLookup(tmp[tmp.Length - 1]);
             return tmp[tmp.Length - 1];
         }
 

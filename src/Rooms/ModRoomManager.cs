@@ -677,38 +677,11 @@ namespace BluePrinceArchipelago.Rooms
                                 modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
                             }
                         }
-                        else if (modroom.Name == "TUNNEL")
-                        {
-                            if (modroom.IsUnlocked && !GetPoolRemovalVar("TUNNEL"))
-                            {
-                                if (RoomCounts.ContainsKey(modroom.Name))
-                                {
-                                    // If there are more copies than there should be.
-                                    if (RoomCounts[modroom.Name] > modroom.RoomsLeftInPool)
-                                    {
-                                        modroom.RemoveFromPool(array, RoomCounts[modroom.Name] - modroom.RoomsLeftInPool);
-                                    }
-                                    // check if there less copies than there should be.
-                                    else if (RoomCounts[modroom.Name] < modroom.RoomsLeftInPool)
-                                    {
-                                        modroom.AddToPool(array, modroom.RoomsLeftInPool);
-                                    }
-                                }
-                                else
-                                {
-                                    modroom.AddToPool(array, modroom.RoomsLeftInPool);
-                                }
-                            }
-                            else if (RoomCounts.ContainsKey(modroom.Name) && (!modroom.IsUnlocked || !GetPoolRemovalVar("TUNNEL")))
-                            {
-                                modroom.RemoveFromPool(array, RoomCounts[modroom.Name]);
-                            }
-                        }
-                        else
+                        else 
                         {
                             if (!cantDraft)
                             {
-                                if (modroom.RoomsLeftInPool > 0)
+                                if (modroom.RoomsLeftInPool > 0 && modroom.Name != "TUNNEL")
                                 {
                                     SetPoolRemovalVar(modroom.Name, false);
                                 }
@@ -728,7 +701,6 @@ namespace BluePrinceArchipelago.Rooms
                                     {
                                         // Else, add copies to the pool to match the total number.
                                         modroom.AddToPool(array, modroom.RoomsLeftInPool);
-                                        SetPoolRemovalVar(modroom.Name, false);
                                     }
                                 }
                             }
@@ -1183,6 +1155,7 @@ namespace BluePrinceArchipelago.Rooms
         {
             PlayMakerFSM grid = ModInstance.TheGrid;
             PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").value?.GetComponent<PlayMakerFSM>();
+            Logging.LogWarning($"PlanPicker: {planPicker.name}");
             PickerManager.CurrentPickerArrays.Clear();
             //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
             if (planPicker != null)

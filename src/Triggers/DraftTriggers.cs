@@ -75,9 +75,13 @@ namespace BluePrinceArchipelago.Triggers
             {
                 PlayMakerFSM MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
                 MasterPicker.GetBoolVariable("TunnelUnlocked").Value = ModRoomManager.GetRoomByName("Tunnel").IsUnlocked;
+                Logging.LogWarning($"Tunnel Unlocked: {MasterPicker.GetBoolVariable("TunnelUnlocked").Value}");
                 MasterPicker.GetBoolVariable("GarageUnlocked").Value = ModRoomManager.GetRoomByName("Garage").IsUnlocked;
+                Logging.LogWarning($"Garage Unlocked: {MasterPicker.GetBoolVariable("GarageUnlocked").Value}");
                 MasterPicker.GetBoolVariable("SecretPassageUnlocked").Value = ModRoomManager.GetRoomByName("Secret Passage").IsUnlocked;
+                Logging.LogWarning($"Secret Passage Unlocked: {MasterPicker.GetBoolVariable("SecretPassageUnlocked").Value}");
                 MasterPicker.GetBoolVariable("FoundationUnlocked").Value = ModRoomManager.GetRoomByName("The Foundation").IsUnlocked;
+                Logging.LogWarning($"Foundation Unlocked: {MasterPicker.GetBoolVariable("FoundationUnlocked").Value}");
             }
         }
 
