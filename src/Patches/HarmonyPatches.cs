@@ -293,13 +293,13 @@ namespace BluePrinceArchipelago.Patches
                 try
                 {
                     __instance.PerformValidation();
-                    EventPatches.depth = 0;
+
                 }
                 catch
                 {
-                    EventPatches.depth = 0;
                     DraftTriggers.OnDraftValidationFailed();
                 }
+                EventPatches.depth = 0;
                 return false;
             }
             return true;

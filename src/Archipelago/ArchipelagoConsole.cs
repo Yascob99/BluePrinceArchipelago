@@ -11,7 +11,6 @@ using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Il2CppSystem.Net;
 
 namespace BluePrinceArchipelago.Archipelago;
 

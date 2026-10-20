@@ -21,7 +21,7 @@ using HarmonyPatch = HarmonyLib.Harmony;
 using BluePrinceArchipelago.UI;
 
 #if ML
-[assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.1.6", "Yascob", null)]
+[assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.1.7", "Yascob", null)]
     [assembly: MelonGame("Dogubomb", "BLUE PRINCE")]
 #endif
 namespace BluePrinceArchipelago {
@@ -39,7 +39,7 @@ namespace BluePrinceArchipelago {
 #endif
         public const string PluginGUID = "com.Yascob.BluePrinceArchipelago";
         public const string PluginName = "BluePrinceArchipelago";
-        public const string PluginVersion = "0.1.6";
+        public const string PluginVersion = "0.1.7";
 
         private static Plugin _instance;
         public static Plugin Instance => _instance;
