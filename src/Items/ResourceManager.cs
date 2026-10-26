@@ -303,19 +303,31 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     public sealed class ResourceManager
     {
-        private readonly GemHandler gemHandler = new();
-        private readonly GoldHandler goldHandler = new();
-        private readonly DiceHandler diceHandler = new();
-        private readonly StepHandler stepHandler = new();
-        private readonly KeyHandler keyHandler = new();
-        private readonly StarHandler starHandler = new();
-        private readonly LuckHandler luckHandler = new();
-        private readonly AllowanceHandler allowanceHandler = new();
+        private const string GEM_TYPE = "Gems";
+        private const string GOLD_TYPE = "Gold";
+        private const string DICE_TYPE = "Dice";
+        private const string STEP_TYPE = "Steps";
+        private const string KEY_TYPE = "Keys";
+        private const string STAR_TYPE = "Stars";
+        private const string LUCK_TYPE = "Luck";
+        private const string ALLOWANCE_TYPE = "Allowance";
+
+        private readonly Dictionary<string, ResourceHandler> resources = new()
+        {
+            { GEM_TYPE, new GemHandler() },
+            { GOLD_TYPE, new GoldHandler() },
+            { DICE_TYPE, new DiceHandler() },
+            { STEP_TYPE, new StepHandler() },
+            { KEY_TYPE, new KeyHandler() },
+            { STAR_TYPE, new StarHandler() },
+            { LUCK_TYPE, new LuckHandler() },
+            { ALLOWANCE_TYPE, new AllowanceHandler() }
+        };
+
+        private static ResourceManager _instance;
 
         //Singleton
         private ResourceManager() { }
-
-        private static ResourceManager _instance;
 
         public static ResourceManager GetInstance()
         {
@@ -328,11 +340,11 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void GiveStartingItems() {
             Dictionary <string, int> startingResources = [];
-            startingResources.Add("Gems", 0);
-            startingResources.Add("Keys", 0);
-            startingResources.Add("Dice", 0);
-            startingResources.Add("Steps", 0);
-            startingResources.Add("Luck", 0);
+            startingResources.Add(GEM_TYPE, 0);
+            startingResources.Add(KEY_TYPE, 0);
+            startingResources.Add(DICE_TYPE, 0);
+            startingResources.Add(STEP_TYPE, 0);
+            startingResources.Add(LUCK_TYPE, 0);
             
             if (ModItemManager.PermanentItemList.Count > 0)
             {
@@ -366,16 +378,9 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustGems(int count)
         {
-            try
-            {
-                return gemHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Gems", "Resources");
-                return false;
-            }
+            return AdjustResource(GEM_TYPE, count);
         }
+
         /// <summary>
         /// Add or remove Gold from Simon's resources.
         /// </summary>
@@ -383,17 +388,9 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustGold(int count)
         {
-            try
-            {
-                return goldHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Gold", "Resources");
-                return false;
-            }
-
+            return AdjustResource(GOLD_TYPE, count);
         }
+
         /// <summary>
         /// Add or remove Dice from Simon's resources.
         /// </summary>
@@ -401,16 +398,9 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustDice(int count)
         {
-            try
-            { 
-                return diceHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Dice", "Resources");
-                return false;
-            }
+            return AdjustResource(DICE_TYPE, count);
         }
+
         /// <summary>
         /// Add or remove Steps from Simon's resources.
         /// </summary>
@@ -422,7 +412,7 @@ namespace BluePrinceArchipelago.Items
             try
             {
                 if (setdirectly){
-                    return stepHandler.AdjustResource(count);
+                    return AdjustResource(STEP_TYPE, count);
                 }
                 else
                 {
@@ -437,6 +427,7 @@ namespace BluePrinceArchipelago.Items
             }
 
         }
+
         /// <summary>
         /// Add or remove Keys from Simon's resources.
         /// </summary>
@@ -444,16 +435,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustKeys(int count)
         {
-            try
-            {
-                return keyHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Keys", "Resources");
-                return false;
-            }
-
+            return AdjustResource(KEY_TYPE, count);
         }
 
         /// <summary>
@@ -463,17 +445,9 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustStars(int count)
         {
-            try
-            {
-                return starHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Stars", "Resources");
-                return false;
-            }
-
+            return AdjustResource(STAR_TYPE, count);
         }
+
         /// <summary>
         /// Add or remove Luck from Simon's resources.
         /// </summary>
@@ -481,17 +455,9 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustLuck(int count)
         {
-            try
-            {
-                return luckHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.LogWarning("Error adjusting Luck", "Resources");
-                return false;
-            }
-
+            return AdjustResource(LUCK_TYPE, count);
         }
+
         /// <summary>
         /// Add or remove Allowance from Simon's resources.
         /// </summary>
@@ -499,15 +465,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustAllowance(int count)
         {
-            try
-            {
-                return allowanceHandler.AdjustResource(count);
-            }
-            catch
-            {
-                Logging.Logger.LogWarning("Error adjusting Allowance");
-                return false;
-            }
+            return AdjustResource(ALLOWANCE_TYPE, count);
         }
 
         /// <summary>
@@ -540,30 +498,22 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustResource(string type, int count)
         {
-            switch (type.ToLower())
+            if (!IsValidResourceType(type))
             {
-                case "gems":
-                    return AdjustGems(count);
-                case "gold":
-                    return AdjustGold(count);
-                case "steps":
-                    return AdjustSteps(count);
-                case "keys":
-                    return AdjustKeys(count);
-                case "dice":
-                    return AdjustDice(count);
-                case "stars":
-                    return AdjustStars(count);
-                case "luck":
-                    return AdjustLuck(count);
-                case "allowance":
-                    return AdjustAllowance(count);
-                default:
-                    Logging.Logger.LogWarning($"Error adjusting unknown resource type: {type}");
-                    return false;
-
+                Logging.Logger.LogWarning($"Error adjusting count for unknown resource type: {type}");
+                return false;
+            }
+            try
+            {
+                return resources[type].AdjustResource(count);
+            }
+            catch
+            {
+                Logging.Logger.LogWarning($"Error adjusting {type}");
+                return false;
             }
         }
+
         /// <summary>
         ///     Returns the current total of a resource, or -1 if it could not be found.
         /// </summary>
@@ -571,29 +521,11 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The total of that resource. -1 if not found.</returns>
         public int GetResourceCount(string type)
         {
-            switch (type.ToLower())
-            {
-                case "gems":
-                    return gemHandler.GetResourceCount();
-                case "gold":
-                    return goldHandler.GetResourceCount();
-                case "steps":
-                    return stepHandler.GetResourceCount();
-                case "keys":
-                    return keyHandler.GetResourceCount();
-                case "dice":
-                    return diceHandler.GetResourceCount();
-                case "stars":
-                    return starHandler.GetResourceCount();
-                case "luck":
-                    return luckHandler.GetResourceCount();
-                case "allowance":
-                    return allowanceHandler.GetResourceCount();
-                default:
-                    Logging.Logger.LogWarning($"Error getting count for unknown resource type: {type}");
-                    return -1;
-
+            if (!IsValidResourceType(type)) {
+                Logging.Logger.LogWarning($"Error getting count for unknown resource type: {type}");
+                return -1;
             }
+            return resources[type].GetResourceCount();
         }
 
         /// <summary>
