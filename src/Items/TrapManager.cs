@@ -69,7 +69,7 @@ namespace BluePrinceArchipelago.Items
             {
                 bool EOD = EODTrapsCount > 0;
                 List<int> idsToRun = new List<int>();
-                int stepTotal = ResourceManager.GetResourceCount("steps");
+                int stepTotal = ResourceManager.GetInstance().GetResourceCount("steps");
                 bool FreezeTrap = false;
 
                 // Queue up traps based on priority and context.

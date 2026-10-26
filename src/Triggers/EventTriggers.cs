@@ -252,8 +252,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on the Allowance token being picked up.
         /// </summary>
         public static void OnAllowanceEnvelopePickedUp() {
-            ResourceManager.RecalculculateStartingItems();
-            ResourceManager.GetInstance().AddStartingItems();
+            ResourceManager.GetInstance().GiveStartingItems();
         }
 
         public static void OnBasementDoorOpened(string location)

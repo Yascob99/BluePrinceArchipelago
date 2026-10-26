@@ -309,14 +309,14 @@ namespace BluePrinceArchipelago.Items
         public static int StartingSteps = 0;
         public static int StartingLuck = 0;
 
-        private GemHandler gemHandler = new();
-        private GoldHandler goldHandler = new();
-        private DiceHandler diceHandler = new();
-        private StepHandler stepHandler = new();
-        private KeyHandler keyHandler = new();
-        private StarHandler starHandler = new();
-        private LuckHandler luckHandler = new();
-        private AllowanceHandler allowanceHandler = new();
+        private readonly GemHandler gemHandler = new();
+        private readonly GoldHandler goldHandler = new();
+        private readonly DiceHandler diceHandler = new();
+        private readonly StepHandler stepHandler = new();
+        private readonly KeyHandler keyHandler = new();
+        private readonly StarHandler starHandler = new();
+        private readonly LuckHandler luckHandler = new();
+        private readonly AllowanceHandler allowanceHandler = new();
 
         //Singleton
         private ResourceManager() { }
@@ -325,10 +325,7 @@ namespace BluePrinceArchipelago.Items
 
         public static ResourceManager GetInstance()
         {
-            if (_instance == null)
-            {
-                _instance = new();
-            }
+            _instance ??= new();
             return _instance;
         }
 
@@ -336,11 +333,11 @@ namespace BluePrinceArchipelago.Items
         ///     Recalculates the amount of starting items the player should have.
         /// </summary>
         public static void RecalculculateStartingItems() {
-            StartingGems = 10;
-            StartingKeys = 10;
-            StartingDice = 10;
-            StartingSteps = 10;
-            StartingLuck = 10;
+            StartingGems = 0;
+            StartingKeys = 0;
+            StartingDice = 0;
+            StartingSteps = 0;
+            StartingLuck = 0;
             if (ModItemManager.PermanentItemList.Count > 0)
             {
                 foreach (PermanentItem item in ModItemManager.PermanentItemList) {
@@ -381,7 +378,8 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
-        public void AddStartingItems() {
+        public void GiveStartingItems() {
+            RecalculculateStartingItems();
             Logging.LogWarning($"Gems: {StartingGems}");
             AdjustGems(StartingGems);
             Logging.LogWarning($"Keys: {StartingKeys}");
@@ -604,26 +602,26 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="type">The type of resource to get the total of.</param>
         /// <returns>The total of that resource. -1 if not found.</returns>
-        public static int GetResourceCount(string type)
+        public int GetResourceCount(string type)
         {
             switch (type.ToLower())
             {
                 case "gems":
-                    return ModInstance.GemManager.GetIntVariable("GEMS").Value;
+                    return gemHandler.GetResourceCount();
                 case "gold":
-                    return ModInstance.GoldManager.GetIntVariable("GOLD").Value;
+                    return goldHandler.GetResourceCount();
                 case "steps":
-                    return ModInstance.StepManager.GetIntVariable("STEPS").Value;
+                    return stepHandler.GetResourceCount();
                 case "keys":
-                    return ModInstance.KeyManager.GetIntVariable("KEYS").Value;
+                    return keyHandler.GetResourceCount();
                 case "dice":
-                    return ModInstance.DiceManager.GetIntVariable("BONES").Value;
+                    return diceHandler.GetResourceCount();
                 case "stars":
-                    return ModInstance.GlobalPersistentManager.GetIntVariable("Total Stars").Value;
+                    return starHandler.GetResourceCount();
                 case "luck":
-                    return ModInstance.LuckManager.GetIntVariable("LUCK").Value;
+                    return luckHandler.GetResourceCount();
                 case "allowance":
-                    return ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value;
+                    return allowanceHandler.GetResourceCount();
                 default:
                     Logging.Logger.LogWarning($"Error getting count for unknown resource type: {type}");
                     return -1;
