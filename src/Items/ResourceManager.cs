@@ -43,15 +43,20 @@ namespace BluePrinceArchipelago.Items
             SetResourceCount(newResourceTotal);
         }
 
-        public abstract bool IsResourceLocked();
-
         public abstract int GetResourceCount();
 
         public abstract void SetResourceCount(int resourceCount);
 
-        public abstract int GetUpperLimit();
+        public virtual bool IsResourceLocked()
+        {
+            return false;
+        }
+        public virtual int GetUpperLimit()
+        {
+            return 1000000;
+        }
 
-        public abstract void UpdateUI();
+        public virtual void UpdateUI() { }
     }
 
     public class GemHandler : ResourceHandler
@@ -139,11 +144,6 @@ namespace BluePrinceArchipelago.Items
             return 1000000;
         }
 
-        public override bool IsResourceLocked()
-        {
-            return false;
-        }
-
         public override void SetResourceCount(int resourceCount)
         {
             ModInstance.DiceManager.GetIntVariable("BONES").Value = resourceCount;
@@ -208,10 +208,91 @@ namespace BluePrinceArchipelago.Items
             GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/EatPopup/Steps #").GetComponent<TextMeshPro>().text = GetResourceCount().ToString();
         }
 
-        public void ForceAdjust(int resourceCount)
+        public static void ForceAdjust(int resourceCount)
         {
             ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value += resourceCount;
             ModInstance.StepManager.SendEvent("Update");
+        }
+    }
+
+    public class KeyHandler : ResourceHandler
+    {
+        public override bool IsResourceLocked()
+        {
+            if (ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value)
+            {
+                Logging.LogWarning("Keys are locked, cannot adjust", "Resources");
+                return true;
+            }
+            return false;
+        }
+        public override int GetResourceCount()
+        {
+            return ModInstance.KeyManager.GetIntVariable("KEYS").Value;
+        }
+
+        public override int GetUpperLimit()
+        {
+            return 1000000;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.KeyManager.GetIntVariable("KEYS").Value = resourceCount;
+        }
+
+        public override void UpdateUI()
+        {
+            GameObject KeyIcon = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
+            KeyIcon.transform.Find("Key #").GetComponent<TextMeshPro>().text = GetResourceCount().ToString();
+            if (!KeyIcon.active)
+            {
+                KeyIcon.SetActive(true);
+            }
+        }
+    }
+
+    public class StarHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value = resourceCount;
+        }
+
+        public override void UpdateUI()
+        {
+            ModInstance.StarManager.SendEvent("Update");
+        }
+    }
+
+    public class LuckHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.LuckManager.FindIntVariable("LUCK").Value;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.LuckManager.FindIntVariable("LUCK").Value = resourceCount;
+        }
+    }
+
+    public class AllowanceHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value = resourceCount;
         }
     }
 
@@ -232,6 +313,10 @@ namespace BluePrinceArchipelago.Items
         private GoldHandler goldHandler = new();
         private DiceHandler diceHandler = new();
         private StepHandler stepHandler = new();
+        private KeyHandler keyHandler = new();
+        private StarHandler starHandler = new();
+        private LuckHandler luckHandler = new();
+        private AllowanceHandler allowanceHandler = new();
 
         //Singleton
         private ResourceManager() { }
@@ -376,7 +461,7 @@ namespace BluePrinceArchipelago.Items
                 }
                 else
                 {
-                    stepHandler.ForceAdjust(count);
+                    StepHandler.ForceAdjust(count);
                     return true;
                 }
             }
@@ -392,39 +477,11 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustKeys(int count)
+        public bool AdjustKeys(int count)
         {
             try
             {
-                // Don't set Keys if Keys are locked.
-                if(ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value)
-                {
-                    Logging.LogWarning("Keys are locked, cannot adjust", "Resources");
-                    return false;
-                }
-                int Total = ModInstance.KeyManager.GetIntVariable("KEYS").Value;
-
-                // Int Clamp
-                if (Total + count < 0)
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value = 0;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value += count;
-                }
-                // Set the UI
-                GameObject KeyIcon = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
-                KeyIcon.transform.Find("Key #").GetComponent<TextMeshPro>().text = ModInstance.KeyManager.GetIntVariable("KEYS").Value.ToString();
-                if (!KeyIcon.active)
-                {
-                    KeyIcon.SetActive(true);
-                }
-                return true;
+                return keyHandler.AdjustResource(count);
             }
             catch
             {
@@ -439,21 +496,11 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustStars(int count)
+        public bool AdjustStars(int count)
         {
             try
             {
-                int totalStars = ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value;
-                if (totalStars + count > 0)
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value += count;
-                }
-                else
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("TotalStars").Value = 0;
-                }
-                ModInstance.StarManager.SendEvent("Update");
-                return true;
+                return starHandler.AdjustResource(count);
             }
             catch
             {
@@ -467,20 +514,11 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustLuck(int count)
+        public bool AdjustLuck(int count)
         {
             try
             {
-                int luck = ModInstance.LuckManager.FindIntVariable("LUCK").Value;
-                if (luck + count > 0)
-                {
-                    ModInstance.LuckManager.FindIntVariable("LUCK").Value += count;
-                }
-                else
-                {
-                    ModInstance.LuckManager.FindIntVariable("Luck").Value = 0;
-                }
-                return true;
+                return luckHandler.AdjustResource(count);
             }
             catch
             {
@@ -494,20 +532,11 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustAllowance(int count)
+        public bool AdjustAllowance(int count)
         {
             try
             {
-                int totalAllowance = ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value;
-                if (totalAllowance + count > 0)
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value += count;
-                }
-                else
-                {
-                    ModInstance.GlobalPersistentManager.GetIntVariable("allowance").Value = 0;
-                }
-                return true;
+                return allowanceHandler.AdjustResource(count);
             }
             catch
             {
