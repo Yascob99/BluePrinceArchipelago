@@ -185,7 +185,7 @@ namespace BluePrinceArchipelago.Items
         ///     A function for simulating the effect of the unlock. Used when the unlock is received at the start of a day.
         /// </summary>
         public void ApplyEffects() {
-            ResourceManager.AdjustSteps(20);
+            ResourceManager.GetInstance().AdjustSteps(20);
         }
 
     }

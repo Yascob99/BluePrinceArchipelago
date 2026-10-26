@@ -86,7 +86,7 @@ namespace BluePrinceArchipelago.Items
         public override void UpdateUI()
         {
             GameObject GemIcon = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
-            GemIcon.transform.Find("Gem #").GetComponent<TextMeshPro>().text = ModInstance.GemManager.GetIntVariable("GEMS").Value.ToString();
+            GemIcon.transform.Find("Gem #").GetComponent<TextMeshPro>().text = GetResourceCount().ToString();
             if (GemIcon.active == false)
             {
                 GemIcon.SetActive(true);
@@ -119,11 +119,99 @@ namespace BluePrinceArchipelago.Items
         public override void UpdateUI()
         {
             GameObject GoldIcon = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
-            GoldIcon.transform.Find("Gold #").GetComponent<TextMeshPro>().text = ModInstance.GoldManager.GetIntVariable("GOLD").Value.ToString();
+            GoldIcon.transform.Find("Gold #").GetComponent<TextMeshPro>().text = GetResourceCount().ToString();
             if (GoldIcon.active == false)
             {
                 GoldIcon.SetActive(true);
             }
+        }
+    }
+
+    public class DiceHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.DiceManager.GetIntVariable("BONES").Value;
+        }
+
+        public override int GetUpperLimit()
+        {
+            return 1000000;
+        }
+
+        public override bool IsResourceLocked()
+        {
+            return false;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.DiceManager.GetIntVariable("BONES").Value = resourceCount;
+        }
+
+        public override void UpdateUI()
+        {
+            GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
+            GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
+            TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
+            // Set the Dice Icon's local scale
+            BoneNum.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
+            // Set the Dice text's color
+            BoneTMP.color = new Color(1f, 1f, 1f, 1f);
+            // Set the Dice Icon and text to active 
+
+            // if the set the value to 0 then hide dice UI
+            if (GetResourceCount() == 0)
+            {
+                BoneIcon.SetActive(false);
+            }
+            else
+            {
+                // Show the Dice UI
+                BoneIcon.SetActive(true);
+            }
+
+            // Set text to the correct amount.
+            BoneTMP.text = GetResourceCount().ToString();
+        }
+    }
+
+    public class StepHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.StepManager.GetIntVariable("Steps").Value;
+        }
+
+        public override int GetUpperLimit()
+        {
+            return 10000;
+        }
+
+        public override bool IsResourceLocked()
+        {
+            if (ModInstance.StepManager.GetBoolVariable("STEP LOCK").Value)
+            {
+                Logging.LogWarning("Steps are locked, cannot adjust", "Resources");
+                return true;
+            }
+            return false;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.StepManager.GetIntVariable("Steps").Value = resourceCount;
+        }
+
+        public override void UpdateUI()
+        {
+            GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/EatPopup/Steps #").GetComponent<TextMeshPro>().text = GetResourceCount().ToString();
+        }
+
+        public void ForceAdjust(int resourceCount)
+        {
+            ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value += resourceCount;
+            ModInstance.StepManager.SendEvent("Update");
         }
     }
 
@@ -140,8 +228,10 @@ namespace BluePrinceArchipelago.Items
         public static int StartingSteps = 0;
         public static int StartingLuck = 0;
 
-        private GemHandler gemManager = new();
-        private GoldHandler goldManager = new();
+        private GemHandler gemHandler = new();
+        private GoldHandler goldHandler = new();
+        private DiceHandler diceHandler = new();
+        private StepHandler stepHandler = new();
 
         //Singleton
         private ResourceManager() { }
@@ -161,11 +251,11 @@ namespace BluePrinceArchipelago.Items
         ///     Recalculates the amount of starting items the player should have.
         /// </summary>
         public static void RecalculculateStartingItems() {
-            StartingGems = 0;
-            StartingKeys = 0;
-            StartingDice = 0;
-            StartingSteps = 0;
-            StartingLuck = 0;
+            StartingGems = 10;
+            StartingKeys = 10;
+            StartingDice = 10;
+            StartingSteps = 10;
+            StartingLuck = 10;
             if (ModItemManager.PermanentItemList.Count > 0)
             {
                 foreach (PermanentItem item in ModItemManager.PermanentItemList) {
@@ -219,18 +309,6 @@ namespace BluePrinceArchipelago.Items
             AdjustLuck(StartingLuck);
         }
 
-        public static int ComputeNewResourceCount(int baseResources, int addedResources, int upperLimit) {
-            if (baseResources + addedResources < 0)
-            {
-                return 0;
-            }
-            if (baseResources + addedResources > upperLimit)
-            {
-                return upperLimit;
-            }
-            return baseResources + addedResources;
-        }
-
         /// <summary>
         /// Add or remove Gems from Simon's resources.
         /// </summary>
@@ -240,7 +318,7 @@ namespace BluePrinceArchipelago.Items
         {
             try
             {
-                return gemManager.AdjustResource(count);
+                return gemHandler.AdjustResource(count);
             }
             catch
             {
@@ -257,7 +335,7 @@ namespace BluePrinceArchipelago.Items
         {
             try
             {
-                return goldManager.AdjustResource(count);
+                return goldHandler.AdjustResource(count);
             }
             catch
             {
@@ -271,56 +349,17 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustDice(int count)
+        public bool AdjustDice(int count)
         {
             try
-            {
-
-                int Total = ModInstance.DiceManager.GetIntVariable("BONES").Value;
-                // Int Clamp
-                if (Total + count <= 0)
-                {
-                    return true;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value += count;
-                }
-
-                GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
-                GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
-                TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
-                // Set the Dice Icon's local scale
-                BoneNum.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
-                // Set the Dice text's color
-                BoneTMP.color = new Color(1f, 1f, 1f, 1f);
-                // Set the Dice Icon and text to active 
-
-                // if the set the value to 0 then hide dice UI
-                if (ModInstance.DiceManager.GetIntVariable("BONES").Value == 0)
-                {
-                    BoneIcon.SetActive(false);
-                }
-                else
-                {
-                    // Show the Dice UI
-                    BoneIcon.SetActive(true);
-                }
-                
-                // Set text to the correct amount.
-                BoneTMP.text = ModInstance.DiceManager.GetIntVariable("BONES").Value.ToString();
-                return true;
+            { 
+                return diceHandler.AdjustResource(count);
             }
             catch
             {
                 Logging.LogWarning("Error adjusting Dice", "Resources");
                 return false;
             }
-
         }
         /// <summary>
         /// Add or remove Steps from Simon's resources.
@@ -328,40 +367,16 @@ namespace BluePrinceArchipelago.Items
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <param name="setdirectly">Whether to set the steps directly or use the slow updater.</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustSteps(int count, bool setdirectly = false)
+        public bool AdjustSteps(int count, bool setdirectly = false)
         {
             try
             {
                 if (setdirectly){
-                    // Don't set Steps if Steps are locked.
-                    if(ModInstance.StepManager.GetBoolVariable("STEP LOCK").Value)
-                    {
-                        Logging.LogWarning("Steps are locked, cannot adjust", "Resources");
-                        return false;
-                    }
-                    int Total = ModInstance.StepManager.GetIntVariable("Steps").Value;
-
-                    // Int Clamp
-                    if (Total + count < 0)
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value = 0;
-                    }
-                    if (Total + count > 10000)
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value = 10000;
-                    }
-                    else
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value += count;
-                    }
-                    // Set the UI
-                    GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/EatPopup/Steps #").GetComponent<TextMeshPro>().text = ModInstance.StepManager.GetIntVariable("Steps").Value.ToString();
-                    return true;
+                    return stepHandler.AdjustResource(count);
                 }
                 else
                 {
-                    ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value += count;
-                    ModInstance.StepManager.SendEvent("Update");
+                    stepHandler.ForceAdjust(count);
                     return true;
                 }
             }

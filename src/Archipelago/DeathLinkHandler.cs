@@ -181,7 +181,7 @@ public class DeathLinkHandler
         ArchipelagoConsole.LogMessage($"{cause}, {_localDeathsInProgress} local deaths in progress.", "DeathLink");
 
         yield return null;
-        if (!ResourceManager.AdjustSteps(-1000000))
+        if (!ResourceManager.GetInstance().AdjustSteps(-1000000))
         {
             Logging.LogFatal("There was an error sending the deathlink.", "DeathLink");
             if (deathLink != null)
