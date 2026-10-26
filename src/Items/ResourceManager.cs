@@ -1,5 +1,4 @@
-﻿using Archipelago.MultiClient.Net.MessageLog.Parts;
-using BluePrinceArchipelago.Archipelago;
+﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Utils;
 #if ML
 using Il2CppTMPro;
@@ -13,8 +12,6 @@ namespace BluePrinceArchipelago.Items
 {
     public abstract class ResourceHandler
     {
-        private int resource = 0;
-
         private static int ComputeNewResourceCount(int baseResources, int addedResources, int upperLimit)
         {
             if (baseResources + addedResources < 0)
@@ -34,13 +31,16 @@ namespace BluePrinceArchipelago.Items
             {
                 return false;
             }
+            UpdateResources(addedResources);
+            UpdateUI();
+            return true;
+        }
+
+        public void UpdateResources(int addedResources)
+        {
             int currentResources = GetResourceCount();
             int newResourceTotal = ComputeNewResourceCount(currentResources, addedResources, GetUpperLimit());
             SetResourceCount(newResourceTotal);
-
-            UpdateUI();
-
-            return true;
         }
 
         public abstract bool IsResourceLocked();
@@ -54,7 +54,7 @@ namespace BluePrinceArchipelago.Items
         public abstract void UpdateUI();
     }
 
-    public class GemManager : ResourceHandler
+    public class GemHandler : ResourceHandler
     {
         private const int GEM_COUNT_UPPER_LIMIT = 1000000;
 
@@ -94,12 +94,45 @@ namespace BluePrinceArchipelago.Items
         }
     }
 
+    public class GoldHandler : ResourceHandler
+    {
+        public override int GetResourceCount()
+        {
+            return ModInstance.GoldManager.GetIntVariable("GOLD").Value;
+        }
+
+        public override int GetUpperLimit()
+        {
+            return 1000000;
+        }
+
+        public override bool IsResourceLocked()
+        {
+            return ModInstance.GoldManager.GetBoolVariable("GOLD LOCK").Value;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.GoldManager.GetIntVariable("GOLD").Value = resourceCount;
+        }
+
+        public override void UpdateUI()
+        {
+            GameObject GoldIcon = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
+            GoldIcon.transform.Find("Gold #").GetComponent<TextMeshPro>().text = ModInstance.GoldManager.GetIntVariable("GOLD").Value.ToString();
+            if (GoldIcon.active == false)
+            {
+                GoldIcon.SetActive(true);
+            }
+        }
+    }
+
     /// <summary>
     /// Manage Simon's daily resources. 
     /// This includes gems, keys, gold, steps, dice, stars, allowance, and luck. 
     /// </summary>
     public sealed class ResourceManager
-	{
+    {
 
         public static int StartingGems = 0;
         public static int StartingKeys = 0;
@@ -107,10 +140,9 @@ namespace BluePrinceArchipelago.Items
         public static int StartingSteps = 0;
         public static int StartingLuck = 0;
 
-        private const int GEM_COUNT_UPPER_LIMIT = 1000000;
+        private GemHandler gemManager = new();
+        private GoldHandler goldManager = new();
 
-        private GemManager gemManager = new();
-        
         //Singleton
         private ResourceManager() { }
 
@@ -118,7 +150,7 @@ namespace BluePrinceArchipelago.Items
 
         public static ResourceManager GetInstance()
         {
-            if (_instance == null) 
+            if (_instance == null)
             {
                 _instance = new();
             }
@@ -146,7 +178,7 @@ namespace BluePrinceArchipelago.Items
                         Logging.LogWarning(itemname);
                         PermanentItem item = ModItemManager.GetPermanentItem(itemname);
                         item.UnlockedCount++;
-                    } 
+                    }
                 }
                 foreach (PermanentItem item in ModItemManager.PermanentItemList)
                 {
@@ -205,48 +237,27 @@ namespace BluePrinceArchipelago.Items
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustGems(int count)
-		{
-            return gemManager.AdjustResource(count);
+        {
+            try
+            {
+                return gemManager.AdjustResource(count);
+            }
+            catch
+            {
+                Logging.LogWarning("Error adjusting Gems", "Resources");
+                return false;
+            }
         }
         /// <summary>
         /// Add or remove Gold from Simon's resources.
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustGold(int count)
+        public bool AdjustGold(int count)
         {
             try
             {
-                // Don't set Gold if Gold is locked.
-                if(ModInstance.GoldManager.GetBoolVariable("GOLD LOCK").Value)
-                {
-                    Logging.LogWarning("Gold is locked, cannot adjust", "Resources");
-                    return false;
-                }
-                int Total = ModInstance.GoldManager.GetIntVariable("GOLD").Value;
-                
-                // Int Clamp
-                if (Total + count < 0)
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value = 0;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value += count;
-                }
-                // Set the UI
-                GameObject GoldIcon = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
-                GoldIcon.transform.Find("Gold #").GetComponent<TextMeshPro>().text = ModInstance.GoldManager.GetIntVariable("GOLD").Value.ToString();
-                if (GoldIcon.active == false)
-                {
-                    GoldIcon.SetActive(true);
-                }
-                
-                return true;
+                return goldManager.AdjustResource(count);
             }
             catch
             {
@@ -264,23 +275,11 @@ namespace BluePrinceArchipelago.Items
         {
             try
             {
-                GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
-                GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
-                TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
-                // Set the Dice Icon's local scale
-                BoneNum.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
-                // Set the Dice text's color
-                BoneTMP.color = new Color(1f, 1f, 1f, 1f);
-                // Set the Dice Icon and text to active 
-                
 
                 int Total = ModInstance.DiceManager.GetIntVariable("BONES").Value;
                 // Int Clamp
                 if (Total + count <= 0)
                 {
-                    // if the set the value to 0 then hide dice UI
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value = 0;
-                    BoneIcon.SetActive(false);
                     return true;
                 }
                 if (Total + count > 1000000)
@@ -291,8 +290,27 @@ namespace BluePrinceArchipelago.Items
                 {
                     ModInstance.DiceManager.GetIntVariable("BONES").Value += count;
                 }
-                // Show the Dice UI
-                BoneIcon.SetActive(true);
+
+                GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
+                GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
+                TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
+                // Set the Dice Icon's local scale
+                BoneNum.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
+                // Set the Dice text's color
+                BoneTMP.color = new Color(1f, 1f, 1f, 1f);
+                // Set the Dice Icon and text to active 
+
+                // if the set the value to 0 then hide dice UI
+                if (ModInstance.DiceManager.GetIntVariable("BONES").Value == 0)
+                {
+                    BoneIcon.SetActive(false);
+                }
+                else
+                {
+                    // Show the Dice UI
+                    BoneIcon.SetActive(true);
+                }
+                
                 // Set text to the correct amount.
                 BoneTMP.text = ModInstance.DiceManager.GetIntVariable("BONES").Value.ToString();
                 return true;
@@ -322,7 +340,7 @@ namespace BluePrinceArchipelago.Items
                         return false;
                     }
                     int Total = ModInstance.StepManager.GetIntVariable("Steps").Value;
-                    
+
                     // Int Clamp
                     if (Total + count < 0)
                     {
@@ -370,7 +388,7 @@ namespace BluePrinceArchipelago.Items
                     return false;
                 }
                 int Total = ModInstance.KeyManager.GetIntVariable("KEYS").Value;
-                
+
                 // Int Clamp
                 if (Total + count < 0)
                 {
