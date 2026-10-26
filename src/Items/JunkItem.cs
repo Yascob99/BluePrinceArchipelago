@@ -54,7 +54,7 @@ namespace BluePrinceArchipelago.Items
 
         public override void AddItemToInventory()
         {
-            ResourceManager.AdjustResource(_ItemType, _Count);
+            ResourceManager.GetInstance().AdjustResource(_ItemType, _Count);
         }
     }
 }

@@ -92,7 +92,7 @@ namespace BluePrinceArchipelago.Items
     {
         public override void ActivateTrap()
         {
-            ResourceManager.AdjustResource(TrapType, Count);
+            ResourceManager.GetInstance().AdjustResource(TrapType, Count);
         }
     }
 

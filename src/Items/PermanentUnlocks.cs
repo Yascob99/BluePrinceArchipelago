@@ -272,7 +272,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void ApplyEffects()
         {
-            ResourceManager.AdjustGems(2);
+            ResourceManager.GetInstance().AdjustGems(2);
         }
     }
 

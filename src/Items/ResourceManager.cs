@@ -11,11 +11,94 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
-	/// <summary>
-	/// Manage Simon's daily resources. 
+    public abstract class ResourceHandler
+    {
+        private int resource = 0;
+
+        private static int ComputeNewResourceCount(int baseResources, int addedResources, int upperLimit)
+        {
+            if (baseResources + addedResources < 0)
+            {
+                return 0;
+            }
+            if (baseResources + addedResources > upperLimit)
+            {
+                return upperLimit;
+            }
+            return baseResources + addedResources;
+        }
+
+        public bool AdjustResource(int addedResources)
+        {
+            if (IsResourceLocked())
+            {
+                return false;
+            }
+            int currentResources = GetResourceCount();
+            int newResourceTotal = ComputeNewResourceCount(currentResources, addedResources, GetUpperLimit());
+            SetResourceCount(newResourceTotal);
+
+            UpdateUI();
+
+            return true;
+        }
+
+        public abstract bool IsResourceLocked();
+
+        public abstract int GetResourceCount();
+
+        public abstract void SetResourceCount(int resourceCount);
+
+        public abstract int GetUpperLimit();
+
+        public abstract void UpdateUI();
+    }
+
+    public class GemManager : ResourceHandler
+    {
+        private const int GEM_COUNT_UPPER_LIMIT = 1000000;
+
+        public override bool IsResourceLocked()
+        {
+            if (ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value)
+            {
+                Logging.LogWarning("Gems are locked, cannot adjust", "Resources");
+                return true;
+            }
+            return false;
+        }
+
+        public override int GetResourceCount()
+        {
+            return ModInstance.GemManager.GetIntVariable("GEMS").Value;
+        }
+
+        public override void SetResourceCount(int resourceCount)
+        {
+            ModInstance.GemManager.GetIntVariable("GEMS").Value = resourceCount;
+        }
+
+        public override int GetUpperLimit()
+        {
+            return GEM_COUNT_UPPER_LIMIT;
+        }
+
+        public override void UpdateUI()
+        {
+            GameObject GemIcon = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
+            GemIcon.transform.Find("Gem #").GetComponent<TextMeshPro>().text = ModInstance.GemManager.GetIntVariable("GEMS").Value.ToString();
+            if (GemIcon.active == false)
+            {
+                GemIcon.SetActive(true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Manage Simon's daily resources. 
     /// This includes gems, keys, gold, steps, dice, stars, allowance, and luck. 
-	/// </summary>
-	public static class ResourceManager
+    /// </summary>
+    public sealed class ResourceManager
 	{
 
         public static int StartingGems = 0;
@@ -23,6 +106,24 @@ namespace BluePrinceArchipelago.Items
         public static int StartingDice = 0;
         public static int StartingSteps = 0;
         public static int StartingLuck = 0;
+
+        private const int GEM_COUNT_UPPER_LIMIT = 1000000;
+
+        private GemManager gemManager = new();
+        
+        //Singleton
+        private ResourceManager() { }
+
+        private static ResourceManager _instance;
+
+        public static ResourceManager GetInstance()
+        {
+            if (_instance == null) 
+            {
+                _instance = new();
+            }
+            return _instance;
+        }
 
         /// <summary>
         ///     Recalculates the amount of starting items the player should have.
@@ -73,7 +174,7 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
-        public static void AddStartingItems() {
+        public void AddStartingItems() {
             Logging.LogWarning($"Gems: {StartingGems}");
             AdjustGems(StartingGems);
             Logging.LogWarning($"Keys: {StartingKeys}");
@@ -86,51 +187,26 @@ namespace BluePrinceArchipelago.Items
             AdjustLuck(StartingLuck);
         }
 
+        public static int ComputeNewResourceCount(int baseResources, int addedResources, int upperLimit) {
+            if (baseResources + addedResources < 0)
+            {
+                return 0;
+            }
+            if (baseResources + addedResources > upperLimit)
+            {
+                return upperLimit;
+            }
+            return baseResources + addedResources;
+        }
+
         /// <summary>
         /// Add or remove Gems from Simon's resources.
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustGems(int count)
+        public bool AdjustGems(int count)
 		{
-			try
-			{
-                // Don't set Gems if Gems are locked.
-                if(ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value)
-                {
-                    Logging.LogWarning("Gems are locked, cannot adjust", "Resources");
-                    return false;
-                }
-                int gemTotal = ModInstance.GemManager.GetIntVariable("GEMS").Value;
-                
-                // Int Clamp
-                if (gemTotal + count < 0)
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value = 0;
-                }
-                if (gemTotal + count > 1000000)
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value += count;
-                }
-                // Set the UI
-                GameObject GemIcon = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
-                GemIcon.transform.Find("Gem #").GetComponent<TextMeshPro>().text = ModInstance.GemManager.GetIntVariable("GEMS").Value.ToString();
-                if (GemIcon.active == false)
-                {
-                    GemIcon.SetActive(true);
-                }
-                return true;
-            }
-			catch
-			{
-				Logging.LogWarning("Error adjusting Gems", "Resources");
-                return false;
-            }
-
+            return gemManager.AdjustResource(count);
         }
         /// <summary>
         /// Add or remove Gold from Simon's resources.
@@ -435,7 +511,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="type">The resource type to add or remove</param>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustResource(string type, int count)
+        public bool AdjustResource(string type, int count)
         {
             switch (type.ToLower())
             {
@@ -497,7 +573,7 @@ namespace BluePrinceArchipelago.Items
         /// Used in the DEBUG build configuration to give Simon many resources at start of day.
         /// Modify this if Simon also needs Items or anything else for your testing.
         /// </summary>
-        public static void GodMode()
+        public void GodMode()
         {
             AdjustGems(100);
             AdjustGold(500);
