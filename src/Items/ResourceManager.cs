@@ -1,5 +1,6 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Utils;
+using System.Collections.Generic;
 #if ML
 using Il2CppTMPro;
 #endif
@@ -302,13 +303,6 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     public sealed class ResourceManager
     {
-
-        public static int StartingGems = 0;
-        public static int StartingKeys = 0;
-        public static int StartingDice = 0;
-        public static int StartingSteps = 0;
-        public static int StartingLuck = 0;
-
         private readonly GemHandler gemHandler = new();
         private readonly GoldHandler goldHandler = new();
         private readonly DiceHandler diceHandler = new();
@@ -330,14 +324,16 @@ namespace BluePrinceArchipelago.Items
         }
 
         /// <summary>
-        ///     Recalculates the amount of starting items the player should have.
+        ///     Recalculates and give the amount of starting items the player should have.
         /// </summary>
-        public static void RecalculculateStartingItems() {
-            StartingGems = 0;
-            StartingKeys = 0;
-            StartingDice = 0;
-            StartingSteps = 0;
-            StartingLuck = 0;
+        public void GiveStartingItems() {
+            Dictionary <string, int> startingResources = [];
+            startingResources.Add("Gems", 0);
+            startingResources.Add("Keys", 0);
+            startingResources.Add("Dice", 0);
+            startingResources.Add("Steps", 0);
+            startingResources.Add("Luck", 0);
+            
             if (ModItemManager.PermanentItemList.Count > 0)
             {
                 foreach (PermanentItem item in ModItemManager.PermanentItemList) {
@@ -354,44 +350,15 @@ namespace BluePrinceArchipelago.Items
                 }
                 foreach (PermanentItem item in ModItemManager.PermanentItemList)
                 {
-                    switch (item.ItemType)
-                    {
-                        case "Gems":
-                            StartingGems += item.UnlockedCount * item.Count;
-                            break;
-                        case "Keys":
-                            StartingKeys += item.UnlockedCount * item.Count;
-                            break;
-                        case "Dice":
-                            StartingDice += item.UnlockedCount * item.Count;
-                            break;
-                        case "Steps":
-                            StartingSteps += item.UnlockedCount * item.Count;
-                            break;
-                        case "Luck":
-                            StartingLuck += item.UnlockedCount * item.Count;
-                            break;
-                    }
-
+                    startingResources[item.ItemType] += item.UnlockedCount * item.Count;
                 }
-
+            }
+            foreach (KeyValuePair<string, int> startingResource in startingResources)
+            {
+                AdjustResource(startingResource.Key, startingResource.Value);
             }
         }
-
-        public void GiveStartingItems() {
-            RecalculculateStartingItems();
-            Logging.LogWarning($"Gems: {StartingGems}");
-            AdjustGems(StartingGems);
-            Logging.LogWarning($"Keys: {StartingKeys}");
-            AdjustKeys(StartingKeys);
-            Logging.LogWarning($"Dice: {StartingDice}");
-            AdjustDice(StartingDice);
-            Logging.LogWarning($"Steps: {StartingSteps}");
-            AdjustSteps(StartingSteps);
-            Logging.LogWarning($"Luck: {StartingLuck}");
-            AdjustLuck(StartingLuck);
-        }
-
+        
         /// <summary>
         /// Add or remove Gems from Simon's resources.
         /// </summary>
