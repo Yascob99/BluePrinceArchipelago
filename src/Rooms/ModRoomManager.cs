@@ -1154,46 +1154,51 @@ namespace BluePrinceArchipelago.Rooms
         public static void UpdateCurrentPickerArrays()
         {
             PlayMakerFSM grid = ModInstance.TheGrid;
-            PlayMakerFSM planPicker = grid.GetGameObjectVariable("theplanpick").value?.GetComponent<PlayMakerFSM>();
-            Logging.LogWarning($"PlanPicker: {planPicker.name}");
-            PickerManager.CurrentPickerArrays.Clear();
-            //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
-            if (planPicker != null)
+            FsmGameObject PlanPicker = grid.GetGameObjectVariable("theplanpick");
+            if (PlanPicker.Value != null)
             {
-                foreach (FsmState state in planPicker.FsmStates)
+                PlayMakerFSM planPicker = PlanPicker?.Value?.GetComponent<PlayMakerFSM>();
+                Logging.LogWarning($"PlanPicker: {planPicker.name}");
+                PickerManager.CurrentPickerArrays.Clear();
+                //Check all the states for SetFsmGameObject actions. If that action is setting one of the picker arrays, add it to the current picker list.
+                if (planPicker != null)
                 {
-                    foreach (var action in state.GetActionsOfType<SetFsmGameObject>())
+                    foreach (FsmState state in planPicker.FsmStates)
                     {
-                        if (action != null)
+                        foreach (var action in state.GetActionsOfType<SetFsmGameObject>())
                         {
-                            SetFsmGameObject SetAction = action.TryCast<SetFsmGameObject>();
-                            //Add the array to the list if it's getting set as a picker array, and it's not already on the list (some pickers use dupe lists).
-                            if (SetAction.variableName.value.Contains("Array") && !PickerManager.CurrentPickerArrays.Contains(action.setValue.value.name))
+                            if (action != null)
                             {
-                                if (SetAction.setValue.value.name.Contains("CENTER"))
+                                SetFsmGameObject SetAction = action.TryCast<SetFsmGameObject>();
+                                //Add the array to the list if it's getting set as a picker array, and it's not already on the list (some pickers use dupe lists).
+                                if (SetAction.variableName.value.Contains("Array") && !PickerManager.CurrentPickerArrays.Contains(action.setValue.value.name))
                                 {
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 1");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1");
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 2");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2");
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 3");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3");
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 1 G");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1 G");
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 2 G");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2 G");
-                                    Logging.LogWarning($"Adding Room Picker: CENTER - Tier 3 G");
-                                    PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3 G");
-                                }
-                                else
-                                {
-                                    Logging.LogWarning($"Adding Room Picker: {SetAction.setValue.Value.name}");
-                                    PickerManager.CurrentPickerArrays.Add(SetAction.setValue.Value.name);
+                                    if (SetAction.setValue.value.name.Contains("CENTER"))
+                                    {
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 1");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1");
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 2");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2");
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 3");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3");
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 1 G");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 1 G");
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 2 G");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 2 G");
+                                        Logging.LogWarning($"Adding Room Picker: CENTER - Tier 3 G");
+                                        PickerManager.CurrentPickerArrays.Add("CENTER - Tier 3 G");
+                                    }
+                                    else
+                                    {
+                                        Logging.LogWarning($"Adding Room Picker: {SetAction.setValue.Value.name}");
+                                        PickerManager.CurrentPickerArrays.Add(SetAction.setValue.Value.name);
+                                    }
                                 }
                             }
-                        }
-                        else {
-                            Logging.LogWarning("Action was invalid, unable to get value from it.");
+                            else
+                            {
+                                Logging.LogWarning("Action was invalid, unable to get value from it.");
+                            }
                         }
                     }
                 }

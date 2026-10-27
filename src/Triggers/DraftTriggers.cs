@@ -99,7 +99,7 @@ namespace BluePrinceArchipelago.Triggers
                     ModRoomManager.CheckForceRoomDraft();
                     return;
                 }
-
+                ModInstance.RDHelper.StartDraft(); //To fix the reroll error.
                 ModRoomManager.UpdateRoomPools();
 
                 ModRoomManager.OuterDraftRooms = ModRoomManager.OuterDraftPrePickShuffling();

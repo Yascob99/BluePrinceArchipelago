@@ -164,7 +164,7 @@ namespace BluePrinceArchipelago
                 }
                 //UIManager.InitializeMainMenu();
                 FSMPatches.IntroSkip();
-                FSMPatches.MainMenuHooks();
+                //FSMPatches.MainMenuHooks();
             }
             if (scene.name.Equals("Mount Holly Estate"))
             {

@@ -451,7 +451,7 @@ namespace BluePrinceArchipelago.Patches
             {
                 // Prevent Default Draft Code Calls.
                 FsmInt RerollCount = MasterPicker.GetIntVariable("Reroll Count");
-                RerollCount = 0;
+                RerollCount.Value = 0;
                 PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 FsmState SendFreeze = StandaloneDoorCode.GetState("Send Freeze");
                 FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
@@ -559,8 +559,8 @@ namespace BluePrinceArchipelago.Patches
             TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
 
             //Sundial Hooks:
-            GameObject Step1 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 1");
-            GameObject Step2 = GameObject.Find("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 2");
+            GameObject Step1 = GameObject.Find("TERRAIN").transform.Find("EAST SECTOR").transform.Find("_APPLE ORCHARD").transform.Find("Back Orchard (cull)").transform.Find("BAKE LAYERS").transform.Find("Water - Just cast").transform.Find("STEP 1").gameObject;
+            GameObject Step2 = GameObject.Find("TERRAIN").transform.Find("EAST SECTOR").transform.Find("_APPLE ORCHARD").transform.Find("Back Orchard (cull)").transform.Find("BAKE LAYERS").transform.Find("Water - Just cast").transform.Find("STEP 2").gameObject;
             for (int i = 0; i < 8; i++)
             {
                 GameObject child1 = Step1.transform.GetChild(i).gameObject;
