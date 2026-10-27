@@ -896,7 +896,7 @@ namespace BluePrinceArchipelago.Utils
         {
             FsmStateAction[] actions = AddItemToArray(state.Actions, action);
             state.Actions = actions;
-            state.actions = actions;
+            state.ActionData.ActionNames.Add(action.GetType().ToString());
             action.Init(state);
             //state.SaveActions();
         }

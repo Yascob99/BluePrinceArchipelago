@@ -632,7 +632,7 @@ public class ArchipelagoClient
                 return;
             }
         }
-        Logging.Log($"Location '{locationName}' not found in Archipelago data. Unable to send location check.");
+        Logging.Log($"Location '{locationName}' not found in Archipelago data. Unable to send location check.", "Locations");
     }
     /// <summary>
     ///     Sends to the server that the location has been checked.
@@ -752,6 +752,7 @@ public class ArchipelagoQueueManager {
                 if (!SendLocationCheck())
                 {
                     _LocationQueue.Enqueue(item);
+                    Logging.LogWarning($"Unable to Dequeue Location: {item}");
                 }
                 else {
                     Plugin.ArchipelagoClient.CheckLocation(item);

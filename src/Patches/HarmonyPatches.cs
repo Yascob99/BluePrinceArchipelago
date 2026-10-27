@@ -284,6 +284,7 @@ namespace BluePrinceArchipelago.Patches
         }
 
         // The game will throw an error when falling back to closet. This prevents the error from filling up the log.
+        // It seems this function isn't what sets the rooms to closet, something else does and that causes the validation function to fail.
         [HarmonyPatch(typeof(RoomDraftHelper), nameof(RoomDraftHelper.PerformValidation))]
         [HarmonyPrefix]
         static bool PerformValidationPreFix(RoomDraftHelper __instance) {

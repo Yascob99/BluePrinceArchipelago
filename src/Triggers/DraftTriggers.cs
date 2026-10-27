@@ -126,7 +126,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     This will result in some of the rooms being set to closets
         /// </summary>
         public static void OnDraftValidationFailed() {
-            Logging.Log("DraftHelper Validation ran into an error and could not run to completion.", "Draft");
+            Logging.LogWarning("DraftHelper Validation ran into an error and could not run to completion.", "Draft");
         }
     }
 }

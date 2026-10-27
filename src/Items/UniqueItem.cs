@@ -333,6 +333,7 @@ namespace BluePrinceArchipelago.Items
                         // If the item is not unlocked, prevent it from being added to inventory.
                         if (!item.IsUnlocked && item.ApplySanity())
                         {
+                            Logging.LogWarning($"Attempting to add hook for {item.Name} to Locksmith in state: {state.name}");
                             //Disable the actions that add the item to inventory.
                             state.DisableActionsOfType<ArrayListAdd>();
                             state.AddAction(item.LocksmithEvent);
