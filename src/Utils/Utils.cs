@@ -177,6 +177,18 @@ namespace BluePrinceArchipelago.Utils
             }
             return transforms.ToArray();
         }
+
+        /// <summary>
+        ///     Gets the current resource path of the invoking Transform.
+        /// </summary>
+        /// <param name="current">The Transform.</param>
+        /// <returns>The Transformarms path as a string relative to it's scene.</returns>
+        public static string GetPath(this Transform current)
+        {
+            if (current.parent == null)
+                return "/" + current.name;
+            return current.parent.GetPath() + "/" + current.name;
+        }
     }
     /// <summary>
     ///     A series of utility functions for common operations involving strings.
@@ -377,15 +389,51 @@ namespace BluePrinceArchipelago.Utils
         /// <returns>The GameObject path as a string relative to it's scene.</returns>
         public static string GetPath(this GameObject current) => current.transform.GetPath();
 
+
         /// <summary>
-        ///     Gets the current resource path of the invoking Transform.
+        ///     Gets a GameObject in the current scene heirarchy relative to the scene route. Sometimes GameObject.Find() is better.
         /// </summary>
-        /// <param name="current">The Transform.</param>
-        /// <returns>The Transformarms path as a string relative to it's scene.</returns>
-        public static string GetPath(this Transform current) {
-            if (current.parent == null)
-                return "/" + current.name;
-            return current.parent.GetPath() + "/" + current.name;
+        /// <param name="objectPath">The relative heirarchy path of the descendant GameObject</param>
+        /// <returns>The GameObject at the given hierarchy path. Returns null if the path is an empty string, or if it fails to find the object at that path.</returns>
+        public static GameObject FindInHierarchy(string objectPath) 
+        {
+            // Handles case of starting with "/"
+            if (objectPath.StartsWith('/')) { 
+                objectPath = objectPath.Substring(1);
+            }
+            // Handles case of an empty path.
+            if (objectPath.Length == 0) return null;
+            string[] pathparts = objectPath.Split('/');
+            GameObject root = GameObject.Find(pathparts[0]);
+            // Handles case where it's just single object. GameObject.Find() should be used in that case anyways.
+            if (pathparts.Length < 2) {
+                return root;
+            }
+            return root.FindDescendant(string.Join("/", pathparts, 1, pathparts.Length -1));
+        }
+
+        /// <summary>
+        ///     Gets a GameObject among the provided GameObject's descendants based on the heirarchy path provided.
+        /// </summary>
+        /// <param name="current">The GameObject.</param>
+        /// <param name="objectPath">The eelative heirarchy path of the descendant GameObject</param>
+        /// <returns>The GameObject at the given hierarchy path. Returns the calling if the path is an empty string. Returns null if it fails to find the object at that path.</returns>
+        public static GameObject FindDescendant(this GameObject current, string objectPath)
+        {
+            // Handles case of no further descendants
+            if (objectPath.Length == 0) return current;
+            string[] pathparts = objectPath.Split('/');
+            Transform subObject = current.transform;
+            for (int i = 0; i < pathparts.Length; i++)
+            {
+                subObject = subObject.Find(pathparts[i]);
+                if (subObject == null)
+                {
+                    Logging.LogError($"Error Getting GameObject: {current.name}/{string.Join("/", pathparts)}.\n{current.name}/{string.Join("/", pathparts, 0, i + 1)} was not a valid GameObject.");
+                    return null;
+                }
+            }
+            return subObject.gameObject;
         }
     }
     /// <summary>
@@ -624,6 +672,13 @@ namespace BluePrinceArchipelago.Utils
 
     public static class GeneralUtils
     {
+
+        /// <summary>
+        ///     The IEnumerator for Running an Action after a delay.
+        /// </summary>
+        /// <param name="delay">Delay in miliseconds.</param>
+        /// <param name="actionToRun">The action to run.</param>
+        /// <returns>The IEnumerator for the delayed run.</returns>
         private static System.Collections.IEnumerator RunAfterDelayRoutine(float delay, Action actionToRun)
         {
             yield return new WaitForSeconds(delay);
@@ -631,6 +686,11 @@ namespace BluePrinceArchipelago.Utils
             actionToRun.Invoke();
         }
 
+        /// <summary>
+        ///     Runs an Action after a delay.
+        /// </summary>
+        /// <param name="delay">Delay in miliseconds.</param>
+        /// <param name="actionToRun">The action to run.</param>
         public static void RunAfterDelay(float delay, Action actionToRun)
         {
             ModInstance.Instance.StartCoroutine(RunAfterDelayRoutine(delay, actionToRun));

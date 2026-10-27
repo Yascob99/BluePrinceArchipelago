@@ -75,9 +75,6 @@ namespace BluePrinceArchipelago
         // Transforms
         public static Transform YouFoundText = new();
 
-        // FSM actions.
-        public static FsmStateAction DraftValidationAction = new();
-
         // Bools
         public static bool IsArchipelagoMode { get; private set; } = false;
         public static bool StateLoaded { get; private set; } = false;
@@ -178,33 +175,32 @@ namespace BluePrinceArchipelago
                 }
 
                 //Initialize all of the GameObjects
-                PlanPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
-                Inventory = GameObject.Find("__SYSTEM/Inventory").gameObject;
-                RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House").gameObject;
-                StatsLogger = GameObject.Find("StatsLogger").gameObject;
-                GemManager = GameObject.Find("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
-                StepManager = GameObject.Find("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
-                GoldManager = GameObject.Find("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");
-                DiceManager = GameObject.Find("__SYSTEM/HUD/Bones")?.GetFsm("Bone Manager");
-                KeyManager = GameObject.Find("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
-                StarManager = GameObject.Find("__SYSTEM/HUD/Stars")?.GetFsm("FSM");
+                PlanPicker = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN PICKER").gameObject;
+                Inventory = GameObjectExtensions.FindInHierarchy("__SYSTEM/Inventory").gameObject;
+                RoomsInHouse = GameObjectExtensions.FindInHierarchy("__SYSTEM/Room Lists/Rooms in House").gameObject;
+                StatsLogger = GameObjectExtensions.FindInHierarchy("StatsLogger").gameObject;
+                GemManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Gems")?.GetFsm("Gem Manager");
+                StepManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Steps")?.GetFsm("Steps Manager");
+                GoldManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Gold")?.GetFsm("Gold Manager");
+                DiceManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Bones")?.GetFsm("Bone Manager");
+                KeyManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Keys")?.GetFsm("Key Manager");
+                StarManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Stars")?.GetFsm("FSM");
                 YouFoundText = GameObject.Find("/UI OVERLAY CAM/You Found Text").transform;
-                LuckManager = GameObject.Find("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
-                GlobalManager = GameObject.Find("Global Manager")?.GetComponent<PlayMakerFSM>();
-                GlobalPersistentManager = GameObject.Find("Global Persitent Manager")?.GetComponent<PlayMakerFSM>();
-                TheGrid = GameObject.Find("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
-                MasterPicker = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
+                LuckManager = GameObjectExtensions.FindInHierarchy("__SYSTEM/Luck Calculator")?.GetFsm("Luck Calculator");
+                GlobalManager = GameObjectExtensions.FindInHierarchy("Global Manager")?.GetComponent<PlayMakerFSM>();
+                GlobalPersistentManager = GameObjectExtensions.FindInHierarchy("Global Persitent Manager")?.GetComponent<PlayMakerFSM>();
+                TheGrid = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE GRID")?.GetComponent<PlayMakerFSM>();
+                MasterPicker = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")?.GetComponent<PlayMakerFSM>();
                 LocksmithMenu = GameObject.Find("UI OVERLAY CAM/Locksmith Menu")?.GetComponent<PlayMakerFSM>();
                 CommissaryMenu = GameObject.Find("UI OVERLAY CAM/Commissary Menu")?.GetComponent<PlayMakerFSM>();
-                EndGameClicker = GameObject.Find("ROOMS/Antechamber/NON STATIC/DOOR 46/grey door/End Game Clicker")?.GetComponent<PlayMakerFSM>();//TODO get the full proper path name for this GameObject.
-                DraftValidationAction = MasterPicker.GetState("3").GetFirstActionOfType<CallMethod>();
-                RoomText = GameObject.Find("__SYSTEM/HUD/Room Text")?.GetComponent<PlayMakerFSM>();
-                PickupSpawnPool = GameObject.Find("__SYSTEM/Pickup Spawn Pools").gameObject;
-                RunningEngine = GameObject.Find("__SYSTEM/RUN ENGINE/Running Engine")?.GetComponent<PlayMakerFSM>();
-                DigEngine = GameObject.Find("__SYSTEM/Utility/Dig Engine")?.GetComponent<PlayMakerFSM>();
-                ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>();
-                UpgradeDisksObj = GameObject.Find("__SYSTEM/Upgrade Disks");
-                RDHelper = GameObject.Find("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
+                EndGameClicker = GameObjectExtensions.FindInHierarchy("ROOMS/Antechamber/NON STATIC/DOOR 46/grey door/End Game Clicker")?.GetComponent<PlayMakerFSM>();//TODO get the full proper path name for this GameObject.
+                RoomText = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD/Room Text")?.GetComponent<PlayMakerFSM>();
+                PickupSpawnPool = GameObjectExtensions.FindInHierarchy("__SYSTEM/Pickup Spawn Pools").gameObject;
+                RunningEngine = GameObjectExtensions.FindInHierarchy("__SYSTEM/RUN ENGINE/Running Engine")?.GetComponent<PlayMakerFSM>();
+                DigEngine = GameObjectExtensions.FindInHierarchy("__SYSTEM/Utility/Dig Engine")?.GetComponent<PlayMakerFSM>();
+                ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>(); // Needs to use GameObject.Find();
+                UpgradeDisksObj = GameObjectExtensions.FindInHierarchy("__SYSTEM/Upgrade Disks");
+                RDHelper = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();

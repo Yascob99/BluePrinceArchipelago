@@ -62,8 +62,8 @@ namespace BluePrinceArchipelago.Patches
             PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
 
             // Darkroom Skip Fix
-            PlayMakerFSM PlanManagement = GameObject.Find("__SYSTEM/THE DRAFT/PLAN MANAGEMENT").GetComponent<PlayMakerFSM>();
-            GameObject RoomsInHouse = GameObject.Find("__SYSTEM/Room Lists/Rooms in House");
+            PlayMakerFSM PlanManagement = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN MANAGEMENT").GetComponent<PlayMakerFSM>();
+            GameObject RoomsInHouse = GameObjectExtensions.FindInHierarchy("__SYSTEM/Room Lists/Rooms in House");
             FsmState DarkRoomLightsOn = PlanManagement.GetState("DarkRoom Lights On");
             ArrayListContains CheckForArchives = DarkRoomLightsOn.GetFirstActionOfType<ArrayListContains>();
             CheckForArchives.gameObject.gameObject = RoomsInHouse;
@@ -134,7 +134,7 @@ namespace BluePrinceArchipelago.Patches
                             target = FsmEventTarget.EventTarget.GameObject,
                             gameObject = new FsmOwnerDefault()
                             {
-                                gameObject = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince"),
+                                gameObject = GameObjectExtensions.FindInHierarchy("__SYSTEM/FPS Home/FPSController - Prince"),
                                 ownerOption = OwnerDefaultOption.SpecifyGameObject
                             },
                             fsmName = "FSM",
@@ -233,7 +233,7 @@ namespace BluePrinceArchipelago.Patches
                     Logging.Log("Upgrade Disk Override already applied.");
                 }
                 //Commissary Replacement Code
-                PlayMakerFSM CommissaryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Commissary Menu")?.GetComponent<PlayMakerFSM>();
+                PlayMakerFSM CommissaryMenu = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Commissary Menu")?.GetComponent<PlayMakerFSM>();
                 // Prevent the Default add to inventory behavior.
                 FsmState UpgradeDisksAdd = CommissaryMenu.GetState("Upgrade Disks Add");
                 UpgradeDisksAdd.DisableFirstActionOfType<SetFsmInt>();
@@ -260,7 +260,7 @@ namespace BluePrinceArchipelago.Patches
                     delay = 0f,
                     everyFrame = false
                 });
-                PlayMakerFSM MineUpgradeSpawn = GameObject.Find("UNDERGROUND").transform.Find("Candle Room").Find("_CULLABLE - candle room").Find("_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM MineUpgradeSpawn = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
                 if (MineUpgradeSpawn != null)
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
@@ -317,24 +317,24 @@ namespace BluePrinceArchipelago.Patches
         public static void AddedFloorPlanOverrides()
         {
             //Planetarium
-            PlayMakerFSM PlanetariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Planetarium Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM PlanetariumYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Planetarium Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState PlanetariumAddState = PlanetariumYesButton.GetState("State 8");
             PlanetariumAddState.DisableFirstActionOfType<SendEvent>();
             // Get the second Send Event so it can be unfrozen.
             SendEvent Unfreeze = PlanetariumAddState.GetActionsOfType<SendEvent>()[1];
 
             //Conservatory
-            PlayMakerFSM ConservatoryYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Conservatory Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM ConservatoryYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Conservatory Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ConservatoryAddState = ConservatoryYesButton.GetState("State 8");
             ConservatoryAddState.DisableFirstActionOfType<SendEvent>();
 
             //Tunnel
-            PlayMakerFSM TunnelYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Tunnel Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM TunnelYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Tunnel Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TunnelAddState = TunnelYesButton.GetState("State 8");
             TunnelAddState.DisableActionsOfType<SetFsmBool>();
 
             //Throne Room
-            PlayMakerFSM ThroneRoomYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Throne Room Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM ThroneRoomYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Throne Room Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ThroneRoomAddState = ThroneRoomYesButton.GetState("Tomorrow");
             ThroneRoomAddState.DisableFirstActionOfType<ActivateGameObject>();
             ThroneRoomAddState.GetFirstActionOfType<SetFsmBool>().variableName = "Throne Room Added";
@@ -342,7 +342,7 @@ namespace BluePrinceArchipelago.Patches
             ThroneRoomAddState.AddAction(Unfreeze);
 
             //Treasure Trove
-            PlayMakerFSM TreasureTroveYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM TreasureTroveYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Treasure Trove Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TreasureTroveAddState = TreasureTroveYesButton.GetState("State 8");
             TreasureTroveAddState.DisableFirstActionOfType<SendEvent>();
 
@@ -359,53 +359,53 @@ namespace BluePrinceArchipelago.Patches
             TreasureTroveYesButton.GetState("State 7").AddFirstAction(TreasureTrovePickup);
 
             //Mechanarium
-            PlayMakerFSM MechanariumYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/MECHANARIUM Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM MechanariumYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/MECHANARIUM Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState MechanariumAddState = MechanariumYesButton.GetState("State 8");
             MechanariumAddState.DisableFirstActionOfType<SendEvent>();
 
             //Lost & Found
-            PlayMakerFSM LostandFoundYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Lost&Found Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM LostandFoundYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Lost&Found Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState LostandFoundAddState = LostandFoundYesButton.GetState("State 8");
             LostandFoundAddState.DisableFirstActionOfType<SendEvent>();
 
 
             //Closed Exhibit
-            PlayMakerFSM ClosedExhibitYesButton = GameObject.Find("UI OVERLAY CAM/UI Documents/DOCUMENTS/RED LETTER STUDY - doc/Page 3/Closed Exhibit Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM ClosedExhibitYesButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/DOCUMENTS/RED LETTER STUDY - doc/Page 3/Closed Exhibit Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClosedExhibitAddState = ClosedExhibitYesButton.GetState("State 8");
             ClosedExhibitAddState.DisableFirstActionOfType<SendEvent>();
 
             //Drafting Studio Adds
 
             //Clock Tower
-            PlayMakerFSM ClockTowerDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CLOCK TOWER/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM ClockTowerDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/CLOCK TOWER/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState ClockTowerAddState = ClockTowerDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             //The Kennel
-            PlayMakerFSM TheKennelDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/THE KENNEL/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM TheKennelDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/THE KENNEL/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState TheKennelAddState = TheKennelDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             //Vestibule
-            PlayMakerFSM VestibuleDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/VESTIBULE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM VestibuleDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/VESTIBULE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState VestibuleAddState = VestibuleDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             //Dovecote
-            PlayMakerFSM DovecoteDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DOVECOTE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM DovecoteDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/DOVECOTE/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DovecoteAddState = DovecoteDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             //Solarium
-            PlayMakerFSM SolariumDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/SOLARIUM/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM SolariumDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/SOLARIUM/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState SolariumAddState = SolariumDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             // Dormitory
-            PlayMakerFSM DormitoryDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/DORMITORY/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM DormitoryDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/DORMITORY/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState DormitoryAddState = DormitoryDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             // Casino
-            PlayMakerFSM CasinoDraftButton = GameObject.Find("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM CasinoDraftButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Drafting Studio UI/CASINO/DRAFT BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CasinoAddState = CasinoDraftButton.GetState("Add this Floorplan to your DRAFT POOL");
 
             // Prevents the CoM from erronously granting the planetarium location.
-            PlayMakerFSM CoMAddButton = GameObject.Find("UI OVERLAY CAM/UI Documents/MINI MENUS/Duplicate Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM CoMAddButton = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/UI Documents/MINI MENUS/Duplicate Find - menu/2 Button Spread (2)/YES BUTTON").GetComponent<PlayMakerFSM>();
             FsmState CoMEventState = CoMAddButton.GetState("State 7");
             CoMEventState.DisableFirstActionOfType<CallMethod>();
 
@@ -452,7 +452,7 @@ namespace BluePrinceArchipelago.Patches
                 // Prevent Default Draft Code Calls.
                 FsmInt RerollCount = MasterPicker.GetIntVariable("Reroll Count");
                 RerollCount.Value = 0;
-                PlayMakerFSM StandaloneDoorCode = GameObject.Find("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
+                PlayMakerFSM StandaloneDoorCode = GameObjectExtensions.FindInHierarchy("Standalone Rooms/Rustic Door/Rustic Door/Standalone Door Code").GetComponent<PlayMakerFSM>();
                 FsmState SendFreeze = StandaloneDoorCode.GetState("Send Freeze");
                 FsmState ShuffleRooms = StandaloneDoorCode.AddState("Shuffle Rooms");
                 SendFreeze.DisableAction(5);
@@ -539,28 +539,28 @@ namespace BluePrinceArchipelago.Patches
         {
             //Basement Door Hooks:
             // Foundation
-            PlayMakerFSM FoundationDoor1 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM FoundationDoor1 = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
             FoundationDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
             FoundationDoor1.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
-            PlayMakerFSM FoundationDoor2 = GameObject.Find("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM FoundationDoor2 = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Basement/_CULLABLE - basement/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
             FoundationDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
             FoundationDoor2.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("FoundationBasementDoorOpened"), 0);
 
             // Well
-            PlayMakerFSM WellDoor1 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM WellDoor1 = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 1").GetComponent<PlayMakerFSM>();
             WellDoor1.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
             WellDoor1.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
-            PlayMakerFSM WellDoor2 = GameObject.Find("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM WellDoor2 = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
             WellDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
             WellDoor2.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
 
             // Tunnel
-            PlayMakerFSM TunnelDoor = GameObject.Find("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM TunnelDoor = GameObjectExtensions.FindInHierarchy("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
             TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
 
             //Sundial Hooks:
-            GameObject Step1 = GameObject.Find("TERRAIN").transform.Find("EAST SECTOR").transform.Find("_APPLE ORCHARD").transform.Find("Back Orchard (cull)").transform.Find("BAKE LAYERS").transform.Find("Water - Just cast").transform.Find("STEP 1").gameObject;
-            GameObject Step2 = GameObject.Find("TERRAIN").transform.Find("EAST SECTOR").transform.Find("_APPLE ORCHARD").transform.Find("Back Orchard (cull)").transform.Find("BAKE LAYERS").transform.Find("Water - Just cast").transform.Find("STEP 2").gameObject;
+            GameObject Step1 = GameObjectExtensions.FindInHierarchy("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 1");
+            GameObject Step2 = GameObjectExtensions.FindInHierarchy("TERRAIN/EAST SECTOR/_APPLE ORCHARD/Back Orchard (cull)/BAKE LAYERS/Water - Just cast/STEP 2");
             for (int i = 0; i < 8; i++)
             {
                 GameObject child1 = Step1.transform.GetChild(i).gameObject;
@@ -570,13 +570,13 @@ namespace BluePrinceArchipelago.Patches
             }
 
             //Entrance Hall Vase Hooks
-            PlayMakerFSM Vase1 = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 1").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM Vase1 = GameObjectExtensions.FindInHierarchy("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 1").GetComponent<PlayMakerFSM>();
             Vase1.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenEast"));
-            PlayMakerFSM Vase2 = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2").GetComponent<PlayMakerFSM>();
+            PlayMakerFSM Vase2 = GameObjectExtensions.FindInHierarchy("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2").GetComponent<PlayMakerFSM>();
             Vase2.GetState("BREAK!").AddAction(CustomFsmMethodManager.GetCallMethod("EntranceHallVaseBrokenWest"));
 
             //Entrance Hall Allowance Envelope Hooks
-            GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
+            GameObject AllowanceEnvelope = GameObjectExtensions.FindInHierarchy("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
             AllowanceEnvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
         }
 
@@ -601,11 +601,11 @@ namespace BluePrinceArchipelago.Patches
             FsmOwnerDefault MasterPickerFOD = new FsmOwnerDefault()
             {
                 gameObject = new FsmGameObject() {
-                    value = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
+                    value = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
                 },
                 GameObject = new FsmGameObject()
                 {
-                    Value = GameObject.Find("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
+                    Value = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN PICKER/MASTER PICKER - OVERRIDE")
                 },
                 ownerOption = OwnerDefaultOption.SpecifyGameObject
             };
