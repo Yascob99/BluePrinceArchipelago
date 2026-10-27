@@ -409,23 +409,21 @@ namespace BluePrinceArchipelago.Items
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public bool AdjustSteps(int count, bool setdirectly = false)
         {
+            return AdjustResource(STEP_TYPE, count);
+        }
+
+        public static bool ForceAdjustSteps(int count)
+        { 
             try
             {
-                if (setdirectly){
-                    return AdjustResource(STEP_TYPE, count);
-                }
-                else
-                {
-                    StepHandler.ForceAdjust(count);
-                    return true;
-                }
+                StepHandler.ForceAdjust(count);
+                return true;
             }
             catch
             {
                 Logging.LogWarning("Error adjusting Steps", "Resources");
                 return false;
             }
-
         }
 
         /// <summary>
