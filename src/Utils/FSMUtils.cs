@@ -11,7 +11,6 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Utils
@@ -338,7 +337,7 @@ namespace BluePrinceArchipelago.Utils
         {
             for (int i = 0; i < state.Actions.Count; i++)
             {
-                if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
+                if (i == index)
                 {
                     return state.Actions[i].TryCast<TAction>();
                 }
@@ -467,7 +466,6 @@ namespace BluePrinceArchipelago.Utils
         /// </summary>
         /// <param name="fsm">The fsm</param>
         /// <param name="state">The Fsm state to add to the FSM.</param>
-
         public static void AddState(this PlayMakerFSM fsm, FsmState state)
         {
             FsmState[] states = new FsmState[fsm.FsmStates.Length + 1];

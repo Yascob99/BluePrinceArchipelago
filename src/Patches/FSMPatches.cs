@@ -428,7 +428,11 @@ namespace BluePrinceArchipelago.Patches
         }
 
         public static void TradingPostOverrides() {
-            PlayMakerFSM TradingPostMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Trading Post Menu").Find("Items PM bridge").gameObject.GetComponent<PlayMakerFSM>();
+            PlayMakerFSM TradingPostMenu = GameObject
+                .Find("UI OVERLAY CAM")
+                .transform.Find("Trading Post Menu")
+                .Find("Items PM bridge").gameObject
+                .GetComponent<PlayMakerFSM>();
 
             FsmState MenuIconUpdate = TradingPostMenu.GetState("Menu Icon Update");
             MenuIconUpdate.AddAction(CustomFsmMethodManager.GetCallMethod("ItemTraded"));
