@@ -9,6 +9,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods {
 
         public override void OnCalled()
         {
+            // Prevent the trigger if a DeathLink is being processed.
             if (!DeathLinkHandler.processingDeathLink)
             {
                 Plugin.ArchipelagoClient.DeathLinkHandler.SendStepsDeathLink();

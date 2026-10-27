@@ -274,10 +274,10 @@ public class DeathLinkHandler
         if (deathLinkType == DeathLinkType.option_steps) return;
 
         Logging.Log("End of Day, checking for deathlink send", "DeathLink");
-        // if there is already a death link in progress, prevent it.
+        // if there is already a death link in progress, prevent a sending a deathlink.
         if (processingDeathLink)
         {
-            Logging.Log($"Steps deathlink prevented due to local death in progress.", "DeathLink");
+            Logging.Log($"End of Day deathlink prevented due to local death in progress.", "DeathLink");
             return;
         }
         Logging.Log($"Deathlink Enabled: {deathLinkEnabled}");
