@@ -22,6 +22,7 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.IsInRun = true;
             TrapManager.EODTrapToday = false;
             TrapManager.FrozenToday = false;
+            DeathLinkHandler.processingDeathLink = false;
             ModInstance.GemManager.SendEvent("Update");
             ModInstance.KeyManager.SendEvent("Update");
             ModInstance.DiceManager.SendEvent("Update");

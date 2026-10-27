@@ -48,6 +48,8 @@ public class DeathLinkHandler
     private readonly DeathLinkService service;
     private readonly Queue<DeathLink> deathLinks = new();
     public static int BlockedDeathLinks = 0;
+    public static bool processingDeathLink = false;
+    public static bool room46Entered = false;
 
     /// <summary>
     ///     Instantiates our death link handler, sets up the hook for receiving death links, and enables death link if needed
@@ -103,7 +105,6 @@ public class DeathLinkHandler
         Logging.Log(string.IsNullOrWhiteSpace(deathLink.Cause)
             ? $"Received Death Link from: {deathLink.Source}"
             : deathLink.Cause, "DeathLink");
-
         KillPlayer();
     }
 
@@ -118,7 +119,6 @@ public class DeathLinkHandler
             if (!ModInstance.IsInRun) return;
             if (deathLinks.Count < 1) return;
             if (!deathLinkEnabled) return;
-
             var deathLink = deathLinks.Dequeue();
             var cause = string.IsNullOrWhiteSpace(deathLink.Cause) ? GetDeathLinkCause(deathLink) : deathLink.Cause;
 
@@ -158,14 +158,14 @@ public class DeathLinkHandler
         }
     }
 
-    private static int _localDeathsInProgress = 0;
+
 
     /// <summary>
     ///     Prevents entering room46 for the first time from killing the player since this automatically ends the current day.
     /// </summary>
     public static void OnRoom46FirstEntered()
     {
-        _localDeathsInProgress += 1;
+        room46Entered = true;
     }
 
     /// <summary>
@@ -176,9 +176,9 @@ public class DeathLinkHandler
     /// <returns></returns>
     private static System.Collections.IEnumerator KillPlayer(string cause, DeathLink deathLink = null)
     {
+        
         yield return null;
-        _localDeathsInProgress += 1;
-        ArchipelagoConsole.LogMessage($"{cause}, {_localDeathsInProgress} local deaths in progress.", "DeathLink");
+        ArchipelagoConsole.LogMessage($"Attempting to execute DeathLink: {cause}", "DeathLink");
 
         yield return null;
         if (!ResourceManager.AdjustSteps(-1000000))
@@ -191,7 +191,7 @@ public class DeathLinkHandler
         }
         else
         {
-            _localDeathsInProgress -= 1;
+            processingDeathLink = true;
         }
         // ZERO STEP ENDING: Send Event- State 8
     }
@@ -219,11 +219,16 @@ public class DeathLinkHandler
         // If the deathlink is not based on steps, prevent it.
         if (deathLinkType != DeathLinkType.option_steps) return;
 
+        if (room46Entered) {
+            Logging.Log($"Steps deathlink prevented due to room46 being entered.", "DeathLink");
+            room46Entered = false;
+            return;
+        }
+
         // if there is already a death link in progress, prevent it.
-        if (_localDeathsInProgress > 0)
+        if (processingDeathLink)
         {
-            Logging.Log($"Steps deathlink prevented due to local death in progress. {_localDeathsInProgress} local deaths in progress.", "DeathLink");
-            _localDeathsInProgress -= 1;
+            Logging.Log($"Steps deathlink prevented due to local death in progress.", "DeathLink");
             return;
         }
 
@@ -269,10 +274,10 @@ public class DeathLinkHandler
         if (deathLinkType == DeathLinkType.option_steps) return;
 
         Logging.Log("End of Day, checking for deathlink send", "DeathLink");
-        if (_localDeathsInProgress > 0)
+        // if there is already a death link in progress, prevent it.
+        if (processingDeathLink)
         {
-            Logging.Log($"End of Day deathlink prevented due to local death in progress. {_localDeathsInProgress} local deaths in progress.", "DeathLink");
-            _localDeathsInProgress -= 1;
+            Logging.Log($"Steps deathlink prevented due to local death in progress.", "DeathLink");
             return;
         }
         Logging.Log($"Deathlink Enabled: {deathLinkEnabled}");
