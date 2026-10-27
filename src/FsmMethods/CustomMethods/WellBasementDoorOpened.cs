@@ -28,7 +28,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public override void OnCalled()
         {
-            EventTriggers.OnBasementDoorOpened("Well");
+            EventTriggers.OnBasementDoorOpened("The Well");
         }
 
     }

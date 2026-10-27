@@ -1,5 +1,4 @@
 ﻿
-using BluePrinceArchipelago.Utils.Actions;
 #if Bep
 using HutongGames.PlayMaker;
 #endif
@@ -512,6 +511,7 @@ namespace BluePrinceArchipelago.Utils
             Actions[0] = action;
             state.Actions.CopyTo(Actions, 1);
             state.Actions = Actions;
+            state.ActionData.ActionNames.Add(action.GetType().ToString());
             action.Init(state);
             //state.SaveActions();
         }
@@ -526,6 +526,7 @@ namespace BluePrinceArchipelago.Utils
             actions[state.Actions.Length] = action;
             state.Actions.CopyTo(actions, 0);
             state.Actions = actions;
+            state.ActionData.ActionNames.Add(action.GetType().ToString());
             action.Init(state);
             //state.SaveActions();
         }
@@ -576,6 +577,7 @@ namespace BluePrinceArchipelago.Utils
                 else actions[i] = state.Actions[i + 1];
             }
             state.Actions = actions;
+            state.ActionData.actionNames.RemoveAt(index);
             //state.SaveActions();
         }
         /// <summary>
@@ -595,6 +597,7 @@ namespace BluePrinceArchipelago.Utils
                 index = 0;
             }
             state.Actions[index] = action;
+            state.ActionData.ActionNames[index] = action.GetType().ToString();
             action.Init(state);
             //state.SaveActions();
         }
@@ -924,55 +927,6 @@ namespace BluePrinceArchipelago.Utils
             //state.SaveActions();
         }
 
-        /// TODO: Fix these functions
-        /// <summary>
-        ///     Adds a method in a PlayMakerFSM. CURRENTLY DOES NOT WORK
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state in which the method is added</param>
-        /// <param name="method">The method that will be invoked with the action as the parameter</param>
-
-        public static void AddMethod(this PlayMakerFSM fsm, string stateName, Action method) => fsm.GetState(stateName)!.AddMethod(method);
-
-        /// <inheritdoc cref="AddMethod(PlayMakerFSM, string, Action)"/>
-
-        public static void AddMethod(this Fsm fsm, string stateName, Action method) => fsm.GetState(stateName)!.AddMethod(method);
-
-        /// <inheritdoc cref="AddMethod(PlayMakerFSM, string, Action)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="method">The method that will be invoked with the action as the parameter</param>
-
-        public static void AddMethod(this FsmState state, Action method)
-        {
-            MethodAction action = new MethodAction { Method = method };
-            state.AddAction(action);
-        }
-        /// TODO: Fix these functions
-        /// <summary>
-        ///     Adds a method with a parameter in a PlayMakerFSM. CURRENTLY DOES NOT WORK.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state in which the method is added</param>
-        /// <param name="method">The method that will be invoked with the finish action as the parameter</param>
-
-        public static void AddLambdaMethod(this PlayMakerFSM fsm, string stateName, Action<Action> method) => fsm.GetState(stateName)!.AddLambdaMethod(method);
-
-        /// <inheritdoc cref="AddLambdaMethod(PlayMakerFSM, string, Action{Action})"/>
-
-        public static void AddLambdaMethod(this Fsm fsm, string stateName, Action<Action> method) => fsm.GetState(stateName)!.AddLambdaMethod(method);
-
-        /// <inheritdoc cref="AddLambdaMethod(PlayMakerFSM, string, Action{Action})"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="method">The method that will be invoked with the finish action as the parameter</param>
-
-        public static void AddLambdaMethod(this FsmState state, Action<Action> method)
-        {
-            FunctionAction<Action> action = new FunctionAction<Action> { Method = method };
-            action.Arg = action.Finish;
-            state.AddAction(action);
-            //state.SaveActions();
-        }
-
         /// <summary>
         ///     Internal. Inserts a value of a given type into an array at a given index.
         ///     Trying to insert a value out of bounds will cause a `ArgumentOutOfRangeException`.
@@ -1069,144 +1023,7 @@ namespace BluePrinceArchipelago.Utils
             //state.SaveActions();
         }
 
-        /// <summary>
-        ///     Inserts a method in a PlayMakerFSM. CURRENTLY DOES NOT WORK
-        ///     Trying to insert a method out of bounds will cause a `ArgumentOutOfRangeException`.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state in which the method is added</param>
-        /// <param name="method">The method that will be invoked</param>
-        /// <param name="index">The index to place the action in</param>
-        /// <returns>bool that indicates whether the insertion was successful</returns>
-
-        public static void InsertMethod(this PlayMakerFSM fsm, string stateName, Action method, int index) => fsm.GetState(stateName)!.InsertMethod(index, method);
-
-        /// <inheritdoc cref="InsertMethod(PlayMakerFSM, string, Action, int)"/>
-
-        public static void InsertMethod(this PlayMakerFSM fsm, string stateName, int index, Action method) => fsm.GetState(stateName)!.InsertMethod(index, method);
-
-        /// <inheritdoc cref="InsertMethod(PlayMakerFSM, string, Action, int)"/>
-
-        public static void InsertMethod(this Fsm fsm, string stateName, Action method, int index) => fsm.GetState(stateName)!.InsertMethod(index, method);
-
-        /// <inheritdoc cref="InsertMethod(PlayMakerFSM, string, Action, int)"/>
-
-        public static void InsertMethod(this Fsm fsm, string stateName, int index, Action method) => fsm.GetState(stateName)!.InsertMethod(index, method);
-
-        /// <inheritdoc cref="InsertMethod(PlayMakerFSM, string, Action, int)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="method">The method that will be invoked</param>
-        /// <param name="index">The index to place the action in</param>
-
-        public static void InsertMethod(this FsmState state, Action method, int index) => state.InsertMethod(index, method);
-
-        /// <inheritdoc cref="InsertMethod(FsmState, Action, int)"/>
-
-        public static void InsertMethod(this FsmState state, int index, Action method)
-        {
-            MethodAction action = new MethodAction { Method = method };
-            state.InsertAction(action, index);
-            //state.SaveActions();
-        }
-
-        /// <summary>
-        ///     Inserts a method with a parameter in a PlayMakerFSM. CURRENTLY DOES NOT WORK
-        ///     Trying to insert a method out of bounds will cause a `ArgumentOutOfRangeException`.
-        /// </summary>
-        /// <param name="fsm">The fsm</param>
-        /// <param name="stateName">The name of the state in which the method is added</param>
-        /// <param name="method">The method that will be invoked</param>
-        /// <param name="index">The index to place the action in</param>
-        /// <returns>bool that indicates whether the insertion was successful</returns>
-
-        public static void InsertLambdaMethod(this PlayMakerFSM fsm, string stateName, Action<Action> method, int index) => fsm.GetState(stateName)!.InsertLambdaMethod(index, method);
-
-        /// <inheritdoc cref="InsertLambdaMethod(PlayMakerFSM, string, Action{Action}, int)"/>
-
-        public static void InsertLambdaMethod(this PlayMakerFSM fsm, string stateName, int index, Action<Action> method) => fsm.GetState(stateName)!.InsertLambdaMethod(index, method);
-
-        /// <inheritdoc cref="InsertLambdaMethod(PlayMakerFSM, string, Action{Action}, int)"/>
-
-        public static void InsertLambdaMethod(this Fsm fsm, string stateName, Action<Action> method, int index) => fsm.GetState(stateName)!.InsertLambdaMethod(index, method);
-
-        /// <inheritdoc cref="InsertLambdaMethod(PlayMakerFSM, string, Action{Action}, int)"/>
-
-        public static void InsertLambdaMethod(this Fsm fsm, string stateName, int index, Action<Action> method) => fsm.GetState(stateName)!.InsertLambdaMethod(index, method);
-
-        /// <inheritdoc cref="InsertLambdaMethod(PlayMakerFSM, string, Action{Action}, int)"/>
-        /// <param name="state">The fsm state</param>
-        /// <param name="method">The method that will be invoked</param>
-        /// <param name="index">The index to place the action in</param>
-
-        public static void InsertLambdaMethod(this FsmState state, Action<Action> method, int index) => state.InsertLambdaMethod(index, method);
-
-        /// <inheritdoc cref="InsertLambdaMethod(FsmState, Action{Action}, int)"/>
-
-        public static void InsertLambdaMethod(this FsmState state, int index, Action<Action> method)
-        {
-            FunctionAction<Action> action = new FunctionAction<Action> { Method = method };
-            action.Arg = action.Finish;
-            state.InsertAction(action, index);
-            //state.SaveActions();
-        }
-
-        /// <summary>
-        ///     Insert a method to run before the specified FsmStateAction. CURRENTLY DOES NOT WORK
-        /// </summary>
-        /// <param name="action">The action to insert before.</param>
-        /// <param name="method">The method to execute.
-        /// The argument will be the FsmStateAction which is being added.</param>
-
-        public static void InsertMethodBefore(this FsmStateAction action, Action method)
-        {
-            FsmState state = action.State;
-            int idx = Array.IndexOf(state.Actions, action);
-            state.InsertMethod(idx, method);
-            //state.SaveActions();
-        }
-
-        /// <summary>
-        ///     Insert a method to run after the specified FsmStateAction. CURRENTLY DOES NOT WORK
-        /// </summary>
-        /// <param name="action">The action to insert after.</param>
-        /// <param name="method">The method to execute.
-        /// The argument will be the FsmStateAction which is being added.</param>
-
-        public static void InsertMethodAfter(this FsmStateAction action, Action method)
-        {
-            FsmState state = action.State;
-            int idx = Array.IndexOf(state.Actions, action);
-            state.InsertMethod(idx + 1, method);
-            //state.SaveActions();
-        }
-
-        /// <summary>
-        ///     Insert an action to run before the specified FsmStateAction. CURRENTLY DOES NOT WORK
-        /// </summary>
-        /// <param name="action">The action to insert before.</param>
-        /// <param name="newAction">The action to add.</param>
-
-        public static void InsertActionBefore(this FsmStateAction action, FsmStateAction newAction)
-        {
-            FsmState state = action.State;
-            int idx = Array.IndexOf(state.Actions, action);
-            state.InsertAction(idx, newAction);
-            //state.SaveActions();
-        }
-
-        /// <summary>
-        ///     Insert an action to run after the specified FsmStateAction. CURRENTLY DOES NOT WORK.
-        /// </summary>
-        /// <param name="action">The action to insert after.</param>
-        /// <param name="newAction">The action to add.</param>
-
-        public static void InsertActionAfter(this FsmStateAction action, FsmStateAction newAction)
-        {
-            FsmState state = action.State;
-            int idx = Array.IndexOf(state.Actions, action);
-            state.InsertAction(idx + 1, newAction);
-            //state.SaveActions();
-        }
+        
         /// <summary>
         ///     Replaces an action in a PlayMakerFSM.
         /// </summary>
