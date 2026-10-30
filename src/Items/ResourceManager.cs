@@ -91,15 +91,21 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustGems(int count)
+        public static void AdjustGems(int count)
 		{
 			try
 			{
                 // Don't set Gems if Gems are locked.
-                if(ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value)
+                if(ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value || ModInstance.GemManager.GetIntVariable("Adjustment Amount").Value != 0)
                 {
-                    Logging.LogWarning("Gems are locked, cannot adjust", "Resources");
-                    return false;
+                    // Attempt again every second until succesful while in a run. Otherwise, stop.
+                    if (ModInstance.IsInRun)
+                    {
+                        Logging.LogWarning("Unable to Adjust Gems, reattempting in 1 second", "Resources");
+                        static void runOnDelay(int count) { AdjustGems(count); }
+                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                    }
+                    return;
                 }
                 int gemTotal = ModInstance.GemManager.GetIntVariable("GEMS").Value;
                 
@@ -123,12 +129,17 @@ namespace BluePrinceArchipelago.Items
                 {
                     GemIcon.SetActive(true);
                 }
-                return true;
+                return;
             }
 			catch
 			{
-				Logging.LogWarning("Error adjusting Gems", "Resources");
-                return false;
+                if (ModInstance.IsInRun)
+                {
+                    Logging.LogWarning("Unable to Adjust Gems, reattempting in 1 second", "Resources");
+                    static void runOnDelay(int count) { AdjustGems(count); }
+                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                }
+                return;
             }
 
         }
@@ -137,15 +148,21 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustGold(int count)
+        public static void AdjustGold(int count)
         {
             try
             {
                 // Don't set Gold if Gold is locked.
-                if(ModInstance.GoldManager.GetBoolVariable("GOLD LOCK").Value)
+                if (ModInstance.GoldManager.GetBoolVariable("GOLD LOCK").Value || ModInstance.GoldManager.GetIntVariable("Adjustment Amount").Value != 0)
                 {
-                    Logging.LogWarning("Gold is locked, cannot adjust", "Resources");
-                    return false;
+                    // Attempt again every second until succesful;
+                    if (ModInstance.IsInRun)
+                    {
+                        Logging.LogWarning("Unable to Adjust Gold, reattempting in 1 second", "Resources");
+                        static void runOnDelay(int count) { AdjustGold(count); }
+                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                    }
+                    return;
                 }
                 int Total = ModInstance.GoldManager.GetIntVariable("GOLD").Value;
                 
@@ -170,12 +187,18 @@ namespace BluePrinceArchipelago.Items
                     GoldIcon.SetActive(true);
                 }
                 
-                return true;
+                return;
             }
             catch
             {
-                Logging.LogWarning("Error adjusting Gold", "Resources");
-                return false;
+                // Attempt again every second until succesful;
+                if (ModInstance.IsInRun)
+                {
+                    Logging.LogWarning("Unable to Adjust Gold, reattempting in 1 second", "Resources");
+                    static void runOnDelay(int count) { AdjustGold(count); }
+                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                }
+                return;
             }
 
         }
@@ -184,10 +207,21 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustDice(int count)
+        public static void AdjustDice(int count)
         {
             try
             {
+                if ( ModInstance.DiceManager.GetIntVariable("Adjustment Amount").Value != 0)
+                {
+                    // Attempt again every second until succesful;
+                    if (ModInstance.IsInRun)
+                    {
+                        Logging.LogWarning("Unable to Adjust Dice, reattempting in 1 second", "Resources");
+                        static void runOnDelay(int count) { AdjustDice(count); }
+                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                    }
+                    return;
+                }
                 GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
                 GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
                 TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
@@ -205,7 +239,7 @@ namespace BluePrinceArchipelago.Items
                     // if the set the value to 0 then hide dice UI
                     ModInstance.DiceManager.GetIntVariable("BONES").Value = 0;
                     BoneIcon.SetActive(false);
-                    return true;
+                    return;
                 }
                 if (Total + count > 1000000)
                 {
@@ -219,12 +253,18 @@ namespace BluePrinceArchipelago.Items
                 BoneIcon.SetActive(true);
                 // Set text to the correct amount.
                 BoneTMP.text = ModInstance.DiceManager.GetIntVariable("BONES").Value.ToString();
-                return true;
+                return;
             }
             catch
             {
-                Logging.LogWarning("Error adjusting Dice", "Resources");
-                return false;
+                // Attempt again every second until succesful;
+                if (ModInstance.IsInRun)
+                {
+                    Logging.LogWarning("Unable to Adjust Dice, reattempting in 1 second", "Resources");
+                    static void runOnDelay(int count) { AdjustDice(count); }
+                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                }
+                return;
             }
 
         }
@@ -234,16 +274,22 @@ namespace BluePrinceArchipelago.Items
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <param name="setdirectly">Whether to set the steps directly or use the slow updater.</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustSteps(int count, bool setdirectly = false)
+        public static void AdjustSteps(int count, bool setdirectly = false)
         {
             try
             {
                 if (setdirectly){
                     // Don't set Steps if Steps are locked.
-                    if(ModInstance.StepManager.GetBoolVariable("STEP LOCK").Value)
+                    if (ModInstance.StepManager.GetBoolVariable("STEP LOCK").Value || ModInstance.StepManager.GetIntVariable("Adjustment Amount").Value != 0)
                     {
-                        Logging.LogWarning("Steps are locked, cannot adjust", "Resources");
-                        return false;
+                        // Attempt again every second until succesful;
+                        if (ModInstance.IsInRun)
+                        {
+                            Logging.LogWarning("Unable to Adjust Stepss, reattempting in 1 second", "Resources");
+                            static void runOnDelay(int count) { AdjustSteps(count); }
+                            GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                        }
+                        return;
                     }
                     int Total = ModInstance.StepManager.GetIntVariable("Steps").Value;
                     
@@ -262,19 +308,25 @@ namespace BluePrinceArchipelago.Items
                     }
                     // Set the UI
                     GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/EatPopup/Steps #").GetComponent<TextMeshPro>().text = ModInstance.StepManager.GetIntVariable("Steps").Value.ToString();
-                    return true;
+                    return;
                 }
                 else
                 {
                     ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value += count;
                     ModInstance.StepManager.SendEvent("Update");
-                    return true;
+                    return;
                 }
             }
             catch
             {
-                Logging.LogWarning("Error adjusting Steps", "Resources");
-                return false;
+                // Attempt again every second until succesful;
+                if (ModInstance.IsInRun)
+                {
+                    Logging.LogWarning("Unable to Adjust Steps, reattempting in 1 second", "Resources");
+                    static void runOnDelay(int count) { AdjustSteps(count); }
+                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                }
+                return;
             }
 
         }
@@ -283,15 +335,21 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustKeys(int count)
+        public static void AdjustKeys(int count)
         {
             try
             {
                 // Don't set Keys if Keys are locked.
-                if(ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value)
+                if (ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value || ModInstance.KeyManager.GetIntVariable("Adjustment Amount").Value != 0)
                 {
-                    Logging.LogWarning("Keys are locked, cannot adjust", "Resources");
-                    return false;
+                    // Attempt again every second until succesful;
+                    if (ModInstance.IsInRun)
+                    {
+                        Logging.LogWarning("Unable to Adjust Keys, reattempting in 1 second", "Resources");
+                        static void runOnDelay(int count) { AdjustKeys(count); }
+                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                    }
+                    return;
                 }
                 int Total = ModInstance.KeyManager.GetIntVariable("KEYS").Value;
                 
@@ -315,12 +373,18 @@ namespace BluePrinceArchipelago.Items
                 {
                     KeyIcon.SetActive(true);
                 }
-                return true;
+                return;
             }
             catch
             {
-                Logging.LogWarning("Error adjusting Keys", "Resources");
-                return false;
+                // Attempt again every second until succesful;
+                if (ModInstance.IsInRun)
+                {
+                    Logging.LogWarning("Unable to Adjust Keys, reattempting in 1 second", "Resources");
+                    static void runOnDelay(int count) { AdjustKeys(count); }
+                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
+                }
+                return;
             }
 
         }
@@ -435,29 +499,37 @@ namespace BluePrinceArchipelago.Items
         /// <param name="type">The resource type to add or remove</param>
         /// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static bool AdjustResource(string type, int count)
+        public static void AdjustResource(string type, int count)
         {
             switch (type.ToLower())
             {
                 case "gems":
-                    return AdjustGems(count);
+                    AdjustGems(count);
+                    break;
                 case "gold":
-                    return AdjustGold(count);
+                    AdjustGold(count);
+                    break;
                 case "steps":
-                    return AdjustSteps(count);
+                    AdjustSteps(count);
+                    break;
                 case "keys":
-                    return AdjustKeys(count);
+                    AdjustKeys(count);
+                    break;
                 case "dice":
-                    return AdjustDice(count);
+                    AdjustDice(count);
+                    break;
                 case "stars":
-                    return AdjustStars(count);
+                    AdjustStars(count);
+                    break;
                 case "luck":
-                    return AdjustLuck(count);
+                    AdjustLuck(count);
+                    break;
                 case "allowance":
-                    return AdjustAllowance(count);
+                    AdjustAllowance(count);
+                    break;
                 default:
                     Logging.Logger.LogWarning($"Error adjusting unknown resource type: {type}");
-                    return false;
+                    break;
 
             }
         }

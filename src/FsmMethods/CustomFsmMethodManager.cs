@@ -13,6 +13,7 @@ using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using Il2CppInterop.Runtime;
 using System.Collections.Generic;
+using BluePrinceArchipelago.Rooms;
 
 
 namespace BluePrinceArchipelago.FsmMethods
@@ -44,11 +45,31 @@ namespace BluePrinceArchipelago.FsmMethods
             { "MainMenuLoaded", new MainMenuLoaded()},
         };
 
+
+        /// <summary>
+        ///     Runs the on Register for all methods the Manager is tracking
+        /// </summary>
         public static void RegisterMethods() {
             foreach (RegisteredCustomFsmMethod Method in RegisteredCustomFsmMethods.Values) {
                 Method.OnRegister();
             }
         }
+
+
+        /// <summary>
+        ///     Adds a hook to be used by rooms for tracking that the Item Code is complete.
+        /// </summary>
+        /// <param name="room">The ModRoom to associate the hook with.</param>
+        /// <returns>The RegisteredCustomFsmMethod for the room</returns>
+        public static RegisteredCustomFsmMethod AddItemCodeComplete(ModRoom room) {
+            RegisteredCustomFsmMethod Method = new ItemCodeComplete(room);
+            string MethodName = room.Name.ToTitleCase() + "ItemCodeComplete";
+            RegisteredCustomFsmMethods[MethodName] = Method;
+            Logging.Log($"Registered New Method: {MethodName}", "CustomFsmMethods");
+            Method.OnRegister();
+            return Method;
+        }
+
 
         /// <summary>
         ///     Adds an FSM event related to a Unique Item pickup.

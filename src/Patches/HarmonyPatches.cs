@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using HarmonyLib;
+
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -95,6 +96,8 @@ namespace BluePrinceArchipelago.Patches
     public class EventPatches {
 
         public static int depth = 0;
+
+        public static int steamDepth = 0;
 
         // TODO: Find a hook that works for Mora Jai Boxes
         // [HarmonyPatch(typeof(MorajaiController), nameof(MorajaiController.CheckCorners))]
@@ -301,6 +304,23 @@ namespace BluePrinceArchipelago.Patches
                 return false;
             }
             return true;
+        }
+
+        // Prevents the log from being spammed by this 
+        [HarmonyPatch(typeof(IsUsingTextlessAction), nameof(IsUsingTextlessAction.OnEnter))]
+        [HarmonyPrefix]
+        static bool SteamAPIFix(IsUsingTextlessAction __instance)
+        {
+            try
+            {
+                __instance.PerformAction();
+            }
+            catch
+            {
+                Logging.LogWarning("Steam Error: Steamworks was not Initialized.");
+            }
+            __instance.Finish();
+            return false;
         }
     }
 }

@@ -507,11 +507,35 @@ public class ArchipelagoClient
         for (int i = 0; i < serverLocations.Length; i++)
         {
             long location = serverLocations[i];
+            string locationName = "";
             // Only add new data if the old one is not good.
-            if (!ServerData.LocationDict.ContainsKey(location)) { 
-            
-                string locationName = session.Locations.GetLocationNameFromId(location);
+            if (!ServerData.LocationDict.ContainsKey(location))
+            {
+
+                locationName = session.Locations.GetLocationNameFromId(location);
                 ServerData.LocationDict[location] = locationName;
+            }
+            else {
+                locationName = ServerData.LocationDict[location];
+            }
+            // Initialize the Max number of Trunks for each room with trunk Objects
+            if (locationName.Contains("Locked Trunk") && !hint)
+            {
+                string[] nameparts = locationName.Split(' ');
+                if (nameparts.Length == 4) { 
+                    string roomName = ModRoomManager.GetRoomByName(nameparts[0]).Name;
+                    int count = int.Parse(nameparts[3]);
+                    if (ModInstance.TrunkManager.MaxTrunkCounts.ContainsKey(roomName))
+                    {
+                        if (ModInstance.TrunkManager.MaxTrunkCounts[roomName] < count)
+                        {
+                            ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
+                        }
+                    }
+                    else {
+                        ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
+                    }
+                }
             }
         }
 

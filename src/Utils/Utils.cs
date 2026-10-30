@@ -2,8 +2,13 @@
 using Il2CppInterop.Runtime;
 #if ML
 using MelonLoader;
+using Il2Cpp;
+using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 #if Bep
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 #endif
 using System;
@@ -416,7 +421,7 @@ namespace BluePrinceArchipelago.Utils
         ///     Gets a GameObject among the provided GameObject's descendants based on the heirarchy path provided.
         /// </summary>
         /// <param name="current">The GameObject.</param>
-        /// <param name="objectPath">The eelative heirarchy path of the descendant GameObject</param>
+        /// <param name="objectPath">The relative heirarchy path of the descendant GameObject</param>
         /// <returns>The GameObject at the given hierarchy path. Returns the calling if the path is an empty string. Returns null if it fails to find the object at that path.</returns>
         public static GameObject FindDescendant(this GameObject current, string objectPath)
         {
@@ -434,6 +439,39 @@ namespace BluePrinceArchipelago.Utils
                 }
             }
             return subObject.gameObject;
+        }
+
+        /// <summary>
+        ///     Gets child PlayMakerFsms that contain a name among all descendants of an object.
+        /// </summary>
+        /// <param name="go">The GameObject to check the Descendents of.</param>
+        /// <param name="name">The GameObject to match with.</param>
+        /// <param name="caseinsensitive">Whether case matters.</param>
+        /// <returns>A list of PlayMakerFSMs that match the name.</returns>
+        public static List<GameObject> FindChildGameObjectsRecursive(this GameObject go, string name, bool caseinsensitive = false)
+        {
+            Queue<GameObject> queue = new Queue<GameObject>();
+            List<GameObject> GOs = new();
+            queue.Enqueue(go);
+            while (queue.Count > 0)
+            {
+                GameObject current = queue.Dequeue();
+                if (caseinsensitive)
+                {
+                    if (current.name.ToLower().Contains(name.ToLower()) && current != go)
+                    {
+                            GOs.Add(current);
+                    }
+                }
+                else if (current.name.Contains(name) && current != go)
+                {
+                    GOs.Add(current);
+                }
+
+                for (int i = 0; i < current.transform.childCount; i++)
+                    queue.Enqueue(current.transform.GetChild(i).gameObject);
+            }
+            return GOs;
         }
     }
     /// <summary>
@@ -685,6 +723,19 @@ namespace BluePrinceArchipelago.Utils
 
             actionToRun.Invoke();
         }
+        /// <summary>
+        ///     The IEnumerator for Running an Action after a delay.
+        /// </summary>
+        /// <param name="delay">Delay in miliseconds.</param>
+        /// <param name="actionToRun">The action to run.</param>
+        /// <returns>The IEnumerator for the delayed run.</returns>
+        /// /// <param name="value">The int to pass to the action.</param>
+        private static System.Collections.IEnumerator RunAfterDelayRoutine(float delay, Action<int> actionToRun, int value)
+        {
+            yield return new WaitForSeconds(delay);
+
+            actionToRun.Invoke(value);
+        }
 
         /// <summary>
         ///     Runs an Action after a delay.
@@ -695,5 +746,17 @@ namespace BluePrinceArchipelago.Utils
         {
             ModInstance.Instance.StartCoroutine(RunAfterDelayRoutine(delay, actionToRun));
         }
+
+        /// <summary>
+        ///     Runs an Action after a delay with an int Parameter.
+        /// </summary>
+        /// <param name="delay">Delay in miliseconds.</param>
+        /// <param name="actionToRun">The action to run.</param>
+        /// <param name="value">The int to pass to the action.</param>
+        public static void RunAfterDelay(float delay, Action<int> actionToRun, int value)
+        {
+            ModInstance.Instance.StartCoroutine(RunAfterDelayRoutine(delay, actionToRun, value));
+        }
+
     }
 }

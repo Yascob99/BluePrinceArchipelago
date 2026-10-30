@@ -49,7 +49,7 @@ namespace BluePrinceArchipelago.Triggers
                             state2.EnableActionsOfType<ArrayListAdd>();
                         }
                         else
-                        { 
+                        {
                             state.EnableActionsOfType<ArrayListAdd>();
                         }
                     }
@@ -66,6 +66,11 @@ namespace BluePrinceArchipelago.Triggers
                 string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
                 CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
                 ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
+            }
+            // Check for trunk spawn, and track it.
+            else if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned) {
+                ModInstance.TrunkManager.TrunkSpawned = true;
+                ModInstance.TrunkManager.CheckingForTrunkSpawn = false;
             }
         }
 

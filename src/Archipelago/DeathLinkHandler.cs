@@ -181,18 +181,8 @@ public class DeathLinkHandler
         ArchipelagoConsole.LogMessage($"Attempting to execute DeathLink: {cause}", "DeathLink");
 
         yield return null;
-        if (!ResourceManager.AdjustSteps(-1000000))
-        {
-            Logging.LogFatal("There was an error sending the deathlink.", "DeathLink");
-            if (deathLink != null)
-            {
-                Plugin.ArchipelagoClient.DeathLinkHandler.deathLinks.Enqueue(deathLink);
-            }
-        }
-        else
-        {
-            processingDeathLink = true;
-        }
+        ResourceManager.AdjustSteps(-1000000);
+        processingDeathLink = true;
         // ZERO STEP ENDING: Send Event- State 8
     }
 
