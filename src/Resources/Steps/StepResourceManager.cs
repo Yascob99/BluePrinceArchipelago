@@ -42,8 +42,6 @@ namespace BluePrinceArchipelago.Resources
 
         public GameObject DareEngine = null;
 
-        public object Routine = null;
-
         public bool IsRunning = false;
 
         public bool WaitingForUnfreeze = false;
@@ -83,7 +81,7 @@ namespace BluePrinceArchipelago.Resources
             WaitingForUnfreeze = true;
             FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen != null) {
-                while (currentlyFrozen.Value) {
+                while (currentlyFrozen.Value && ModInstance.IsInRun) {
                     yield return new WaitForSeconds(0.2f);
                 }
             }
@@ -259,7 +257,7 @@ namespace BluePrinceArchipelago.Resources
             ModInstance.StepManager.GetIntVariable("STEPS").Value = ModInstance.StepManager.GetIntVariable("target steps").Value;
             FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen.Value) {
-                // Waits until the game is not paused/in a cutscene, then kills the player;
+                // Waits until the game is not paused/in a cutscene, then kills the player via 0 step ending;
                 WaitUntilUnfrozen();
             }
         }
@@ -285,12 +283,6 @@ namespace BluePrinceArchipelago.Resources
 
         public void StartOfDay()
         {
-
-            // Prevent coroutine from being run multiple times.
-            if (Routine != null)
-            {
-                MonoBehaviorExtensions.StopCoroutine(Instance, Routine);
-            }
             StepTextObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
             Player = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince");
             PlayerCore = Player.GetChild("Player Core");
