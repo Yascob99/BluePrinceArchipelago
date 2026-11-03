@@ -9,7 +9,6 @@ namespace BluePrinceArchipelago.Archipelago.Commands
     public static class CommandManager
     {
         private static Dictionary<string, Command> _LocalCommands = new();
-        private static Dictionary<string, Command> _ServerCommands = new();
 
         /// <summary>
         ///     Registers a local command.

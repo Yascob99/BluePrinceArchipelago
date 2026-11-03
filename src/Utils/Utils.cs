@@ -291,7 +291,7 @@ namespace BluePrinceArchipelago.Utils
         public static GameObject FindGameObject(string name)
         {
             List<GameObject> gos = new List<GameObject>();
-            foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
+            foreach (GameObject go in UnityEngine.Resources.FindObjectsOfTypeAll<GameObject>())
             {
                 if (go != null)
                 {
@@ -324,6 +324,11 @@ namespace BluePrinceArchipelago.Utils
 
         }
 
+        /// <summary>
+        ///     Gets a Root game object in the scene. Sometimes fails.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static GameObject GetRootGameObject(string name)
         {
             foreach (GameObject go in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
@@ -365,7 +370,7 @@ namespace BluePrinceArchipelago.Utils
             }
         }
         /// <summary>
-        ///     Gets the First child of a Gameobject with the given name.
+        ///     Gets the First child of a GameObject with the given name.
         /// </summary>
         /// <param name="parent">The parent object to search.</param>
         /// <param name="name">The name of the child object to find.</param>
@@ -473,6 +478,7 @@ namespace BluePrinceArchipelago.Utils
             }
             return GOs;
         }
+
     }
     /// <summary>
     ///     A series of utility functions for enums.
@@ -699,12 +705,13 @@ namespace BluePrinceArchipelago.Utils
     {
         #if ML
         public static object StartCoroutine(this MonoBehaviour mb, IEnumerator routine) => MelonCoroutines.Start(routine);
-        public static void StopCouroutine(this MonoBehaviour mb, object routine) => MelonCoroutines.Stop(routine);
+        public static void StopCoroutine(MonoBehaviour mb, object routine) => MelonCoroutines.Stop(routine);
         #endif
         #if Bep
         public static object StartCoroutine(this MonoBehaviour mb, IEnumerator routine) => mb.StartCoroutine(routine.WrapToIl2Cpp());
-        public static void StopCoroutine(this MonoBehaviour mb, object routine) => mb.StopCoroutine((Coroutine)routine);
-        #endif
+        public static void StopCoroutine(MonoBehaviour mb, object routine) => mb.StopCoroutine((Coroutine)routine);
+#endif
+
 
     }
 

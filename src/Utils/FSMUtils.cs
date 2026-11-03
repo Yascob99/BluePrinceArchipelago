@@ -1447,7 +1447,6 @@ namespace BluePrinceArchipelago.Utils
                 if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
                 {
                     state.DisableAction(i);
-                    state.DisableAction(i);
                     return;
                 }
             }

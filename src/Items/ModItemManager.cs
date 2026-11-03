@@ -5,7 +5,6 @@ using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using StableNameDotNet;
 using TMPro;
 #endif
 #if ML
@@ -124,6 +123,10 @@ namespace BluePrinceArchipelago.Items
                                     APswirly.transform.parent = spawnObj.transform;
                                     APswirly.layer = 10;
                                     item.ModelReplaced = true;
+                                    if (item.Name == "Cabinet Key 3")
+                                    { 
+
+                                    }
                                     ReplaceAPItemNotifications(item.Name, spawnObj);
                                 }
                                 else

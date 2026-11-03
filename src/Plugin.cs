@@ -97,6 +97,7 @@ namespace BluePrinceArchipelago {
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();
             ClassInjector.RegisterTypeInIl2Cpp<CustomFsmMethods>();
+            ClassInjector.RegisterTypeInIl2Cpp<StepResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
             { 
                 Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])

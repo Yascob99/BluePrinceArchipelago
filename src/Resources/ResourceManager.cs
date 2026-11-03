@@ -9,7 +9,7 @@ using TMPro;
 #endif
 using UnityEngine;
 
-namespace BluePrinceArchipelago.Items
+namespace BluePrinceArchipelago.Resources
 {
 	/// <summary>
 	/// Manage Simon's daily resources. 
@@ -563,6 +563,11 @@ namespace BluePrinceArchipelago.Items
                     return -1;
 
             }
+        }
+
+
+        public static void ReplaceResourceManagers() { 
+            
         }
 
         /// <summary>
