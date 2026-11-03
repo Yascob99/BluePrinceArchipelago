@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Resources;
 
 namespace BluePrinceArchipelago.Archipelago;
 

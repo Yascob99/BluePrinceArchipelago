@@ -19,6 +19,7 @@ using UnityEngine;
 using BluePrinceArchipelago.FsmMethods;
 using HarmonyPatch = HarmonyLib.Harmony;
 using BluePrinceArchipelago.UI;
+using BluePrinceArchipelago.Resources;
 
 #if ML
 [assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.1.7", "Yascob", null)]

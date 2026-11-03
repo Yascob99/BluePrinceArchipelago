@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net.MessageLog.Parts;
 using BluePrinceArchipelago.Archipelago;
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 #if ML
 using Il2CppTMPro;

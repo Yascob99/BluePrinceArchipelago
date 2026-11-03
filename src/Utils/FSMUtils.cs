@@ -630,7 +630,7 @@ namespace BluePrinceArchipelago.Utils
         {
             for (int i = state.ActionData.ActionNames.Count -1; i >= 0 ; i--)
             {
-                if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i])) //REVISIT: A bit hacky, but it works.
+                if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) //REVISIT: A bit hacky, but it works.
                 {
                     state.RemoveAction(i);
                 }
