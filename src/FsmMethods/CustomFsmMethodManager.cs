@@ -42,6 +42,7 @@ namespace BluePrinceArchipelago.FsmMethods
             { "ZeroStepEnding", new ZeroStepEnding()},
             { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()},
             { "MainMenuLoaded", new MainMenuLoaded()},
+            { "LockContraption", new LockContraption()},
         };
 
         public static void RegisterMethods() {

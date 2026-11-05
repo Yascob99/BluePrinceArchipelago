@@ -20,10 +20,9 @@ public abstract class RoomHandler
     public HashSet<string> AllowanceTokens { get; } = [];
 
     public virtual void OnRoomDrafted(GameObject roomGameObject) {}
-    public virtual void OnAfterRoomDrafted(GameObject roomGameObject) { }
-    public virtual void OnAllowanceTokenCollected(string token) { }
-    public virtual void OnRoomUnlocked(ModRoom room) { 
-    }
+    public virtual void OnAfterRoomDrafted(GameObject roomGameObject) {}
+    public virtual void OnAllowanceTokenCollected(string token) {}
+    public virtual void OnRoomUnlocked(ModRoom room) {}
     public virtual void OnDayStart() {}
 
 
@@ -73,6 +72,7 @@ public abstract class RoomHandler
             "TUNNEL" => new Tunnel(),
             "UTILITY CLOSET" => new UtilityCloset(),
             "VAULT" => new Vault(),
+            "WORKSHOP" => new Workshop(),
             _ => null
         };
 
