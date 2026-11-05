@@ -121,11 +121,11 @@ namespace BluePrinceArchipelago.Events
         }
 
         /// <summary>
-        ///     The event of a safe being opened.
+        ///     The event of a red letter being red.
         /// </summary>
-        /// <param name="safeName">The name of the safe.</param>
-        public void OnSafeOpened(string safeName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{safeName.ToTitleCase()}", "Safe Opened"));
+        /// <param name="letterNumName">The letter read.</param>
+        public void OnRedLetterRead(string letterNumName) {
+            LocationFound.Invoke(this, new LocationEventArgs($"{letterNumName.ToTitleCase()}", "Red Letter Read"));
         }
 
         /// <summary>
