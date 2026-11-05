@@ -101,7 +101,7 @@ namespace BluePrinceArchipelago.Events
         /// <param name="roomName">The name of the room the trunk was opened in.</param>
         /// <param name="trunkCount">The current number of opened trunks in that room.</param>
         public void OnTrunkOpened(string roomName, int trunkCount) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} Locked Trunk {trunkCount}", "Locked Trunk Unlocked"));
+            LocationFound.Invoke(this, new LocationEventArgs($"Locked Trunk - {roomName.ToTitleCase()} - {trunkCount}", "Locked Trunk Unlocked"));
         }
 
         /// <summary>
