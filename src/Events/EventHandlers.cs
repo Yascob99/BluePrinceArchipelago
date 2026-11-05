@@ -141,7 +141,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="floorplanName">The name of the floorplan.</param>
         public void OnFloorplanFound(string floorplanName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{floorplanName.ToTitleCase()} Floorplan", "Floorplan Found"));
+            LocationFound.Invoke(this, new LocationEventArgs($"Floorplan - {floorplanName.ToTitleCase()}", "Floorplan Found"));
         }
 
         /// <summary>
