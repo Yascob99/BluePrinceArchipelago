@@ -390,14 +390,14 @@ public class ArchipelagoClient
             try
             {
                 string location = ServerData.LocationDict[locationid];
-                if (location.EndsWith("First Pickup"))
+                if (location.StartsWith("First Pickup - "))
                 {
-                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace(" First Pickup", ""));
+                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace("First Pickup - ", ""));
                     item.HasBeenFound = true;
                 }
-                else if (location.EndsWith("First Entering"))
+                else if (location.StartsWith("First Draft - "))
                 {
-                    ModRoom room = ModRoomManager.GetRoomByName(location.Replace(" First Entering", ""));
+                    ModRoom room = ModRoomManager.GetRoomByName(location.Replace("First Draft - ", ""));
                     room.IsUnlocked = true;
                 }
                 // Try Upgrade Disks. If that fails, try Permanent Unlocks.
@@ -648,8 +648,8 @@ public class ArchipelagoClient
             return;
         }
         // Shelter backwards Compatibility Fix.
-        else if (locationName == "Bomb Shelter First Entering") {
-            locationid = GetLocationFromName("Shelter First Entering");
+        else if (locationName == "First Draft - Bomb Shelter") {
+            locationid = GetLocationFromName("First Draft - Shelter");
             if (locationid > 0)
             {
                 CheckLocation(locationid);

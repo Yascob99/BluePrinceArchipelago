@@ -39,11 +39,11 @@ namespace BluePrinceArchipelago.Events
         /// <inheritdoc cref="OnFirstDrafted(ModRoom)"/>
         /// <param name="roomName">The name of the room.</param>
         public void OnFirstDrafted(string roomName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Draft - {roomName.ToTitleCase()}", "First Draft Room"));
             // Send second Bunk Room location.
-            if (roomName.ToUpper() == "BUNK ROOM")
+            if (roomName.Equals("BUNK ROOM", StringComparison.CurrentCultureIgnoreCase))
             {
-                LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering 2", "First Draft Room 2"));
+                LocationFound.Invoke(this, new LocationEventArgs($"First Draft - {roomName.ToTitleCase()} 2", "First Draft Room 2"));
             }
         }
 
@@ -52,7 +52,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="classroomNumber">The grade number of the drafted classroom.</param>
         public void OnClassroomFirstDrafted(string classroomNumber) {
-            LocationFound.Invoke(this, new LocationEventArgs($"Classroom {classroomNumber} First Entering", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Draft - Classroom {classroomNumber}", "First Draft Room"));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="item">The ModItem that was found.</param>
         public void OnFirstFound(ModItem item) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{item.Name.ToTitleCase()} First Pickup", "Item First Pickup"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Pickup - {item.Name.ToTitleCase()}", "Item First Pickup"));
         }
 
         /// <summary>

@@ -217,19 +217,19 @@ namespace BluePrinceArchipelago.Items
 
                             //Import the template Text Prefab.  
                             GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
-                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname.ToTitleCase() + " First Pickup");
+                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName($"First Pickup - {scoutname.ToTitleCase()}");
                             // Get the location ID of our first pickup.
                             if (scoutname == "CABINET KEY 1")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Patio First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Patio");
                             }
                             else if (scoutname == "CABINET KEY 2")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Laundry Room First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Laundry Room");
                             }
                             else if (scoutname == "CABINET KEY 3")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                             }
                                 // Find the the details of the item that will be sent on pickup.
                                 ScoutedItemInfo scout = null;
