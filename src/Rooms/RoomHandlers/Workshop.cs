@@ -11,6 +11,7 @@ using Il2CppTMPro;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.FsmMethods;
+using BluePrinceArchipelago.Archipelago;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
@@ -20,8 +21,12 @@ class Workshop : RoomHandler
     
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
+        if (!ArchipelagoOptions.WorkshopSanity)
+        {
+            return;
+        }
         Logging.LogWarning("Successfully hooked Workshop", "DEBUG");
-
+        //item.HasBeenFound && !item.IsUnlock
         // TODO : Make sure to handle multiple instances of workshop before releasing
         GameObject workshopMenu = GameObject.Find("__SYSTEM/Room Spawn Pools/Workshop(Clone)001/_GAMEPLAY/WorkShop Table");
         
@@ -30,5 +35,8 @@ class Workshop : RoomHandler
 
         FsmState detectorShovel = workshopFSM.GetState("DETECTOR SHOVEL");
         detectorShovel.AddAction(CustomFsmMethodManager.GetCallMethod("LockContraption"));
+
+        FsmState BurningGlass = workshopFSM.GetState("Burning Glass");
+        BurningGlass.AddAction(CustomFsmMethodManager.GetCallMethod("UnlockContraption"));
     }
 }
