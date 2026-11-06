@@ -312,7 +312,7 @@ public class ArchipelagoClient
             {
                 session.Items.DequeueItem();
                 // Handle any items that have not been received formally.
-                if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Starting ")) {
+                if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Permanent ")) {
                     if (item.LocationName == "Server")
                     {
                         // Checks if the item recieved is a room.

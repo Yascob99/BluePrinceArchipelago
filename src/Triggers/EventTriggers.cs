@@ -5,6 +5,8 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.UI;
+using BluePrinceArchipelago.Resources;
+
 
 #if ML
 using Il2Cpp;

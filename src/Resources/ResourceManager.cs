@@ -41,7 +41,7 @@ namespace BluePrinceArchipelago.Resources
                 }
                 foreach (string itemname in ArchipelagoClient.ServerData.ReceivedItems)
                 {
-                    if (itemname.ToLower().Contains("starting"))
+                    if (itemname.ToLower().Contains("permanent"))
                     {
                         Logging.LogWarning(itemname);
                         PermanentItem item = ModItemManager.GetPermanentItem(itemname);
