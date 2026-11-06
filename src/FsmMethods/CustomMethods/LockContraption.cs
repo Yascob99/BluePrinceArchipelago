@@ -1,3 +1,4 @@
+using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
@@ -14,37 +15,58 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 {
-    public class LockContraption() : RegisteredCustomFsmMethod
+    public class LockContraption(string contraptionName) : RegisteredCustomFsmMethod
     {
+        public new readonly string Name = CustomFsmMethodManager.GetItemOnCraftMethodName(contraptionName);
+
+        //TODO : Handle multiple instances... 
         private const string WRENCH_OBJECT_PATH = "__SYSTEM/Room Spawn Pools/Workshop(Clone)001/_GAMEPLAY/WorkShop Table/ICONS TEXT/Wrench";
         private const string ASSEMBLE_TEXT_OBJECT_NAME = "Assemble";
         private const string CLICK_STATE_NAME = "Click";
         private const string NORMAL_STATE_NAME = "State 3";
         private const string HOVERED_STATE_NAME = "State 4";
+        private const string CLICK_EVENT_NAME = "click";
         private const string LOCKED_DISPLAY_TEXT = "LOCKED";
+        private const string UNLOCKED_DISPLAY_TEXT = "ASSEMBLE";
 
+        private UniqueItem contraption;
+        private readonly GameObject workshopWrench = GameObject.Find(WRENCH_OBJECT_PATH);
+        private readonly PlayMakerFSM wrenchFSM = GameObject.Find(WRENCH_OBJECT_PATH).GetComponent<PlayMakerFSM>();
 
-        public new string Name { get; set; } = "LockContraption";
+        public override void OnRegister()
+        {
+            contraption = ModItemManager.GetUniqueItem(contraptionName);
+            //TODO : Maybe add the first three lines into object parameters for faster invocation
+            return;
+        }
 
         public override void OnCalled()
         {
-            //TODO : Handle multiple instances... 
-            GameObject workshopWrench = GameObject.Find(WRENCH_OBJECT_PATH);
-            LockCraftButton(workshopWrench);
-            IndicateCraftButtonIsLocked(workshopWrench);
+            if (contraption.HasBeenFound && !contraption.IsUnlocked)
+            {
+                LockCraftButton();
+                ChangeCraftButtonText(LOCKED_DISPLAY_TEXT);
+                return;
+            }
+            UnlockCraftButton();
+            ChangeCraftButtonText(UNLOCKED_DISPLAY_TEXT);
         }
 
-        private static void LockCraftButton(GameObject workshopWrench)
+        private void LockCraftButton()
         {
-            PlayMakerFSM wrenchFSM = workshopWrench.GetComponent<PlayMakerFSM>();
-            //Potentially irreversible ?
             wrenchFSM.GetState(NORMAL_STATE_NAME).RemoveTransitionsTo(CLICK_STATE_NAME);
             wrenchFSM.GetState(HOVERED_STATE_NAME).RemoveTransitionsTo(CLICK_STATE_NAME);
         }
 
-        private static void IndicateCraftButtonIsLocked(GameObject workshopWrench)
+        private void UnlockCraftButton()
         {
-            workshopWrench.transform.Find(ASSEMBLE_TEXT_OBJECT_NAME).GetComponent<TextMeshPro>().text = LOCKED_DISPLAY_TEXT;
+            wrenchFSM.GetState(NORMAL_STATE_NAME).AddTransition(CLICK_EVENT_NAME, CLICK_STATE_NAME);
+            wrenchFSM.GetState(HOVERED_STATE_NAME).AddTransition(CLICK_EVENT_NAME, CLICK_STATE_NAME);
+        }
+
+        private void ChangeCraftButtonText(string text)
+        {
+            workshopWrench.transform.Find(ASSEMBLE_TEXT_OBJECT_NAME).GetComponent<TextMeshPro>().text = text;
         }
     }
 }

@@ -25,16 +25,17 @@ class Workshop : RoomHandler
         {
             return;
         }
-        Logging.LogWarning("Successfully hooked Workshop", "DEBUG");
-        //item.HasBeenFound && !item.IsUnlock
         // TODO : Make sure to handle multiple instances of workshop before releasing
         GameObject workshopMenu = GameObject.Find("__SYSTEM/Room Spawn Pools/Workshop(Clone)001/_GAMEPLAY/WorkShop Table");
         
         PlayMakerFSM workshopFSM = workshopMenu.transform.Find("ICONS TEXT").GetComponent<PlayMakerFSM>();
         workshopMenu.transform.Find("ICONS TEXT/TITLE TEXT/Workshop TExt").GetComponent<TextMeshPro>().text = "Archipelago";
 
+        UniqueItem detectorShovelItem = ModItemManager.GetUniqueItem("Detector Shovel");
+        CustomFsmMethodManager.AddItemOnCraftMethod(detectorShovelItem);
+        string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(detectorShovelItem.Name);
         FsmState detectorShovel = workshopFSM.GetState("DETECTOR SHOVEL");
-        detectorShovel.AddAction(CustomFsmMethodManager.GetCallMethod("LockContraption"));
+        detectorShovel.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
 
         FsmState BurningGlass = workshopFSM.GetState("Burning Glass");
         BurningGlass.AddAction(CustomFsmMethodManager.GetCallMethod("UnlockContraption"));
