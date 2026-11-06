@@ -60,8 +60,8 @@ namespace BluePrinceArchipelago.Resources
         System.Collections.IEnumerator UpdateSteps()
         {
             IsRunning = true;
-            targetSteps = ModInstance.StepManager.GetIntVariable("STEPS").Value;
-            oldSteps = ModInstance.StepManager.GetIntVariable("old steps").Value;
+            targetSteps = GetTargetSteps();
+            oldSteps = GetOldStepCount();
             int stepChange = targetSteps - oldSteps;
             float waitTime = StepUpdate(stepChange);
             yield return new WaitForSeconds(waitTime);
@@ -70,7 +70,7 @@ namespace BluePrinceArchipelago.Resources
             {
                 yield return new WaitForSeconds(waitTime);
                 waitTime = StepUpdate(stepChange);
-                targetSteps = ModInstance.StepManager.GetIntVariable("STEPS").Value;
+                targetSteps = GetStepCount();
                 stepChange = targetSteps - oldSteps;
             }
             IsRunning = false;
@@ -87,7 +87,7 @@ namespace BluePrinceArchipelago.Resources
             }
             WaitingForUnfreeze = false;
             // If the target steps are still at 0;
-            if (ModInstance.IsInRun && ModInstance.StepManager.GetIntVariable("target steps").Value < 1)
+            if (ModInstance.IsInRun && GetTargetSteps() < 1)
             {
                 GameObject.Find("UI OVERLAY CAM").GetChild("ZERO STEP ENDING").SetActive(true);
             }
@@ -144,25 +144,27 @@ namespace BluePrinceArchipelago.Resources
         public void RunUpdate()
         {
             Logging.Log($"Attempting to run update for the resource Steps", "Resources");
-            ModInstance.StepManager.GetIntVariable("target steps").Value = ModInstance.StepManager.GetIntVariable("STEPS").Value + ModInstance.StepManager.GetIntVariable("Adjustment Amount").Value;
-            ModInstance.StepManager.GetIntVariable("Adjustment Amount").Value = 0;
-            if (ModInstance.StepManager.GetIntVariable("target steps").Value < 1) {
+            int targetSteps = GetStepCount() + GetAdjustmentAmount();
+            SetTargetSteps(targetSteps);
+            SetAdjustmentAmount(0);
+            if (GetTargetSteps() < 1)
+            {
                 Fix();
                 return;
             }
-            ModInstance.StepManager.GetIntVariable("old steps").Value = ModInstance.StepManager.GetIntVariable("old steps to compare").Value;
-            ModInstance.StepManager.GetIntVariable("old steps").Value = ModInstance.StepManager.GetIntVariable("STEPS").Value;
-            ModInstance.StepManager.GetIntVariable("STEPS").Value = ModInstance.StepManager.GetIntVariable("target steps").Value;
+            SetOldStepCount(GetOldStepsToCompare());
+            SetOldStepCount(GetStepCount());
+            SetStepCount(GetTargetSteps());
             RunUpdater();
         }
 
         public void SetSteps(int amount) {
-            ModInstance.StepManager.GetIntVariable("STEPS").Value = amount;
+            SetStepCount(amount);
             RunUpdate();
         }
 
         public void AdjustSteps(int amount) {
-            ModInstance.StepManager.GetIntVariable("Adjustment Amount").Value = amount;
+            SetAdjustmentAmount(amount);
             RunUpdate();
         }
 
@@ -225,7 +227,7 @@ namespace BluePrinceArchipelago.Resources
 
         private void StopTime()
         {
-            ModInstance.StepManager.GetIntVariable("Total Steps Taken Today").Value++;
+            SetIntVariable("Total Steps Taken Today", GetIntVariable("Total Steps Taken Today")+ 1);
         }
         private void NoStep()
         {
@@ -235,16 +237,16 @@ namespace BluePrinceArchipelago.Resources
         private void StepAdjust()
         {
             ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value++;
-            ModInstance.StepManager.GetIntVariable("totalstepslltime").Value = ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value;
-            ModInstance.StepManager.GetIntVariable("Total Steps Taken Today").Value++;
+            SetIntVariable("totalstepsalltime", ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value);
+            SetIntVariable("Total Steps Taken Today", GetIntVariable("Total Steps Taken Today") + 1);
             StepTimeDelete.GetComponent<PlayMakerFSM>().SendEvent("Update");
-            ModInstance.StepManager.GetIntVariable("target steps").Value = ModInstance.StepManager.GetIntVariable("STEPS").Value - 1;
-            if (ModInstance.StepManager.GetIntVariable("target steps").Value < 1) {
+            SetTargetSteps(GetStepCount() - 1);
+            if (GetTargetSteps() < 1) {
                 Fix();
                 return;
             }
             RunUpdater();
-            int steps = ModInstance.StepManager.GetIntVariable("STEPS").Value;
+            int steps = GetStepCount();
             if (steps < 20) {
                 DareEngine.GetComponent<PlayMakerFSM>().GetIntVariable("dare break").Value = 5;
                 DareEngine.GetComponent<PlayMakerFSM>().SendEvent("Update");
@@ -253,8 +255,8 @@ namespace BluePrinceArchipelago.Resources
 
         private void Fix()
         {
-            ModInstance.StepManager.GetIntVariable("old steps").Value = ModInstance.StepManager.GetIntVariable("STEPS").Value;
-            ModInstance.StepManager.GetIntVariable("STEPS").Value = ModInstance.StepManager.GetIntVariable("target steps").Value;
+            SetOldStepCount(GetStepCount());
+            SetStepCount(GetTargetSteps());
             FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen.Value) {
                 // Waits until the game is not paused/in a cutscene, then kills the player via 0 step ending;
@@ -295,6 +297,66 @@ namespace BluePrinceArchipelago.Resources
         private void Start()
         {
             CustomFsmMethodManager.RegisterMethods();
+        }
+        private int GetIntVariable(string variable)
+        {
+            return ModInstance.StepManager.GetIntVariable(variable).Value;
+        }
+
+        private int SetIntVariable(string variable, int amount)
+        {
+            return ModInstance.StepManager.GetIntVariable(variable).Value = amount;
+        }
+
+        //Example variable access
+        private int GetStepCount()
+        {
+            return GetIntVariable("STEP");
+        }
+
+        private int SetStepCount(int amount)
+        {
+            return SetIntVariable("STEP", amount);
+        }
+
+        private int GetOldStepCount()
+        {
+            return GetIntVariable("old step");
+        }
+
+        private int SetOldStepCount(int amount)
+        {
+            return SetIntVariable("old step", amount);
+        }
+
+        private int GetAdjustmentAmount()
+        {
+            return GetIntVariable("Adjustment Amount");
+        }
+
+        private int SetAdjustmentAmount(int amount)
+        {
+            return SetIntVariable("Adjustment Amount", amount);
+        }
+
+        private int GetTargetSteps()
+        {
+            return GetIntVariable("target steps");
+        }
+
+        private int SetTargetSteps(int amount)
+        {
+            return SetIntVariable("target steps", amount);
+        }
+
+        private int GetOldStepsToCompare()
+        {
+            return GetIntVariable("old steps to compare");
+        }
+
+        private int SetOldStepsToCompare(int amount)
+        {
+            return SetIntVariable("old steps to compare", amount);
         }
     }
 }
