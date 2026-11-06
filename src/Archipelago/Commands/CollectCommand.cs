@@ -10,7 +10,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
     {
         public override string Description => "Collects a location from the Archipelago item pool (for testing purposes).";
 
-        public override string Syntax => "Usage:\n\t/collect <LocationName>\n\nExample:\n\t/collect Closet First Entering";
+        public override string Syntax => "Usage:\n\t/collect <LocationName>\n\nExample:\n\t/collect First Draft - Closet";
 
         public override void Run(List<string> Args)
         {

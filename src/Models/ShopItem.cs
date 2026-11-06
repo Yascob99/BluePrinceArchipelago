@@ -27,7 +27,7 @@ namespace BluePrinceArchipelago.Models
 
                 string locationName = Name;
                 if (!Name.Contains("Upgrade Disk"))
-                    locationName = Name + " First Pickup";
+                    locationName = $"First Pickup - {Name}";
 
                 long locationid = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
                 if (locationid == -1)
@@ -99,7 +99,7 @@ namespace BluePrinceArchipelago.Models
                 
                 string locationName = Name;
                 if (!Name.Contains("Upgrade Disk"))
-                    locationName = Name + " First Pickup";
+                    locationName = $"First Pickup - {Name}";
 
                 long locationid = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
                 if (locationid == -1)

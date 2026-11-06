@@ -217,19 +217,19 @@ namespace BluePrinceArchipelago.Items
 
                             //Import the template Text Prefab.  
                             GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
-                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName(scoutname.ToTitleCase() + " First Pickup");
+                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName($"First Pickup - {scoutname.ToTitleCase()}");
                             // Get the location ID of our first pickup.
                             if (scoutname == "CABINET KEY 1")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Patio First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Patio");
                             }
                             else if (scoutname == "CABINET KEY 2")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Laundry Room First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Laundry Room");
                             }
                             else if (scoutname == "CABINET KEY 3")
                             {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                             }
                                 // Find the the details of the item that will be sent on pickup.
                                 ScoutedItemInfo scout = null;
@@ -1222,40 +1222,40 @@ namespace BluePrinceArchipelago.Items
             AddItem(new UniqueItem("TORCH", GetInventoryItem("TORCH"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
 
             // Permanent Items
-            AddItem(new PermanentItem("Extra Starting Dice 1", null, false, "Dice", 1));
-            AddItem(new PermanentItem("Extra Starting Dice 2", null, false, "Dice", 2));
-            AddItem(new PermanentItem("Extra Starting Keys 1", null, false, "Keys", 1));
-            AddItem(new PermanentItem("Extra Starting Keys 2", null, false, "Keys", 2));
-            AddItem(new PermanentItem("Extra Starting Steps 1", null, false, "Steps", 1));
-            AddItem(new PermanentItem("Extra Starting Steps 2", null, false, "Steps", 2));
-            AddItem(new PermanentItem("Extra Starting Steps 5", null, false, "Steps", 5));
-            AddItem(new PermanentItem("Extra Starting Steps 10", null, false, "Steps", 10));
-            AddItem(new PermanentItem("Extra Starting Gems 1", null, false, "Gems", 1));
-            AddItem(new PermanentItem("Extra Starting Gems 2", null, false, "Gems", 2));
-            AddItem(new PermanentItem("Extra Starting Luck 1", null, false, "Luck", 1));
-            AddItem(new PermanentItem("Extra Starting Luck 2", null, false, "Luck", 2));
+            AddItem(new PermanentItem("1 Permanent Dice", null, false, "Dice", 1));
+            AddItem(new PermanentItem("2 Permanent Dice", null, false, "Dice", 2));
+            AddItem(new PermanentItem("1 Permanent Dice", null, false, "Keys", 1));
+            AddItem(new PermanentItem("2 Permanent Dice", null, false, "Keys", 2));
+            AddItem(new PermanentItem("1 Permanent Steps", null, false, "Steps", 1));
+            AddItem(new PermanentItem("2 Permanent Steps", null, false, "Steps", 2));
+            AddItem(new PermanentItem("5 Permanent Steps", null, false, "Steps", 5));
+            AddItem(new PermanentItem("10 Permanent Steps", null, false, "Steps", 10));
+            AddItem(new PermanentItem("1 Permanent Gems", null, false, "Gems", 1));
+            AddItem(new PermanentItem("2 Permanent Gems", null, false, "Gems", 2));
+            AddItem(new PermanentItem("1 Permanent Luck", null, false, "Luck", 1));
+            AddItem(new PermanentItem("2 Permanent Luck", null, false, "Luck", 2));
 
             // Junk Items
-            AddItem(new JunkItem("Extra Allowance 1", null, false, "Allowance", 1));
-            AddItem(new JunkItem("Extra Allowance 2", null, false, "Allowance", 2));
-            AddItem(new JunkItem("Extra Stars 1", null, false, "Stars", 1));
-            AddItem(new JunkItem("Extra Stars 2", null, false, "Stars", 2));
-            AddItem(new JunkItem("Extra Stars 5", null, false, "Stars", 5));
+            AddItem(new JunkItem("1 Allowance", null, false, "Allowance", 1));
+            AddItem(new JunkItem("2 Allowance", null, false, "Allowance", 2));
+            AddItem(new JunkItem("1 Stars", null, false, "Stars", 1));
+            AddItem(new JunkItem("2 Stars", null, false, "Stars", 2));
+            AddItem(new JunkItem("5 Stars", null, false, "Stars", 5));
             AddItem(new JunkItem("Dug Up Nothing", null, true, "Nothing", 1));
-            AddItem(new JunkItem("Extra Gold 1", null, true, "Gold", 1));
-            AddItem(new JunkItem("Extra Gold 2", null, true, "Gold", 2));
-            AddItem(new JunkItem("Extra Gold 5", null, true, "Gold", 5));
-            AddItem(new JunkItem("Extra Dice 1", null, true, "Dice", 1));
-            AddItem(new JunkItem("Extra Dice 2", null, true, "Dice", 2));
-            AddItem(new JunkItem("Extra Dice 4", null, true, "Dice", 4));
-            AddItem(new JunkItem("Extra Gems 1", null, true, "Gems", 1));
-            AddItem(new JunkItem("Extra Gems 2", null, true, "Gems", 2));
-            AddItem(new JunkItem("Extra Keys 1", null, true, "Keys", 1));
-            AddItem(new JunkItem("Extra Keys 2", null, true, "Keys", 2));
-            AddItem(new JunkItem("Extra Keys 3", null, true, "Keys", 3));
-            AddItem(new JunkItem("Extra Steps 1", null, true, "Steps", 1));
-            AddItem(new JunkItem("Extra Steps 2", null, true, "Steps", 2));
-            AddItem(new JunkItem("Extra Steps 5", null, true, "Steps", 5));
+            AddItem(new JunkItem("1 Gold", null, true, "Gold", 1));
+            AddItem(new JunkItem("2 Gold", null, true, "Gold", 2));
+            AddItem(new JunkItem("5 Gold", null, true, "Gold", 5));
+            AddItem(new JunkItem("1 Dice", null, true, "Dice", 1));
+            AddItem(new JunkItem("2 Dice", null, true, "Dice", 2));
+            AddItem(new JunkItem("4 Dice", null, true, "Dice", 4));
+            AddItem(new JunkItem("1 Gems", null, true, "Gems", 1));
+            AddItem(new JunkItem("2 Gems", null, true, "Gems", 2));
+            AddItem(new JunkItem("1 Keys", null, true, "Keys", 1));
+            AddItem(new JunkItem("2 Keys", null, true, "Keys", 2));
+            AddItem(new JunkItem("3 Keys", null, true, "Keys", 3));
+            AddItem(new JunkItem("1 Steps", null, true, "Steps", 1));
+            AddItem(new JunkItem("2 Steps", null, true, "Steps", 2));
+            AddItem(new JunkItem("5 Steps", null, true, "Steps", 5));
 
             // Traps
             AddTrap(new LoseTrap("Trap Take Steps 1", "Steps", -1));

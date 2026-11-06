@@ -74,9 +74,9 @@ namespace BluePrinceArchipelago.Items
             // Check if a trunk was spawned by the item code. If not attempt a trunk spawn.
             if (_TrunkCounts.ContainsKey(room.Name) && _MaxTrunkCounts.ContainsKey(room.Name) && !TrunkSpawned) {
                 if (_TrunkCounts[room.Name] < _MaxTrunkCounts[room.Name]) {
-                    
+
                     // Check if the player rolled a trunk on the additional trunk chance.
-                    System.Random rng = new System.Random();
+                    Random rng = new();
                     int TrunkRNG = rng.Next(100) + 1;
                     if (TrunkChance >= TrunkRNG)
                     {
