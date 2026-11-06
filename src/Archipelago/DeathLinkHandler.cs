@@ -51,6 +51,9 @@ public class DeathLinkHandler
     public static bool processingDeathLink = false;
     public static bool room46Entered = false;
 
+    // 0 = Off, any other is the max number that can be queued at once.
+    public static int MaxQueuedDeathLinks = 0;
+
     /// <summary>
     ///     Instantiates our death link handler, sets up the hook for receiving death links, and enables death link if needed
     /// </summary>
@@ -100,11 +103,15 @@ public class DeathLinkHandler
     /// <param name="deathLink">Received Death Link object to handle</param>
     private void DeathLinkReceived(DeathLink deathLink)
     {
-        deathLinks.Enqueue(deathLink);
-
         Logging.Log(string.IsNullOrWhiteSpace(deathLink.Cause)
             ? $"Received Death Link from: {deathLink.Source}"
             : deathLink.Cause, "DeathLink");
+        if (MaxQueuedDeathLinks > 0 && deathLinks.Count >= MaxQueuedDeathLinks) 
+        {
+            Logging.Log("Skipping Deathlink due to exceeding Maximum number of Queued deathlinks.");
+        }
+        deathLinks.Enqueue(deathLink);
+
         KillPlayer();
     }
 

@@ -1,4 +1,5 @@
 ﻿using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
 #if Bep
 using HutongGames.PlayMaker;
 #endif

@@ -1,6 +1,7 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
+using UnityEngine;
 #if Bep
 using PathologicalGames;
 #endif
@@ -8,7 +9,7 @@ using PathologicalGames;
 using Il2CppPathologicalGames;
 #endif
 using System.Collections.Generic;
-using UnityEngine;
+
 
 namespace BluePrinceArchipelago.Items
 {
@@ -76,7 +77,7 @@ namespace BluePrinceArchipelago.Items
                 if (_TrunkCounts[room.Name] < _MaxTrunkCounts[room.Name]) {
 
                     // Check if the player rolled a trunk on the additional trunk chance.
-                    Random rng = new();
+                    System.Random rng = new();
                     int TrunkRNG = rng.Next(100) + 1;
                     if (TrunkChance >= TrunkRNG)
                     {
