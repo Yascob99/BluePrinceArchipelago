@@ -118,6 +118,21 @@ public static class ArchipelagoOptions
     /// </summary>
     public static Dictionary<string, int> TrapTypeDistribution { get; private set; } = new Dictionary<string, int>();
 
+    /// <summary>
+    /// The World version of the APworld.
+    /// </summary>
+    public static string WorldVersion { get; private set; } = "0.0.0";
+
+    /// <summary>
+    /// The extra chance of a trunk spawning in a room with a trunk location.
+    /// </summary>
+    public static int ExtraTrunkChance { get; private set; } = 100;
+
+    /// <summary>
+    /// The Max number of Deaths that can be queued for deathlinks at the same time. 0 or negative values mean off.
+    /// </summary>
+    public static int MaxQueuedDeathlinks { get; private set; } = 0;
+
     // ============================================================
     // Methods
     // ============================================================
@@ -155,6 +170,9 @@ public static class ArchipelagoOptions
             DeathLinkMonkException = slotData.DeathLinkMonkException;
             GoalType = slotData.GoalType;
             GoalSanctumSolves = slotData.GoalSanctumSolves;
+            //WorldVersion = slotData.WorldVersion;
+            //ExtraTrunkChance = slotData.ExtraTrunkChance;
+            //MaxQueuedDeathlinks = slotData.MaxQueuedDeathLinks;
             IsLoaded = true;
             LogOptions();
         }
@@ -198,6 +216,9 @@ public static class ArchipelagoOptions
             DeathLinkMonkException = GetBool(slotData, "death_link_monk_exception", true);
             GoalType = (GoalType)GetInt(slotData, "goal_type", 0);
             GoalSanctumSolves = GetInt(slotData, "goal_sanctum_solves", 1);
+            //WorldVersion = GetString(slotData, "world_version", "0.0.0")
+            //ExtraTrunkChance = GetInt(slotData, "extra_trunk_chance", 100);
+            //MaxQueuedDeathlinks = GetInt(slotData, "max_queued_deathlinks", 0);
             IsLoaded = true;
             LogOptions();
         }

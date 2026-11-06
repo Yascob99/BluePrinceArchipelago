@@ -68,5 +68,15 @@ namespace BluePrinceArchipelago.Models
         [JsonProperty("start_inventory")]
         public Dictionary<string, int> StartInventory { get; set; }
 
+        //[JsonProperty("world_version")]
+        //public string WorldVersion { get; set; }
+
+        // TODO Add Extra Trunk Chance variable
+        //[JsonProperty("extra_trunk_chance")]
+        //public int ExtraTrunkChance { get; set; }
+
+        //[JsonProperty("max_queued_deathlinks")]
+        //public int MaxQueuedDeathlinks { get; set; }
+
     }
 }
