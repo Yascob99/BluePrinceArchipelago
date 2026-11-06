@@ -29,19 +29,19 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         private const string LOCKED_DISPLAY_TEXT = "LOCKED";
         private const string UNLOCKED_DISPLAY_TEXT = "ASSEMBLE";
 
-        private UniqueItem contraption;
         private readonly GameObject workshopWrench = GameObject.Find(WRENCH_OBJECT_PATH);
         private readonly PlayMakerFSM wrenchFSM = GameObject.Find(WRENCH_OBJECT_PATH).GetComponent<PlayMakerFSM>();
 
         public override void OnRegister()
         {
-            contraption = ModItemManager.GetUniqueItem(contraptionName);
             //TODO : Maybe add the first three lines into object parameters for faster invocation
             return;
         }
 
         public override void OnCalled()
         {
+            UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionName);
+            Logging.LogWarning($"contraption {contraption.Name} has been found : {contraption.HasBeenFound}, is unlocked : {contraption.IsUnlocked}");
             if (contraption.HasBeenFound && !contraption.IsUnlocked)
             {
                 LockCraftButton();

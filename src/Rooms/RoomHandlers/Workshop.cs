@@ -12,12 +12,24 @@ using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.FsmMethods;
 using BluePrinceArchipelago.Archipelago;
+using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 class Workshop : RoomHandler
 {
-    private readonly string[] stateNames = ["Shovel Check", "State 6", "State 2", "Shovel", "Item 1", "No Combombs"];
+
+    private readonly Dictionary<string, string> contraptionStateNames = new()
+        {
+            {"Electromagnet", "Electo Magnet"},
+            {"Dowsing Rod", "Dowsing Rod"},
+            {"Detector Shovel", "DETECTOR SHOVEL"},
+            {"Burning Glass", "Burning Glass"},
+            {"Pick Sound Amplifier", "Pick Sound Amplifier"},
+            {"Lucky Purse", "Lucky Purse"},
+            {"Power Hammer", "Power Hammer"},
+            {"Jack Hammer", "Jack Hammer"}
+        };
     
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
@@ -31,13 +43,13 @@ class Workshop : RoomHandler
         PlayMakerFSM workshopFSM = workshopMenu.transform.Find("ICONS TEXT").GetComponent<PlayMakerFSM>();
         workshopMenu.transform.Find("ICONS TEXT/TITLE TEXT/Workshop TExt").GetComponent<TextMeshPro>().text = "Archipelago";
 
-        UniqueItem detectorShovelItem = ModItemManager.GetUniqueItem("Detector Shovel");
-        CustomFsmMethodManager.AddItemOnCraftMethod(detectorShovelItem);
-        string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(detectorShovelItem.Name);
-        FsmState detectorShovel = workshopFSM.GetState("DETECTOR SHOVEL");
-        detectorShovel.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
-
-        FsmState BurningGlass = workshopFSM.GetState("Burning Glass");
-        BurningGlass.AddAction(CustomFsmMethodManager.GetCallMethod("UnlockContraption"));
+        foreach (KeyValuePair<string, string> contraptionStateName in contraptionStateNames)
+        {
+            UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionStateName.Key);
+            CustomFsmMethodManager.AddItemOnCraftMethod(contraption);
+            string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(contraption.Name);
+            FsmState state = workshopFSM.GetState(contraptionStateName.Value);
+            state.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
+        }
     }
 }

@@ -42,8 +42,6 @@ namespace BluePrinceArchipelago.FsmMethods
             { "ZeroStepEnding", new ZeroStepEnding()},
             { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()},
             { "MainMenuLoaded", new MainMenuLoaded()},
-            //TODO : Remove UnlockContraption
-            { "UnlockContraption", new UnlockContraption()},
         };
 
         public static void RegisterMethods() {
@@ -113,8 +111,7 @@ namespace BluePrinceArchipelago.FsmMethods
             string CraftedMethodName = GetItemOnCraftMethodName(item.Name);
             RegisteredCustomFsmMethod Method = new LockContraption(item.Name);
             RegisteredCustomFsmMethods[CraftedMethodName] = Method;
-            //TODO : Reduce log level to simple Log not LogWarning
-            Logging.LogWarning($"Registered New Method: {CraftedMethodName}", "CustomFsmMethods");
+            Logging.Log($"Registered New Method: {CraftedMethodName}", "CustomFsmMethods");
             Method.OnRegister();
             return Method;
         }
