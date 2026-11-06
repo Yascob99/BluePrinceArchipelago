@@ -125,7 +125,7 @@ namespace BluePrinceArchipelago.Triggers
                         if (!Item.HasBeenFound)
                         {
                             Item.HasBeenFound = true;
-                            ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                            ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                             ModItemManager.RemoveUniqueItemAPSwirly(Item);
                         }
                     }
@@ -145,19 +145,19 @@ namespace BluePrinceArchipelago.Triggers
                 // Cabinet Key fixes.
                 if (Item.Name == "CABINET KEY 1")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Patio First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Patio");
                 }
                 else if (Item.Name == "CABINET KEY 2")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Laundry Room First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Laundry Room");
                 }
                 else if (Item.Name == "CABINET KEY 3")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                 }
                 else
                 {
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                 }
             }
         }
@@ -190,7 +190,7 @@ namespace BluePrinceArchipelago.Triggers
                 Item.HasBeenFound = true;
                 ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 
-                ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
             }
             Item.HasBeenFound = true;
         }
@@ -206,7 +206,7 @@ namespace BluePrinceArchipelago.Triggers
                 {
                     Item.HasBeenFound = true;
                     ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                 }
             }
         }
