@@ -15,12 +15,11 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 {
-    public class LockContraption(string contraptionName) : RegisteredCustomFsmMethod
+    public class LockContraption(string contraptionName, int currentInstance) : RegisteredCustomFsmMethod
     {
-        public new readonly string Name = CustomFsmMethodManager.GetItemOnCraftMethodName(contraptionName);
+        public new readonly string Name = CustomFsmMethodManager.GetItemOnCraftMethodName(contraptionName, currentInstance);
 
-        //TODO : Handle multiple instances... 
-        private const string WRENCH_OBJECT_PATH = "__SYSTEM/Room Spawn Pools/Workshop(Clone)001/_GAMEPLAY/WorkShop Table/ICONS TEXT/Wrench";
+        private readonly string WRENCH_OBJECT_PATH = $"__SYSTEM/Room Spawn Pools/Workshop(Clone)00{currentInstance}/_GAMEPLAY/WorkShop Table/ICONS TEXT/Wrench";
         private const string ASSEMBLE_TEXT_OBJECT_NAME = "Assemble";
         private const string CLICK_STATE_NAME = "Click";
         private const string NORMAL_STATE_NAME = "State 3";
@@ -29,13 +28,13 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         private const string LOCKED_DISPLAY_TEXT = "LOCKED";
         private const string UNLOCKED_DISPLAY_TEXT = "ASSEMBLE";
 
-        private readonly GameObject workshopWrench = GameObject.Find(WRENCH_OBJECT_PATH);
-        private readonly PlayMakerFSM wrenchFSM = GameObject.Find(WRENCH_OBJECT_PATH).GetComponent<PlayMakerFSM>();
+        private GameObject workshopWrench = new();
+        private PlayMakerFSM wrenchFSM = new();
 
         public override void OnRegister()
         {
-            //TODO : Maybe add the first three lines into object parameters for faster invocation
-            return;
+            workshopWrench = GameObject.Find(WRENCH_OBJECT_PATH);
+            wrenchFSM = GameObject.Find(WRENCH_OBJECT_PATH).GetComponent<PlayMakerFSM>();
         }
 
         public override void OnCalled()

@@ -30,26 +30,40 @@ class Workshop : RoomHandler
             {"Power Hammer", "Power Hammer"},
             {"Jack Hammer", "Jack Hammer"}
         };
+
+    private static int currentInstance = 0;
     
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
+        ++currentInstance;
         if (!ArchipelagoOptions.WorkshopSanity)
         {
             return;
         }
-        // TODO : Make sure to handle multiple instances of workshop before releasing
-        GameObject workshopMenu = GameObject.Find("__SYSTEM/Room Spawn Pools/Workshop(Clone)001/_GAMEPLAY/WorkShop Table");
-        
-        PlayMakerFSM workshopFSM = workshopMenu.transform.Find("ICONS TEXT").GetComponent<PlayMakerFSM>();
-        workshopMenu.transform.Find("ICONS TEXT/TITLE TEXT/Workshop TExt").GetComponent<TextMeshPro>().text = "Archipelago";
+        GameObject workshopMenu = GameObject.Find($"__SYSTEM/Room Spawn Pools/Workshop(Clone)00{currentInstance}/_GAMEPLAY/WorkShop Table");
 
+        PlayMakerFSM workshopFSM = workshopMenu.transform.Find("ICONS TEXT").GetComponent<PlayMakerFSM>();
+        // TODO : Remove
+        workshopMenu.transform.Find("ICONS TEXT/TITLE TEXT/Workshop TExt").GetComponent<TextMeshPro>().text = "Archipelago";
+        HookItemIconsOnCraft(workshopFSM);
+    }
+
+    private void HookItemIconsOnCraft(PlayMakerFSM workshopFSM)
+    {
         foreach (KeyValuePair<string, string> contraptionStateName in contraptionStateNames)
         {
+            HookItemIconOnCraft(workshopFSM, contraptionStateName.Key, contraptionStateName.Value);
             UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionStateName.Key);
-            CustomFsmMethodManager.AddItemOnCraftMethod(contraption);
-            string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(contraption.Name);
-            FsmState state = workshopFSM.GetState(contraptionStateName.Value);
-            state.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
+            //ModItemManager.AddSwirly(contraption);
         }
+    }
+
+    private static void HookItemIconOnCraft(PlayMakerFSM workshopFSM, string itemName, string stateName)
+    {
+        UniqueItem contraption = ModItemManager.GetUniqueItem(itemName);
+        CustomFsmMethodManager.AddItemOnCraftMethod(contraption, currentInstance);
+        string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(contraption.Name, currentInstance);
+        FsmState state = workshopFSM.GetState(stateName);
+        state.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
     }
 }

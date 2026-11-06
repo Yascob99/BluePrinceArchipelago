@@ -106,18 +106,18 @@ namespace BluePrinceArchipelago.FsmMethods
             return itemName.ToTitleCase().Replace(" ", "") + "ItemDugUp";
         }
 
-        public static RegisteredCustomFsmMethod AddItemOnCraftMethod(UniqueItem item)
+        public static RegisteredCustomFsmMethod AddItemOnCraftMethod(UniqueItem item, int currentInstance)
         {
-            string CraftedMethodName = GetItemOnCraftMethodName(item.Name);
-            RegisteredCustomFsmMethod Method = new LockContraption(item.Name);
+            string CraftedMethodName = GetItemOnCraftMethodName(item.Name, currentInstance);
+            RegisteredCustomFsmMethod Method = new LockContraption(item.Name, currentInstance);
             RegisteredCustomFsmMethods[CraftedMethodName] = Method;
             Logging.Log($"Registered New Method: {CraftedMethodName}", "CustomFsmMethods");
             Method.OnRegister();
             return Method;
         }
-        public static string GetItemOnCraftMethodName(string itemName)
+        public static string GetItemOnCraftMethodName(string itemName, int currentInstance)
         {
-            return itemName.ToTitleCase().Replace(" ", "") + "ItemCraft";
+            return itemName.ToTitleCase().Replace(" ", "") + "ItemCraft" + currentInstance.ToString();
         }
 
         public static RegisteredCustomFsmMethod RegisterCustomFsmMethod(string methodname, RegisteredCustomFsmMethod method)
