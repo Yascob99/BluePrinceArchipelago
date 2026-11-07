@@ -77,7 +77,6 @@ class Workshop : RoomHandler
     private static void AddSwirly(GameObject workshopTable, string contraptionName, string contraptionObjectPath)
     {
         UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionName);
-        // Assuming an item can not be crafted twice the same day (in 2 workshops)
         if (contraption.HasBeenFound)
         {
             return;
@@ -88,6 +87,9 @@ class Workshop : RoomHandler
             Logging.LogWarning($"Failed to reach object for {contraptionName}", "DEBUG");
             return;
         }
+        /* Here, swirly effect is added upon creation.
+         * No need to remove it if the item has been crafted through another mean because it is impossible in vanilla.
+         */
         ModItemManager.AddSwirly(contraption, contraptionObject);
     }
 

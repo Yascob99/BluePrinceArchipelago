@@ -117,7 +117,8 @@ namespace BluePrinceArchipelago.Items
                 Logging.LogWarning($"Error finding game object for {APitem.Name}.");
                 return;
             }
-            GameObject prefab = ModInstance.Prefabs.GetChild(APitem.Name);
+            string prefabName = GetPrefabName(APitem);
+            GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
             if (prefab == null)
             {
                 Logging.LogWarning($"Unable to find prefab for {APitem.Name}. Item is either unimplemented or not present in the assets.");
@@ -151,6 +152,15 @@ namespace BluePrinceArchipelago.Items
             APitem.ModelReplaced = true;
             ReplaceAPItemNotifications(APitem.Name, gameInstance);
             GameObject.Destroy(APGO);
+        }
+
+        private static string GetPrefabName(UniqueItem APitem)
+        {
+            if (APitem.Name.ToUpper() == "ELECTROMAGNET")
+            {
+                return "POWERED ELECTROMAGNET";
+            }
+            return APitem.Name;
         }
 
         /// <summary>
@@ -469,6 +479,8 @@ namespace BluePrinceArchipelago.Items
                     return "Prism Key";
                 case "KEY OF ARIES":
                     return "o Key";
+                case "POWER HAMMER":
+                    return "Power Hammer ";
                 default:
                     return name;
             }
