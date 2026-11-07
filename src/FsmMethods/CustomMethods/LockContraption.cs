@@ -20,7 +20,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         public new readonly string Name = CustomFsmMethodManager.GetItemOnCraftMethodName(contraptionName, currentInstance);
 
         private readonly string WRENCH_OBJECT_PATH = $"__SYSTEM/Room Spawn Pools/Workshop(Clone)00{currentInstance}/_GAMEPLAY/WorkShop Table/ICONS TEXT/Wrench";
-        private const string ASSEMBLE_TEXT_OBJECT_NAME = "Assemble";
+        private const string ASSEMBLE_TEXT_OBJECT_SUBPATH = "Assemble";
         private const string CLICK_STATE_NAME = "Click";
         private const string NORMAL_STATE_NAME = "State 3";
         private const string HOVERED_STATE_NAME = "State 4";
@@ -40,7 +40,6 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         public override void OnCalled()
         {
             UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionName);
-            Logging.LogWarning($"contraption {contraption.Name} has been found : {contraption.HasBeenFound}, is unlocked : {contraption.IsUnlocked}");
             if (contraption.HasBeenFound && !contraption.IsUnlocked)
             {
                 LockCraftButton();
@@ -65,7 +64,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         private void ChangeCraftButtonText(string text)
         {
-            workshopWrench.transform.Find(ASSEMBLE_TEXT_OBJECT_NAME).GetComponent<TextMeshPro>().text = text;
+            workshopWrench.transform.Find(ASSEMBLE_TEXT_OBJECT_SUBPATH).GetComponent<TextMeshPro>().text = text;
         }
     }
 }

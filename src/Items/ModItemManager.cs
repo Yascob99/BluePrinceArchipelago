@@ -163,6 +163,54 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        //TODO : This is extracted from the method above, make sure to re-use
+        public static void AddSwirly(UniqueItem item, GameObject spawnObj)
+        {
+            if (spawnObj == null)
+            {
+                Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
+                return;
+            }
+            GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
+            if (prefab == null)
+            {
+                Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
+                return;
+            }
+            //If the Model is not currently already replaced.
+            if (spawnObj.transform.FindChild("AP Swirlie") == null)
+            {
+                //Instantiate a copy of the game object at the location of the spawn pool game object.
+                GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
+                // Get the APswirly Component of the prefab
+                GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
+                if (APswirly == null)
+                {
+                    Logging.LogWarning($"Unable to find APSwirly for {item.Name}.");
+                    GameObject.Destroy(APGO);
+                    return;
+                }
+            
+                // Reparent the the AP Swirly to the Archipelago Mod GameObject.
+                APswirly.transform.parent = spawnObj.transform;
+                APswirly.layer = 10;
+                item.ModelReplaced = true;
+                ReplaceAPItemNotifications(item.Name, spawnObj);
+                GameObject.Destroy(APGO);
+            }
+            else
+            {
+                // Make sure the notification is changed for persistent items.
+                if (item.IsPersistent)
+                {
+                    ReplaceAPItemNotifications(item.Name, spawnObj);
+                }
+                else
+                {
+                    Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
+                }
+            }
+        }
 
         /// <summary>
         ///     Replaces an AP Item's notification with the appropriate item data and the UI model with the AP model.
