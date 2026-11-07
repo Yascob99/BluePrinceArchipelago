@@ -99,61 +99,8 @@ namespace BluePrinceArchipelago.Items
                             state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
                         }
                     }
-                    GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
-                    if (prefab != null)
-                    {
-
-                        GameObject spawnObj = FindSpawnObject(item.Name);
-                        if (spawnObj == null)
-                        {
-                            spawnObj = item.GameObj;
-                        }
-                        if (spawnObj != null)
-                        {
-                            //If the Model is not currently already replaced.
-                            if (spawnObj.transform.FindChild("AP Swirlie") == null)
-                            {
-                                //Instantiate a copy of the game object at the location of the spawn pool game object.
-                                GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
-                                // Get the APswirly Component of the prefab
-                                GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
-                                if (APswirly != null)
-                                {
-                                   
-                                    // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-                                    APswirly.transform.parent = spawnObj.transform;
-                                    APswirly.layer = 10;
-                                    item.ModelReplaced = true;
-                                    ReplaceAPItemNotifications(item.Name, spawnObj);
-                                }
-                                else
-                                {
-                                    Logging.LogWarning($"Unable to find APSwirly for {item.Name}.");
-                                }
-                                GameObject.Destroy(APGO);
-                            }
-                            else
-                            {
-                                // Make sure the notification is changed for persistent items.
-                                if (item.IsPersistent)
-                                {
-                                    ReplaceAPItemNotifications(item.Name, spawnObj);
-                                }
-                                else
-                                {
-                                    Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
-                        }
-                    }
-                    else
-                    {
-                        Logging.LogWarning($"Unable to find prefab for {item.Name}. Item is either unimplemented or not present in the assets.");
-                    }
+                    GameObject spawnObj = FindSpawnObject(item.Name) ?? item.GameObj;
+                    AddSwirly(item, spawnObj);
                 }
                 else {
                     if (item.IsPersistent) { 
@@ -163,53 +110,47 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
-        //TODO : This is extracted from the method above, make sure to re-use
-        public static void AddSwirly(UniqueItem item, GameObject spawnObj)
+        public static void AddSwirly(UniqueItem APitem, GameObject gameInstance)
         {
-            if (spawnObj == null)
+            if (gameInstance == null)
             {
-                Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
+                Logging.LogWarning($"Error finding game object for {APitem.Name}.");
                 return;
             }
-            GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
+            GameObject prefab = ModInstance.Prefabs.GetChild(APitem.Name);
             if (prefab == null)
             {
-                Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
+                Logging.LogWarning($"Unable to find prefab for {APitem.Name}. Item is either unimplemented or not present in the assets.");
                 return;
             }
             //If the Model is not currently already replaced.
-            if (spawnObj.transform.FindChild("AP Swirlie") == null)
-            {
-                //Instantiate a copy of the game object at the location of the spawn pool game object.
-                GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
-                // Get the APswirly Component of the prefab
-                GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
-                if (APswirly == null)
-                {
-                    Logging.LogWarning($"Unable to find APSwirly for {item.Name}.");
-                    GameObject.Destroy(APGO);
-                    return;
-                }
-            
-                // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-                APswirly.transform.parent = spawnObj.transform;
-                APswirly.layer = 10;
-                item.ModelReplaced = true;
-                ReplaceAPItemNotifications(item.Name, spawnObj);
-                GameObject.Destroy(APGO);
-            }
-            else
+            if (gameInstance.transform.FindChild("AP Swirlie") != null)
             {
                 // Make sure the notification is changed for persistent items.
-                if (item.IsPersistent)
+                if (!APitem.IsPersistent)
                 {
-                    ReplaceAPItemNotifications(item.Name, spawnObj);
+                    Logging.LogWarning($"{APitem.Name} has already Been Replaced with an AP Item:");
+                    return;
                 }
-                else
-                {
-                    Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
-                }
+                ReplaceAPItemNotifications(APitem.Name, gameInstance);
+                return;
             }
+            //Instantiate a copy of the game object at the location of the spawn pool game object.
+            GameObject APGO = GameObject.Instantiate(prefab, gameInstance.transform.position, gameInstance.transform.rotation);
+            // Get the APswirly Component of the prefab
+            GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
+            if (APswirly == null)
+            {
+                Logging.LogWarning($"Unable to find APSwirly for {APitem.Name}.");
+                GameObject.Destroy(APGO);
+                return;
+            }
+            // Reparent the the AP Swirly to the Archipelago Mod GameObject.
+            APswirly.transform.parent = gameInstance.transform;
+            APswirly.layer = 10;
+            APitem.ModelReplaced = true;
+            ReplaceAPItemNotifications(APitem.Name, gameInstance);
+            GameObject.Destroy(APGO);
         }
 
         /// <summary>
