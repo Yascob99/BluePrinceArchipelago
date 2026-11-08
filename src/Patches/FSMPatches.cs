@@ -60,7 +60,7 @@ namespace BluePrinceArchipelago.Patches
             FsmState PickAnother = fsm.GetState("Pick Another ");
             PickAnother.ChangeTransition("FINISHED", "Draft Forced Check");
 
-            // Darkroom Skip Fix
+            // Darkroom Archives UI Fix
             PlayMakerFSM PlanManagement = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/PLAN MANAGEMENT").GetComponent<PlayMakerFSM>();
             GameObject RoomsInHouse = GameObjectExtensions.FindInHierarchy("__SYSTEM/Room Lists/Rooms in House");
             FsmState DarkRoomLightsOn = PlanManagement.GetState("DarkRoom Lights On");
@@ -241,7 +241,7 @@ namespace BluePrinceArchipelago.Patches
                 FsmState UpgradeDiskPurchaseState = CommissaryMenu.GetState("Upgrade Disk Purchase 2");
                 UpgradeDiskPurchaseState.DisableActionsOfType<ArrayListAdd>();
                 UpgradeDiskPurchaseState.DisableFirstActionOfType<ActivateGameObject>();
-                UpgradeDiskPurchaseState.InsertAction(3, new SendEventByName()
+                UpgradeDiskPurchaseState.InsertAction(3, new SendEvent()
                 {
                     eventTarget = new FsmEventTarget()
                     {
@@ -255,7 +255,7 @@ namespace BluePrinceArchipelago.Patches
                         sendToChildren = false,
                         excludeSelf = false
                     },
-                    sendEvent = "Upgrade Disk Pickup",
+                    sendEvent = GlobalFSM.GetGlobalTransition("Upgrade Disk Pickup").fsmEvent,
                     delay = 0f,
                     everyFrame = false
                 });

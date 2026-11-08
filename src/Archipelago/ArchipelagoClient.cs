@@ -20,10 +20,9 @@ namespace BluePrinceArchipelago.Archipelago;
 
 public class ArchipelagoClient
 {
-    public const string APVersion = "0.6.7";
+    public const string APVersion = "0.6.8";
     private const string Game = "Blue Prince";
-
-
+    private Version MinWorldVersion = new("0.1.4");
     public static bool Authenticated;
     private bool _AttemptingConnection;
     public static bool Reconnected = false;
@@ -153,7 +152,14 @@ public class ArchipelagoClient
             // Get the slot data
             SlotData slotData = session.DataStorage.GetSlotData<SlotData>();
 
-            // Check if the Seed and options match the expected Seed and Options.
+            //if (new Version(slotData.WorldVersion).CompareTo(MinWorldVersion) < 0) {
+            //    ArchipelagoConsole.LogMessage($"World Version {slotData.WorldVersion} is lower than the minimum world version of {MinWorldVersion}");
+
+            //    HandleConnectResult(new LoginFailure($"Unexpected LoginResult type when connecting to Archipelago: {loginResult}"));
+            //    _AttemptingConnection = false;
+
+            //}
+            // Check if the Seed and options match the expected Seed and Options
             if (ServerData.Seed == "" || ServerData.Seed == session.RoomState.Seed) {
                 //If the Seed data was already stored this is a recconnect.
                 if (ServerData.Seed == session.RoomState.Seed) {
@@ -522,8 +528,8 @@ public class ArchipelagoClient
             if (locationName.StartsWith("Locked Trunk - ") && !hint)
             {
                 string[] nameparts = locationName.Split(" - ");
-                if (nameparts.Length == 3) { 
-                    string roomName = ModRoomManager.GetRoomByName(nameparts[1]).Name;
+                if (nameparts.Length == 3) {
+                    string roomName = nameparts[1].ToUpper();
                     int count = int.Parse(nameparts[2]);
                     if (ModInstance.TrunkManager.MaxTrunkCounts.ContainsKey(roomName))
                     {

@@ -171,8 +171,8 @@ public static class ArchipelagoOptions
             GoalType = slotData.GoalType;
             GoalSanctumSolves = slotData.GoalSanctumSolves;
             //WorldVersion = slotData.WorldVersion;
-            //ExtraTrunkChance = slotData.ExtraTrunkChance;
-            //MaxQueuedDeathlinks = slotData.MaxQueuedDeathLinks;
+            ExtraTrunkChance = slotData.ExtraTrunkChance;
+            MaxQueuedDeathlinks = slotData.MaxQueuedDeathLinks;
             IsLoaded = true;
             LogOptions();
         }
@@ -216,9 +216,9 @@ public static class ArchipelagoOptions
             DeathLinkMonkException = GetBool(slotData, "death_link_monk_exception", true);
             GoalType = (GoalType)GetInt(slotData, "goal_type", 0);
             GoalSanctumSolves = GetInt(slotData, "goal_sanctum_solves", 1);
-            //WorldVersion = GetString(slotData, "world_version", "0.0.0")
-            //ExtraTrunkChance = GetInt(slotData, "extra_trunk_chance", 100);
-            //MaxQueuedDeathlinks = GetInt(slotData, "max_queued_deathlinks", 0);
+            //WorldVersion = GetString(slotData, "world_version", "0.0.0");
+            ExtraTrunkChance = GetInt(slotData, "extra_trunk_chance", 100);
+            MaxQueuedDeathlinks = GetInt(slotData, "max_queued_deathlinks", 0);
             IsLoaded = true;
             LogOptions();
         }
@@ -275,6 +275,7 @@ public static class ArchipelagoOptions
         Logging.Log($"  DeathLinkMonkException: {DeathLinkMonkException}");
         Logging.Log($"  GoalType: {GoalType}");
         Logging.Log($"  GoalSanctumSolves: {GoalSanctumSolves}");
+        Logging.Log($"  World Version: {WorldVersion}");
         Logging.Log($"  Filler Item Distribution:");
         foreach (var entry in FillerItemDistribution) {
             Logging.Log($"    {entry.Key} - {entry.Value}");

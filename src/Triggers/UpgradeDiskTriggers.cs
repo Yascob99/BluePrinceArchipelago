@@ -38,6 +38,8 @@ namespace BluePrinceArchipelago.Triggers
             {
                 roomname = "THE FOUNDATION";
             }
+
+            Logging.LogWarning(roomname);
             ModItemManager.UpgradeDisks.OnFind(roomname);
         }
     }

@@ -71,12 +71,11 @@ namespace BluePrinceArchipelago.Models
         //[JsonProperty("world_version")]
         //public string WorldVersion { get; set; }
 
-        // TODO Add Extra Trunk Chance variable
-        //[JsonProperty("extra_trunk_chance")]
-        //public int ExtraTrunkChance { get; set; }
+        [JsonProperty("extra_trunk_chance")]
+        public int ExtraTrunkChance { get; set; }
 
-        //[JsonProperty("max_queued_deathlinks")]
-        //public int MaxQueuedDeathlinks { get; set; }
+        [JsonProperty("max_queued_deathlinks")]
+        public int MaxQueuedDeathLinks { get; set; }
 
     }
 }

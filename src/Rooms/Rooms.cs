@@ -253,7 +253,9 @@ namespace BluePrinceArchipelago.Rooms
         /// </summary>
         public void Initialize()
         {
-            var pool = GameObject.Find("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
+            RoomItemCodeCompleteMethod = CustomFsmMethodManager.AddItemCodeComplete(this);
+            RoomItemCodeComplete = CustomFsmMethodManager.GetCallMethod(Name.ToTitleCase() + "ItemCodeComplete");
+            var pool = GameObjectExtensions.FindInHierarchy("__SYSTEM/The Room Engines/" + _GameObjectName)?.GetFsm(_GameObjectName)?.GetBoolVariable("POOL REMOVAL");
             if (pool == null) return;
             if (!IsUnlocked)
             {
@@ -263,9 +265,7 @@ namespace BluePrinceArchipelago.Rooms
             {
                 pool.Value = false;
             }
-            // Create the Hook item code complete.
-            RoomItemCodeCompleteMethod = CustomFsmMethodManager.AddItemCodeComplete(this);
-            RoomItemCodeComplete = CustomFsmMethodManager.GetCallMethod(Name.ToTitleCase() + "ItemCodeComplete");
+           
         }
 
         /// <summary>

@@ -287,7 +287,7 @@ namespace BluePrinceArchipelago.Resources
         {
             StepTextObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
             Player = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince");
-            PlayerCore = Player.GetChild("Player Core");
+            PlayerCore = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
             BedUISlide = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Steps Icon/Bed UI Slide");
             StepTimeDelete = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Step Time delete (and gloabl variable)");
             DareEngine = GameObjectExtensions.FindGameObject("DAY/DARE ENGINE");

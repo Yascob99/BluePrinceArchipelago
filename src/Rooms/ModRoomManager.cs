@@ -200,6 +200,7 @@ namespace BluePrinceArchipelago.Rooms
             {
                 Logging.LogWarning($"{_Rooms[counter].Name} already in Pool, adding more to the pool");
                 _Rooms[counter].RoomPoolCount++;
+                Logging.LogWarning($"Initializing Room {room.Name}");
                 room.Initialize();
             }
             else
@@ -1209,6 +1210,10 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="roomInstanceName">The Name of the Room Instance to get.</param>
         /// <returns>The GameObject of the found room instance. Null if not found.</returns>
         public static GameObject GetRoomInstance(string roomInstanceName) {
+            Logging.LogWarning($"{roomInstanceName}");
+            if (roomInstanceName.Contains("MAID")) {
+                roomInstanceName = "Maids Chamber";
+            }
             GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
             GameObject roomInstance = null;
             // Start at end of list since newer objects are usually at the end of the children.
@@ -1346,7 +1351,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("GUEST BEDROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CORNER - Tier 1", "CENTER - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("GYMNASIUM", ["FRONTBACK - RARE", "NORTH PIERCE", "CENTER - Tier 1", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
             AddRoom("HALLWAY", ["FRONT - Tier 1", "FRONTBACK - RARE", "SOUTH PIERCE", "CENTER - Tier 1"], true);
-            AddRoom("HER LADYSHIP\'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true);
+            AddRoom("HER LADYSHIP\'S CHAMBER", ["EDGE RETREAT WESTWING -  G"], true, false, ["HER LADYSHIP'S CHAMBER"]);
             AddRoom("HOVEL", ["STANDALONE ARRAY", "STANDALONE ARRAY FULL"], true);
             AddRoom("KITCHEN", ["FRONT - Tier 1 G", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
             AddRoom("LABORATORY", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - Tier 1 G", "CENTER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G"], true);
@@ -1357,7 +1362,7 @@ namespace BluePrinceArchipelago.Rooms
                 .AddEarlyDraftDependency(poolCheck);
             AddRoom("LOCKSMITH", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CORNER - RARE G", "CENTER - Tier 3 G", "EDGECREEP - RARE G", "EDGEPIERCE - RARE G"], true);
             AddRoom("LOST & FOUND", ["FRONTBACK - RARE", "CORNER - Tier 1", "EDGECREEP WEST", "EDGECREEP EAST", "EDGEPIERCE WEST", "EDGEPIERCE EAST", "SOUTH PIERCE", "CENTER - Tier 2"], false);
-            AddRoom("MAID\'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
+            AddRoom("MAID\'S CHAMBER", ["FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true, false, ["MAIDS CHAMBER"]);
             AddRoom("MAIL ROOM", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 3", "EDGECREEP - RARE", "EDGEPIERCE - RARE"], true);
             AddRoom("MASTER BEDROOM", ["EDGE ADVANCE EASTWING - G", "EDGE RETREAT EASTTWING -  G"], true);
             AddRoom("MECHANARIUM", ["CENTER - Tier 2"], false);
