@@ -61,7 +61,17 @@ class Workshop : RoomHandler
         }
         string workshopTablePath = $"__SYSTEM/Room Spawn Pools/Workshop(Clone)00{currentInstance}/_GAMEPLAY/WorkShop Table";
         GameObject workshopTable = GameObject.Find(workshopTablePath);
+        if (workshopTable == null)
+        {
+            Logging.LogWarning($"Failed to reach object for workshop table", "WORKSHOP");
+            return;
+        }
         PlayMakerFSM workshopFSM = workshopTable.transform.Find(WORKSHOP_FSM_SUBPATH).GetComponent<PlayMakerFSM>();
+        if (workshopFSM == null)
+        {
+            Logging.LogWarning("Failed to reach FSM for workshop table", "WORKSHOP");
+            return;
+        }
         HookItemIconsOnCraft(workshopFSM);
         AddSwirlies(workshopTable);
     }
@@ -84,7 +94,7 @@ class Workshop : RoomHandler
         GameObject contraptionObject = workshopTable.transform.Find(contraptionObjectPath).gameObject;
         if (contraptionObject == null)
         {
-            Logging.LogWarning($"Failed to reach object for {contraptionName}", "DEBUG");
+            Logging.LogWarning($"Failed to reach object instance for {contraptionName} to add swirly effect", "WORKSHOP");
             return;
         }
         /* Here, swirly effect is added upon creation.
@@ -108,6 +118,11 @@ class Workshop : RoomHandler
         CustomFsmMethodManager.AddItemOnCraftMethod(contraption, currentInstance);
         string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(contraption.Name, currentInstance);
         FsmState state = workshopFSM.GetState(stateName);
+        if (workshopFSM == null)
+        {
+            Logging.LogWarning($"Failed to reach state {stateName} for item {itemName}", "WORKSHOP");
+            return;
+        }
         state.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
     }
 }
