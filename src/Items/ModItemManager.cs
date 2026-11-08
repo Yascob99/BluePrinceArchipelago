@@ -98,65 +98,8 @@ namespace BluePrinceArchipelago.Items
                             state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
                         }
                     }
-                    GameObject prefab = ModInstance.Prefabs.GetChild(item.Name);
-                    if (prefab != null)
-                    {
-
-                        GameObject spawnObj = FindSpawnObject(item.Name);
-                        if (spawnObj == null)
-                        {
-                            spawnObj = item.GameObj;
-                        }
-                        if (spawnObj != null)
-                        {
-                            //If the Model is not currently already replaced.
-                            if (spawnObj.transform.FindChild("AP Swirlie") == null)
-                            {
-                                //Instantiate a copy of the game object at the location of the spawn pool game object.
-                                GameObject APGO = GameObject.Instantiate(prefab, spawnObj.transform.position, spawnObj.transform.rotation);
-                                // Get the APswirly Component of the prefab
-                                GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
-                                if (APswirly != null)
-                                {
-                                   
-                                    // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-                                    APswirly.transform.parent = spawnObj.transform;
-                                    APswirly.layer = 10;
-                                    item.ModelReplaced = true;
-                                    if (item.Name == "Cabinet Key 3")
-                                    { 
-
-                                    }
-                                    ReplaceAPItemNotifications(item.Name, spawnObj);
-                                }
-                                else
-                                {
-                                    Logging.LogWarning($"Unable to find APSwirly for {item.Name}.");
-                                }
-                                GameObject.Destroy(APGO);
-                            }
-                            else
-                            {
-                                // Make sure the notification is changed for persistent items.
-                                if (item.IsPersistent)
-                                {
-                                    ReplaceAPItemNotifications(item.Name, spawnObj);
-                                }
-                                else
-                                {
-                                    Logging.LogWarning($"{item.Name} has already Been Replaced with an AP Item:");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab.");
-                        }
-                    }
-                    else
-                    {
-                        Logging.LogWarning($"Unable to find prefab for {item.Name}. Item is either unimplemented or not present in the assets.");
-                    }
+                    GameObject spawnObj = FindSpawnObject(item.Name) ?? item.GameObj;
+                    AddSwirly(item, spawnObj);
                 }
                 else {
                     if (item.IsPersistent) { 
@@ -166,6 +109,58 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        public static void AddSwirly(UniqueItem APitem, GameObject gameInstance)
+        {
+            if (gameInstance == null)
+            {
+                Logging.LogWarning($"Error finding game object for {APitem.Name}.");
+                return;
+            }
+            string prefabName = GetPrefabName(APitem);
+            GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
+            if (prefab == null)
+            {
+                Logging.LogWarning($"Unable to find prefab for {APitem.Name}. Item is either unimplemented or not present in the assets.");
+                return;
+            }
+            //If the Model is not currently already replaced.
+            if (gameInstance.transform.FindChild("AP Swirlie") != null)
+            {
+                // Make sure the notification is changed for persistent items.
+                if (!APitem.IsPersistent)
+                {
+                    Logging.LogWarning($"{APitem.Name} has already Been Replaced with an AP Item:");
+                    return;
+                }
+                ReplaceAPItemNotifications(APitem.Name, gameInstance);
+                return;
+            }
+            //Instantiate a copy of the game object at the location of the spawn pool game object.
+            GameObject APGO = GameObject.Instantiate(prefab, gameInstance.transform.position, gameInstance.transform.rotation);
+            // Get the APswirly Component of the prefab
+            GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
+            if (APswirly == null)
+            {
+                Logging.LogWarning($"Unable to find APSwirly for {APitem.Name}.");
+                GameObject.Destroy(APGO);
+                return;
+            }
+            // Reparent the the AP Swirly to the Archipelago Mod GameObject.
+            APswirly.transform.parent = gameInstance.transform;
+            APswirly.layer = 10;
+            APitem.ModelReplaced = true;
+            ReplaceAPItemNotifications(APitem.Name, gameInstance);
+            GameObject.Destroy(APGO);
+        }
+
+        private static string GetPrefabName(UniqueItem APitem)
+        {
+            if (APitem.Name.ToUpper() == "ELECTROMAGNET")
+            {
+                return "POWERED ELECTROMAGNET";
+            }
+            return APitem.Name;
+        }
 
         /// <summary>
         ///     Replaces an AP Item's notification with the appropriate item data and the UI model with the AP model.
@@ -448,6 +443,8 @@ namespace BluePrinceArchipelago.Items
                     return "power hammer";
                 case "Jack Hammer":
                     return "jack hammer";
+                case "Electromagnet":
+                    return "Electro Magnet";
                 default:
                     return name;
             }
@@ -483,6 +480,10 @@ namespace BluePrinceArchipelago.Items
                     return "Prism Key";
                 case "KEY OF ARIES":
                     return "o Key";
+                case "POWER HAMMER":
+                    return "Power Hammer ";
+                case "ELECTROMAGNET":
+                    return "Powerd Electromagnet";
                 default:
                     return name;
             }
