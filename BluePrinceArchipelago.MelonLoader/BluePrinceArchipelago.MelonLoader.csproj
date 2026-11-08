@@ -119,5 +119,9 @@
 			<HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BluePrinceMelonLoaderDir)\MelonLoader\Il2CppAssemblies\Il2Cppcom.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 	</ItemGroup>
 </Project>

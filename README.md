@@ -187,6 +187,7 @@ If you prefer a simpler install we do have a [Thunderstore version]([https://thu
 #### Windows MelonLoader Steam Setup
 
 **Please note MelonLoader Support is expirimental and not as well tested. Use with caution.**
+**The MelonLoader version of the Thunderstore install is currently not working properly due to an error with the MelonLoader installation.**
 If you prefer a simpler install we do have a [Thunderstore version](https://thunderstore.io/c/blue-prince/p/BluePrinceArchipelago/BluePrinceArchipelagoMelonLoader/)
 
 1. Download [MelonLoader 0.7.3](https://github.com/LavaGang/MelonLoader/releases/tag/v0.7.3) for your platform. Run the installer then install Melonloader onto your Blue Prince installation. If you previously had a different modloader installed you may need to uninstall it before Melonloader will work.

@@ -13,7 +13,6 @@ namespace BluePrinceArchipelago.FsmMethods
     {
         public static CustomFsmMethods Instance;
 
-
         public CustomFsmMethods(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.

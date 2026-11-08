@@ -39,11 +39,11 @@ namespace BluePrinceArchipelago.Events
         /// <inheritdoc cref="OnFirstDrafted(ModRoom)"/>
         /// <param name="roomName">The name of the room.</param>
         public void OnFirstDrafted(string roomName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Draft - {roomName.ToTitleCase()}", "First Draft Room"));
             // Send second Bunk Room location.
-            if (roomName.ToUpper() == "BUNK ROOM")
+            if (roomName.Equals("BUNK ROOM", StringComparison.CurrentCultureIgnoreCase))
             {
-                LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} First Entering 2", "First Draft Room 2"));
+                LocationFound.Invoke(this, new LocationEventArgs($"First Draft - {roomName.ToTitleCase()} 2", "First Draft Room 2"));
             }
         }
 
@@ -52,7 +52,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="classroomNumber">The grade number of the drafted classroom.</param>
         public void OnClassroomFirstDrafted(string classroomNumber) {
-            LocationFound.Invoke(this, new LocationEventArgs($"Classroom {classroomNumber} First Entering", "First Draft Room"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Draft - Classroom {classroomNumber}", "First Draft Room"));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="item">The ModItem that was found.</param>
         public void OnFirstFound(ModItem item) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{item.Name.ToTitleCase()} First Pickup", "Item First Pickup"));
+            LocationFound.Invoke(this, new LocationEventArgs($"First Pickup - {item.Name.ToTitleCase()}", "Item First Pickup"));
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace BluePrinceArchipelago.Events
         /// <param name="roomName">The name of the room the trunk was opened in.</param>
         /// <param name="trunkCount">The current number of opened trunks in that room.</param>
         public void OnTrunkOpened(string roomName, int trunkCount) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{roomName.ToTitleCase()} Locked Trunk {trunkCount}", "Locked Trunk Unlocked"));
+            LocationFound.Invoke(this, new LocationEventArgs($"Locked Trunk - {roomName.ToTitleCase()} - {trunkCount}", "Locked Trunk Unlocked"));
         }
 
         /// <summary>
@@ -121,11 +121,11 @@ namespace BluePrinceArchipelago.Events
         }
 
         /// <summary>
-        ///     The event of a safe being opened.
+        ///     The event of a red letter being red.
         /// </summary>
-        /// <param name="safeName">The name of the safe.</param>
-        public void OnSafeOpened(string safeName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{safeName.ToTitleCase()}", "Safe Opened"));
+        /// <param name="letterNumName">The letter read.</param>
+        public void OnRedLetterRead(string letterNumName) {
+            LocationFound.Invoke(this, new LocationEventArgs($"{letterNumName.ToTitleCase()}", "Red Letter Read"));
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         /// <param name="floorplanName">The name of the floorplan.</param>
         public void OnFloorplanFound(string floorplanName) {
-            LocationFound.Invoke(this, new LocationEventArgs($"{floorplanName.ToTitleCase()} Floorplan", "Floorplan Found"));
+            LocationFound.Invoke(this, new LocationEventArgs($"Floorplan - {floorplanName.ToTitleCase()}", "Floorplan Found"));
         }
 
         /// <summary>

@@ -5,6 +5,8 @@ using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.UI;
+using BluePrinceArchipelago.Resources;
+
 
 #if ML
 using Il2Cpp;
@@ -57,26 +59,26 @@ namespace BluePrinceArchipelago.Triggers
                     break;
 
                 case EventID.Boudoir_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Boudoir Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter 4");
                     break;
                 case EventID.Drawing_Room_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Drawing Room Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter SIX");
                     break;
                 case EventID.Study_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Study Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter 2");
                     break;
                 case EventID.Office_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Office Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter ∞");
                     break;
                 case EventID.Drafting_Studio_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Drafting Studio Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter 5");
                     break;
                 case EventID.Shelter_Safe_Opened:
-                    ModEventHandler.OnSafeOpened("Shelter Safe");
+                    ModEventHandler.OnRedLetterRead("Red Letter VII");
                     break;
                 // This may be sent by things it isn't supposed to. May need to find new hook.
                 case EventID.Mayait_Opened:
-                    ModEventHandler.OnGateOpened("Underpass Gate");
+                    ModEventHandler.OnRedLetterRead("Red Letter 1");
                     break;
                 case EventID.Foundation_Elevator_Lowered:
                     ModEventHandler.OnLowerFoundationElevator();

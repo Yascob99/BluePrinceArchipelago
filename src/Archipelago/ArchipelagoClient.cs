@@ -312,7 +312,7 @@ public class ArchipelagoClient
             {
                 session.Items.DequeueItem();
                 // Handle any items that have not been received formally.
-                if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Starting ")) {
+                if (Received.RemoveFirst(item.ItemName) == -1 && !item.ItemName.Contains(" Permanent ")) {
                     if (item.LocationName == "Server")
                     {
                         // Checks if the item recieved is a room.
@@ -390,14 +390,14 @@ public class ArchipelagoClient
             try
             {
                 string location = ServerData.LocationDict[locationid];
-                if (location.EndsWith("First Pickup"))
+                if (location.StartsWith("First Pickup - "))
                 {
-                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace(" First Pickup", ""));
+                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace("First Pickup - ", ""));
                     item.HasBeenFound = true;
                 }
-                else if (location.EndsWith("First Entering"))
+                else if (location.StartsWith("First Draft - "))
                 {
-                    ModRoom room = ModRoomManager.GetRoomByName(location.Replace(" First Entering", ""));
+                    ModRoom room = ModRoomManager.GetRoomByName(location.Replace("First Draft - ", ""));
                     room.IsUnlocked = true;
                 }
                 // Try Upgrade Disks. If that fails, try Permanent Unlocks.
@@ -507,11 +507,35 @@ public class ArchipelagoClient
         for (int i = 0; i < serverLocations.Length; i++)
         {
             long location = serverLocations[i];
+            string locationName = "";
             // Only add new data if the old one is not good.
-            if (!ServerData.LocationDict.ContainsKey(location)) { 
-            
-                string locationName = session.Locations.GetLocationNameFromId(location);
+            if (!ServerData.LocationDict.ContainsKey(location))
+            {
+
+                locationName = session.Locations.GetLocationNameFromId(location);
                 ServerData.LocationDict[location] = locationName;
+            }
+            else {
+                locationName = ServerData.LocationDict[location];
+            }
+            // Initialize the Max number of Trunks for each room with trunk Objects
+            if (locationName.StartsWith("Locked Trunk - ") && !hint)
+            {
+                string[] nameparts = locationName.Split(" - ");
+                if (nameparts.Length == 3) { 
+                    string roomName = ModRoomManager.GetRoomByName(nameparts[1]).Name;
+                    int count = int.Parse(nameparts[2]);
+                    if (ModInstance.TrunkManager.MaxTrunkCounts.ContainsKey(roomName))
+                    {
+                        if (ModInstance.TrunkManager.MaxTrunkCounts[roomName] < count)
+                        {
+                            ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
+                        }
+                    }
+                    else {
+                        ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
+                    }
+                }
             }
         }
 
@@ -624,8 +648,8 @@ public class ArchipelagoClient
             return;
         }
         // Shelter backwards Compatibility Fix.
-        else if (locationName == "Bomb Shelter First Entering") {
-            locationid = GetLocationFromName("Shelter First Entering");
+        else if (locationName == "First Draft - Bomb Shelter") {
+            locationid = GetLocationFromName("First Draft - Shelter");
             if (locationid > 0)
             {
                 CheckLocation(locationid);

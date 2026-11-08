@@ -85,5 +85,9 @@
 			<HintPath>$(BluePrinceBepInExDir)\BepInEx\interop\UnityEngine.UI.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+    <Reference Include="Steamworks">
+      <HintPath>$(BluePrinceBepInExDir)\BepInEx\interop\com.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 	</ItemGroup>
 </Project>

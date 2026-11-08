@@ -294,49 +294,49 @@ namespace BluePrinceArchipelago.Items
                 // Handles start of Day Item Removal
                 item.RemoveFromPool();
                 // Handles updating the Commissary Menu
-                if (!item.HasBeenFound && item.IsCommissary)
+                if (item.IsCommissary)
                 {
                     FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item.Name.Trim()]);
                     item.CommissaryState = state;
                     if (state != null)
                     {
+                        state.AddAction(item.CommissaryEvent);
                         //If the item is not unlocked, prevent it from being added to inventory.
                         if (!item.IsUnlocked && item.ApplySanity())
                         {
                             //Disable the actions that add the item to inventory.
                             state.DisableActionsOfType<ArrayListAdd>();
-                            state.AddAction(item.CommissaryEvent);
                         }
                     }
                 }
-                if (!item.HasBeenFound && item.IsDig) {
+                if (item.IsDig) {
                     FsmState state = ModInstance.DigEngine?.GetState(DigStates[item.Name.Trim()]);
                     item.DigState = state;
                     if (state != null)
                     {
+                        state.InsertAction(item.DigEvent, 6);
                         //If the item is not unlocked, prevent it from being added to inventory.
                         if (!item.IsUnlocked && item.ApplySanity())
                         {
                             //Disable the actions that add the item to inventory.
                             state.DisableActionsOfType<ArrayListAdd>();
-                            state.AddAction(item.DigEvent);
                         }
                     }
                 }
-                if (!item.HasBeenFound && item.IsLocksmith)
+                if (item.IsLocksmith)
                 {
                     // Does not load properly unless loaded like so.
                     FsmState state = GameObject.Find("UI OVERLAY CAM").transform.Find("Locksmith Menu").gameObject.GetComponent<PlayMakerFSM>().GetState(LocksmithStates[item.Name.Trim()]);
                     item.LocksmithState = state;
                     if (state != null)
                     {
+                        state.AddAction(item.LocksmithEvent);
                         // If the item is not unlocked, prevent it from being added to inventory.
                         if (!item.IsUnlocked && item.ApplySanity())
                         {
                             Logging.LogWarning($"Attempting to add hook for {item.Name} to Locksmith in state: {state.name}");
                             //Disable the actions that add the item to inventory.
                             state.DisableActionsOfType<ArrayListAdd>();
-                            state.AddAction(item.LocksmithEvent);
                         }
                     }
                 }

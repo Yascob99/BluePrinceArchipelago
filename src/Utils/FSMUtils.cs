@@ -630,7 +630,7 @@ namespace BluePrinceArchipelago.Utils
         {
             for (int i = state.ActionData.ActionNames.Count -1; i >= 0 ; i--)
             {
-                if (state.ActionData.ActionNames[i] == typeof(T).FullName) //REVISIT: A bit hacky, but it works.
+                if (typeof(T).FullName.Contains(state.ActionData.ActionNames[i])) //REVISIT: A bit hacky, but it works.
                 {
                     state.RemoveAction(i);
                 }
@@ -1316,7 +1316,7 @@ namespace BluePrinceArchipelago.Utils
             int lastActionIndex = -1;
             for (int i = state.ActionData.ActionNames.Count - 1; i >= 0; i--)
             {
-                if (state.ActionData.ActionNames[i] == typeof(TAction).FullName)
+                if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
                 {
                     lastActionIndex = i;
                     break;
@@ -1446,7 +1446,6 @@ namespace BluePrinceArchipelago.Utils
             {
                 if (typeof(TAction).FullName.Contains(state.ActionData.ActionNames[i]))
                 {
-                    state.DisableAction(i);
                     state.DisableAction(i);
                     return;
                 }

@@ -19,9 +19,10 @@ using UnityEngine;
 using BluePrinceArchipelago.FsmMethods;
 using HarmonyPatch = HarmonyLib.Harmony;
 using BluePrinceArchipelago.UI;
+using BluePrinceArchipelago.Resources;
 
 #if ML
-[assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.1.7", "Yascob", null)]
+[assembly: MelonInfo(typeof(BluePrinceArchipelago.Plugin), "BluePrinceArchipelago", "0.2.0", "Yascob", null)]
     [assembly: MelonGame("Dogubomb", "BLUE PRINCE")]
 #endif
 namespace BluePrinceArchipelago {
@@ -39,7 +40,7 @@ namespace BluePrinceArchipelago {
 #endif
         public const string PluginGUID = "com.Yascob.BluePrinceArchipelago";
         public const string PluginName = "BluePrinceArchipelago";
-        public const string PluginVersion = "0.1.7";
+        public const string PluginVersion = "0.2.0";
 
         private static Plugin _instance;
         public static Plugin Instance => _instance;
@@ -97,6 +98,7 @@ namespace BluePrinceArchipelago {
             //Inject custom Object for Mod Handling
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();
             ClassInjector.RegisterTypeInIl2Cpp<CustomFsmMethods>();
+            ClassInjector.RegisterTypeInIl2Cpp<StepResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
             { 
                 Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])

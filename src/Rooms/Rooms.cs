@@ -3,12 +3,17 @@ using BluePrinceArchipelago.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using BluePrinceArchipelago.FsmMethods.CustomMethods;
+using BluePrinceArchipelago.FsmMethods;
 #if Bep
 using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 #endif
 #if ML
 using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
+using Il2CppCirrusPlay.PortalLibrary;
 #endif
 
 namespace BluePrinceArchipelago.Rooms
@@ -173,8 +178,11 @@ namespace BluePrinceArchipelago.Rooms
             }
         }
 
-        public GameObject RoomObj { get; }
         public string[] Strings { get; }
+
+        public CallMethod RoomItemCodeComplete { get; set; }
+
+        public RegisteredCustomFsmMethod RoomItemCodeCompleteMethod { get; set; }
 
         /// <summary>
         ///     Adds copy(s) of this room to the pool array
@@ -255,6 +263,9 @@ namespace BluePrinceArchipelago.Rooms
             {
                 pool.Value = false;
             }
+            // Create the Hook item code complete.
+            RoomItemCodeCompleteMethod = CustomFsmMethodManager.AddItemCodeComplete(this);
+            RoomItemCodeComplete = CustomFsmMethodManager.GetCallMethod(Name.ToTitleCase() + "ItemCodeComplete");
         }
 
         /// <summary>

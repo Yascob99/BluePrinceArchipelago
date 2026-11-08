@@ -1,6 +1,17 @@
 ﻿using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
+using System.Collections.Generic;
 using UnityEngine;
+#if Bep
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
+#endif
+#if ML
+using Il2Cpp;
+using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
+using BluePrinceArchipelago.Items;
+#endif
 
 namespace BluePrinceArchipelago.Triggers
 {
@@ -18,6 +29,9 @@ namespace BluePrinceArchipelago.Triggers
             room?.Handler?.OnAfterRoomDrafted(obj);
             // Turn off the forced draft.
             ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = false;
+
+            // Add ItemCodeCompleteHook
+            AddItemCodeCompleteHook(room);
         }
 
         /// <summary>
@@ -57,6 +71,41 @@ namespace BluePrinceArchipelago.Triggers
                         room.HasBeenDrafted = true; //This triggers the Location found Event.
                     }
                 }
+            }
+        }
+
+        public static void OnItemCodeComplete(ModRoom room) {
+            room?.Handler?.OnItemCodeComplete();
+
+            // Attempt the extra trunk spawn.
+            ModInstance.TrunkManager.TrySpawnTrunk(room);
+        }
+
+
+        private static void AddItemCodeCompleteHook(ModRoom room) {
+            GameObject roomGameObject = ModRoomManager.GetRoomInstance(room.Name.ToTitleCase());
+            List<GameObject> ItemDropGOs = roomGameObject.FindChildGameObjectsRecursive("_Pickup Items", true);
+            bool success = false;
+            foreach (GameObject go in ItemDropGOs) {
+                PlayMakerFSM FSM;
+                if (go.TryGetComponent<PlayMakerFSM>(out FSM))
+                {
+                    FsmState completed = FSM.GetState("Complete!");
+                    if (completed != null)
+                    {
+                        completed.AddAction(room.RoomItemCodeComplete);
+                        success = true;
+                    }
+                }
+            }
+            ModInstance.TrunkManager.TrunkHooked[room.Name] = success;
+            if (success)
+            {
+               ModInstance.TrunkManager.CheckingForTrunkSpawn = true;
+               Logging.LogWarning($"Successfully Added Item Code complete Hook for {room.Name}", "Rooms");
+            }
+            else {
+                Logging.LogWarning($"Item Code Complete Hook could not be added for {room.Name}", "Rooms");
             }
         }
     }

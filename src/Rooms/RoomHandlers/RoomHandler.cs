@@ -25,7 +25,7 @@ public abstract class RoomHandler
     public virtual void OnRoomUnlocked(ModRoom room) {}
     public virtual void OnDayStart() {}
 
-
+    public virtual void OnItemCodeComplete() { }
     public virtual void SetupEventHooks(){}
     
     public static readonly Dictionary<string, RoomHandler> RoomHandlers = new Dictionary<string, RoomHandler>()

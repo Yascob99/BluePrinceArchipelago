@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Resources;
 
 namespace BluePrinceArchipelago.Archipelago;
 
@@ -50,6 +50,9 @@ public class DeathLinkHandler
     public static int BlockedDeathLinks = 0;
     public static bool processingDeathLink = false;
     public static bool room46Entered = false;
+
+    // 0 = Off, any other is the max number that can be queued at once.
+    public static int MaxQueuedDeathLinks = 0;
 
     /// <summary>
     ///     Instantiates our death link handler, sets up the hook for receiving death links, and enables death link if needed
@@ -100,11 +103,15 @@ public class DeathLinkHandler
     /// <param name="deathLink">Received Death Link object to handle</param>
     private void DeathLinkReceived(DeathLink deathLink)
     {
-        deathLinks.Enqueue(deathLink);
-
         Logging.Log(string.IsNullOrWhiteSpace(deathLink.Cause)
             ? $"Received Death Link from: {deathLink.Source}"
             : deathLink.Cause, "DeathLink");
+        if (MaxQueuedDeathLinks > 0 && deathLinks.Count >= MaxQueuedDeathLinks) 
+        {
+            Logging.Log("Skipping Deathlink due to exceeding Maximum number of Queued deathlinks.");
+        }
+        deathLinks.Enqueue(deathLink);
+
         KillPlayer();
     }
 
@@ -181,18 +188,8 @@ public class DeathLinkHandler
         ArchipelagoConsole.LogMessage($"Attempting to execute DeathLink: {cause}", "DeathLink");
 
         yield return null;
-        if (!ResourceManager.AdjustSteps(-1000000))
-        {
-            Logging.LogFatal("There was an error sending the deathlink.", "DeathLink");
-            if (deathLink != null)
-            {
-                Plugin.ArchipelagoClient.DeathLinkHandler.deathLinks.Enqueue(deathLink);
-            }
-        }
-        else
-        {
-            processingDeathLink = true;
-        }
+        ResourceManager.AdjustSteps(-1000000);
+        processingDeathLink = true;
         // ZERO STEP ENDING: Send Event- State 8
     }
 
@@ -274,10 +271,10 @@ public class DeathLinkHandler
         if (deathLinkType == DeathLinkType.option_steps) return;
 
         Logging.Log("End of Day, checking for deathlink send", "DeathLink");
-        // if there is already a death link in progress, prevent it.
+        // if there is already a death link in progress, prevent a sending a deathlink.
         if (processingDeathLink)
         {
-            Logging.Log($"Steps deathlink prevented due to local death in progress.", "DeathLink");
+            Logging.Log($"End of Day deathlink prevented due to local death in progress.", "DeathLink");
             return;
         }
         Logging.Log($"Deathlink Enabled: {deathLinkEnabled}");

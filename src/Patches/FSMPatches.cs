@@ -1,5 +1,4 @@
 ﻿using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;

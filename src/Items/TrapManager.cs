@@ -4,6 +4,7 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
 #if Bep
 using HutongGames.PlayMaker;
 #endif

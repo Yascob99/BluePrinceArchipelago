@@ -9,7 +9,6 @@ namespace BluePrinceArchipelago.Archipelago.Commands
     public static class CommandManager
     {
         private static Dictionary<string, Command> _LocalCommands = new();
-        private static Dictionary<string, Command> _ServerCommands = new();
 
         /// <summary>
         ///     Registers a local command.
@@ -73,6 +72,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             _LocalCommands["collect"] = new CollectCommand("Collect"); // Collect location from the Archipelago item pool, for testing purposes.
             _LocalCommands["recordevent"] = new RecordEventCommand("RecordEvent"); // records an event to set some of the vanilla states
             _LocalCommands["deathlink"] = new DeathLinkCommand("DeathLink"); // Handles changing the local DeathLink settings.
+            _LocalCommands["trunk"] = new TrunkCommand("Trunk"); // For changing Trunk related settings.
         }
 
         /// <summary>

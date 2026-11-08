@@ -49,7 +49,7 @@ namespace BluePrinceArchipelago.Triggers
                             state2.EnableActionsOfType<ArrayListAdd>();
                         }
                         else
-                        { 
+                        {
                             state.EnableActionsOfType<ArrayListAdd>();
                         }
                     }
@@ -66,6 +66,11 @@ namespace BluePrinceArchipelago.Triggers
                 string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
                 CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
                 ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
+            }
+            // Check for trunk spawn, and track it.
+            else if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned) {
+                ModInstance.TrunkManager.TrunkSpawned = true;
+                ModInstance.TrunkManager.CheckingForTrunkSpawn = false;
             }
         }
 
@@ -120,7 +125,7 @@ namespace BluePrinceArchipelago.Triggers
                         if (!Item.HasBeenFound)
                         {
                             Item.HasBeenFound = true;
-                            ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                            ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                             ModItemManager.RemoveUniqueItemAPSwirly(Item);
                         }
                     }
@@ -140,19 +145,19 @@ namespace BluePrinceArchipelago.Triggers
                 // Cabinet Key fixes.
                 if (Item.Name == "CABINET KEY 1")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Patio First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Patio");
                 }
                 else if (Item.Name == "CABINET KEY 2")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Laundry Room First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Laundry Room");
                 }
                 else if (Item.Name == "CABINET KEY 3")
                 {
-                    ModInstance.QueueManager.AddLocationToQueue("File Cabinet Key - Tunnel Area Past Crates First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                 }
                 else
                 {
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                 }
             }
         }
@@ -185,7 +190,7 @@ namespace BluePrinceArchipelago.Triggers
                 Item.HasBeenFound = true;
                 ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 
-                ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
             }
             Item.HasBeenFound = true;
         }
@@ -201,7 +206,7 @@ namespace BluePrinceArchipelago.Triggers
                 {
                     Item.HasBeenFound = true;
                     ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"{Item.Name.ToTitleCase()} First Pickup");
+                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
                 }
             }
         }
