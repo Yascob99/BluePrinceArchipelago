@@ -25,7 +25,6 @@ namespace BluePrinceArchipelago.Triggers
         /// </summary>
         /// <param name="obj">The spawned room object.</param>
         public static void OnAfterRoomSpawned(GameObject obj) {
-            Logging.LogWarning(obj.name.ToUpper());
             ModRoom room = ModRoomManager.GetRoomByName(obj.name.ToUpper().Trim());
             room?.Handler?.OnAfterRoomDrafted(obj);
             // Turn off the forced draft.
@@ -84,7 +83,6 @@ namespace BluePrinceArchipelago.Triggers
 
 
         private static void AddItemCodeCompleteHook(ModRoom room) {
-            Logging.LogWarning(room.Name);
             GameObject roomGameObject = ModRoomManager.GetRoomInstance(room.Name.ToTitleCase());
             List<GameObject> ItemDropGOs = roomGameObject.FindChildGameObjectsRecursive("_Pickup Items", true);
             bool success = false;

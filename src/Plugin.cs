@@ -73,7 +73,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("ArchipelagoOptions", LogLevel.Info);
             Logging.SetLogLevel("DeathLink", LogLevel.Info);
             Logging.SetLogLevel("ModRoomManager", LogLevel.Info);
-            //Logging.SetLogLevel("Items", LogLevel.Info);
+            Logging.SetLogLevel("Items", LogLevel.Info);
             Logging.SetLogLevel("Locations", LogLevel.Info);
             Logging.SetLogLevel("Trades", LogLevel.Info);
             //Logging.SetLogLevel("Rooms", LogLevel.Info);

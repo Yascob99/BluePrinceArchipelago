@@ -1037,6 +1037,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="itemInfo">The ItemInfo of the received item.</param>
         public static void OnItemCheckRecieved(ItemInfo itemInfo)
         {
+            Logging.LogWarning(itemInfo.ItemName);
             ModItem item = null;
             //If item exists, retreive it.
             PermanentItem permanentItem = GetPermanentItem(itemInfo.ItemName);
@@ -1199,14 +1200,14 @@ namespace BluePrinceArchipelago.Items
             AddItem(new UniqueItem("HALL PASS", GetInventoryItem("HALL PASS"), false, ItemSanityType.Standard, true, true));
 
             // Workshop Items - TODO
-            AddItem(new UniqueItem("ELECTROMAGNET", GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("LUCKY PURSE", GetInventoryItem("LUCKY PURSE"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("PICK SOUND AMPLIFIER", GetInventoryItem("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("BURNING GLASS", GetInventoryItem("BURNING GLASS"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("DETECTOR SHOVEL", GetInventoryItem("DETECTOR SHOVEL"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("DOWSING ROD", GetInventoryItem("DOWSING ROD"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("JACK HAMMER", GetInventoryItem("JACK HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("POWER HAMMER", GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Electromagnet", GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Lucky Purse", GetInventoryItem("LUCKY PURSE"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Pick Sound Amplifier", GetInventoryItem("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Burning Glass", GetInventoryItem("BURNING GLASS"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Detector Shovel", GetInventoryItem("DETECTOR SHOVEL"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Dowsing Rod", GetInventoryItem("DOWSING ROD"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Jack Hammer", GetInventoryItem("JACK HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Power Hammer", GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
 
             // Showroom
             AddItem(new UniqueItem("CHRONOGRAPH", GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop, true, false));

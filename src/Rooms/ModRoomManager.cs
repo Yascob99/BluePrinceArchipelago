@@ -1210,9 +1210,12 @@ namespace BluePrinceArchipelago.Rooms
         /// <param name="roomInstanceName">The Name of the Room Instance to get.</param>
         /// <returns>The GameObject of the found room instance. Null if not found.</returns>
         public static GameObject GetRoomInstance(string roomInstanceName) {
-            Logging.LogWarning($"{roomInstanceName}");
             if (roomInstanceName.Contains("MAID")) {
                 roomInstanceName = "Maids Chamber";
+            }
+            if (roomInstanceName.Contains("LADYSHIP"))
+            {
+                roomInstanceName = "Her Ladyships Chamber";
             }
             GameObject RoomSpawnPools = GameObject.Find("__SYSTEM/Room Spawn Pools");
             GameObject roomInstance = null;

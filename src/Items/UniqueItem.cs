@@ -168,6 +168,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public override void AddItemToInventory()
         {
+            Logging.LogWarning(Name);
             if (!ApplySanity())
             {
                 return;
