@@ -317,7 +317,7 @@ namespace BluePrinceArchipelago.Patches
             }
             catch
             {
-                Logging.LogWarning("Steam Error: Steamworks was not Initialized.");
+                Logging.Log("Steam Error: Steamworks was not Initialized.", "Steam");
             }
             __instance.Finish();
             return false;
