@@ -445,6 +445,8 @@ namespace BluePrinceArchipelago.Items
                     return "jack hammer";
                 case "Electromagnet":
                     return "Electro Magnet";
+                case "Knights Shield":
+                    return "Knight's Shield";
                 default:
                     return name;
             }

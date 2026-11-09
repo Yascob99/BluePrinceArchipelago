@@ -1,10 +1,17 @@
 
 using System.Collections.Generic;
-using Il2CppSystem.Linq;
+using BluePrinceArchipelago.FsmMethods;
+using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Utils;
 #if Bep
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 using TMPro;
 #endif
 #if ML
+using Il2Cpp;
+using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
 using Il2CppTMPro;
 #endif
 using UnityEngine;
@@ -13,6 +20,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 public class Armory : RoomHandler
 {
+    private static int currentInstance = 0;
     private GameObject _ArmoryMenu;
     private static Dictionary<string, Models.ShopItem> _ArmoryItemMap = [];
     private static readonly Dictionary<string, (string TitlePath, string DescriptionPath1, string DescriptionPath2)> _ArmoryItemUIMap = new()
@@ -44,7 +52,69 @@ public class Armory : RoomHandler
 
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
+        ++currentInstance;
         SetupArmoryItems();
+
+
+        string path = $"__SYSTEM/Room Spawn Pools/The Armory(Clone)00{currentInstance}/_CULLABLE/_NON STATIC/KNIGHTS SHIELD";
+        GameObject shieldInstance = GameObject.Find(path);
+        if (shieldInstance == null)
+        {
+            Logging.LogWarning("Shield unfound", "ARMORY");
+            return;
+        }
+        UniqueItem shieldItem = ModItemManager.GetUniqueItem("KNIGHTS SHIELD");
+        ModItemManager.AddSwirly(shieldItem, shieldInstance);
+
+        PlayMakerFSM buyingArmoryItemFSM = _ArmoryMenu.transform.Find("Knight's Shield")?.transform.Find("Pop Up")?.transform.Find("2 Button Spread")?.transform.Find("YES BUTTON")?.GetComponent<PlayMakerFSM>();
+        /*
+        if (shieldd == null)
+        {
+            Logging.LogWarning("shieldd unfound", "ARMORY");
+            return;
+        }
+        GameObject popup = shieldd.transform.Find("Pop Up").gameObject;
+        if (popup == null)
+        {
+            Logging.LogWarning("popup unfound", "ARMORY");
+            return;
+        }
+        GameObject buttons = popup.transform.Find("2 Button Spread").gameObject;
+        if (buttons == null)
+        {
+            Logging.LogWarning("buttons unfound", "ARMORY");
+            return;
+        }
+        GameObject yesButton = buttons.transform.Find("YES BUTTON").gameObject;
+        if (yesButton == null)
+        {
+            Logging.LogWarning("yesButton unfound", "ARMORY");
+            return;
+        }
+        */        
+
+        
+        if (buyingArmoryItemFSM == null)
+        {
+            Logging.LogWarning("Shield FSM unfound", "ARMORY");
+            return;
+        }
+        FsmState buyEndState = buyingArmoryItemFSM.GetState("State 2");
+        if (buyEndState == null)
+        {
+            Logging.LogWarning("buy state unfound", "ARMORY");
+            return;
+        }
+        CustomFsmMethodManager.AddItemBoughtMethod(shieldItem);
+        string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(shieldItem.Name);
+        Logging.LogWarning($"Registered New Method: {customMethodName}", "ARMORY");
+        CallMethod method = CustomFsmMethodManager.GetCallMethod(customMethodName);
+        if (method == null)
+        {
+            Logging.LogWarning("ItemBought method unfound", "ARMORY");
+            return;
+        }
+        buyEndState.AddAction(method);
     }
 
     // Morning Star preview model is misspelled as Morning Star in scene
@@ -116,7 +186,7 @@ public class Armory : RoomHandler
             // {
             //     descriptionTMP1.text = scoutHintParts[1];
             // }
-            
+
         }
     }
 }
