@@ -79,7 +79,7 @@ namespace BluePrinceArchipelago.Items
         public override void ActivateTrap()
         {
             //Sets the Zero Step Ending to on, regardless of steps. Seems to be the easiest Ending to trigger. May add a custom ending later.
-            ResourceManager.AdjustSteps(-1000000, true);
+            ResourceManager.AdjustSteps(-1000000);
         }
     }
 
@@ -109,11 +109,8 @@ namespace BluePrinceArchipelago.Items
         {
             if (TrapType == "Steps")
             {
-                var current = ModInstance.StepManager.FindIntVariable("STEPS").value;
-                
-                var difference = current - Count;
                 // change the adjustment amount.
-                ResourceManager.AdjustSteps(-difference, true);
+                StepManager.SetSteps(Count);
             }
         }
     }

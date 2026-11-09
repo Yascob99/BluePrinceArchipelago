@@ -110,9 +110,11 @@ namespace BluePrinceArchipelago {
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
             ModObject.AddComponent<ModInstance>();
             ModObject.AddComponent<PlayMakerFSM>(); //Add A PlayMakerFSM to be used for Events.
+            ModObject.AddComponent<StepResourceManager>();
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();
+            StepManager.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             ArchipelagoConsole.UpdateWindow();

@@ -208,6 +208,7 @@ namespace BluePrinceArchipelago
                 RDHelper = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
                 ResourceManagerInstance = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD").AddComponent<StepResourceManager>();
                 ResourceManagerInstance.StartOfDay();
+                FSMPatches.StepManagerOverride();
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();

@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -835,5 +836,48 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgePierceWest = ModInstance.PlanPicker.transform.Find("EDGEPIERCE WEST").gameObject.GetComponent<PlayMakerFSM>();
             EdgePierceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
         }
-    }
+
+        public static void StepManagerOverride()
+        {
+            // UpdateSteps Event
+            FsmState RunningShoesCheck = ModInstance.StepManager.GetState("Running Shoes check");
+            RunningShoesCheck.RemoveAction(0);
+            RunningShoesCheck.RemoveAction(1);
+            RunningShoesCheck.ChangeTransition("FINISHED", "State 5");
+            RunningShoesCheck.AddAction(StepManager.GetUpdateStepMethod);
+
+            FsmState RunningShoesCheck2 = ModInstance.StepManager.GetState("Running Shoes check 2");
+            RunningShoesCheck2.RemoveAction(0);
+            RunningShoesCheck2.ChangeTransition("FINISHED", "State 1");
+            RunningShoesCheck2.AddAction(StepManager.GetUpdateStepMethod);
+
+            // Update Event
+            FsmState StepLock = ModInstance.StepManager.GetState("STEP LOCK");
+            StepLock.RemoveAction(0);
+            StepLock.RemoveAction(1);
+            StepLock.ChangeTransition("FINSISHED", "State 5");
+            StepLock.AddAction(StepManager.GetUpdateMethod);
+
+            FsmState StepLock2 = ModInstance.StepManager.GetState("STEP LOCK 2");
+            StepLock2.RemoveAction(0);
+            StepLock2.RemoveAction(1);
+            StepLock2.ChangeTransition("FINSISHED", "State 1");
+            StepLock2.AddAction(StepManager.GetUpdateMethod);
+
+            // Event 0
+            FsmState State2 = ModInstance.StepManager.GetState("State 2");
+            int numActions = State2.Actions.Count;
+            for (int i = numActions -1; i >= 0; i++) {
+                State2.RemoveAction(i);
+            }
+            State2.AddAction(StepManager.GetEvent0);
+            State2.ChangeTransition("FINSISHED", "State 1");
+
+            // Event 10
+            FsmState State3 = ModInstance.StepManager.GetState("State 3");
+            State3.RemoveAction(0);
+            State3.AddAction(StepManager.GetEvent10);
+            State2.ChangeTransition("FINSISHED", "State 5");
+        }
+    }  
 }

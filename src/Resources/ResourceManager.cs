@@ -273,64 +273,9 @@ namespace BluePrinceArchipelago.Resources
         /// Add or remove Steps from Simon's resources.
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
-        /// <param name="setdirectly">Whether to set the steps directly or use the slow updater.</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static void AdjustSteps(int count, bool setdirectly = false)
-        {
-            try
-            {
-                if (setdirectly){
-                    // Don't set Steps if Steps are locked.
-                    if (ModInstance.StepManager.GetBoolVariable("STEP LOCK").Value || ModInstance.StepManager.GetIntVariable("Adjustment Amount").Value != 0)
-                    {
-                        // Attempt again every second until succesful;
-                        if (ModInstance.IsInRun)
-                        {
-                            Logging.LogWarning("Unable to Adjust Stepss, reattempting in 1 second", "Resources");
-                            static void runOnDelay(int count) { AdjustSteps(count); }
-                            GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                        }
-                        return;
-                    }
-                    int Total = ModInstance.StepManager.GetIntVariable("Steps").Value;
-                    
-                    // Int Clamp
-                    if (Total + count < 0)
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value = 0;
-                    }
-                    if (Total + count > 10000)
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value = 10000;
-                    }
-                    else
-                    {
-                        ModInstance.StepManager.GetIntVariable("Steps").Value += count;
-                    }
-                    // Set the UI
-                    GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/EatPopup/Steps #").GetComponent<TextMeshPro>().text = ModInstance.StepManager.GetIntVariable("Steps").Value.ToString();
-                    return;
-                }
-                else
-                {
-                    ModInstance.StepManager.FindIntVariable("Adjustment Amount").Value += count;
-                    ModInstance.StepManager.SendEvent("Update");
-                    return;
-                }
-            }
-            catch
-            {
-                // Attempt again every second until succesful;
-                if (ModInstance.IsInRun)
-                {
-                    Logging.LogWarning("Unable to Adjust Steps, reattempting in 1 second", "Resources");
-                    static void runOnDelay(int count) { AdjustSteps(count); }
-                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                }
-                return;
-            }
-
-        }
+        public static void AdjustSteps(int count) => StepManager.AdjustSteps(count);
+       
         /// <summary>
         /// Add or remove Keys from Simon's resources.
         /// </summary>
