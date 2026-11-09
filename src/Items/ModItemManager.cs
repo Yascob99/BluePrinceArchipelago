@@ -109,6 +109,11 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        /// <summary>
+        /// Add the swirly effect on an item and replace its pickup notification with the AP item collected.
+        /// </summary>
+        /// <param name="APitem">AP version of the item.</param>
+        /// <param name="gameInstance">In-game object to add the swirly effect on.</param>
         public static void AddSwirly(UniqueItem APitem, GameObject gameInstance)
         {
             if (gameInstance == null)

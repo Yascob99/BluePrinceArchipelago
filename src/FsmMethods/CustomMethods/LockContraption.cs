@@ -15,6 +15,11 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 {
+    /// <summary>
+    /// Handles locking the assemble button in the workshop menu.
+    /// </summary>
+    /// <param name="contraptionName">Name of the workshop item this method will be associated to</param>
+    /// <param name="currentInstance">Instance number of the workshop room this method will be associated to</param>
     public class LockContraption(string contraptionName, int currentInstance) : RegisteredCustomFsmMethod
     {
         public new readonly string Name = CustomFsmMethodManager.GetItemOnCraftMethodName(contraptionName, currentInstance);
