@@ -26,7 +26,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
         }
 
         private string[] GetScoutHints() {
-            string[] FloorplanLocations = ["Floorplan - Dovecote", "Floorplan - Kennel", "Floorplan - Clock Tower", "Floorplan - Solarium", "Floorplan - Dormitory", "Floorplan - Vestibule", "Floorplan - Casino"];
+            string[] FloorplanLocations = ["Floorplan - Dovecote", "Floorplan - Kennel", "Floorplan - Clock Tower", "Floorplan - Solarium", "Floorplan - Dormitory", "Floorplan - Vestibule", "Floorplan - Casino", "Floorplan - Classroom"];
             List<long> locationids = [];
             foreach (string FloorplanLocation in FloorplanLocations) {
                 long locationid = Plugin.ArchipelagoClient.GetLocationFromName(FloorplanLocation);
