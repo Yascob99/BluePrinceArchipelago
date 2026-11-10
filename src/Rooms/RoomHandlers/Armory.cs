@@ -18,6 +18,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 public class Armory : RoomHandler
 {
+    private const string ITEM_BOUGHT_STATE = "State 2";
     private static int currentInstance = 0;
     private GameObject _ArmoryMenu;
     private static Dictionary<string, Models.ShopItem> _ArmoryItemMap = [];
@@ -54,50 +55,87 @@ public class Armory : RoomHandler
     {
         ++currentInstance;
         SetupArmoryItems();
+        ReplaceItemsWithAP();
+    }
 
+    private void ReplaceItemsWithAP()
+    {
         foreach (string armoryObjectInstanceName in armoryObjectInstanceNames)
         {
-            string path = $"__SYSTEM/Room Spawn Pools/The Armory(Clone)00{currentInstance}/_CULLABLE/_NON STATIC/{armoryObjectInstanceName}";
-            GameObject armoryObjectInstance = GameObject.Find(path);
+            GameObject armoryObjectInstance = GetArmoryItemGameObject(armoryObjectInstanceName);
             if (armoryObjectInstance == null)
             {
                 Logging.LogError($"Game instance for {armoryObjectInstanceName} not found", "ARMORY");
                 continue;
             }
+            // This seems to be uneffective
             if (!armoryObjectInstance.active)
             {
-                Logging.LogError($"Game instance for {armoryObjectInstanceName} not active", "DEBUG");
+                Logging.LogWarning($"Game instance for {armoryObjectInstanceName} not active", "DEBUG");
                 continue;
             }
-            string uniqueItemName = armoryObjectInstanceName;
-            if (armoryObjectInstanceName.Contains("THE AXE"))
-            {
-                uniqueItemName = "THE AXE";
-            }
-            UniqueItem armoryItem = ModItemManager.GetUniqueItem(uniqueItemName);
+            UniqueItem armoryItem = GetArmoryItemFromGameObjectName(armoryObjectInstanceName);
             ModItemManager.AddSwirly(armoryItem, armoryObjectInstance);
-
-            string armoryShopUiName = armoryItem.Name.ToTitleCase();
-            if (armoryItem.Name.ToUpper() == "KNIGHTS SHIELD")
-            {
-                armoryShopUiName = "Knight's Shield";
-            }
-            PlayMakerFSM buyingArmoryItemFSM = _ArmoryMenu.transform.Find(armoryShopUiName)?.transform.Find("Pop Up")?.transform.Find("2 Button Spread")?.transform.Find("YES BUTTON")?.GetComponent<PlayMakerFSM>();
-            if (buyingArmoryItemFSM == null)
-            {
-                Logging.LogError($"Armory FSM for {armoryItem.Name} unfound", "ARMORY");
-                continue;
-            }
-            FsmState buyEndState = buyingArmoryItemFSM.GetState("State 2");
-            if (buyEndState == null)
-            {
-                Logging.LogError($"Buy state unfound for {armoryItem.Name}", "ARMORY");
-                continue;
-            }
-            CustomFsmMethodManager.AddItemBoughtMethod(armoryItem);
-            string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(armoryItem.Name);
-            buyEndState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
+            AddItemBoughtHook(armoryItem);
         }
+    }
+
+    private void AddItemBoughtHook(UniqueItem armoryItem)
+    {
+        PlayMakerFSM buyingArmoryItemFSM = GetFsmForBuyingArmoryItems(armoryItem);
+        if (buyingArmoryItemFSM == null)
+        {
+            Logging.LogError($"Armory FSM for {armoryItem.Name} unfound", "ARMORY");
+            return;
+        }
+        FsmState itemBoughtState = buyingArmoryItemFSM.GetState(ITEM_BOUGHT_STATE);
+        if (itemBoughtState == null)
+        {
+            Logging.LogError($"Buy state unfound for {armoryItem.Name}", "ARMORY");
+            return;
+        }
+        CustomFsmMethodManager.AddItemBoughtMethod(armoryItem);
+        string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(armoryItem.Name);
+        itemBoughtState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
+    }
+
+    private PlayMakerFSM GetFsmForBuyingArmoryItems(UniqueItem armoryItem)
+    {
+        string armoryShopUiName = GetArmoryShopUiName(armoryItem);
+        PlayMakerFSM buyingArmoryItemFSM = _ArmoryMenu.transform.Find(armoryShopUiName)?.transform.Find("Pop Up")?.transform.Find("2 Button Spread")?.transform.Find("YES BUTTON")?.GetComponent<PlayMakerFSM>();
+        return buyingArmoryItemFSM;
+    }
+
+    private static UniqueItem GetArmoryItemFromGameObjectName(string armoryObjectInstanceName)
+    {
+        string uniqueItemName = GetUniqueItemName(armoryObjectInstanceName);
+        UniqueItem armoryItem = ModItemManager.GetUniqueItem(uniqueItemName);
+        return armoryItem;
+    }
+
+    private static string GetArmoryShopUiName(UniqueItem armoryItem)
+    {
+        if (armoryItem.Name.ToUpper() == "KNIGHTS SHIELD")
+        {
+            return "Knight's Shield";
+        }
+        return armoryItem.Name.ToTitleCase();
+    }
+
+    private static string GetUniqueItemName(string armoryObjectInstanceName)
+    {
+        if (armoryObjectInstanceName.Contains("THE AXE"))
+        {
+            return "THE AXE";
+        }
+        return armoryObjectInstanceName;
+    }
+
+    private static GameObject GetArmoryItemGameObject(string armoryObjectInstanceName)
+    {
+        string path = $"__SYSTEM/Room Spawn Pools/The Armory(Clone)00{currentInstance}/_CULLABLE/_NON STATIC/{armoryObjectInstanceName}";
+        GameObject armoryObjectInstance = GameObject.Find(path);
+        return armoryObjectInstance;
     }
 
     // Morning Star preview model is misspelled as Morning Star in scene
