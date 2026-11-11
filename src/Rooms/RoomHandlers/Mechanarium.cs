@@ -29,7 +29,7 @@ class Mechanarium : RoomHandler
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("MECHANARIUM");
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = !found;
+                    CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("Upgrae Disk").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check 2");
                     CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");

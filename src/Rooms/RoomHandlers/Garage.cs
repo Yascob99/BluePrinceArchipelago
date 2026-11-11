@@ -35,7 +35,7 @@ class Garage : RoomHandler
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = !found;
+                    CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
                     CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");

@@ -32,9 +32,16 @@ class Vault : RoomHandler
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;
-                        ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                        ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                         ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
                         CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                        FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check ");
+                        CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key ");
+                        if (!found)
+                        {
+                            IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                            KeyIntCheck.equal = KeyIntCheck.lessThan;
+                        }
                     }
                     else
                     {

@@ -28,7 +28,7 @@ class MorningRoom : RoomHandler
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("MORNING ROOM");
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = !found;
+                    CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
                     CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;

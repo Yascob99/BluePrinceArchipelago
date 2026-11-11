@@ -40,7 +40,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("TRADING POST DYNAMITE");
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                        CanSpawnDisk.Value = !found;
+                        CanSpawnDisk.Value = found;
                         ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                         ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
                         CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
