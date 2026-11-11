@@ -488,7 +488,7 @@ namespace BluePrinceArchipelago.Items
                 case "POWER HAMMER":
                     return "Power Hammer ";
                 case "ELECTROMAGNET":
-                    return "Powerd Electromagnet";
+                    return "Powered Electromagnet";
                 default:
                     return name;
             }
