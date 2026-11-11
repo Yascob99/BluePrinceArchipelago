@@ -31,12 +31,18 @@ class GreatHall : RoomHandler
                     if (ItemDropFSM != null)
                     {
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GREAT HALL");
-                        Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                        CanSpawnDisk.Value = found;
-                        ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                        ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                        CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                        CanSpawnDisk.Value = !found;
+                        ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                        FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                        CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
+                        if (!found)
+                        {
+                            IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                            KeyIntCheck.equal = KeyIntCheck.lessThan;
+                            ItemDropFSM.GetState("State 2").DisableFirstActionOfType<ArrayListContains>();
+                            ItemDropFSM.GetState("State 2").ChangeTransition("FINISHED", "Coat Check Check");
+                        }
                     }
                     else
                     {

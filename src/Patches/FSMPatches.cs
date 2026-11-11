@@ -264,10 +264,17 @@ namespace BluePrinceArchipelago.Patches
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
                     FsmBool CanSpawnDisk = MineUpgradeSpawn.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    CanSpawnDisk.Value = !found;
+                    MineUpgradeSpawn.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
                     CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                    FsmState CoatCheckCheck = MineUpgradeSpawn.GetState("Coat Check Check 2");
+                    CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
+                    if (!found)
+                    {
+                        IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                        KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    }
                 }
                 else
                 {

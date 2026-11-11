@@ -20,16 +20,22 @@ class Archives: RoomHandler
         roomGameObject = ModRoomManager.GetRoomInstance("Archives");
         if (roomGameObject != null)
         {
-            PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1")?.GetComponent<PlayMakerFSM>();
+            PlayMakerFSM ItemDropFSM = roomGameObject.FindDescendant("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1")?.GetComponent<PlayMakerFSM>();
             if (ItemDropFSM != null)
             {
                 bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ARCHIVES");
-                Logging.LogWarning(found);
                 FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                CanSpawnDisk.Value = found;
-                ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                CanSpawnDisk.Value = !found;
+                ItemDropFSM.GetState("State").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                 ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
                 CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
+                if (!found)
+                {
+                    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                }
             }
             else
             {
