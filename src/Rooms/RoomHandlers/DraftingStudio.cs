@@ -22,7 +22,13 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
             ModInstance.GlobalManager.GetBoolVariable("Solarium Unlocked").Value = ModRoomManager.GetRoomByName("SOLARIUM").IsUnlocked;
             ModInstance.GlobalManager.GetBoolVariable("Dormitory Unlocked").Value = ModRoomManager.GetRoomByName("DORMITORY").IsUnlocked;
             ModInstance.GlobalManager.GetBoolVariable("Casino Unlocked").Value = ModRoomManager.GetRoomByName("CASINO").IsUnlocked;
-            GetScoutHints();
+            ModRoom room = ModRoomManager.GetRoomByName(roomGameObject.name.ToUpper().Trim());
+            if (!room.HasBeenDrafted)
+            {
+                Logging.Log("Drafting Studio has been drafted for the first time. Sending floorplan hints.");
+                Logging.Log("Debug HasBeenDrafted: " + room.HasBeenDrafted);
+                GetScoutHints();
+            }
         }
 
         private string[] GetScoutHints() {
