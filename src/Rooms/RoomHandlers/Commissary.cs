@@ -67,8 +67,8 @@ public class Commissary : RoomHandler
             // Changes makes it check if the location has been found instead of a different check.
             FsmBool CanSpawnDisk = _ItemsForSaleFsm.GetBoolVariable("CanSpawnDisk");
             CanSpawnDisk.Value = ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
-            _ItemsForSaleFsm.GetState("UPGRADE CHECK").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-            _ItemsForSaleFsm.GetState("UPGRADE CHECK").ChangeTransition("skip", "Spawn Sanctum Key");
+            _ItemsForSaleFsm.GetState("UPRADE CHECK").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            _ItemsForSaleFsm.GetState("UPRADE CHECK").ChangeTransition("skip", "Spawn Sanctum Key");
         }
     }
 
