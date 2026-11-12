@@ -22,11 +22,13 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
             ModInstance.GlobalManager.GetBoolVariable("Solarium Unlocked").Value = ModRoomManager.GetRoomByName("SOLARIUM").IsUnlocked;
             ModInstance.GlobalManager.GetBoolVariable("Dormitory Unlocked").Value = ModRoomManager.GetRoomByName("DORMITORY").IsUnlocked;
             ModInstance.GlobalManager.GetBoolVariable("Casino Unlocked").Value = ModRoomManager.GetRoomByName("CASINO").IsUnlocked;
+            
             ModRoom room = ModRoomManager.GetRoomByName(roomGameObject.name.ToUpper().Trim());
-            if (!room.HasBeenDrafted)
+            var RoomRecords = GameObject.Find("Global Persitent Manager").GetHashTableProxy("RoomRecords").hashTable;
+            if (RoomRecords[room.Name].Unbox<int>() == 1)
             {
                 Logging.Log("Drafting Studio has been drafted for the first time. Sending floorplan hints.", "RoomHandler");
-                //Logging.Log("Debug HasBeenDrafted: " + room.HasBeenDrafted, "RoomHandler");
+                //Logging.Log("Debug RoomRecords: " + RoomRecords[room.Name].Unbox<int>(), "RoomHandler");
                 GetScoutHints();
             }
         }
