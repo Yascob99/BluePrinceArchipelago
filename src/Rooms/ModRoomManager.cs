@@ -56,7 +56,7 @@ namespace BluePrinceArchipelago.Rooms
             {"CLOISTER", "Upgrade Cloister"},
             {"NURSERY", "Upgrade Nursery"},
             {"PARLOR", "Upgrade Parlor"},
-            {"NOOK", "Upgrade Nool"}
+            {"NOOK", "Upgrade Nook"}
         };
 
 
