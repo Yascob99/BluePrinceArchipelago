@@ -25,8 +25,8 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
             ModRoom room = ModRoomManager.GetRoomByName(roomGameObject.name.ToUpper().Trim());
             if (!room.HasBeenDrafted)
             {
-                Logging.Log("Drafting Studio has been drafted for the first time. Sending floorplan hints.");
-                Logging.Log("Debug HasBeenDrafted: " + room.HasBeenDrafted);
+                Logging.Log("Drafting Studio has been drafted for the first time. Sending floorplan hints.", "RoomHandler");
+                //Logging.Log("Debug HasBeenDrafted: " + room.HasBeenDrafted, "RoomHandler");
                 GetScoutHints();
             }
         }
