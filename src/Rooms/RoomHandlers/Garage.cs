@@ -37,15 +37,16 @@ class Garage : RoomHandler
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
-                    CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
-                    if (!found)
-                    {
-                        IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                        KeyIntCheck.equal = KeyIntCheck.lessThan;
-                        ItemDropFSM.GetState("State 2").DisableFirstActionOfType<ArrayListContains>();
-                        ItemDropFSM.GetState("State 2").ChangeTransition("FINISHED", "Coat Check Check");
-                    }
+                    ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key");
+                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
+                    //if (!found)
+                    //{
+                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    //    ItemDropFSM.GetState("State 2").DisableFirstActionOfType<ArrayListContains>();
+                    //    ItemDropFSM.GetState("State 2").ChangeTransition("FINISHED", "Coat Check Check");
+                    //}
                 }
                 else
                 {

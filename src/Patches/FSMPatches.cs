@@ -266,15 +266,16 @@ namespace BluePrinceArchipelago.Patches
                     FsmBool CanSpawnDisk = MineUpgradeSpawn.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
-                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                    FsmState CoatCheckCheck = MineUpgradeSpawn.GetState("Coat Check Check 2");
-                    CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
-                    if (!found)
-                    {
-                        IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                        KeyIntCheck.equal = KeyIntCheck.lessThan;
-                    }
+                    MineUpgradeSpawn.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key 2");
+                    //ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
+                    //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                    //FsmState CoatCheckCheck = MineUpgradeSpawn.GetState("Coat Check Check 2");
+                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
+                    //if (!found)
+                    //{
+                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    //}
                 }
                 else
                 {

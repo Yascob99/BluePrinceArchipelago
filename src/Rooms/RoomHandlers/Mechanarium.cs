@@ -31,15 +31,16 @@ class Mechanarium : RoomHandler
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("Upgrae Disk").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check 2");
-                    CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
-                    if (!found)
-                    {
-                        IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                        KeyIntCheck.equal = KeyIntCheck.lessThan;
-                        ItemDropFSM.GetState("State 6").DisableFirstActionOfType<ArrayListContains>();
-                        ItemDropFSM.GetState("State 6").ChangeTransition("FINISHED", "Coat Check Check 2");
-                    }
+                    ItemDropFSM.GetState("Upgrae Disk").ChangeTransition("skip", "Spawn Sanctum Key 2");
+                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check 2");
+                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
+                    //if (!found)
+                    //{
+                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    //    ItemDropFSM.GetState("State 6").DisableFirstActionOfType<ArrayListContains>();
+                    //    ItemDropFSM.GetState("State 6").ChangeTransition("FINISHED", "Coat Check Check 2");
+                    //}
                 }
                 else
                 {

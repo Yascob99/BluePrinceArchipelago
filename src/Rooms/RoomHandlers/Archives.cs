@@ -27,15 +27,16 @@ class Archives: RoomHandler
                 FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                 CanSpawnDisk.Value = found;
                 ItemDropFSM.GetState("State").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
-                CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
-                if (!found)
-                {
-                    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                    KeyIntCheck.equal = KeyIntCheck.lessThan;
-                }
+                ItemDropFSM.GetState("State").ChangeTransition("skip", "Spawn Sanctum Key");
+                //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
+                //if (!found)
+                //{
+                //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                //}
             }
             else
             {
