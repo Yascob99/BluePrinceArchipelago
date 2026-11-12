@@ -450,6 +450,8 @@ namespace BluePrinceArchipelago.Items
                     return "jack hammer";
                 case "Electromagnet":
                     return "Electro Magnet";
+                case "Knights Shield":
+                    return "Knight's Shield";
                 default:
                     return name;
             }
@@ -489,6 +491,10 @@ namespace BluePrinceArchipelago.Items
                     return "Power Hammer ";
                 case "ELECTROMAGNET":
                     return "Powerd Electromagnet";
+                case "TORCH":
+                    return "Self Lighting Torch";
+                case "MORNING STAR":
+                    return "Mornign Star";
                 default:
                     return name;
             }
