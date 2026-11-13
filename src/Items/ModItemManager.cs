@@ -1237,8 +1237,8 @@ namespace BluePrinceArchipelago.Items
             // Permanent Items
             AddItem(new PermanentItem("1 Permanent Dice", null, false, "Dice", 1));
             AddItem(new PermanentItem("2 Permanent Dice", null, false, "Dice", 2));
-            AddItem(new PermanentItem("1 Permanent Key", null, false, "Keys", 1));
-            AddItem(new PermanentItem("2 Permanent Key", null, false, "Keys", 2));
+            AddItem(new PermanentItem("1 Permanent Keys", null, false, "Keys", 1));
+            AddItem(new PermanentItem("2 Permanent Keys", null, false, "Keys", 2));
             AddItem(new PermanentItem("1 Permanent Steps", null, false, "Steps", 1));
             AddItem(new PermanentItem("2 Permanent Steps", null, false, "Steps", 2));
             AddItem(new PermanentItem("5 Permanent Steps", null, false, "Steps", 5));
