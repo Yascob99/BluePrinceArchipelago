@@ -138,6 +138,7 @@ namespace BluePrinceArchipelago.Utils
         /// <param name="value">The game object to add to the list if it doesn't already exist in the list.</param>
         public static void AddIfUnique(this PlayMakerArrayListProxy arrayListProxy, GameObject value)
         {
+            if (value == null) return;
             for (int i = 0; i < arrayListProxy.arrayList.Count; i++)
             {
                 GameObject item = arrayListProxy?.arrayList[i]?.TryCast<GameObject>();

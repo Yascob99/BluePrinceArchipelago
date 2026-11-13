@@ -40,14 +40,22 @@ class LostAndFound : RoomHandler
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 4").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    if (CheckInInventory != null)
-                    {
-                        BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
-                        ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
-                        return;
-                    }
+                    ItemDropFSM.GetState("UPGRADE CHECK").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    ItemDropFSM.GetState("State 2").ChangeTransition("skip", "Spawn Upgrade Disk");
+                    //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Upgrade Disk");
+                    //if (!found)
+                    //{
+                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    //}
+                    //if (CheckInInventory != null)
+                    //{
+                    //    BoolTest CheckFound = new BoolTest() { boolVariable = CanSpawnDisk, isTrue = CheckInInventory.isContainedEvent, isFalse = CheckInInventory.isNotContainedEvent, everyFrame = false };
+                    //    ItemDropFSM.GetState("State 2").ReplaceAction(CheckFound, 4);
+                    //    return;
+                    //}
                     Logging.LogWarning("Error changing Lost and Found Upgrade disk spawn logic.");
                     return;
                 }

@@ -36,9 +36,17 @@ class Garage : RoomHandler
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                    ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                    ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key");
+                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
+                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
+                    //if (!found)
+                    //{
+                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                    //    ItemDropFSM.GetState("State 2").DisableFirstActionOfType<ArrayListContains>();
+                    //    ItemDropFSM.GetState("State 2").ChangeTransition("FINISHED", "Coat Check Check");
+                    //}
                 }
                 else
                 {
