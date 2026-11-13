@@ -9,24 +9,25 @@ using BluePrinceArchipelago.Utils;
 using UnityEngine;
 using BluePrinceArchipelago.Archipelago;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace BluePrinceArchipelago.UI
 {
 	public static class InGameTrackerUiManager {
 		private const int MAX_TRUNK = 10;
-        private static readonly string[] MORA_JAI_BOX_ROOMS = { 
-            "Lost & Found", 
-            "Solarium", 
-            "Tunnel", 
-            "Trading Post", 
-            "Tomb", 
-            "Closed Exhibit", 
-            "Master Bedroom" 
-        };
+		private static readonly string[] MORA_JAI_BOX_ROOMS = {
+			"Lost & Found",
+			"Solarium",
+			"Tunnel",
+			"Trading Post",
+			"Tomb",
+			"Closed Exhibit",
+			"Master Bedroom"
+		};
 
-        private static readonly string[] UPGRADE_DISK_ROOMS = {
-            "Office",
-            "Morning Room",
+		private static readonly string[] UPGRADE_DISK_ROOMS = {
+			"Office",
+			"Morning Room",
 			"Her Ladyship's Chamber",
 			"Commissary",
 			"Garage",
@@ -40,6 +41,27 @@ namespace BluePrinceArchipelago.UI
 			"Mechanarium",
 			"Archives",
 		};
+
+		private static readonly Dictionary<string, List<string>> PUZZLES_IN_ROOMS = new() 
+		{
+            {"The Foundation", new() {"Lower The Foundation Elevator"}},
+			{"Tomb", new() {"Solve Tomb Puzzle 1", "Solve Tomb Puzzle 2"}},
+			{"Secret Garden", new() {"Break Secret Garden Wall" }},
+            {"Greenhouse", new() {"Break Greenhouse Wall"}},
+            {"Weight Room", new() {"Break Weight Room Wall"}},
+            {"Laboratory", new() {"Laboratory Puzzle"}},
+            {"Cloister", new() {"Allowance Token - Cloister Statue"}},
+            {"Utility Closet", new() {"VAC Controls"}},
+            {"Hovel", new() {"Gasline Valve - Hovel"}},
+            {"Schoolhouse", new() {"Gasline Valve - Schoolhouse"}},
+            {"Entrance Hall", new() { "Entrance Hall West Vase", "Entrance Hall East Vase"}},
+            {"Shelter", new() {"Red Letter VII"}},
+            {"Study", new() {"Red Letter 2"}},
+            {"Office", new() {"Red Letter ∞"}},
+            {"Drawing Room", new() {"Red Letter SIX"}},
+            {"Drafting Studio", new() {"Red Letter 5"}},
+            {"Boudoir", new() {"Red Letter 4"}},
+        };
 
 		public static string getCurrentRoomName()
 		{
@@ -75,8 +97,13 @@ namespace BluePrinceArchipelago.UI
 			archipelagoStats.Append(MoraJaiBoxLocation(roomName));
 			Logging.LogWarning($"Upgrade Disk location", "TRACKER");
 			archipelagoStats.Append(UpgradeDiskLocation(roomName));
+            Logging.LogWarning($"Puzzles location", "TRACKER");
+            archipelagoStats.Append(PuzzleLocations(roomName));
 
-			GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
+			//TODO : Drafting Room Floorplans
+			//TODO : Items
+
+            GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
 			description.GetComponent<TextMeshPro>().text = archipelagoStats.ToString();
 		}
 
@@ -97,6 +124,7 @@ namespace BluePrinceArchipelago.UI
 			return prefix + ResultText(complete, 1);
         }
 
+		//TODO : Clean that ?
         private static string TrunkLocations(string roomName)
         {
             //Compute trunk amount for this room and store trunks locations
@@ -116,6 +144,11 @@ namespace BluePrinceArchipelago.UI
                     trunkLocationIds[i] = id;
                 }
             }
+
+			if (totalTrunkLocations == 0)
+			{
+				return "";
+			}
 
             int trunksFound = 0;
             for (int i = 0; i < totalTrunkLocations; ++i)
@@ -137,7 +170,6 @@ namespace BluePrinceArchipelago.UI
         {
             if (!MORA_JAI_BOX_ROOMS.Contains(roomName))
             {
-				Logging.LogWarning($"No Mora Jai location", "TRACKER");
 				return "";
             }
 			int complete = LocationCompletion($"{roomName} Mora Jai Box");
@@ -148,7 +180,6 @@ namespace BluePrinceArchipelago.UI
 		{
 			if (!UPGRADE_DISK_ROOMS.Contains(roomName))
 			{
-				Logging.LogWarning($"No Upgrade Disk", "TRACKER");
 				return "";
 			}
 			if (roomName == "Trading Post")
@@ -160,8 +191,26 @@ namespace BluePrinceArchipelago.UI
 			int complete = LocationCompletion($"Upgrade Disk - {roomName}");
 			return "<br>Upgrade Disk : " + ResultText(complete, 1);
 		}
+		private static string PuzzleLocations(string roomName)
+		{
+            if (!PUZZLES_IN_ROOMS.ContainsKey(roomName))
+            {
+                Logging.LogWarning($"Not found {roomName} in puzzle list", "TRACKER");
+                return "";
+            }
+			StringBuilder puzzlesTracker = new();
+			foreach (string location in PUZZLES_IN_ROOMS[roomName])
+			{
+				string color = IsCompleted(location) ? "green" : "red";
+				puzzlesTracker.Append(ColorText(location, color));
+				puzzlesTracker.Append(", ");
+            }
+			puzzlesTracker.Remove(puzzlesTracker.Length - 2, 2);
+			return "<br>Puzzle : " + puzzlesTracker.ToString();
+        }
 
-		private static string ColorText(string text, string color) 
+
+        private static string ColorText(string text, string color) 
 		{
 			return $"<color={color}>{text}</color>";
 		}
@@ -182,27 +231,39 @@ namespace BluePrinceArchipelago.UI
 
 		private static int LocationCompletion(string[] locationNames)
 		{
-            int locationCompleted = 0;
+            int locationsCompleted = 0;
 			int locationChecked = locationNames.Length;
 			for (int i = 0; i < locationChecked; ++i)
-			{
-				long id = Plugin.ArchipelagoClient.GetLocationFromName(locationNames[i]);
-				if (id == -1)
+            {
+				if (IsCompleted(locationNames[i]))
 				{
-					Logging.LogError($"location : {locationNames[i]} not found", "TRACKER");
+					locationsCompleted++;
 				}
-				if (ArchipelagoClient.ServerData.CheckedLocations.Contains(id))
-				{
-					++locationCompleted;
-				}
-			}
-            return locationCompleted;
+            }
+            return locationsCompleted;
 		}
+
+        private static bool IsCompleted(string locationName)
+        {
+            long id = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
+            if (id == -1)
+            {
+                Logging.LogError($"location : {locationName} not found", "TRACKER");
+            }
+            if (ArchipelagoClient.ServerData.CheckedLocations.Contains(id))
+            {
+                return true;
+            }
+            return false;
+        }
 
         private static int LocationCompletion(string locationName)
         {
-            string[] array = {locationName};
-            return LocationCompletion(array);
+			if (IsCompleted(locationName))
+			{
+				return 1;
+			}
+			return 0;
         }
 	}
 }
