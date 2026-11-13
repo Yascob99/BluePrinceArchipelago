@@ -16,7 +16,8 @@ namespace BluePrinceArchipelago.UI
 {
 	public static class InGameTrackerUiManager {
 		private const int MAX_TRUNK = 10;
-		private static readonly string[] MORA_JAI_BOX_ROOMS = {
+		private static readonly string[] MORA_JAI_BOX_ROOMS = 
+        {
 			ROOM.LOST_AND_FOUND,
 			ROOM.SOLARIUM,
 			ROOM.TUNNEL,
@@ -26,7 +27,8 @@ namespace BluePrinceArchipelago.UI
 			ROOM.MASTER_BEDROOM,
 		};
 
-		private static readonly string[] UPGRADE_DISK_ROOMS = {
+		private static readonly string[] UPGRADE_DISK_ROOMS = 
+        {
 			ROOM.OFFICE,
 			ROOM.MORNING_ROOM,
 			ROOM.HER_LADYSHIPS_CHAMBER,
@@ -65,23 +67,24 @@ namespace BluePrinceArchipelago.UI
             {ROOM.OBSERVATORY, new() {"Floorplan - Planetarium"}}
         };
 
-        private static readonly string[] STUDIO_ADDITIONS_LOCATIONS_NAME = 
-        {
-            "Floorplan - Dovecote",
-            "Floorplan - Kennel",
-            "Floorplan - Clock Tower",
-            "Floorplan - Classroom",
-            "Floorplan - Solarium",
-            "Floorplan - Dormitory",
-            "Floorplan - Vestibule",
-            "Floorplan - Casino"
-        };
+        private static readonly List<string> STUDIO_ADDITIONS_LOCATIONS_NAME =
+        [
+            ROOM.DOVECOTE,
+            ROOM.THE_KENNEL, //Mismatch ???
+            ROOM.CLOCK_TOWER,
+            ROOM.CLASSROOM,
+            ROOM.SOLARIUM,
+            ROOM.DOVECOTE,
+            ROOM.VESTIBULE,
+            ROOM.CASINO,
+        ];
 
         private static readonly Dictionary<string, List<string>> ITEMS_IN_ROOMS = new()
         {
             //TODO : CABINET KEYS 1 2 3
             //TODO : Key of Aries
-            //TODO : Microchips 1 2 3
+            //TODO : Microchips 1 3
+            {ROOM.ENTRANCE_HALL, new() {ITEM.MICROCHIP_MIDDLE_SIZED}},
             {ROOM.THE_ARMORY, new() {ITEM.MORNING_STAR, ITEM.TORCH, ITEM.KNIGHTS_SHIELD, ITEM.THE_AXE}},
             {ROOM.ANTECHAMBER, new() {ITEM.BASEMENT_KEY}},
             {ROOM.SHOWROOM, new() {ITEM.CHRONOGRAPH, ITEM.EMERALD_BRACELET, ITEM.MASTER_KEY, ITEM.MOON_PENDANT, ITEM.ORNATE_COMPASS, ITEM.SILVER_SPOON}},
@@ -197,7 +200,11 @@ namespace BluePrinceArchipelago.UI
 			Logging.LogWarning($"Mora Jai location", "TRACKER");
 			archipelagoStats.Append(MoraJaiBoxLocation(roomName));
 			Logging.LogWarning($"Upgrade Disk location", "TRACKER");
-			archipelagoStats.Append(UpgradeDiskLocation(roomName));
+            archipelagoStats.Append(UpgradeDiskLocation(roomName));
+            if (roomName == ROOM.DRAFTING_STUDIO)
+            {
+                archipelagoStats.Append(StudioAdditionsLocations());
+            }
             Logging.LogWarning($"Puzzle location", "TRACKER");
             archipelagoStats.Append(PuzzleLocations(roomName));
             Logging.LogWarning($"Item location", "TRACKER");
@@ -297,14 +304,21 @@ namespace BluePrinceArchipelago.UI
 			return "<br>Upgrade Disk : " + ResultText(complete, 1);
 		}
 
+        // TODO : RENAME
         private static string IndividualLocations(string roomName, Dictionary<string, List<string>> locationsInRooms, string categoryName, Func<string, string> nameToLocation)
         {
             if (!locationsInRooms.ContainsKey(roomName))
             {
                 return "";
             }
+            return IndividualLocationsFromArray(locationsInRooms[roomName], categoryName, nameToLocation);
+        }
+        
+        //TODO : Rename
+        private static string IndividualLocationsFromArray(List<string> locationList, string categoryName, Func<string, string> nameToLocation)
+        {
             StringBuilder trackerDisplay = new();
-            foreach (string locationName in locationsInRooms[roomName])
+            foreach (string locationName in locationList)
             {
                 string location = nameToLocation(locationName);
                 string displayLocationName = locationName.ToTitleCase();
@@ -315,8 +329,8 @@ namespace BluePrinceArchipelago.UI
             trackerDisplay.Remove(trackerDisplay.Length - 2, 2);
             return "<br>" + categoryName + " : " + trackerDisplay.ToString();
         }
-        
-		private static string PuzzleLocations(string roomName)
+
+        private static string PuzzleLocations(string roomName)
 		{
             return IndividualLocations(roomName, PUZZLES_IN_ROOMS, "Puzzle", x => x);
         }
@@ -324,6 +338,11 @@ namespace BluePrinceArchipelago.UI
         private static string ItemPickupLocations(string roomName)
         {
             return IndividualLocations(roomName, ITEMS_IN_ROOMS, "Items", x => $"First Pickup - {x}");
+        }
+
+        private static string StudioAdditionsLocations()
+        {
+            return IndividualLocationsFromArray(STUDIO_ADDITIONS_LOCATIONS_NAME, "Studio Additions", x => $"Floorplan - {x}");
         }
 
         private static string ApplyRichTextTag(string text, string tag, string attribute = "")
