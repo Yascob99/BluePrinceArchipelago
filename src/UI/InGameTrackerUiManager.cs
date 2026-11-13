@@ -16,51 +16,51 @@ namespace BluePrinceArchipelago.UI
 	public static class InGameTrackerUiManager {
 		private const int MAX_TRUNK = 10;
 		private static readonly string[] MORA_JAI_BOX_ROOMS = {
-			"Lost & Found",
-			"Solarium",
-			"Tunnel",
-			"Trading Post",
-			"Tomb",
-			"Closed Exhibit",
-			"Master Bedroom"
+			ROOM.LOST_AND_FOUND,
+			ROOM.SOLARIUM,
+			ROOM.TUNNEL,
+			ROOM.TRADING_POST,
+			ROOM.TOMB,
+			ROOM.CLOSED_EXHIBIT,
+			ROOM.MASTER_BEDROOM,
 		};
 
 		private static readonly string[] UPGRADE_DISK_ROOMS = {
-			"Office",
-			"Morning Room",
-			"Her Ladyship's Chamber",
-			"Commissary",
-			"Garage",
-			"Great Hall",
-			"Vault",
-			"Trading Post",
-			"Freezer",
-			"Tomb",
-			"The Foundation",
-			"Lost & Found",
-			"Mechanarium",
-			"Archives",
+			ROOM.OFFICE,
+			ROOM.MORNING_ROOM,
+			ROOM.HER_LADYSHIPS_CHAMBER,
+			ROOM.COMMISSARY,
+			ROOM.GARAGE,
+			ROOM.GREAT_HALL,
+			ROOM.VAULT,
+			ROOM.TRADING_POST,
+			ROOM.FREEZER,
+			ROOM.TOMB,
+			ROOM.THE_FOUNDATION,
+			ROOM.LOST_AND_FOUND,
+			ROOM.MECHANARIUM,
+			ROOM.ARCHIVES,
 		};
 
 		private static readonly Dictionary<string, List<string>> PUZZLES_IN_ROOMS = new() 
 		{
-            {"The Foundation", new() {"Lower The Foundation Elevator"}},
-			{"Tomb", new() {"Solve Tomb Puzzle 1", "Solve Tomb Puzzle 2"}},
-			{"Secret Garden", new() {"Break Secret Garden Wall" }},
-            {"Greenhouse", new() {"Break Greenhouse Wall"}},
-            {"Weight Room", new() {"Break Weight Room Wall"}},
-            {"Laboratory", new() {"Laboratory Puzzle"}},
-            {"Cloister", new() {"Allowance Token - Cloister Statue"}},
-            {"Utility Closet", new() {"VAC Controls"}},
-            {"Hovel", new() {"Gasline Valve - Hovel"}},
-            {"Schoolhouse", new() {"Gasline Valve - Schoolhouse"}},
-            {"Entrance Hall", new() { "Entrance Hall West Vase", "Entrance Hall East Vase"}},
-            {"Shelter", new() {"Red Letter VII"}},
-            {"Study", new() {"Red Letter 2"}},
-            {"Office", new() {"Red Letter ∞"}},
-            {"Drawing Room", new() {"Red Letter SIX"}},
-            {"Drafting Studio", new() {"Red Letter 5"}},
-            {"Boudoir", new() {"Red Letter 4"}},
+            {ROOM.THE_FOUNDATION, new() {"Lower The Foundation Elevator"}},
+			{ROOM.TOMB, new() {"Solve Tomb Puzzle 1", "Solve Tomb Puzzle 2"}},
+			{ROOM.SECRET_GARDEN, new() {"Break Secret Garden Wall" }},
+            {ROOM.GREENHOUSE, new() {"Break Greenhouse Wall"}},
+            {ROOM.WEIGHT_ROOM, new() {"Break Weight Room Wall"}},
+            {ROOM.LABORATORY, new() {"Laboratory Puzzle"}},
+            {ROOM.CLOISTER, new() {"Allowance Token - Cloister Statue"}},
+            {ROOM.UTILITY_CLOSET, new() {"VAC Controls"}},
+            {ROOM.HOVEL, new() {"Gasline Valve - Hovel"}},
+            {ROOM.SCHOOLHOUSE, new() {"Gasline Valve - Schoolhouse"}},
+            {ROOM.ENTRANCE_HALL, new() { "Entrance Hall West Vase", "Entrance Hall East Vase"}},
+            {ROOM.SHELTER, new() {"Red Letter VII"}},
+            {ROOM.STUDY, new() {"Red Letter 2"}},
+            {ROOM.OFFICE, new() {"Red Letter ∞"}},
+            {ROOM.DRAWING_ROOM, new() {"Red Letter SIX"}},
+            {ROOM.DRAFTING_STUDIO, new() {"Red Letter 5"}},
+            {ROOM.BOUDOIR, new() {"Red Letter 4"}},
         };
 
 		public static string getCurrentRoomName()
@@ -110,16 +110,16 @@ namespace BluePrinceArchipelago.UI
         private static string DraftedLocation(string roomName)
         {
 			string prefix = "Drafted : ";
-			if (roomName == "Bunk Room")
+            if (roomName == ROOM.ENTRANCE_HALL || roomName == ROOM.ROOM_46)
+            {
+                return "";
+            }
+            if (roomName == ROOM.BUNK_ROOM)
             {
                 string[] locationNames = { $"First Draft - {roomName}", $"First Draft - {roomName} 2" };
                 int completed = LocationCompletion(locationNames);
                 return prefix + ResultText(completed, locationNames.Length);
 			}
-            if (roomName == "Entrance Hall" || roomName == "Room 46") 
-            {
-                return prefix + ResultText(0, 0);
-            }
             int complete = LocationCompletion($"First Draft - {roomName}");
 			return prefix + ResultText(complete, 1);
         }
@@ -182,7 +182,7 @@ namespace BluePrinceArchipelago.UI
 			{
 				return "";
 			}
-			if (roomName == "Trading Post")
+			if (roomName == ROOM.TRADING_POST)
 			{
 				string[] locationNames = { "Upgrade Disk - Trading Post Dynamite", "Upgrade Disk - Trading Post Trade" };
 				int completed = LocationCompletion(locationNames);
