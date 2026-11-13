@@ -25,7 +25,7 @@ class Vault : RoomHandler
                 roomGameObject = ModRoomManager.GetRoomInstance("Vault");
                 if (roomGameObject != null)
                 {
-                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 304/304 spwn/15")?.GetComponent<PlayMakerFSM>();
+                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 304/304 Spwn/15")?.GetComponent<PlayMakerFSM>();
                     if (ItemDropFSM != null)
                     {
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("VAULT");

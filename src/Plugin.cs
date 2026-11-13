@@ -107,7 +107,9 @@ namespace BluePrinceArchipelago {
             FsmMethods = new GameObject("CustomFsmMethods");
 
             GameObject.DontDestroyOnLoad(ModObject);
+            GameObject.DontDestroyOnLoad(FsmMethods);
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
+            FsmMethods.hideFlags = HideFlags.HideAndDontSave;
             ModObject.AddComponent<ModInstance>();
             ModObject.AddComponent<PlayMakerFSM>(); //Add A PlayMakerFSM to be used for Events.
             FsmMethods.AddComponent<CustomFsmMethods>();
