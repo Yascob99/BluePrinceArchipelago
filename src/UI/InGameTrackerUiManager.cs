@@ -10,6 +10,7 @@ using UnityEngine;
 using BluePrinceArchipelago.Archipelago;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace BluePrinceArchipelago.UI
 {
@@ -56,11 +57,24 @@ namespace BluePrinceArchipelago.UI
             {ROOM.SCHOOLHOUSE, new() {"Gasline Valve - Schoolhouse"}},
             {ROOM.ENTRANCE_HALL, new() {"Entrance Hall West Vase", "Entrance Hall East Vase"}},
             {ROOM.SHELTER, new() {"Red Letter VII"}},
-            {ROOM.STUDY, new() {"Red Letter 2"}},
+            {ROOM.STUDY, new() {"Red Letter 2", "Floorplan - Closed Exhibit"}},
             {ROOM.OFFICE, new() {"Red Letter ∞"}},
             {ROOM.DRAWING_ROOM, new() {"Red Letter SIX"}},
             {ROOM.DRAFTING_STUDIO, new() {"Red Letter 5"}},
             {ROOM.BOUDOIR, new() {"Red Letter 4"}},
+            {ROOM.OBSERVATORY, new() {"Floorplan - Planetarium"}}
+        };
+
+        private static readonly string[] STUDIO_ADDITIONS_LOCATIONS_NAME = 
+        {
+            "Floorplan - Dovecote",
+            "Floorplan - Kennel",
+            "Floorplan - Clock Tower",
+            "Floorplan - Classroom",
+            "Floorplan - Solarium",
+            "Floorplan - Dormitory",
+            "Floorplan - Vestibule",
+            "Floorplan - Casino"
         };
 
         private static readonly Dictionary<string, List<string>> ITEMS_IN_ROOMS = new()
@@ -282,49 +296,64 @@ namespace BluePrinceArchipelago.UI
 			int complete = LocationCompletion($"Upgrade Disk - {roomName}");
 			return "<br>Upgrade Disk : " + ResultText(complete, 1);
 		}
+
+        private static string IndividualLocations(string roomName, Dictionary<string, List<string>> locationsInRooms, string categoryName, Func<string, string> nameToLocation)
+        {
+            if (!locationsInRooms.ContainsKey(roomName))
+            {
+                return "";
+            }
+            StringBuilder trackerDisplay = new();
+            foreach (string locationName in locationsInRooms[roomName])
+            {
+                string location = nameToLocation(locationName);
+                string displayLocationName = locationName.ToTitleCase();
+                string locationText = IsCompleted(location) ? CompletedLocationText(displayLocationName) : UncompletedLocationText(displayLocationName);
+                trackerDisplay.Append(locationText);
+                trackerDisplay.Append(", ");
+            }
+            trackerDisplay.Remove(trackerDisplay.Length - 2, 2);
+            return "<br>" + categoryName + " : " + trackerDisplay.ToString();
+        }
+        
 		private static string PuzzleLocations(string roomName)
 		{
-            if (!PUZZLES_IN_ROOMS.ContainsKey(roomName))
-            {
-                Logging.LogWarning($"Not found {roomName} in puzzle list", "TRACKER");
-                return "";
-            }
-			StringBuilder puzzlesTracker = new();
-			foreach (string location in PUZZLES_IN_ROOMS[roomName])
-			{
-				string color = IsCompleted(location) ? "green" : "red";
-				puzzlesTracker.Append(ColorText(location, color));
-				puzzlesTracker.Append(", ");
-            }
-			puzzlesTracker.Remove(puzzlesTracker.Length - 2, 2);
-			return "<br>Puzzle : " + puzzlesTracker.ToString();
+            return IndividualLocations(roomName, PUZZLES_IN_ROOMS, "Puzzle", x => x);
         }
 
-        //TODO : Duplicated
         private static string ItemPickupLocations(string roomName)
         {
-            if (!ITEMS_IN_ROOMS.ContainsKey(roomName))
-            {
-                Logging.LogWarning($"Not found {roomName} in item list", "TRACKER");
-                return "";
-            }
-            StringBuilder itemTracker = new();
-            foreach (string itemName in ITEMS_IN_ROOMS[roomName])
-            {
-                string location = $"First Pickup - {itemName}";
-                string color = IsCompleted(location) ? "green" : "red";
-                itemTracker.Append(ColorText(itemName.ToTitleCase(), color));
-                itemTracker.Append(", ");
-            }
-            itemTracker.Remove(itemTracker.Length - 2, 2);
-            return "<br>Items : " + itemTracker.ToString();
+            return IndividualLocations(roomName, ITEMS_IN_ROOMS, "Items", x => $"First Pickup - {x}");
         }
 
+        private static string ApplyRichTextTag(string text, string tag, string attribute = "")
+        {
+            if (attribute.Length == 0)
+            {
+                return $"<{tag}>{text}</{tag}>";
+            }
+            return $"<{tag}={attribute}>{text}</{tag}>";
+        }
 
-        private static string ColorText(string text, string color) 
-		{
-			return $"<color={color}>{text}</color>";
-		}
+        private static string ColorText(string text, string color)
+        {
+            return ApplyRichTextTag(text, "color", color);
+        }
+
+        private static string StrikethroughText(string text)
+        {
+            return ApplyRichTextTag(text, "s");
+        }
+
+        private static string CompletedLocationText(string text)
+        {
+            return ColorText(StrikethroughText(text), "#D3D3D3");
+        }
+
+        private static string UncompletedLocationText(string text)
+        {
+            return ColorText(text, "#01A9FF");
+        }
 
         private static string ResultText(int completed, int total)
         {
