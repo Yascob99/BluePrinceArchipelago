@@ -91,7 +91,8 @@ Special Thanks to:
 - Mac for helping out on the mod and APworld
 - deefdragon and BatemenzDW for their work on the APworld.
 - Ezra3 for some logic fixes on the APworld.
-- ZigZuagg and Shavnir for helping out with the mod.
+- ZigZuagg, Koyd, and Shavnir for helping out with the mod.
+- Lucian for helping with testing on the bleeding edge/untested changes.
 - Zygan for some custom art assets.
 - The Blue Prince community on the Archipelago Discord for all of their fantastic ideas.
 - The Silksong/HK community for a lot of great tools which made modding so much easier.
