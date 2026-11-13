@@ -42,7 +42,7 @@ namespace BluePrinceArchipelago
         public const string MORNING_STAR = "MORNING STAR";
         public const string ORNATE_COMPASS = "ORNATE COMPASS";
         public const string PAPER_CROWN = "PAPER CROWN";
-        public const string PRISM_KEY_0 = "PRISM KEY_0";
+        public const string PRISM_KEY = "PRISM KEY_0";
         public const string PICK_SOUND_AMPLIFIER = "Pick Sound Amplifier";
         public const string POWER_HAMMER = "Power Hammer";
         public const string REPELLENT = "REPELLENT";

@@ -4,6 +4,7 @@ namespace BluePrinceArchipelago
     public class ROOM
     {
         public const string ABANDONED_MINE = "Abandoned Mine";
+        public const string ANTECHAMBER = "Antechamber";
         public const string APPLE_ORCHARD = "Apple Orchard";
         public const string AQUARIUM = "Aquarium";
         public const string ARCHIVES = "Archives";
@@ -126,7 +127,7 @@ namespace BluePrinceArchipelago
         public const string SECRET_GARDEN = "Secret Garden";
         public const string SECRET_PASSAGE = "Secret Passage";
         public const string SECURITY = "Security";
-        public const string SERVANTS_QUARTER = "Servant's Quarter";
+        public const string SERVANTS_QUARTERS = "Servant's Quarter";
         public const string SHELTER = "Shelter";
         public const string SHOWROOM = "Showroom";
         public const string SHRINE = "Shrine";
@@ -156,7 +157,7 @@ namespace BluePrinceArchipelago
         public const string THE_UNDERPASS = "The Underpass";
         public const string THRONE_ROOM = "Throne Room";
         public const string TOMB = "Tomb";
-        public const string TOOL_SHED = "Tool Shed";
+        public const string TOOLSHED = "Tool Shed";
         public const string TRADING_POST = "Trading Post";
         public const string TREASURE_TROVE = "Treasure Trove";
         public const string TROPHY_ROOM = "Trophy Room";
