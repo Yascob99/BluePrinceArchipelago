@@ -12,7 +12,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 
-namespace BluePrinceArchipelago.UI
+namespace BluePrinceArchipelago.Tracker
 {
 	public static class InGameTrackerUiManager {
 		private const int MAX_TRUNK = 10;
@@ -179,7 +179,6 @@ namespace BluePrinceArchipelago.UI
 		{
 			GameObject headline = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/HEADLINE");
             string roomName = headline.GetComponent<TextMeshPro>().text;
-            Logging.LogWarning($"Raw Headline : ${roomName}$", "TRACKER");
 			return RemoveColorCode(roomName);
 		}
 
@@ -238,7 +237,6 @@ namespace BluePrinceArchipelago.UI
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(true);
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(true);
             }
-            //TODO : Archipelago options check (sanities)
             GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
 			description.GetComponent<TextMeshPro>().text = archipelagoStats.ToString();
 		}
@@ -252,12 +250,10 @@ namespace BluePrinceArchipelago.UI
             }
             if (roomName == ROOM.BUNK_ROOM)
             {
-                string[] locationNames = { $"First Draft - {roomName}", $"First Draft - {roomName} 2" };
-                int completed = LocationCompletion(locationNames);
-                return prefix + ResultText(completed, locationNames.Length);
+                string[] locationNames = [$"First Draft - {roomName}", $"First Draft - {roomName} 2"];
+                return FiniteStackableLocations(locationNames, prefix);
 			}
-            int complete = LocationCompletion($"First Draft - {roomName}");
-			return prefix + ResultText(complete, 1);
+            return FiniteStackableLocations([$"First Draft - {roomName}"], prefix);
         }
 
 		//TODO : Clean that ?
@@ -299,7 +295,7 @@ namespace BluePrinceArchipelago.UI
                     break;
                 }
             }
-            return "<br>Trunks : " + ResultText(trunksFound, totalTrunkLocations);
+            return "<br>Trunks : " + StackableLocationResultText(trunksFound, totalTrunkLocations);
         }
 
         private static string MoraJaiBoxLocation(string roomName)
@@ -308,8 +304,7 @@ namespace BluePrinceArchipelago.UI
             {
 				return "";
             }
-			int complete = LocationCompletion($"{roomName} Mora Jai Box");
-			return "<br>Mora Jai Box : " + ResultText(complete, 1);
+            return FiniteStackableLocations([$"{roomName} Mora Jai Box"], "Mora Jai Box");
 		}
 
 		private static string UpgradeDiskLocation(string roomName)
@@ -320,12 +315,10 @@ namespace BluePrinceArchipelago.UI
 			}
 			if (roomName == ROOM.TRADING_POST)
 			{
-				string[] locationNames = { "Upgrade Disk - Trading Post Dynamite", "Upgrade Disk - Trading Post Trade" };
-				int completed = LocationCompletion(locationNames);
-				return "<br>Upgrade Disks : " + ResultText(completed, locationNames.Length);
+				string[] locationNames = ["Upgrade Disk - Trading Post Dynamite", "Upgrade Disk - Trading Post Trade"];
+                return FiniteStackableLocations(locationNames, "Upgrade Disk");
 			}
-			int complete = LocationCompletion($"Upgrade Disk - {roomName}");
-			return "<br>Upgrade Disk : " + ResultText(complete, 1);
+            return FiniteStackableLocations([$"Upgrade Disk - {roomName}"], "Upgrade Disk");
 		}
 
         // TODO : RENAME
@@ -344,14 +337,24 @@ namespace BluePrinceArchipelago.UI
             StringBuilder trackerDisplay = new();
             foreach (string locationName in locationList)
             {
-                string location = nameToLocation(locationName);
+                Location location = new(nameToLocation(locationName));
                 string displayLocationName = locationName.ToTitleCase();
-                string locationText = IsCompleted(location) ? CompletedLocationText(displayLocationName) : UncompletedLocationText(displayLocationName);
+                if (!location.IsInPlay())
+                {
+                    continue;
+                }
+                string locationText = location.IsCompleted() ? CompletedLocationText(displayLocationName) : UncompletedLocationText(displayLocationName);
                 trackerDisplay.Append(locationText);
                 trackerDisplay.Append(", ");
             }
+            if (trackerDisplay.Length == 0)
+            {
+                return "";
+            }
             trackerDisplay.Remove(trackerDisplay.Length - 2, 2);
-            return LINE_BREAK + categoryName + " : " + trackerDisplay.ToString();
+            // Handles plural
+            string prefix = (trackerDisplay.Length == 1) ? LINE_BREAK + categoryName + " : " : LINE_BREAK + "s" + categoryName + " : ";
+            return prefix + trackerDisplay.ToString();
         }
 
         private static string PuzzleLocations(string roomName)
@@ -399,6 +402,31 @@ namespace BluePrinceArchipelago.UI
             return estateTracker.ToString();
         }
 
+        private static string FiniteStackableLocations(string[] locationNames, string categoryName)
+        {            
+            int locationsCompleted = 0;
+            int locationsInPlay = locationNames.Length;
+            for (int i = 0; i < locationNames.Length; ++i)
+            {
+                Location location = new(locationNames[i]);
+                if (!location.IsInPlay())
+                {
+                    --locationsInPlay;
+                    continue;
+                }
+                if (location.IsCompleted())
+                {
+                    ++locationsCompleted;
+                }
+            }
+            if (locationsInPlay == 0)
+            {
+                return "";
+            }
+            return LINE_BREAK + categoryName + " : " + StackableLocationResultText(locationsCompleted, locationsInPlay);
+        }
+
+        // TODO : TMPProTextUtils
         private static string ApplyRichTextTag(string text, string tag, string attribute = "")
         {
             if (attribute.Length == 0)
@@ -428,7 +456,7 @@ namespace BluePrinceArchipelago.UI
             return ColorText(text, "#01A9FF");
         }
 
-        private static string ResultText(int completed, int total)
+        private static string StackableLocationResultText(int completed, int total)
         {
 			string color = "yellow";
 			if (completed == 0)
@@ -441,42 +469,35 @@ namespace BluePrinceArchipelago.UI
 			}
 			return ColorText($"{completed}/{total}", color);
 		}
+	}
 
-		private static int LocationCompletion(string[] locationNames)
-		{
-            int locationsCompleted = 0;
-			int locationChecked = locationNames.Length;
-			for (int i = 0; i < locationChecked; ++i)
-            {
-				if (IsCompleted(locationNames[i]))
-				{
-					locationsCompleted++;
-				}
-            }
-            return locationsCompleted;
-		}
+    public class Location(string locationName)
+    {
+        private const long LOCATION_NOT_FOUND = -1;
 
-        private static bool IsCompleted(string locationName)
+        private readonly long id = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
+        private bool isCompleted = false;
+
+        public bool IsCompleted()
         {
-            long id = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
-            if (id == -1)
-            {
-                Logging.LogError($"location : {locationName} not found", "TRACKER");
-            }
-            if (ArchipelagoClient.ServerData.CheckedLocations.Contains(id))
+            if (isCompleted)
             {
                 return true;
             }
-            return false;
+            isCompleted = CheckCompletion();
+            return isCompleted;
         }
 
-        private static int LocationCompletion(string locationName)
+        public bool IsInPlay()
         {
-			if (IsCompleted(locationName))
-			{
-				return 1;
-			}
-			return 0;
+            //TODO : Debug line below, please remove
+            if (id == LOCATION_NOT_FOUND) Logging.LogError($"{locationName} not found");
+            return (id != LOCATION_NOT_FOUND);
         }
-	}
+
+        private bool CheckCompletion()
+        {
+            return ArchipelagoClient.ServerData.CheckedLocations.Contains(id);
+        }
+    }
 }

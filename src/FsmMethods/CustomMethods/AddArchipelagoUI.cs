@@ -1,20 +1,9 @@
-using BluePrinceArchipelago.Triggers;
-using BluePrinceArchipelago.UI;
-
-#if Bep
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
-#endif
-#if ML
-using Il2Cpp;
-using Il2CppHutongGames.PlayMaker;
-using Il2CppHutongGames.PlayMaker.Actions;
-#endif
+using BluePrinceArchipelago.Tracker;
 
 namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 {
     /// <summary>
-    ///     On the allowance token being picked up.
+    ///     Redirects to the in-game AP tracker UI.
     /// </summary>
     public class AddArchipelagoUI() : RegisteredCustomFsmMethod
     {
