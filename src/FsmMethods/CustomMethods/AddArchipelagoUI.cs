@@ -11,7 +11,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public override void OnCalled()
         {
-            APTrackerPresenter.ShowArchipelagoRoomInfo();
+            APTrackerPresenter.ShowTrackerInfo();
         }
     }
 }

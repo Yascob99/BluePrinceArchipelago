@@ -5,6 +5,9 @@ using System;
 
 namespace BluePrinceArchipelago.Tracker
 {
+    /// <summary>
+    ///     Handles the content of the in game AP Tracker 
+    /// </summary>
 	public static class APTrackerPresenter {
 		private const int MAX_TRUNK = 10;
         private const string LINE_BREAK = "<br>";
@@ -183,13 +186,10 @@ namespace BluePrinceArchipelago.Tracker
             {"Abandoned Mine", new() {"Upgrade Disk - Abandoned Mine", "Unlock Basement Door The Well"}},
         };
 
-        public static string GetCurrentRoomName()
-		{
-            string roomDisplayName = APTrackerView.GetTitleName();
-            return APTrackerModel.StripRoomName(roomDisplayName);
-		}
-
-		public static void ShowArchipelagoRoomInfo()
+        /// <summary>
+        ///     Displays Archipelago locations in the Mount Holly Directory, replacing the room description.
+        /// </summary>
+		public static void ShowTrackerInfo()
         {
             string roomName = GetCurrentRoomName();
             StringBuilder archipelagoStats = new();
@@ -218,6 +218,12 @@ namespace BluePrinceArchipelago.Tracker
             }
             APTrackerView.DisplayTrackerInformation(archipelagoStats.ToString());
 		}
+
+        private static string GetCurrentRoomName()
+        {
+            string roomDisplayName = APTrackerView.GetTitleName();
+            return APTrackerModel.StripRoomName(roomDisplayName);
+        }
 
         private static string DraftedLocation(string roomName)
         {
