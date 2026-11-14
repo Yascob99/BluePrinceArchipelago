@@ -12,7 +12,7 @@ namespace BluePrinceArchipelago.Tracker
 
 		private readonly long _id;
 		private bool _isCompleted = false;
-		private string _displayName;
+		private readonly string _displayName;
 
 		/// <summary>
 		///		Constructor for AP location.
@@ -30,11 +30,19 @@ namespace BluePrinceArchipelago.Tracker
 
         }
 
+		/// <summary>
+		///		Get display name.
+		/// </summary>
+		/// <returns>Display name.</returns>
 		public string GetName()
 		{
 			return _displayName;
 		}
-
+		
+		/// <summary>
+		///		Indicate whether the location has been completed or not yet.
+		/// </summary>	
+		/// <returns>A boolean.</returns>
 		public bool IsCompleted()
 		{
 			if (!IsInPlay())
@@ -49,6 +57,10 @@ namespace BluePrinceArchipelago.Tracker
 			return _isCompleted;
 		}
 
+		/// <summary>
+		///		Indicate whether the location is in play in this AP world or not.
+		/// </summary>
+		/// <returns>A boolean.</returns>
 		public bool IsInPlay()
 		{
 			return (_id != LOCATION_NOT_FOUND);
