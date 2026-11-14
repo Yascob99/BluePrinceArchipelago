@@ -3,7 +3,7 @@ using BluePrinceArchipelago.Utils;
 
 namespace BluePrinceArchipelago.Tracker
 {
-	public class Location
+	public class TrackerLocation
 	{
 		private const long LOCATION_NOT_FOUND = -1;
 
@@ -11,7 +11,7 @@ namespace BluePrinceArchipelago.Tracker
 		private bool _isCompleted = false;
 		private string _displayName;
 
-		public Location(string locationName, string diplayName = "")
+		public TrackerLocation(string locationName, string diplayName = "")
 		{
 			_id = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
 			if (_displayName == "")

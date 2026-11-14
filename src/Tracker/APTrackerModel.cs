@@ -34,12 +34,12 @@ namespace BluePrinceArchipelago.Tracker
 			return roomName[begining..end];
 		}
 
-		public static Tuple<List<Location>, List<Location>> GetCompletedAndUncompletedLocations(List<Location> locations)
+		public static Tuple<List<TrackerLocation>, List<TrackerLocation>> GetCompletedAndUncompletedLocations(List<TrackerLocation> locations)
 		{
-			List<Location> completedLocations = [];
-			List<Location> uncompletedLocations = [];
+			List<TrackerLocation> completedLocations = [];
+			List<TrackerLocation> uncompletedLocations = [];
 
-			foreach (Location location in locations)
+			foreach (TrackerLocation location in locations)
 			{
 				if (!location.IsInPlay())
 				{

@@ -322,21 +322,21 @@ namespace BluePrinceArchipelago.Tracker
 
         private static string GetIndividualLocationsDisplay(List<string> locationList, Func<string, string> nameToLocation, string categoryName, string pluralForm = DEFAULT_PLURAL_FORM)
         {
-            List<Location> locations = CreateLocationList(locationList, nameToLocation);
-            (List<Location> completedLocations, List<Location> uncompletedLocations) = APTrackerModel.GetCompletedAndUncompletedLocations(locations);
+            List<TrackerLocation> locations = CreateLocationList(locationList, nameToLocation);
+            (List<TrackerLocation> completedLocations, List<TrackerLocation> uncompletedLocations) = APTrackerModel.GetCompletedAndUncompletedLocations(locations);
             int numberOfLocationsInPlay = completedLocations.Count + uncompletedLocations.Count;
             if (numberOfLocationsInPlay == 0)
             {
                 return EMPTY_STRING;
             }
             StringBuilder trackerDisplay = new();
-            foreach (Location uncompletedlocation in uncompletedLocations)
+            foreach (TrackerLocation uncompletedlocation in uncompletedLocations)
             {
                 string locationDisplay = UncompletedLocationText(uncompletedlocation.GetName());
                 trackerDisplay.Append(locationDisplay);
                 trackerDisplay.Append(INDIVIDUAL_LOCATIONS_SEPARATOR);
             }
-            foreach (Location completedlocation in completedLocations)
+            foreach (TrackerLocation completedlocation in completedLocations)
             {
                 string locationDisplay = CompletedLocationText(completedlocation.GetName());
                 trackerDisplay.Append(locationDisplay);
@@ -348,8 +348,8 @@ namespace BluePrinceArchipelago.Tracker
 
         private static string GetStackableLocationsDisplay(List<string> locationNames, string categoryName, string pluralForm = DEFAULT_PLURAL_FORM)
         {
-            List<Location> locations = CreateLocationList(locationNames, x => x);
-            (List<Location> completedLocations, List<Location> uncompletedLocations) = APTrackerModel.GetCompletedAndUncompletedLocations(locations);
+            List<TrackerLocation> locations = CreateLocationList(locationNames, x => x);
+            (List<TrackerLocation> completedLocations, List<TrackerLocation> uncompletedLocations) = APTrackerModel.GetCompletedAndUncompletedLocations(locations);
             int completedLocationCount = completedLocations.Count;
             int numberOfLocationsInPlay = completedLocationCount + uncompletedLocations.Count;
             if (numberOfLocationsInPlay == 0)
@@ -360,12 +360,12 @@ namespace BluePrinceArchipelago.Tracker
             return prefix + StackableLocationResultText(completedLocationCount, numberOfLocationsInPlay);
         }
 
-        private static List<Location> CreateLocationList(List<string> locationList, Func<string, string> nameToLocation)
+        private static List<TrackerLocation> CreateLocationList(List<string> locationList, Func<string, string> nameToLocation)
         {
-            List<Location> locations = [];
+            List<TrackerLocation> locations = [];
             foreach (string locationName in locationList)
             {
-                locations.Add(new Location(nameToLocation(locationName), locationName));
+                locations.Add(new TrackerLocation(nameToLocation(locationName), locationName));
             }
 
             return locations;
