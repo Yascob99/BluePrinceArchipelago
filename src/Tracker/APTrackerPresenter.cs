@@ -1,20 +1,14 @@
-#if Bep
-using TMPro;
-#endif
-#if ML
-using Il2CppTMPro;
-#endif
 using System.Text;
 using BluePrinceArchipelago.Utils;
-using UnityEngine;
 using BluePrinceArchipelago.Archipelago;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using BluePrince.Tracker;
 
 namespace BluePrinceArchipelago.Tracker
 {
-	public static class InGameTrackerUiManager {
+	public static class APTrackerPresenter {
 		private const int MAX_TRUNK = 10;
         private const string LINE_BREAK = "<br>";
 		private static readonly string[] MORA_JAI_BOX_ROOMS = 
@@ -175,10 +169,29 @@ namespace BluePrinceArchipelago.Tracker
             {"Abandoned Mine", new() {"Upgrade Disk - Abandoned Mine", "Unlock Basement Door The Well"}},
         };
 
+        /*
+        private readonly APTrackerView _view = null;
+
+        private static InGameTrackerUiManager _instance = null;
+
+        private InGameTrackerUiManager() 
+        {
+            _view = new APTrackerView();
+        }
+
+        public static InGameTrackerUiManager GetInstance()
+        {
+            if (_instance == null)
+            {
+                _instance = new InGameTrackerUiManager();
+            }
+            return _instance;
+        }
+        */
+
         public static string GetCurrentRoomName()
 		{
-			GameObject headline = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/HEADLINE");
-            string roomName = headline.GetComponent<TextMeshPro>().text;
+            string roomName = APTrackerView.GetTitleName();
             string stripedRoomName = RemoveColorCode(roomName);
             return ROOM.GetDowngradedRoomName(stripedRoomName);
 		}
@@ -225,22 +238,16 @@ namespace BluePrinceArchipelago.Tracker
             {
                 archipelagoStats.Append(EstateLocations());
             }
+            
             if (roomName == ROOM.ENTRANCE_HALL || roomName == ROOM.TRADING_POST)
             {
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/TYPE").SetActive(false);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Type Type").SetActive(false);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(false);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(false);
+                APTrackerView.DisableRoomDirectoryComponents();
             } 
             else
             {
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/TYPE").SetActive(true);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Type Type").SetActive(true);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(true);
-                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(true);
+                APTrackerView.EnableRoomDirectoryComponents();
             }
-            GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
-			description.GetComponent<TextMeshPro>().text = archipelagoStats.ToString();
+            APTrackerView.DisplayTrackerInformation(archipelagoStats.ToString());
 		}
 
         private static string DraftedLocation(string roomName)
@@ -405,7 +412,7 @@ namespace BluePrinceArchipelago.Tracker
         }
 
         private static string FiniteStackableLocations(string[] locationNames, string categoryName)
-        {            
+        {
             int locationsCompleted = 0;
             int locationsInPlay = locationNames.Length;
             for (int i = 0; i < locationNames.Length; ++i)
@@ -428,34 +435,14 @@ namespace BluePrinceArchipelago.Tracker
             return LINE_BREAK + categoryName + " : " + StackableLocationResultText(locationsCompleted, locationsInPlay);
         }
 
-        // TODO : TMPProTextUtils
-        private static string ApplyRichTextTag(string text, string tag, string attribute = "")
-        {
-            if (attribute.Length == 0)
-            {
-                return $"<{tag}>{text}</{tag}>";
-            }
-            return $"<{tag}={attribute}>{text}</{tag}>";
-        }
-
-        private static string ColorText(string text, string color)
-        {
-            return ApplyRichTextTag(text, "color", color);
-        }
-
-        private static string StrikethroughText(string text)
-        {
-            return ApplyRichTextTag(text, "s");
-        }
-
         private static string CompletedLocationText(string text)
         {
-            return ColorText(StrikethroughText(text), "#D3D3D3");
+            return TMProTextUtils.ColorText(TMProTextUtils.StrikethroughText(text), "#D3D3D3");
         }
 
         private static string UncompletedLocationText(string text)
         {
-            return ColorText(text, "#01A9FF");
+            return TMProTextUtils.ColorText(text, "#01A9FF");
         }
 
         private static string StackableLocationResultText(int completed, int total)
@@ -469,37 +456,7 @@ namespace BluePrinceArchipelago.Tracker
 			{
 				color = "green";
 			}
-			return ColorText($"{completed}/{total}", color);
+			return TMProTextUtils.ColorText($"{completed}/{total}", color);
 		}
 	}
-
-    public class Location(string locationName)
-    {
-        private const long LOCATION_NOT_FOUND = -1;
-
-        private readonly long id = Plugin.ArchipelagoClient.GetLocationFromName(locationName);
-        private bool isCompleted = false;
-
-        public bool IsCompleted()
-        {
-            if (isCompleted)
-            {
-                return true;
-            }
-            isCompleted = CheckCompletion();
-            return isCompleted;
-        }
-
-        public bool IsInPlay()
-        {
-            //TODO : Debug line below, please remove
-            if (id == LOCATION_NOT_FOUND) Logging.LogError($"{locationName} not found");
-            return (id != LOCATION_NOT_FOUND);
-        }
-
-        private bool CheckCompletion()
-        {
-            return ArchipelagoClient.ServerData.CheckedLocations.Contains(id);
-        }
-    }
 }
