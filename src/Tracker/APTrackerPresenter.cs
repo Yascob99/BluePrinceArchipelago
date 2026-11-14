@@ -1,6 +1,5 @@
 using System.Text;
 using BluePrinceArchipelago.Utils;
-using BluePrinceArchipelago.Archipelago;
 using System.Linq;
 using System.Collections.Generic;
 using System;
@@ -13,6 +12,24 @@ namespace BluePrinceArchipelago.Tracker
         private const string LINE_BREAK = "<br>";
         private const string INDIVIDUAL_LOCATIONS_SEPARATOR = ", ";
         private const string SEPARATOR_BETWEEN_CATEGORY_AND_LOCATIONS = " : ";
+        private const string HER_LADYSHIPS_CHAMBER_DISPLAY_NAME = "<color=#9A6FCF><size=12.5>Her Ladyship's Chamber</size></color>";
+        private const string AQUARIUM_DISPLAY_NAME = "<color=#C20F00>A</color><color=#52B74F>q</color><color=#E78F52>u</color><color=#9A6FCF>a</color><color=#D2BE60>r</color><color=#C20F00>i</color><color=#52B74F>u</color><color=#E78F52>m</color> ";
+        private const string COLOR_YELLOW = "yellow";
+        private const string COLOR_RED = "red";
+        private const string COLOR_GREEN = "green";
+        private const string COLOR_BLUE = "#01A9FF";
+        private const string COLOR_LIGHT_GRAY = "#D3D3D3";
+        private const string DEFAULT_PLURAL_FORM = "s";
+        private const string NO_PLURAL = "";
+        private const string ES_PLURAL = "es";
+        private const string EMPTY_STRING = "";
+        private const string DRAFT_CATEGORY_TITLE = "Drafted";
+        private const string UPGRADE_DISK_CATEGORY_TITLE = "Upgrade Disk";
+        private const string TRUNK_CATEGORY_TITLE = "Trunk";
+        private const string MORA_JAI_BOX_CATEGORY_TITLE = "Mora Jai Box";
+        private const string STUDIO_ADDITION_CATEGORY_TITLE = "Studio Addition";
+        private const string PUZZLE_CATEGORY_TITLE = "Puzzle";
+        private const string ITEM_CATEGORY_TITLE = "Item";
         private static readonly string[] MORA_JAI_BOX_ROOMS = 
         [
 			ROOM.LOST_AND_FOUND,
@@ -78,7 +95,6 @@ namespace BluePrinceArchipelago.Tracker
 
         private static readonly Dictionary<string, List<string>> ITEMS_IN_ROOMS = new()
         {
-            //TODO : Key of Aries
             {ROOM.ENTRANCE_HALL, new() {ITEM.MICROCHIP_MIDDLE_SIZED}},
             {ROOM.THE_ARMORY, new() {ITEM.MORNING_STAR, ITEM.TORCH, ITEM.KNIGHTS_SHIELD, ITEM.THE_AXE}},
             {ROOM.ANTECHAMBER, new() {ITEM.BASEMENT_KEY}},
@@ -171,26 +187,6 @@ namespace BluePrinceArchipelago.Tracker
             {"Abandoned Mine", new() {"Upgrade Disk - Abandoned Mine", "Unlock Basement Door The Well"}},
         };
 
-        /*
-        private readonly APTrackerView _view = null;
-
-        private static InGameTrackerUiManager _instance = null;
-
-        private InGameTrackerUiManager() 
-        {
-            _view = new APTrackerView();
-        }
-
-        public static InGameTrackerUiManager GetInstance()
-        {
-            if (_instance == null)
-            {
-                _instance = new InGameTrackerUiManager();
-            }
-            return _instance;
-        }
-        */
-
         public static string GetCurrentRoomName()
 		{
             string roomName = APTrackerView.GetTitleName();
@@ -205,11 +201,11 @@ namespace BluePrinceArchipelago.Tracker
             {
                 return roomName;
             }
-            if (roomName == "<color=#C20F00>A</color><color=#52B74F>q</color><color=#E78F52>u</color><color=#9A6FCF>a</color><color=#D2BE60>r</color><color=#C20F00>i</color><color=#52B74F>u</color><color=#E78F52>m</color> ")
+            if (roomName == AQUARIUM_DISPLAY_NAME)
             {
                 return ROOM.AQUARIUM;
             }
-            if (roomName == "<color=#9A6FCF><size=12.5>Her Ladyship's Chamber</size></color>")
+            if (roomName == HER_LADYSHIPS_CHAMBER_DISPLAY_NAME)
             {
                 return ROOM.HER_LADYSHIPS_CHAMBER;
             }
@@ -221,10 +217,7 @@ namespace BluePrinceArchipelago.Tracker
 		public static void ShowArchipelagoRoomInfo()
         {
             string roomName = GetCurrentRoomName();
-            Logging.LogWarning($"Room Selected : {roomName}", "TRACKER");
-
             StringBuilder archipelagoStats = new();
-
 			archipelagoStats.Append(DraftedLocation(roomName));
 			archipelagoStats.Append(TrunkLocations(roomName));
 			archipelagoStats.Append(MoraJaiBoxLocation(roomName));
@@ -253,94 +246,61 @@ namespace BluePrinceArchipelago.Tracker
 
         private static string DraftedLocation(string roomName)
         {
-			string prefix = "Drafted : ";
             if (roomName == ROOM.ENTRANCE_HALL || roomName == ROOM.ROOM_46)
             {
-                return "";
+                return EMPTY_STRING;
             }
             if (roomName == ROOM.BUNK_ROOM)
             {
                 string[] locationNames = [$"First Draft - {roomName}", $"First Draft - {roomName} 2"];
-                return FiniteStackableLocations(locationNames, prefix);
+                return FiniteStackableLocations(locationNames, DRAFT_CATEGORY_TITLE, NO_PLURAL);
 			}
-            return FiniteStackableLocations([$"First Draft - {roomName}"], prefix);
+            return FiniteStackableLocations([$"First Draft - {roomName}"], DRAFT_CATEGORY_TITLE, NO_PLURAL);
         }
 
-		//TODO : Clean that ?
         private static string TrunkLocations(string roomName)
         {
-            //Compute trunk amount for this room and store trunks locations
-            int totalTrunkLocations = MAX_TRUNK;
-            long[] trunkLocationIds = new long[MAX_TRUNK];
-
+            string[] trunkLocationNames = new string[MAX_TRUNK];
             for (int i = 0; i < MAX_TRUNK; ++i)
             {
-                long id = Plugin.ArchipelagoClient.GetLocationFromName($"Locked Trunk - {roomName} - {i + 1}");
-                if (id == -1)
-                {
-                    totalTrunkLocations = i;
-                    break;
-                }
-                else
-                {
-                    trunkLocationIds[i] = id;
-                }
+                trunkLocationNames[i] = $"Locked Trunk - {roomName} - {i + 1}";
             }
-
-			if (totalTrunkLocations == 0)
-			{
-				return "";
-			}
-
-            int trunksFound = 0;
-            for (int i = 0; i < totalTrunkLocations; ++i)
-            {
-                long locationId = trunkLocationIds[i];
-                if (ArchipelagoClient.ServerData.CheckedLocations.Contains(locationId))
-                {
-                    ++trunksFound;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return "<br>Trunks : " + StackableLocationResultText(trunksFound, totalTrunkLocations);
+            return FiniteStackableLocations(trunkLocationNames, TRUNK_CATEGORY_TITLE);
         }
 
         private static string MoraJaiBoxLocation(string roomName)
         {
             if (!MORA_JAI_BOX_ROOMS.Contains(roomName))
             {
-				return "";
+				return EMPTY_STRING;
             }
-            return FiniteStackableLocations([$"{roomName} Mora Jai Box"], "Mora Jai Box", "es");
+            return FiniteStackableLocations([$"{roomName} Mora Jai Box"], MORA_JAI_BOX_CATEGORY_TITLE, ES_PLURAL);
 		}
 
 		private static string UpgradeDiskLocation(string roomName)
 		{
 			if (!UPGRADE_DISK_ROOMS.Contains(roomName))
 			{
-				return "";
+				return EMPTY_STRING;
 			}
 			if (roomName == ROOM.TRADING_POST)
 			{
 				string[] locationNames = ["Upgrade Disk - Trading Post Dynamite", "Upgrade Disk - Trading Post Trade"];
-                return FiniteStackableLocations(locationNames, "Upgrade Disk");
+                return FiniteStackableLocations(locationNames, UPGRADE_DISK_CATEGORY_TITLE);
 			}
-            return FiniteStackableLocations([$"Upgrade Disk - {roomName}"], "Upgrade Disk");
+            return FiniteStackableLocations([$"Upgrade Disk - {roomName}"], UPGRADE_DISK_CATEGORY_TITLE);
 		}
 
-        private static string IndividualLocationFromDict(string roomName, Dictionary<string, List<string>> locationsInRooms, Func<string, string> nameToLocation, string categoryName, string pluralForm = "s")
+        private static string IndividualLocationFromDict(string roomName, Dictionary<string, List<string>> locationsInRooms, Func<string, string> nameToLocation, string categoryName, string pluralForm = DEFAULT_PLURAL_FORM)
         {
             if (!locationsInRooms.ContainsKey(roomName))
             {
-                return "";
+                return EMPTY_STRING;
             }
             return IndividualLocationsFromList(locationsInRooms[roomName], nameToLocation, categoryName, pluralForm);
         }
         
-        private static string IndividualLocationsFromList(List<string> locationList, Func<string, string> nameToLocation, string categoryName, string pluralForm = "s")
+        private static string IndividualLocationsFromList(List<string> locationList, Func<string, string> nameToLocation, string categoryName, string pluralForm = DEFAULT_PLURAL_FORM)
         {
             int numberOfLocationsInPlay = 0;
             StringBuilder trackerDisplay = new();
@@ -359,19 +319,27 @@ namespace BluePrinceArchipelago.Tracker
             }
             if (trackerDisplay.Length == 0)
             {
-                return "";
+                return EMPTY_STRING;
             }
-            // Remove last separator
+            RemoveLastSeparator(trackerDisplay);
+            return HandlePlural(categoryName, pluralForm, numberOfLocationsInPlay > 1, trackerDisplay);
+        }
+
+        private static string HandlePlural(string categoryName, string pluralForm, bool isPlural, StringBuilder trackerDisplay)
+        {
+            string prefix = GetPrefix(categoryName, isPlural, pluralForm);
+            return prefix + trackerDisplay.ToString();
+        }
+
+        private static void RemoveLastSeparator(StringBuilder trackerDisplay)
+        {
             int separatorLength = INDIVIDUAL_LOCATIONS_SEPARATOR.Length;
             trackerDisplay.Remove(trackerDisplay.Length - separatorLength, separatorLength);
-            // Handles plural
-            string prefix = GetPrefix(categoryName, numberOfLocationsInPlay > 1, pluralForm);
-            return prefix + trackerDisplay.ToString();
         }
 
         private static string PuzzleLocations(string roomName)
 		{
-            return IndividualLocationFromDict(roomName, PUZZLES_IN_ROOMS, x => x, "Puzzle");
+            return IndividualLocationFromDict(roomName, PUZZLES_IN_ROOMS, x => x, PUZZLE_CATEGORY_TITLE);
         }
 
         private static string ItemPickupLocations(string roomName)
@@ -388,7 +356,7 @@ namespace BluePrinceArchipelago.Tracker
                 }
                 return $"First Pickup - {item}";
             }
-            return IndividualLocationFromDict(roomName, ITEMS_IN_ROOMS, itemToLocation, "Item");
+            return IndividualLocationFromDict(roomName, ITEMS_IN_ROOMS, itemToLocation, ITEM_CATEGORY_TITLE);
         }
 
         private static string StudioAdditionsLocations()
@@ -401,7 +369,7 @@ namespace BluePrinceArchipelago.Tracker
                 }
                 return $"Floorplan - {room}";
             }
-            return IndividualLocationsFromList(STUDIO_ADDITIONS_LOCATIONS_NAME, studioAdditionToLocation, "Studio Addition");
+            return IndividualLocationsFromList(STUDIO_ADDITIONS_LOCATIONS_NAME, studioAdditionToLocation, STUDIO_ADDITION_CATEGORY_TITLE);
         }
 
         private static string EstateLocations()
@@ -409,12 +377,12 @@ namespace BluePrinceArchipelago.Tracker
             StringBuilder estateTracker = new(LINE_BREAK);
             foreach (KeyValuePair<string, List<string>> placeAndLocations in ESTATE_LOCATIONS)
             {
-                estateTracker.Append(IndividualLocationsFromList(placeAndLocations.Value, x => x, placeAndLocations.Key, ""));  
+                estateTracker.Append(IndividualLocationsFromList(placeAndLocations.Value, x => x, placeAndLocations.Key, NO_PLURAL));  
             }
             return estateTracker.ToString();
         }
 
-        private static string FiniteStackableLocations(string[] locationNames, string categoryName, string pluralForm = "s")
+        private static string FiniteStackableLocations(string[] locationNames, string categoryName, string pluralForm = DEFAULT_PLURAL_FORM)
         {
             int locationsCompleted = 0;
             int locationsInPlay = locationNames.Length;
@@ -433,13 +401,13 @@ namespace BluePrinceArchipelago.Tracker
             }
             if (locationsInPlay == 0)
             {
-                return "";
+                return EMPTY_STRING;
             }
             string prefix = GetPrefix(categoryName, locationsInPlay > 1, pluralForm);
             return prefix + StackableLocationResultText(locationsCompleted, locationsInPlay);
         }
 
-        private static string GetPrefix(string categoryName, bool plural = false, string pluralForm = "s")
+        private static string GetPrefix(string categoryName, bool plural = false, string pluralForm = DEFAULT_PLURAL_FORM)
         {
             if (plural)
             {
@@ -450,24 +418,24 @@ namespace BluePrinceArchipelago.Tracker
 
         private static string CompletedLocationText(string text)
         {
-            return TMProTextUtils.ColorText(TMProTextUtils.StrikethroughText(text), "#D3D3D3");
+            return TMProTextUtils.ColorText(TMProTextUtils.StrikethroughText(text), COLOR_LIGHT_GRAY);
         }
 
         private static string UncompletedLocationText(string text)
         {
-            return TMProTextUtils.ColorText(text, "#01A9FF");
+            return TMProTextUtils.ColorText(text, COLOR_BLUE);
         }
 
         private static string StackableLocationResultText(int completed, int total)
         {
-			string color = "yellow";
+			string color = COLOR_YELLOW;
 			if (completed == 0)
 			{
-				color = "red";
+				color = COLOR_RED;
 			}
 			if (completed == total)
 			{
-				color = "green";
+				color = COLOR_GREEN;
 			}
 			return TMProTextUtils.ColorText($"{completed}/{total}", color);
 		}
