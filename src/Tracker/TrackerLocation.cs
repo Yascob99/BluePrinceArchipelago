@@ -1,8 +1,7 @@
-using BluePrinceArchipelago;
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Utils;
 
-namespace BluePrince.Tracker
+namespace BluePrinceArchipelago.Tracker
 {
 	public class Location
 	{

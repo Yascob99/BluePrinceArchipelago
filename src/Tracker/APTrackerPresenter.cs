@@ -1,9 +1,7 @@
 using System.Text;
 using BluePrinceArchipelago.Utils;
-using System.Linq;
 using System.Collections.Generic;
 using System;
-using BluePrince.Tracker;
 
 namespace BluePrinceArchipelago.Tracker
 {

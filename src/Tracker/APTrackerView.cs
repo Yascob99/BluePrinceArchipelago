@@ -7,7 +7,7 @@ using Il2CppTMPro;
 using BluePrinceArchipelago.Utils;
 using UnityEngine;
 
-namespace BluePrince.Tracker
+namespace BluePrinceArchipelago.Tracker
 {
 	public static class APTrackerView
 	{
