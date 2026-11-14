@@ -16,8 +16,9 @@ namespace BluePrinceArchipelago.UI
 {
 	public static class InGameTrackerUiManager {
 		private const int MAX_TRUNK = 10;
+        private const string LINE_BREAK = "<br>";
 		private static readonly string[] MORA_JAI_BOX_ROOMS = 
-        {
+        [
 			ROOM.LOST_AND_FOUND,
 			ROOM.SOLARIUM,
 			ROOM.TUNNEL,
@@ -25,10 +26,10 @@ namespace BluePrinceArchipelago.UI
 			ROOM.TOMB,
 			ROOM.CLOSED_EXHIBIT,
 			ROOM.MASTER_BEDROOM,
-		};
+		];
 
 		private static readonly string[] UPGRADE_DISK_ROOMS = 
-        {
+        [
 			ROOM.OFFICE,
 			ROOM.MORNING_ROOM,
 			ROOM.HER_LADYSHIPS_CHAMBER,
@@ -43,7 +44,7 @@ namespace BluePrinceArchipelago.UI
 			ROOM.LOST_AND_FOUND,
 			ROOM.MECHANARIUM,
 			ROOM.ARCHIVES,
-		};
+		];
 
 		private static readonly Dictionary<string, List<string>> PUZZLES_IN_ROOMS = new() 
 		{
@@ -81,9 +82,7 @@ namespace BluePrinceArchipelago.UI
 
         private static readonly Dictionary<string, List<string>> ITEMS_IN_ROOMS = new()
         {
-            //TODO : CABINET KEYS 1 2 3
             //TODO : Key of Aries
-            //TODO : Microchips 1 3
             {ROOM.ENTRANCE_HALL, new() {ITEM.MICROCHIP_MIDDLE_SIZED}},
             {ROOM.THE_ARMORY, new() {ITEM.MORNING_STAR, ITEM.TORCH, ITEM.KNIGHTS_SHIELD, ITEM.THE_AXE}},
             {ROOM.ANTECHAMBER, new() {ITEM.BASEMENT_KEY}},
@@ -119,7 +118,7 @@ namespace BluePrinceArchipelago.UI
             {ROOM.WINE_CELLAR, new() {ITEM.BROKEN_LEVER, ITEM.BATTERY_PACK, ITEM.LOCK_PICK_KIT, ITEM.SHOVEL, ITEM.SLEDGE_HAMMER, ITEM.TREASURE_MAP, ITEM.VAULT_KEY_233}},
             {ROOM.WORKSHOP, new() {ITEM.BROKEN_LEVER, ITEM.BATTERY_PACK, ITEM.COIN_PURSE, ITEM.COMPASS, ITEM.LOCK_PICK_KIT, ITEM.LUCKY_RABBITS_FOOT, ITEM.MAGNIFYING_GLASS, ITEM.METAL_DETECTOR, ITEM.SHOVEL, ITEM.SLEDGE_HAMMER, ITEM.BURNING_GLASS, ITEM.DETECTOR_SHOVEL, ITEM.DOWSING_ROD, ITEM.ELECTROMAGNET, ITEM.JACK_HAMMER, ITEM.LUCKY_PURSE, ITEM.PICK_SOUND_AMPLIFIER, ITEM.POWER_HAMMER}},
             {ROOM.MAIL_ROOM, new() {ITEM.BATTERY_PACK, ITEM.COUPON_BOOK, ITEM.KEYCARD, ITEM.MAGNIFYING_GLASS, ITEM.METAL_DETECTOR, ITEM.TREASURE_MAP}},
-            {ROOM.PATIO, new() {ITEM.BATTERY_PACK, ITEM.CAR_KEYS, ITEM.METAL_DETECTOR, ITEM.SHOVEL}},
+            {ROOM.PATIO, new() {ITEM.CABINET_KEY_PATIO, ITEM.BATTERY_PACK, ITEM.CAR_KEYS, ITEM.METAL_DETECTOR, ITEM.SHOVEL}},
             {ROOM.ROOT_CELLAR, new() {ITEM.BATTERY_PACK, ITEM.METAL_DETECTOR, ITEM.SLEDGE_HAMMER, ITEM.TREASURE_MAP}},
             {ROOM.STUDY, new() {ITEM.BATTERY_PACK, ITEM.CAR_KEYS, ITEM.COMPASS, ITEM.COUPON_BOOK, ITEM.KEYCARD, ITEM.MAGNIFYING_GLASS, ITEM.TREASURE_MAP}},
             {ROOM.TRADING_POST, new() {ITEM.BATTERY_PACK, ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.COMPASS, ITEM.COUPON_BOOK, ITEM.GEAR_WRENCH, ITEM.HALL_PASS, ITEM.KEYCARD, ITEM.LOCK_PICK_KIT, ITEM.LUCKY_RABBITS_FOOT, ITEM.MAGNIFYING_GLASS, ITEM.METAL_DETECTOR, ITEM.PRISM_KEY, ITEM.RUNNING_SHOES, ITEM.SALT_SHAKER, ITEM.SECRET_GARDEN_KEY, ITEM.SHOVEL, ITEM.SILVER_KEY, ITEM.SLEDGE_HAMMER, ITEM.SLEEPING_MASK, ITEM.TELESCOPE, ITEM.VAULT_KEY_149, ITEM.VAULT_KEY_233, ITEM.VAULT_KEY_304, ITEM.VAULT_KEY_370}},
@@ -128,7 +127,7 @@ namespace BluePrinceArchipelago.UI
             {ROOM.DINING_ROOM, new() {ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.COUPON_BOOK, ITEM.SALT_SHAKER}},
             {ROOM.GALLERY, new() { ITEM.KEY_8, ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.LUCKY_RABBITS_FOOT, ITEM.VAULT_KEY_233}},
             {ROOM.GYMNASIUM, new() {ITEM.CAR_KEYS, ITEM.RUNNING_SHOES}},
-            {ROOM.LAUNDRY_ROOM, new() {ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.KEYCARD, ITEM.RUNNING_SHOES, ITEM.SLEEPING_MASK}},
+            {ROOM.LAUNDRY_ROOM, new() {ITEM.CABINET_KEY_LAUNDRY, ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.KEYCARD, ITEM.RUNNING_SHOES, ITEM.SLEEPING_MASK}},
             {ROOM.LOCKSMITH, new() {ITEM.CAR_KEYS, ITEM.LOCK_PICK_KIT, ITEM.PRISM_KEY, ITEM.SECRET_GARDEN_KEY, ITEM.SILVER_KEY}},
             {ROOM.MORNING_ROOM, new() {ITEM.CAR_KEYS, ITEM.COIN_PURSE, ITEM.COUPON_BOOK, ITEM.LUCKY_RABBITS_FOOT, ITEM.SALT_SHAKER, ITEM.SHOVEL, ITEM.VAULT_KEY_233}},
             {ROOM.OFFICE, new() {ITEM.CAR_KEYS, ITEM.COUPON_BOOK, ITEM.KEYCARD, ITEM.MAGNIFYING_GLASS, ITEM.VAULT_KEY_233}},
@@ -166,8 +165,19 @@ namespace BluePrinceArchipelago.UI
             {ROOM.TUNNEL, new() {ITEM.SHOVEL, ITEM.SLEDGE_HAMMER}},
         };
 
+        private static Dictionary<string, List<string>> ESTATE_LOCATIONS = new()
+        {
+            {"Campsite", new() {"Orchard Gate", "Gasline Valve - Orchard", "Gasline Valve - Gemstone Cavern", "Floorplan - Conservatory", "Scorch Sundial", "Raise Satellite"}},
+            {"Blackbridge Grotto", new() {"Floorplan - Throne Room", "First Pickup - MICROCHIP 1"}},
+            {"West Path", new() {"West Gate", "First Pickup - MICROCHIP 3"}},
+            {"Underpass", new() {"Floorplan - Mechanarium", "Red Letter 1"}},
+            {"Tunnel", new() {"Floorplan - Tunnel", "Break Tunnel Wall"}},
+            {"Precipice", new() {"Break Precipice Wall"}},
+            {"Basement", new() {"Floorplan - Lost And Found", "Unlock Basement Door The Foundation", "Break Grounds to Sealed Entrance Wall", "Open Basement to Reservoir Door"}},
+            {"Abandoned Mine", new() {"Upgrade Disk - Abandoned Mine", "Unlock Basement Door The Well"}},
+        };
 
-        public static string getCurrentRoomName()
+        public static string GetCurrentRoomName()
 		{
 			GameObject headline = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/HEADLINE");
 			string roomName = headline.GetComponent<TextMeshPro>().text;
@@ -188,33 +198,40 @@ namespace BluePrinceArchipelago.UI
 		public static void ShowArchipelagoRoomInfo()
         {
             //TODO : Beware of the upgraded floorplans
-            string roomName = getCurrentRoomName();
+            string roomName = GetCurrentRoomName();
             Logging.LogWarning($"Room Selected : {roomName}", "TRACKER");
 
             StringBuilder archipelagoStats = new();
 
-			Logging.LogWarning($"Drafted location", "TRACKER");
 			archipelagoStats.Append(DraftedLocation(roomName));
-			Logging.LogWarning($"Trunk location", "TRACKER");
 			archipelagoStats.Append(TrunkLocations(roomName));
-			Logging.LogWarning($"Mora Jai location", "TRACKER");
 			archipelagoStats.Append(MoraJaiBoxLocation(roomName));
-			Logging.LogWarning($"Upgrade Disk location", "TRACKER");
             archipelagoStats.Append(UpgradeDiskLocation(roomName));
             if (roomName == ROOM.DRAFTING_STUDIO)
             {
                 archipelagoStats.Append(StudioAdditionsLocations());
             }
-            Logging.LogWarning($"Puzzle location", "TRACKER");
             archipelagoStats.Append(PuzzleLocations(roomName));
-            Logging.LogWarning($"Item location", "TRACKER");
             archipelagoStats.Append(ItemPickupLocations(roomName));
+            if (roomName == ROOM.ENTRANCE_HALL)
+            {
+                archipelagoStats.Append(EstateLocations());
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/TYPE").SetActive(false);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Type Type").SetActive(false);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(false);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(false);
+            } 
+            else
+            {
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/TYPE").SetActive(true);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Type Type").SetActive(true);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(true);
+                GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(true);
+            }
 
-            //TODO : Studio Additions
-            //TODO : Found Floorplans
             //TODO : Archipelago options check (sanities)
-            //TODO : Estate Locations
-
+            //TODO : Room names: Aquarium, HLC
+            //TODO : Location names : First Pickup Cabinet Key 1, First Pickup Cabinet Key 2, First Pickup - CROWN, Floorplan - The Kennel, Tomb Puzzle 2, Cursed Effigy
             GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
 			description.GetComponent<TextMeshPro>().text = archipelagoStats.ToString();
 		}
@@ -343,6 +360,16 @@ namespace BluePrinceArchipelago.UI
         private static string StudioAdditionsLocations()
         {
             return IndividualLocationsFromArray(STUDIO_ADDITIONS_LOCATIONS_NAME, "Studio Additions", x => $"Floorplan - {x}");
+        }
+
+        private static string EstateLocations()
+        {
+            StringBuilder estateTracker = new(LINE_BREAK);
+            foreach (KeyValuePair<string, List<string>> placeAndLocations in ESTATE_LOCATIONS)
+            {
+                estateTracker.Append(IndividualLocationsFromArray(placeAndLocations.Value, placeAndLocations.Key, x => x));  
+            }
+            return estateTracker.ToString();
         }
 
         private static string ApplyRichTextTag(string text, string tag, string attribute = "")

@@ -6,9 +6,9 @@ namespace BluePrinceArchipelago
         public const string BATTERY_PACK = "BATTERY PACK";
         public const string BROKEN_LEVER = "BROKEN LEVER";
         public const string BURNING_GLASS = "Burning Glass";
-        public const string CABINET_KEY_1 = "CABINET KEY 1";
-        public const string CABINET_KEY_2 = "CABINET KEY 2";
-        public const string CABINET_KEY_3 = "CABINET KEY 3";
+        public const string CABINET_KEY_PATIO = "CABINET KEY 1";
+        public const string CABINET_KEY_LAUNDRY = "CABINET KEY 2";
+        public const string CABINET_KEY_TUNNEL = "CABINET KEY 3";
         public const string CAR_KEYS = "CAR KEYS";
         public const string CHRONOGRAPH = "CHRONOGRAPH";
         public const string COIN_PURSE = "COIN PURSE";
@@ -35,9 +35,9 @@ namespace BluePrinceArchipelago
         public const string MAGNIFYING_GLASS = "MAGNIFYING GLASS";
         public const string MASTER_KEY = "MASTER KEY";
         public const string METAL_DETECTOR = "METAL DETECTOR";
-        public const string MICROCHIP_1 = "MICROCHIP 1";
-        public const string MICROCHIP_2 = "MICROCHIP 2";
-        public const string MICROCHIP_3 = "MICROCHIP 3";
+        public const string MICROCHIP_SMALL = "MICROCHIP 1";
+        public const string MICROCHIP_MIDDLE_SIZED = "MICROCHIP 2";
+        public const string MICROCHIP_LARGE = "MICROCHIP 3";
         public const string MOON_PENDANT = "MOON PENDANT";
         public const string MORNING_STAR = "MORNING STAR";
         public const string ORNATE_COMPASS = "ORNATE COMPASS";
