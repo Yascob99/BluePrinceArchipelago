@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+
 namespace BluePrinceArchipelago
 {
     public class ROOM
@@ -174,5 +176,38 @@ namespace BluePrinceArchipelago
         public const string WEST_WING_HALL = "West Wing Hall";
         public const string WINE_CELLAR = "Wine Cellar";
         public const string WORKSHOP = "Workshop";
+
+        public static readonly Dictionary<string, List<string>> ROOM_UPGRADES = new()
+        {
+            {AQUARIUM, [GOLDFISH_AQUARIUM, STARFISH_AQUARIUM, ELECTRIC_EEL_AQUARIUM]},
+            {BILLIARD_ROOM, [SPEAKEASY, BREAK_ROOM, POOL_HALL]},
+            {CLOISTER, [CLOISTER_OF_DAUJA, CLOISTER_OF_DRAXUS, CLOISTER_OF_JOYA, CLOISTER_OF_LYDIA, CLOISTER_OF_MILA, CLOISTER_OF_ORINDA, CLOISTER_OF_RYNNA, CLOISTER_OF_VEIA]},
+            {CLOSET, [HALLWAY_CLOSET, BEDROOM_CLOSET, EMPTY_CLOSET]},
+            {COURTYARD, [CORRIYARD]},
+            {GUEST_BEDROOM, [GUESS_BEDROOM, QUEST_BEDROOM, GEIST_BEDROOM]},
+            {NOOK, [BREAKFAST_NOOK, READING_NOOK]},
+            {NURSERY, [NURSES_STATION, INDOOR_NURSERY]},
+            {PARLOR, [FUNERAL_PARLOR]},
+            {SPARE_ROOM, [SPARE_BEDROOM, SPARE_GREENROOM, SPARE_HALL]},
+            {SPARE_BEDROOM, [SPARE_SERVANTS_QUARTERS, HER_LADYSHIPS_SPARE_ROOM, HER_LADYSHIPS_SPARE_ROOM]},
+            {SPARE_HALL, [SPARE_FOYER, SPARE_SECRET_PASSAGE, SPARE_GREAT_HALL]},
+            {SPARE_GREENROOM, [SPARE_VERANDA, SPARE_TERRACE, SPARE_PATIO]},
+        };
+
+        /* This method is probably slow compared to a switch. But it was faster to write. */
+        public static string GetDowngradedRoomName(string roomName)
+        {
+            foreach (KeyValuePair<string, List<string>> roomAndUpgrades in ROOM_UPGRADES)
+            {
+                foreach (string upgradedRoom in roomAndUpgrades.Value)
+                {
+                    if (roomName == upgradedRoom)
+                    {
+                        return roomAndUpgrades.Key;
+                    }
+                }
+            }
+            return roomName;
+        } 
     }
 }

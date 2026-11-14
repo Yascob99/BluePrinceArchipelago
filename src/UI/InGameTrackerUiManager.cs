@@ -71,7 +71,7 @@ namespace BluePrinceArchipelago.Tracker
         private static readonly List<string> STUDIO_ADDITIONS_LOCATIONS_NAME =
         [
             ROOM.DOVECOTE,
-            ROOM.THE_KENNEL, //Mismatch ???
+            ROOM.THE_KENNEL, //TODO : Report Mismatch for kennel and cabinet keys
             ROOM.CLOCK_TOWER,
             ROOM.CLASSROOM,
             ROOM.SOLARIUM,
@@ -179,9 +179,11 @@ namespace BluePrinceArchipelago.Tracker
 		{
 			GameObject headline = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/HEADLINE");
             string roomName = headline.GetComponent<TextMeshPro>().text;
-			return RemoveColorCode(roomName);
+            string stripedRoomName = RemoveColorCode(roomName);
+            return ROOM.GetDowngradedRoomName(stripedRoomName);
 		}
 
+        //TODO : There may be upgraded floorplans with multicolored names that won't get correctly hooked
 		private static string RemoveColorCode(string roomName) 
 		{
             if (roomName[0] != '<')
