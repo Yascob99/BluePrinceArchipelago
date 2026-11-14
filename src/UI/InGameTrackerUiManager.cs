@@ -49,7 +49,7 @@ namespace BluePrinceArchipelago.UI
 		private static readonly Dictionary<string, List<string>> PUZZLES_IN_ROOMS = new() 
 		{
             {ROOM.THE_FOUNDATION, new() {"Lower The Foundation Elevator"}},
-			{ROOM.TOMB, new() {"Solve Tomb Puzzle 1", "Solve Tomb Puzzle 2"}},
+			{ROOM.TOMB, new() {"Solve Tomb Puzzle 1"}},
 			{ROOM.SECRET_GARDEN, new() {"Break Secret Garden Wall"}},
             {ROOM.GREENHOUSE, new() {"Break Greenhouse Wall"}},
             {ROOM.WEIGHT_ROOM, new() {"Break Weight Room Wall"}},
@@ -87,8 +87,6 @@ namespace BluePrinceArchipelago.UI
             {ROOM.THE_ARMORY, new() {ITEM.MORNING_STAR, ITEM.TORCH, ITEM.KNIGHTS_SHIELD, ITEM.THE_AXE}},
             {ROOM.ANTECHAMBER, new() {ITEM.BASEMENT_KEY}},
             {ROOM.SHOWROOM, new() {ITEM.CHRONOGRAPH, ITEM.EMERALD_BRACELET, ITEM.MASTER_KEY, ITEM.MOON_PENDANT, ITEM.ORNATE_COMPASS, ITEM.SILVER_SPOON}},
-            {ROOM.ROOM_46, new() {ITEM.CROWN}},
-            {ROOM.SHRINE, new() {ITEM.CURSED_EFFIGY}},
             {ROOM.AQUARIUM, new() {ITEM.BROKEN_LEVER, ITEM.COMPASS, ITEM.SHOVEL, ITEM.TREASURE_MAP}},
             {ROOM.ARCHIVES, new() {ITEM.BROKEN_LEVER, ITEM.BATTERY_PACK, ITEM.KEYCARD, ITEM.LOCK_PICK_KIT, ITEM.MAGNIFYING_GLASS, ITEM.METAL_DETECTOR, ITEM.TREASURE_MAP}},
             {ROOM.ATTIC, new() {ITEM.BROKEN_LEVER, ITEM.BATTERY_PACK, ITEM.COIN_PURSE, ITEM.COMPASS, ITEM.COUPON_BOOK, ITEM.LOCK_PICK_KIT, ITEM.MAGNIFYING_GLASS, ITEM.METAL_DETECTOR, ITEM.SECRET_GARDEN_KEY, ITEM.SHOVEL, ITEM.SLEDGE_HAMMER, ITEM.TREASURE_MAP, ITEM.VAULT_KEY_149}},
@@ -180,16 +178,25 @@ namespace BluePrinceArchipelago.UI
         public static string GetCurrentRoomName()
 		{
 			GameObject headline = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/HEADLINE");
-			string roomName = headline.GetComponent<TextMeshPro>().text;
+            string roomName = headline.GetComponent<TextMeshPro>().text;
+            Logging.LogWarning($"Raw Headline : ${roomName}$", "TRACKER");
 			return RemoveColorCode(roomName);
 		}
 
 		private static string RemoveColorCode(string roomName) 
 		{
-			if (roomName[0] != '<')
-			{
-				return roomName;
-			}
+            if (roomName[0] != '<')
+            {
+                return roomName;
+            }
+            if (roomName == "<color=#C20F00>A</color><color=#52B74F>q</color><color=#E78F52>u</color><color=#9A6FCF>a</color><color=#D2BE60>r</color><color=#C20F00>i</color><color=#52B74F>u</color><color=#E78F52>m</color> ")
+            {
+                return ROOM.AQUARIUM;
+            }
+            if (roomName == "<color=#9A6FCF><size=12.5>Her Ladyship's Chamber</size></color>")
+            {
+                return ROOM.HER_LADYSHIPS_CHAMBER;
+            }
 			int begining = roomName.IndexOf('>') + 1;
 			int end = roomName.IndexOf('/') - 1;
 			return roomName[begining..end];
@@ -216,6 +223,9 @@ namespace BluePrinceArchipelago.UI
             if (roomName == ROOM.ENTRANCE_HALL)
             {
                 archipelagoStats.Append(EstateLocations());
+            }
+            if (roomName == ROOM.ENTRANCE_HALL || roomName == ROOM.TRADING_POST)
+            {
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/TYPE").SetActive(false);
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Type Type").SetActive(false);
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(false);
@@ -228,10 +238,7 @@ namespace BluePrinceArchipelago.UI
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/RARITY").SetActive(true);
                 GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/Rarity Type").SetActive(true);
             }
-
             //TODO : Archipelago options check (sanities)
-            //TODO : Room names: Aquarium, HLC
-            //TODO : Location names : First Pickup Cabinet Key 1, First Pickup Cabinet Key 2, First Pickup - CROWN, Floorplan - The Kennel, Tomb Puzzle 2, Cursed Effigy
             GameObject description = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO/Info Window/scalers/Description");
 			description.GetComponent<TextMeshPro>().text = archipelagoStats.ToString();
 		}
@@ -344,7 +351,7 @@ namespace BluePrinceArchipelago.UI
                 trackerDisplay.Append(", ");
             }
             trackerDisplay.Remove(trackerDisplay.Length - 2, 2);
-            return "<br>" + categoryName + " : " + trackerDisplay.ToString();
+            return LINE_BREAK + categoryName + " : " + trackerDisplay.ToString();
         }
 
         private static string PuzzleLocations(string roomName)
@@ -354,12 +361,32 @@ namespace BluePrinceArchipelago.UI
 
         private static string ItemPickupLocations(string roomName)
         {
-            return IndividualLocations(roomName, ITEMS_IN_ROOMS, "Items", x => $"First Pickup - {x}");
+            static string itemToLocation(string item)
+            {
+                if (item == ITEM.CABINET_KEY_PATIO)
+                {
+                    return "First Pickup - File Cabinet Key - Patio";
+                }
+                if (item == ITEM.CABINET_KEY_LAUNDRY)
+                {
+                    return "First Pickup - File Cabinet Key - Laundry Room";
+                }
+                return $"First Pickup - {item}";
+            }
+            return IndividualLocations(roomName, ITEMS_IN_ROOMS, "Items", itemToLocation);
         }
 
         private static string StudioAdditionsLocations()
         {
-            return IndividualLocationsFromArray(STUDIO_ADDITIONS_LOCATIONS_NAME, "Studio Additions", x => $"Floorplan - {x}");
+            static string studioAdditionToLocation(string room)
+            {
+                if (room == ROOM.THE_KENNEL)
+                {
+                    return "Floorplan - Kennel";
+                }
+                return $"Floorplan - {room}";
+            }
+            return IndividualLocationsFromArray(STUDIO_ADDITIONS_LOCATIONS_NAME, "Studio Additions", studioAdditionToLocation);
         }
 
         private static string EstateLocations()
