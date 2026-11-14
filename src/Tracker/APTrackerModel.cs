@@ -11,6 +11,12 @@ namespace BluePrinceArchipelago.Tracker
 		private const string HER_LADYSHIPS_CHAMBER_DISPLAY_NAME = "<color=#9A6FCF><size=12.5>Her Ladyship's Chamber</size></color>";
 		private const string AQUARIUM_DISPLAY_NAME = "<color=#C20F00>A</color><color=#52B74F>q</color><color=#E78F52>u</color><color=#9A6FCF>a</color><color=#D2BE60>r</color><color=#C20F00>i</color><color=#52B74F>u</color><color=#E78F52>m</color> ";
 
+		/// <summary>
+		///		Correct the room name from the headline to extract only the name of the room.
+		///		The original room name may have a color tag.
+		/// </summary>
+		/// <param name="displayName">Raw name from the game title.</param>
+		/// <returns>Cleaned room name.</returns>
 		public static string StripRoomName(string displayName)
 		{
 			string stripedRoomName = RemoveColorCode(displayName);
