@@ -11,7 +11,9 @@ namespace BluePrinceArchipelago.Tracker
 	public static class APTrackerPresenter {
 		private const int MAX_TRUNK = 10;
         private const string LINE_BREAK = "<br>";
-		private static readonly string[] MORA_JAI_BOX_ROOMS = 
+        private const string INDIVIDUAL_LOCATIONS_SEPARATOR = ", ";
+        private const string SEPARATOR_BETWEEN_CATEGORY_AND_LOCATIONS = " : ";
+        private static readonly string[] MORA_JAI_BOX_ROOMS = 
         [
 			ROOM.LOST_AND_FOUND,
 			ROOM.SOLARIUM,
@@ -218,7 +220,6 @@ namespace BluePrinceArchipelago.Tracker
 
 		public static void ShowArchipelagoRoomInfo()
         {
-            //TODO : Beware of the upgraded floorplans
             string roomName = GetCurrentRoomName();
             Logging.LogWarning($"Room Selected : {roomName}", "TRACKER");
 
@@ -313,7 +314,7 @@ namespace BluePrinceArchipelago.Tracker
             {
 				return "";
             }
-            return FiniteStackableLocations([$"{roomName} Mora Jai Box"], "Mora Jai Box");
+            return FiniteStackableLocations([$"{roomName} Mora Jai Box"], "Mora Jai Box", "es");
 		}
 
 		private static string UpgradeDiskLocation(string roomName)
@@ -330,19 +331,18 @@ namespace BluePrinceArchipelago.Tracker
             return FiniteStackableLocations([$"Upgrade Disk - {roomName}"], "Upgrade Disk");
 		}
 
-        // TODO : RENAME
-        private static string IndividualLocations(string roomName, Dictionary<string, List<string>> locationsInRooms, string categoryName, Func<string, string> nameToLocation)
+        private static string IndividualLocationFromDict(string roomName, Dictionary<string, List<string>> locationsInRooms, Func<string, string> nameToLocation, string categoryName, string pluralForm = "s")
         {
             if (!locationsInRooms.ContainsKey(roomName))
             {
                 return "";
             }
-            return IndividualLocationsFromArray(locationsInRooms[roomName], categoryName, nameToLocation);
+            return IndividualLocationsFromList(locationsInRooms[roomName], nameToLocation, categoryName, pluralForm);
         }
         
-        //TODO : Rename
-        private static string IndividualLocationsFromArray(List<string> locationList, string categoryName, Func<string, string> nameToLocation)
+        private static string IndividualLocationsFromList(List<string> locationList, Func<string, string> nameToLocation, string categoryName, string pluralForm = "s")
         {
+            int numberOfLocationsInPlay = 0;
             StringBuilder trackerDisplay = new();
             foreach (string locationName in locationList)
             {
@@ -352,23 +352,26 @@ namespace BluePrinceArchipelago.Tracker
                 {
                     continue;
                 }
+                ++numberOfLocationsInPlay;
                 string locationText = location.IsCompleted() ? CompletedLocationText(displayLocationName) : UncompletedLocationText(displayLocationName);
                 trackerDisplay.Append(locationText);
-                trackerDisplay.Append(", ");
+                trackerDisplay.Append(INDIVIDUAL_LOCATIONS_SEPARATOR);
             }
             if (trackerDisplay.Length == 0)
             {
                 return "";
             }
-            trackerDisplay.Remove(trackerDisplay.Length - 2, 2);
+            // Remove last separator
+            int separatorLength = INDIVIDUAL_LOCATIONS_SEPARATOR.Length;
+            trackerDisplay.Remove(trackerDisplay.Length - separatorLength, separatorLength);
             // Handles plural
-            string prefix = (trackerDisplay.Length == 1) ? LINE_BREAK + categoryName + " : " : LINE_BREAK + "s" + categoryName + " : ";
+            string prefix = GetPrefix(categoryName, numberOfLocationsInPlay > 1, pluralForm);
             return prefix + trackerDisplay.ToString();
         }
 
         private static string PuzzleLocations(string roomName)
 		{
-            return IndividualLocations(roomName, PUZZLES_IN_ROOMS, "Puzzle", x => x);
+            return IndividualLocationFromDict(roomName, PUZZLES_IN_ROOMS, x => x, "Puzzle");
         }
 
         private static string ItemPickupLocations(string roomName)
@@ -385,7 +388,7 @@ namespace BluePrinceArchipelago.Tracker
                 }
                 return $"First Pickup - {item}";
             }
-            return IndividualLocations(roomName, ITEMS_IN_ROOMS, "Items", itemToLocation);
+            return IndividualLocationFromDict(roomName, ITEMS_IN_ROOMS, itemToLocation, "Item");
         }
 
         private static string StudioAdditionsLocations()
@@ -398,7 +401,7 @@ namespace BluePrinceArchipelago.Tracker
                 }
                 return $"Floorplan - {room}";
             }
-            return IndividualLocationsFromArray(STUDIO_ADDITIONS_LOCATIONS_NAME, "Studio Additions", studioAdditionToLocation);
+            return IndividualLocationsFromList(STUDIO_ADDITIONS_LOCATIONS_NAME, studioAdditionToLocation, "Studio Addition");
         }
 
         private static string EstateLocations()
@@ -406,12 +409,12 @@ namespace BluePrinceArchipelago.Tracker
             StringBuilder estateTracker = new(LINE_BREAK);
             foreach (KeyValuePair<string, List<string>> placeAndLocations in ESTATE_LOCATIONS)
             {
-                estateTracker.Append(IndividualLocationsFromArray(placeAndLocations.Value, placeAndLocations.Key, x => x));  
+                estateTracker.Append(IndividualLocationsFromList(placeAndLocations.Value, x => x, placeAndLocations.Key, ""));  
             }
             return estateTracker.ToString();
         }
 
-        private static string FiniteStackableLocations(string[] locationNames, string categoryName)
+        private static string FiniteStackableLocations(string[] locationNames, string categoryName, string pluralForm = "s")
         {
             int locationsCompleted = 0;
             int locationsInPlay = locationNames.Length;
@@ -432,7 +435,17 @@ namespace BluePrinceArchipelago.Tracker
             {
                 return "";
             }
-            return LINE_BREAK + categoryName + " : " + StackableLocationResultText(locationsCompleted, locationsInPlay);
+            string prefix = GetPrefix(categoryName, locationsInPlay > 1, pluralForm);
+            return prefix + StackableLocationResultText(locationsCompleted, locationsInPlay);
+        }
+
+        private static string GetPrefix(string categoryName, bool plural = false, string pluralForm = "s")
+        {
+            if (plural)
+            {
+                return LINE_BREAK + categoryName + pluralForm + SEPARATOR_BETWEEN_CATEGORY_AND_LOCATIONS;
+            }
+            return LINE_BREAK + categoryName + SEPARATOR_BETWEEN_CATEGORY_AND_LOCATIONS;
         }
 
         private static string CompletedLocationText(string text)
