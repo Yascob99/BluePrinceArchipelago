@@ -7,7 +7,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
     /// </summary>
     public class AddTrackerUI() : RegisteredCustomFsmMethod
     {
-        public new string Name { get; set; } = "AddArchipelagoUI";
+        public new string Name { get; set; } = "AddTrackerUI";
 
         public override void OnCalled()
         {
