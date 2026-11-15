@@ -581,7 +581,7 @@ namespace BluePrinceArchipelago.Patches
             //Room directory
             PlayMakerFSM tilehHover4Fsm = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO").GetComponent<PlayMakerFSM>();
             FsmState clickState = tilehHover4Fsm.GetState("Info On");
-            clickState.AddAction(CustomFsmMethodManager.GetCallMethod("AddArchipelagoUI"));
+            clickState.AddAction(CustomFsmMethodManager.GetCallMethod("AddTrackerUI"));
         }
 
         public static void AllowanceEnvelopeSpawnFix() {

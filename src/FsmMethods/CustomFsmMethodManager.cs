@@ -43,7 +43,7 @@ namespace BluePrinceArchipelago.FsmMethods
             { "ZeroStepEnding", new ZeroStepEnding()},
             { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()},
             { "MainMenuLoaded", new MainMenuLoaded()},
-            { "AddArchipelagoUI", new AddArchipelagoUI()},
+            { "AddTrackerUI", new AddTrackerUI()},
         };
 
 
