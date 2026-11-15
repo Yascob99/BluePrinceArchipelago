@@ -236,6 +236,15 @@ namespace BluePrinceArchipelago.Tracker
                 List<string> locationNames = [$"First Draft - {roomName}", $"First Draft - {roomName} 2"];
                 return GetStackableLocationsDisplay(locationNames, DRAFT_CATEGORY_TITLE, NO_PLURAL);
 			}
+            if (roomName == ROOM.CLASSROOM)
+            {
+                List<string> classroomLocations = ["First Draft - Classroom Exam"];
+                for (int i = 1; i <= 8; ++i)
+                {
+                    classroomLocations.Add($"First Draft - Classroom {i}");
+                }
+                return GetStackableLocationsDisplay(classroomLocations, DRAFT_CATEGORY_TITLE, NO_PLURAL);
+            }
             return GetStackableLocationsDisplay([$"First Draft - {roomName}"], DRAFT_CATEGORY_TITLE, NO_PLURAL);
         }
 
