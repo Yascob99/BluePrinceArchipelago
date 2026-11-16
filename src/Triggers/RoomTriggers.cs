@@ -78,7 +78,7 @@ namespace BluePrinceArchipelago.Triggers
             room?.Handler?.OnItemCodeComplete();
 
             // Attempt the extra trunk spawn after a delay to let the original trunk spawn.
-            GeneralUtils.RunAfterDelay(1000f, () => ModInstance.TrunkManager.TrySpawnTrunk(room));
+            ModInstance.TrunkManager.TrySpawnTrunk(room);
         }
 
 

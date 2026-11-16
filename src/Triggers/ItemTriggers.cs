@@ -61,15 +61,17 @@ namespace BluePrinceArchipelago.Triggers
                     }
                 }
             }
-            else if (obj.name.ToUpper().Trim().Contains("UPGRADE DISK"))
+            if (obj.name.ToUpper().Trim().Contains("UPGRADE DISK"))
             {
                 string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
                 CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
                 ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
             }
             // Check for trunk spawn, and track it.
-            else if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned) {
-                ModInstance.TrunkManager.CheckingForTrunkSpawn = false;
+            if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned)
+            {
+                Logging.Log("Trunk Spawned", "Trunks");
+                ModInstance.TrunkManager.TrunkSpawned = true;
             }
         }
 

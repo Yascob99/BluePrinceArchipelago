@@ -217,7 +217,7 @@ public static class ArchipelagoOptions
             GoalType = (GoalType)GetInt(slotData, "goal_type", 0);
             GoalSanctumSolves = GetInt(slotData, "goal_sanctum_solves", 1);
             //WorldVersion = GetString(slotData, "world_version", "0.0.0");
-            ExtraTrunkChance = GetInt(slotData, "extra_trunk_chance", 100);
+            ExtraTrunkChance = GetInt(slotData, "extra_trunk_chance", 0);
             MaxQueuedDeathlinks = GetInt(slotData, "max_queued_deathlinks", 0);
             IsLoaded = true;
             LogOptions();
