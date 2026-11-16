@@ -1,18 +1,20 @@
 using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Models;
 using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
+using TMPro;
 #endif
 #if ML
 using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
+using Il2CppTMPro;
 #endif
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
@@ -43,19 +45,29 @@ public class Commissary : RoomHandler
         Logging.Log("Initializing Commissary.", COMMISSARY_LOG_TAG);
     }
 
-    public override void OnItemCodeComplete()
+    private bool SetupItemForSalesInstances()
     {
         RoomGameObject = ModRoomManager.GetRoomInstance("Commissary");
         _ItemsForSaleGameObject = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.gameObject;
         if (_ItemsForSaleGameObject == null)
         {
             Logging.LogError("_ItemsForSaleGameObject is null", COMMISSARY_LOG_TAG);
-            return;
+            return false;
         }
         _ItemsForSaleFsm = _ItemsForSaleGameObject.GetComponent<PlayMakerFSM>();
         if (_ItemsForSaleFsm == null)
         {
             Logging.LogError("_ItemsForSaleFsm is null", COMMISSARY_LOG_TAG);
+            return false;
+        }
+        return true;
+    }
+
+    public override void OnItemCodeComplete()
+    {
+        bool flowControl = SetupItemForSalesInstances();
+        if (!flowControl)
+        {
             return;
         }
         SetupItemsForSale();
@@ -75,28 +87,23 @@ public class Commissary : RoomHandler
     }
 
     private void ReplaceModelsWithAP() {
-        char poolLetter = _ItemsForSaleFsm.ActiveStateName[0];
-        string poolName = "Items " + poolLetter;
-        Logging.LogWarning($"Pool {_ItemsForSaleFsm.ActiveStateName} chosen, Items in pool : {poolName} registered", "DEBUG");
-
-        Transform itemPoolObject = _ItemsForSaleGameObject.transform.Find(poolName);
-        if (itemPoolObject == null)
+        Transform itemPoolTransform = GetItemPoolTranform();
+        if (itemPoolTransform == null)
         {
-            Logging.LogError($"Error, could not find object corresponding to {poolName}", COMMISSARY_LOG_TAG);
+            Logging.LogError($"Error, could not find object corresponding to the item pool", COMMISSARY_LOG_TAG);
             return;
         }
-        for (int i = 0; i < itemPoolObject.childCount; ++i)
+        for (int i = 0; i < itemPoolTransform.childCount; ++i)
         {
-            Transform itemType = itemPoolObject.GetChild(i);
-            // Check if this is an item with an AP replacement
-            if (!ItemsWithAP.Contains(itemType.gameObject.name.Trim()))
+            Transform itemType = itemPoolTransform.GetChild(i);
+            if (!HasApItemReplacement(itemType))
             {
                 continue;
             }
-            for (int k = 0; k < itemType.childCount; k++)
+            for (int j = 0; j < itemType.childCount; j++)
             {
-                GameObject model = itemType.GetChild(k).gameObject;
-                string itemName = model.name.Trim().Replace(" (1)", "").Replace(" (2)", "").Replace(" (3)", "").Replace(" (4)", "").ToUpper();
+                GameObject model = itemType.GetChild(j).gameObject;
+                string itemName = GetItemNameFromCommissaryModelName(model.name);
                 UniqueItem item = ModItemManager.GetUniqueItem(itemName);
                 if (item == null)
                 {
@@ -111,55 +118,86 @@ public class Commissary : RoomHandler
         }
     }
 
+    private static string GetItemNameFromCommissaryModelName(string modelName)
+    {
+        string itemName = modelName.Trim();
+        for (int i = 1; i <= 5; ++i)
+        {
+            itemName = itemName.Replace($" ({i})", "");
+        }
+        return itemName.ToUpper();
+    }
+
+    private static bool HasApItemReplacement(Transform itemType)
+    {
+        return ItemsWithAP.Contains(itemType.gameObject.name.Trim());
+    }
+
+    private Transform GetItemPoolTranform()
+    {
+        char poolLetter = _ItemsForSaleFsm.ActiveStateName[0];
+        string poolName = "Items " + poolLetter;
+        Logging.LogWarning($"Pool {_ItemsForSaleFsm.ActiveStateName} chosen, Items in pool : {poolName} registered", "DEBUG");
+        Transform itemPoolTransform = _ItemsForSaleGameObject.transform.Find(poolName);
+        if (itemPoolTransform == null)
+        {
+            Logging.LogError($"Error, could not find object corresponding to the item pool : '{poolName}'", COMMISSARY_LOG_TAG);
+        }
+        return itemPoolTransform;
+    }
+
     private void SetupItemsForSale()
     {
         FsmState state = _ItemsForSaleFsm.GetState(_ItemsForSaleFsm.ActiveStateName);
-        var actions = state.GetActionsOfType<SetFsmString>();
-        foreach (var action in actions)
+        SetFsmString[] actions = state.GetActionsOfType<SetFsmString>();
+        foreach (SetFsmString action in actions)
         {
             if (action is not SetFsmString setFsmString)
             {
-                Logging.LogError($"checked action is not SetFsmString, this should not happen...", COMMISSARY_LOG_TAG);
+                Logging.LogError($"'{action.name}' action is not SetFsmString", COMMISSARY_LOG_TAG);
                 continue;
             }
-            var varName = setFsmString.variableName;
-            if (!varName.Value.StartsWith("ITEM") || !varName.Value.EndsWith("NAME"))
-            {
-                continue;
-            }
-            if (!CommissaryStates.ContainsKey(setFsmString.setValue.Value) && !setFsmString.setValue.Value.Contains("Upgrade Disk"))
-            {
-                continue;
-            }
+            FsmString variableName = setFsmString.variableName;
             var itemName = setFsmString.setValue.Value;
-            Logging.LogWarning($"Item found: '{itemName}' in Items For Sale FSM.", "DEBUG");
+            if (!VariableNameDesignatesAnItem(variableName.Value) || !IsCommissaryUniqueItem(itemName))
+            {
+                continue;
+            }
             UniqueItem item = ModItemManager.GetUniqueItem(itemName);
             if (item == null)
             {
-                Logging.LogError($"Item: '{itemName}' not found in unique items.", "DEBUG");
+                Logging.LogError($"Error Getting item {itemName}. No such Unique Item", COMMISSARY_LOG_TAG);
             }
-            if (itemName.Contains("Upgrade Disk"))
+            if (IsCommissaryUpgradeDisk(itemName))
             {
                 itemName += " - Commissary";
             }
-            if (!LocationMap.ContainsKey(itemName))
-            {
-                LocationMap.Add(itemName, new Models.ShopItem
-                {
-                    Name = itemName
-                });
-                Logging.LogWarning($"Item: '{itemName}' addded to LocationMap.", "DEBUG");
-            }
-            string apItem = LocationMap[itemName].GetScoutHint();
-            if (!item.HasBeenFound)
-            {
-                setFsmString.setValue.Value = apItem;
-            }
-            if (itemName.Contains("Upgrade Disk") && !ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY"))
-            {
-                setFsmString.setValue.Value = apItem;
-            }
+            new ShopItem {Name = itemName}.GetScoutHint();
         }
     }
-    
+
+    private static bool RequiresShopTitleUpdate(UniqueItem item, string itemName)
+    {
+        return (!item.HasBeenFound) || (IsCommissaryUpgradeDisk(itemName) && !CommissaryUpgradeDiskHasBeenFound());
+    }
+
+    private static bool CommissaryUpgradeDiskHasBeenFound()
+    {
+        return ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
+    }
+
+    private static bool IsCommissaryUpgradeDisk(string itemName)
+    {
+        return itemName.Contains("Upgrade Disk");
+    }
+
+    private static bool IsCommissaryUniqueItem(string name)
+    {
+        return CommissaryStates.ContainsKey(name) || name.Contains("Upgrade Disk");
+    }
+
+    private static bool VariableNameDesignatesAnItem(string name)
+    {
+        return name.StartsWith("ITEM") && name.EndsWith("NAME");
+    }
 }
