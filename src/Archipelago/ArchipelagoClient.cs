@@ -224,6 +224,7 @@ public class ArchipelagoClient
             {
                 // Gets the Initial data from the server.
                 ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                ModInstance.TrunkManager.TrunkChance = ArchipelagoOptions.ExtraTrunkChance;
                 ServerData.Seed = session.RoomState.Seed;
                 ServerData.Index = 0;
                 // Load options into the static ArchipelagoOptions class
@@ -238,6 +239,7 @@ public class ArchipelagoClient
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
             session.Items.ItemReceived += OnItemReceived;
+
             Authenticated = true;
             // Receives any Queued Items
             DequeueItems();

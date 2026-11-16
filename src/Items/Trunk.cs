@@ -36,7 +36,7 @@ namespace BluePrinceArchipelago.Items
 
         public bool CheckingForTrunkSpawn = false;
 
-        public int TrunkChance { get; set; } = 100;
+        public int TrunkChance { get; set; } = 0;
 
         public TrunkManager() 
         {
