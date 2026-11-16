@@ -19,11 +19,12 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 public class Commissary : RoomHandler
 {
+    private const string COMMISSARY_LOG_TAG = "Commissary";
+
     public static Dictionary<string, Models.ShopItem> LocationMap { get; set; } = [];
     
     private GameObject _ItemsForSaleGameObject;
     private PlayMakerFSM _ItemsForSaleFsm;
-    private static readonly string[] ItemStateNames = ["A Items", "B Items", "C Items", "D Items", "E Items", "F Items", "G Items", "C Items 2", "K ITEMS", "D Items 2", "A Items 2", "J ITEMS", "E Items 2", "G Items 2", "F Items 2", "M Items", "I ITEMS 6", "N Items ", "I ITEMS 7", "I ITEMS", "I ITEMS 2", "I ITEMS 5", "I ITEMS 3", "I ITEMS 4", "H Items"];
     private static readonly string[] ItemsWithAP = ["Shovel", "Magnifying Glasses", "Saltshakers", "Hammers", "Compasses", "Shoes", "Metal Detectors", "Sleeping Mask", "Upgrade Disk"];
     public static Dictionary<string, string> CommissaryStates = new Dictionary<string, string>(){
             {"MAGNIFYING GLASS", "Mag Glass" },
@@ -39,21 +40,22 @@ public class Commissary : RoomHandler
 
     public Commissary()
     {
-        Logging.Log("Initializing Commissary.");
+        Logging.Log("Initializing Commissary.", COMMISSARY_LOG_TAG);
     }
-    public override void OnAfterRoomDrafted(GameObject roomGameObject)
+
+    public override void OnItemCodeComplete()
     {
         RoomGameObject = ModRoomManager.GetRoomInstance("Commissary");
         _ItemsForSaleGameObject = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.gameObject;
-        _ItemsForSaleFsm = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.GetComponent<PlayMakerFSM>();
         if (_ItemsForSaleGameObject == null)
         {
-            Logging.LogError("_ItemsForSaleGameObject is null", "COMMISSARY");
+            Logging.LogError("_ItemsForSaleGameObject is null", COMMISSARY_LOG_TAG);
             return;
         }
+        _ItemsForSaleFsm = _ItemsForSaleGameObject.GetComponent<PlayMakerFSM>();
         if (_ItemsForSaleFsm == null)
         {
-            Logging.LogError("_ItemsForSaleFsm is null", "COMMISSARY");
+            Logging.LogError("_ItemsForSaleFsm is null", COMMISSARY_LOG_TAG);
             return;
         }
         SetupItemsForSale();
@@ -63,10 +65,6 @@ public class Commissary : RoomHandler
 
     private void CommissaryDiskAdjustment()
     {
-        if (_ItemsForSaleFsm == null)
-        {
-            return;
-        }
         if (ArchipelagoOptions.UpgradeDiskSanity)
         {
             // Changes makes it check if the location has been found instead of a different check.
@@ -77,126 +75,91 @@ public class Commissary : RoomHandler
     }
 
     private void ReplaceModelsWithAP() {
-        for (int i = 0; i < _ItemsForSaleGameObject.transform.childCount; i++)
-        {
-            Transform child = _ItemsForSaleGameObject.transform.GetChild(i);
-            // Check if the item list is currently active.
-            if (child.gameObject.active == true)
-            {
- 
-                for (int j = 0; j < child.childCount; j++)
-                {
-                    Transform type = child.GetChild(j);
-                    // Check if this is an item with an AP replacement
-                    if (ItemsWithAP.Contains(type.gameObject.name.Trim()))
-                    {
-                        for (int k = 0; k < type.childCount; k++)
-                        {
-                            GameObject model = type.GetChild(k).gameObject;
-                            string itemName = model.name.Trim().Replace(" (1)", "").Replace(" (2)", "").Replace(" (3)", "").Replace(" (4)", "").ToUpper();
-                            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
-                            if (item != null)
-                            {
-                                // if the item has not been found yet.
-                                if (!item.HasBeenFound)
-                                {
-                                    ReplaceWithAPModel(itemName, model);
-                                }
-                            }
-                            else
-                            {
-                                Logging.Log($"Error Getting item {itemName}. No such Unique Item");
-                            }
-                        }
-                    }
-                }
-            }
-           
-        }
-    }
+        char poolLetter = _ItemsForSaleFsm.ActiveStateName[0];
+        string poolName = "Items " + poolLetter;
+        Logging.LogWarning($"Pool {_ItemsForSaleFsm.ActiveStateName} chosen, Items in pool : {poolName} registered", "DEBUG");
 
-    private void ReplaceWithAPModel(string itemName, GameObject gameObject) {
-        GameObject prefab = ModInstance.Prefabs.GetChild(itemName);
-        if (prefab != null)
+        Transform itemPoolObject = _ItemsForSaleGameObject.transform.Find(poolName);
+        if (itemPoolObject == null)
+        {
+            Logging.LogError($"Error, could not find object corresponding to {poolName}", COMMISSARY_LOG_TAG);
+            return;
+        }
+        for (int i = 0; i < itemPoolObject.childCount; ++i)
+        {
+            Transform itemType = itemPoolObject.GetChild(i);
+            // Check if this is an item with an AP replacement
+            if (!ItemsWithAP.Contains(itemType.gameObject.name.Trim()))
             {
-                //Instantiate a copy of the game object at the location of the spawn pool game object.
-                GameObject APGO = GameObject.Instantiate(prefab, gameObject.transform.position, gameObject.transform.rotation);
-                // Get the APswirly Component of the prefab
-                GameObject APswirly = APGO.transform.GetChild(0)?.gameObject;
-                if (APswirly != null)
-                {
-                    //Reparent the AP swirly to the spawn pool object.
-                    APswirly.transform.parent = gameObject.transform;
-                }
-                else
-                {
-                    Logging.LogWarning($"Unable to find APSwirly for {itemName}.");
-                }
-                // Get rid of our temporarily instantiated game object.
-                GameObject.Destroy(APGO);
+                continue;
             }
-            else
+            for (int k = 0; k < itemType.childCount; k++)
             {
-                Logging.LogWarning($"Unable to find prefab for {itemName}. Item is either unimplemented or not present in the assets.");
+                GameObject model = itemType.GetChild(k).gameObject;
+                string itemName = model.name.Trim().Replace(" (1)", "").Replace(" (2)", "").Replace(" (3)", "").Replace(" (4)", "").ToUpper();
+                UniqueItem item = ModItemManager.GetUniqueItem(itemName);
+                if (item == null)
+                {
+                    Logging.LogError($"Error Getting item {itemName}. No such Unique Item", COMMISSARY_LOG_TAG);
+                    continue;
+                }
+                if (!item.HasBeenFound)
+                {
+                    ModItemManager.AddSwirly(item, model);
+                }
             }
+        }
     }
 
     private void SetupItemsForSale()
     {
-        if (_ItemsForSaleFsm == null)
+        FsmState state = _ItemsForSaleFsm.GetState(_ItemsForSaleFsm.ActiveStateName);
+        var actions = state.GetActionsOfType<SetFsmString>();
+        foreach (var action in actions)
         {
-            Logging.LogError("Items For Sale FSM not found, cannot set up shop items.");
-            return;
-        }
-
-        foreach (var stateName in ItemStateNames)
-        {
-            var state = _ItemsForSaleFsm.GetState(stateName);
-            if (state == null)
+            if (action is not SetFsmString setFsmString)
             {
-                Logging.LogWarning($"State '{stateName}' not found in Items For Sale FSM.");
+                Logging.LogError($"checked action is not SetFsmString, this should not happen...", COMMISSARY_LOG_TAG);
                 continue;
             }
-
-            var actions = state.GetActionsOfType<SetFsmString>();
-
-            foreach (var action in actions)
+            var varName = setFsmString.variableName;
+            if (!varName.Value.StartsWith("ITEM") || !varName.Value.EndsWith("NAME"))
             {
-                if (action is SetFsmString setFsmString)
+                continue;
+            }
+            if (!CommissaryStates.ContainsKey(setFsmString.setValue.Value) && !setFsmString.setValue.Value.Contains("Upgrade Disk"))
+            {
+                continue;
+            }
+            var itemName = setFsmString.setValue.Value;
+            Logging.LogWarning($"Item found: '{itemName}' in Items For Sale FSM.", "DEBUG");
+            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
+            if (item == null)
+            {
+                Logging.LogError($"Item: '{itemName}' not found in unique items.", "DEBUG");
+            }
+            if (itemName.Contains("Upgrade Disk"))
+            {
+                itemName += " - Commissary";
+            }
+            if (!LocationMap.ContainsKey(itemName))
+            {
+                LocationMap.Add(itemName, new Models.ShopItem
                 {
-                    var varName = setFsmString.variableName;
-                    if (varName.Value.StartsWith("ITEM") && varName.Value.EndsWith("NAME"))
-                    {
-                        if (CommissaryStates.ContainsKey(setFsmString.setValue.Value) || setFsmString.setValue.Value.Contains("Upgrade Disk"))
-                        {
-                            var itemName = setFsmString.setValue.Value;
-
-                            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
-                            if (itemName.Contains("Upgrade Disk"))
-                                itemName += " - Commissary";
-
-                            if (!LocationMap.ContainsKey(itemName))
-                            {
-                                LocationMap.Add(itemName, new Models.ShopItem
-                                {
-                                    Name = itemName
-                                });
-                            }
-                            string apItem = LocationMap[itemName].GetScoutHint();
-                            if (item != null) {
-                                if (!item.HasBeenFound) {
-                                    setFsmString.setValue.Value = apItem;
-                                }
-                            }
-                            if (itemName.Contains("Upgrade Disk")) {
-                                if (!ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY")) {
-                                    setFsmString.setValue.Value = apItem;
-                                }
-                            }
-                        }
-                    }
-                }
+                    Name = itemName
+                });
+                Logging.LogWarning($"Item: '{itemName}' addded to LocationMap.", "DEBUG");
+            }
+            string apItem = LocationMap[itemName].GetScoutHint();
+            if (!item.HasBeenFound)
+            {
+                setFsmString.setValue.Value = apItem;
+            }
+            if (itemName.Contains("Upgrade Disk") && !ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY"))
+            {
+                setFsmString.setValue.Value = apItem;
             }
         }
     }
+    
 }
