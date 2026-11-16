@@ -69,7 +69,6 @@ namespace BluePrinceArchipelago.Triggers
             }
             // Check for trunk spawn, and track it.
             else if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned) {
-                ModInstance.TrunkManager.TrunkSpawned = true;
                 ModInstance.TrunkManager.CheckingForTrunkSpawn = false;
             }
         }
