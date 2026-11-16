@@ -1,10 +1,15 @@
 
 using System.Collections.Generic;
-using Il2CppSystem.Linq;
+using BluePrinceArchipelago.FsmMethods;
+using BluePrinceArchipelago.Items;
+using BluePrinceArchipelago.Utils;
 #if Bep
+using HutongGames.PlayMaker;
 using TMPro;
 #endif
 #if ML
+using Il2Cpp;
+using Il2CppHutongGames.PlayMaker;
 using Il2CppTMPro;
 #endif
 using UnityEngine;
@@ -13,8 +18,17 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 public class Armory : RoomHandler
 {
-    private GameObject _ArmoryMenu;
-    private static Dictionary<string, Models.ShopItem> _ArmoryItemMap = [];
+    private const string ITEM_BOUGHT_STATE = "State 2";
+    private const string ARMORY_LOG_TAG = "ARMORY";
+    private const string AXE_ITEM_NAME = "THE AXE";
+    private const string AXE_MODEL_NAME_PREFIX = "THE AXE";
+    private const string UI_GAME_OBJECT = "UI OVERLAY CAM";
+    private const string ARMORY_MENU_GAME_OBJECT = "Armory Menu";
+    private const string SHIELD_SHOP_UI_NAME = "Knight's Shield";
+    private const string SHIELD_ITEM_NAME_UPPERCASE = "KNIGHTS SHIELD";
+    private const string POP_UP_GAME_OBJECT = "Pop Up";
+    private const string BUTTONS_GAME_OBJECT = "2 Button Spread";
+    private const string YES_BUTTON_GAME_OBJECT = "YES BUTTON";
     private static readonly Dictionary<string, (string TitlePath, string DescriptionPath1, string DescriptionPath2)> _ArmoryItemUIMap = new()
     {
         {"Morning Star", ("Morning Star/Pop Up/Title", "Morning Star/Pop Up/Description (2)", "Morning Star/Pop Up/Description (3)")},
@@ -22,6 +36,10 @@ public class Armory : RoomHandler
         {"Knight's Shield", ("Knight's Shield/Pop Up/Title", "Knight's Shield/Pop Up/Description (2)", "Knight's Shield/Pop Up/Description (3)")},
         {"The Axe", ("The Axe/Pop Up/Title", "The Axe/Pop Up/Description (2)", "The Axe/Pop Up/Desciption (2)/Description (3)")}
     };
+    private readonly string[] armoryObjectInstanceNames = { "TORCH", "KNIGHTS SHIELD", "MORNING STAR", "THE AXE (torch replacment", "THE AXE (MStar replacement)", "THE AXE (shield replacement)" };
+    private static int currentInstance = 0;
+    private GameObject _ArmoryMenu;
+    private static Dictionary<string, Models.ShopItem> _ArmoryItemMap = [];
 
     public Armory()
     {
@@ -39,12 +57,94 @@ public class Armory : RoomHandler
             return;
         }
 
-        _ArmoryMenu = GameObject.Find("UI OVERLAY CAM").transform.Find("Armory Menu")?.gameObject;
+        _ArmoryMenu = GameObject.Find(UI_GAME_OBJECT).transform.Find(ARMORY_MENU_GAME_OBJECT)?.gameObject;
     }
 
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
+        ++currentInstance;
         SetupArmoryItems();
+        ReplaceItemsWithAP();
+    }
+
+    private void ReplaceItemsWithAP()
+    {
+        foreach (string armoryObjectInstanceName in armoryObjectInstanceNames)
+        {
+            GameObject armoryObjectInstance = GetArmoryItemGameObject(armoryObjectInstanceName);
+            if (armoryObjectInstance == null)
+            {
+                Logging.LogError($"Game instance for {armoryObjectInstanceName} not found", ARMORY_LOG_TAG);
+                continue;
+            }
+            // This seems to be uneffective
+            if (!armoryObjectInstance.active)
+            {
+                Logging.Log($"Game instance for {armoryObjectInstanceName} not active, skipping", ARMORY_LOG_TAG);
+                continue;
+            }
+            UniqueItem armoryItem = GetArmoryItemFromGameObjectName(armoryObjectInstanceName);
+            ModItemManager.AddSwirly(armoryItem, armoryObjectInstance);
+            AddItemBoughtHook(armoryItem);
+        }
+    }
+
+    private void AddItemBoughtHook(UniqueItem armoryItem)
+    {
+        PlayMakerFSM buyingArmoryItemFSM = GetFsmForBuyingArmoryItems(armoryItem);
+        if (buyingArmoryItemFSM == null)
+        {
+            Logging.LogError($"Armory FSM for {armoryItem.Name} not found", ARMORY_LOG_TAG);
+            return;
+        }
+        FsmState itemBoughtState = buyingArmoryItemFSM.GetState(ITEM_BOUGHT_STATE);
+        if (itemBoughtState == null)
+        {
+            Logging.LogError($"Buy state not found for {armoryItem.Name}", ARMORY_LOG_TAG);
+            return;
+        }
+        CustomFsmMethodManager.AddItemBoughtMethod(armoryItem);
+        string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(armoryItem.Name);
+        itemBoughtState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
+    }
+
+    private PlayMakerFSM GetFsmForBuyingArmoryItems(UniqueItem armoryItem)
+    {
+        string armoryShopUiName = GetArmoryShopUiName(armoryItem);
+        PlayMakerFSM buyingArmoryItemFSM = _ArmoryMenu.transform.Find(armoryShopUiName)?.transform.Find(POP_UP_GAME_OBJECT)?.transform.Find(BUTTONS_GAME_OBJECT)?.transform.Find(YES_BUTTON_GAME_OBJECT)?.GetComponent<PlayMakerFSM>();
+        return buyingArmoryItemFSM;
+    }
+
+    private static UniqueItem GetArmoryItemFromGameObjectName(string armoryObjectInstanceName)
+    {
+        string uniqueItemName = GetUniqueItemName(armoryObjectInstanceName);
+        UniqueItem armoryItem = ModItemManager.GetUniqueItem(uniqueItemName);
+        return armoryItem;
+    }
+
+    private static string GetArmoryShopUiName(UniqueItem armoryItem)
+    {
+        if (armoryItem.Name.ToUpper() == SHIELD_ITEM_NAME_UPPERCASE)
+        {
+            return SHIELD_SHOP_UI_NAME;
+        }
+        return armoryItem.Name.ToTitleCase();
+    }
+
+    private static string GetUniqueItemName(string armoryObjectInstanceName)
+    {
+        if (armoryObjectInstanceName.Contains(AXE_MODEL_NAME_PREFIX))
+        {
+            return AXE_ITEM_NAME;
+        }
+        return armoryObjectInstanceName;
+    }
+
+    private static GameObject GetArmoryItemGameObject(string armoryObjectInstanceName)
+    {
+        string path = $"__SYSTEM/Room Spawn Pools/The Armory(Clone)00{currentInstance}/_CULLABLE/_NON STATIC/{armoryObjectInstanceName}";
+        GameObject armoryObjectInstance = GameObject.Find(path);
+        return armoryObjectInstance;
     }
 
     // Morning Star preview model is misspelled as Morning Star in scene
@@ -116,7 +216,7 @@ public class Armory : RoomHandler
             // {
             //     descriptionTMP1.text = scoutHintParts[1];
             // }
-            
+
         }
     }
 }

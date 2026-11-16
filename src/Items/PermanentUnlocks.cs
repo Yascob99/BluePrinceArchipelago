@@ -333,7 +333,7 @@ namespace BluePrinceArchipelago.Items
     public class BlackBridgeGrotto : PermanentUnlock
     {
         public override string Name { get; set; } = "Blackbridge Grotto";
-        public override string LocationName { get; set; } = "Laboratory Puzzle - Blackbridge";
+        public override string LocationName { get; set; } = "Laboratory Puzzle";
 
         public GameObject RoomObject = null;
         public override void UnlockItem()

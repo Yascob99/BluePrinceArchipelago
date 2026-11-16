@@ -247,7 +247,7 @@ namespace BluePrinceArchipelago.Events
         /// </summary>
         public void OnLaboratoryPuzzleSolved()
         {
-            LocationFound.Invoke(this, new LocationEventArgs("Laboratory Puzzle - Blackbridge", "Laboratory Puzzle - Blackbridge"));
+            LocationFound.Invoke(this, new LocationEventArgs("Laboratory Puzzle", "Laboratory Puzzle"));
         }
 
         /// <summary>

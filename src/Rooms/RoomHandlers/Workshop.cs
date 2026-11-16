@@ -52,6 +52,10 @@ class Workshop : RoomHandler
 
     private static int currentInstance = 0;
     
+    /// <summary>
+    /// Hook the workshop menu for the possibility to lock crafts and attach the swirly effect to workshop items.
+    /// </summary>
+    /// <param name="roomGameObject">Unused</param>
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         ++currentInstance;

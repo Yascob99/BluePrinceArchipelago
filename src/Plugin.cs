@@ -76,6 +76,7 @@ namespace BluePrinceArchipelago {
             Logging.SetLogLevel("Items", LogLevel.Info);
             Logging.SetLogLevel("Locations", LogLevel.Info);
             Logging.SetLogLevel("Trades", LogLevel.Info);
+            Logging.SetLogLevel("Trunks", LogLevel.Info);
             //Logging.SetLogLevel("Rooms", LogLevel.Info);
             //Logging.SetLogLevel("Events", LogLevel.Info);
             Logging.SetLogLevel("StatEvents", LogLevel.Info);

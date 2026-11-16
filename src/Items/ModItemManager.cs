@@ -109,6 +109,11 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        /// <summary>
+        /// Add the swirly effect on an item and replace its pickup notification with the AP item collected.
+        /// </summary>
+        /// <param name="APitem">AP version of the item.</param>
+        /// <param name="gameInstance">In-game object to add the swirly effect on.</param>
         public static void AddSwirly(UniqueItem APitem, GameObject gameInstance)
         {
             if (gameInstance == null)
@@ -445,6 +450,8 @@ namespace BluePrinceArchipelago.Items
                     return "jack hammer";
                 case "Electromagnet":
                     return "Electro Magnet";
+                case "Knights Shield":
+                    return "Knight's Shield";
                 default:
                     return name;
             }
@@ -484,6 +491,10 @@ namespace BluePrinceArchipelago.Items
                     return "Power Hammer ";
                 case "ELECTROMAGNET":
                     return "Powerd Electromagnet";
+                case "TORCH":
+                    return "Self Lighting Torch";
+                case "MORNING STAR":
+                    return "Mornign Star";
                 default:
                     return name;
             }
@@ -1226,8 +1237,8 @@ namespace BluePrinceArchipelago.Items
             // Permanent Items
             AddItem(new PermanentItem("1 Permanent Dice", null, false, "Dice", 1));
             AddItem(new PermanentItem("2 Permanent Dice", null, false, "Dice", 2));
-            AddItem(new PermanentItem("1 Permanent Dice", null, false, "Keys", 1));
-            AddItem(new PermanentItem("2 Permanent Dice", null, false, "Keys", 2));
+            AddItem(new PermanentItem("1 Permanent Keys", null, false, "Keys", 1));
+            AddItem(new PermanentItem("2 Permanent Keys", null, false, "Keys", 2));
             AddItem(new PermanentItem("1 Permanent Steps", null, false, "Steps", 1));
             AddItem(new PermanentItem("2 Permanent Steps", null, false, "Steps", 2));
             AddItem(new PermanentItem("5 Permanent Steps", null, false, "Steps", 5));

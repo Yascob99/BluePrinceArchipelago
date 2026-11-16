@@ -1,0 +1,14 @@
+on:
+  issues:
+    types: [labeled]
+jobs:
+  Move_Labeled_Issue_On_Project_Board:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        action-token: "${{ secrets.ACTIONS_TOKEN }}"
+        project-url: "https://github.com/users/Yascob99/projects/2"
+        column-name: "APWorld Backlog"
+        label-name: "priority"
+        columns-to-ignore: "Mod Backlog,In Progess,In Review,Done"
