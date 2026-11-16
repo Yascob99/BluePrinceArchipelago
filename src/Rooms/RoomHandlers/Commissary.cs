@@ -43,14 +43,19 @@ public class Commissary : RoomHandler
     }
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
-        RoomGameObject = roomGameObject;
-        if (RoomGameObject == null)
-        {
-            RoomGameObject = ModRoomManager.GetRoomInstance("Commissary");
-        }
-
+        RoomGameObject = ModRoomManager.GetRoomInstance("Commissary");
         _ItemsForSaleGameObject = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.gameObject;
         _ItemsForSaleFsm = RoomGameObject.transform.Find("_GAMEPLAY/ITEMS FOR SALE")?.GetComponent<PlayMakerFSM>();
+        if (_ItemsForSaleGameObject == null)
+        {
+            Logging.LogError("_ItemsForSaleGameObject is null", "COMMISSARY");
+            return;
+        }
+        if (_ItemsForSaleFsm == null)
+        {
+            Logging.LogError("_ItemsForSaleFsm is null", "COMMISSARY");
+            return;
+        }
         SetupItemsForSale();
         CommissaryDiskAdjustment();
         ReplaceModelsWithAP();
