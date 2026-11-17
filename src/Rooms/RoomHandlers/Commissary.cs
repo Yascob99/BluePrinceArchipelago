@@ -5,13 +5,11 @@ using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using TMPro;
 #endif
 #if ML
 using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
-using Il2CppTMPro;
 #endif
 using System;
 using System.Collections.Generic;
@@ -22,7 +20,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
 public class Commissary : RoomHandler
 {
-    private const string COMMISSARY_LOG_TAG = "Commissary";
+    private const string COMMISSARY_LOG_TAG = ROOM.COMMISSARY;
 
     public static Dictionary<string, Models.ShopItem> LocationMap { get; set; } = [];
     
@@ -157,7 +155,6 @@ public class Commissary : RoomHandler
     {
         char poolLetter = _ItemsForSaleFsm.ActiveStateName[0];
         string poolName = "Items " + poolLetter;
-        Logging.LogWarning($"Pool {_ItemsForSaleFsm.ActiveStateName} chosen, Items in pool : {poolName} registered", "DEBUG");
         Transform itemPoolTransform = _ItemsForSaleGameObject.transform.Find(poolName);
         if (itemPoolTransform == null)
         {
