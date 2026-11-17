@@ -196,10 +196,11 @@ public class Commissary : RoomHandler
             {
                 SetupBuyingHook(item);
             }
+            //TODO : Issue #121 - Show hints on commissary shop slots
             string apName = new ShopItem {Name = itemName}.GetScoutHint();
             if (RequiresShopTitleUpdate(item, itemName))
             {
-                //Change text but this is hard.
+                //TODO : Issue #121 - Show hints on commissary shop slots
             }
         }
     }
