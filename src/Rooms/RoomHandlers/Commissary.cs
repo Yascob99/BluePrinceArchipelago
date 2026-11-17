@@ -16,6 +16,7 @@ using Il2CppTMPro;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using BluePrinceArchipelago.FsmMethods;
 
 namespace BluePrinceArchipelago.Rooms.RoomHandlers;
 
@@ -38,6 +39,7 @@ public class Commissary : RoomHandler
             {"RUNNING SHOES", "Running Shoes Purchase"},
             {"METAL DETECTOR", "MEtal Detector Purchase"}
          };
+
     public static List<string> CanStock = new();
 
     public Commissary()
@@ -73,6 +75,24 @@ public class Commissary : RoomHandler
         SetupItemsForSale();
         CommissaryDiskAdjustment();
         ReplaceModelsWithAP();
+    }
+
+    private static void SetupBuyingHook(UniqueItem item)
+    {
+        string itemName = item.Name;
+        PlayMakerFSM commissaryMenuFsm = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Commissary Menu")?.GetComponent<PlayMakerFSM>();
+        if (commissaryMenuFsm == null)
+        {
+            Logging.LogError("Could not reach Commissary Menu FSM", COMMISSARY_LOG_TAG);
+        }
+        FsmState purchaseState = commissaryMenuFsm.GetState(CommissaryStates[itemName.ToUpper()]);
+        if (purchaseState == null)
+        {
+            Logging.LogError($"Could not reach FsmState : '{CommissaryStates[itemName.ToUpper()]}' ", COMMISSARY_LOG_TAG);
+        }
+        CustomFsmMethodManager.AddItemBoughtMethod(item);
+        string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(itemName);
+        purchaseState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
     }
 
     private void CommissaryDiskAdjustment()
@@ -172,7 +192,15 @@ public class Commissary : RoomHandler
             {
                 itemName += " - Commissary";
             }
-            new ShopItem {Name = itemName}.GetScoutHint();
+            else
+            {
+                SetupBuyingHook(item);
+            }
+            string apName = new ShopItem {Name = itemName}.GetScoutHint();
+            if (RequiresShopTitleUpdate(item, itemName))
+            {
+                //Change text but this is hard.
+            }
         }
     }
 

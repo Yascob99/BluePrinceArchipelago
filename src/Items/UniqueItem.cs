@@ -48,8 +48,8 @@ namespace BluePrinceArchipelago.Items
             set { _SanityType = value; }
         }
 
-        public bool ModelReplaced { get; set; }
-
+        private readonly List<GameObject> GameModelInstancesWithSwirly = [];
+        
         private static List<string> _ShopTags = new();
 
         public bool IsPersistent { get; set; }
@@ -229,6 +229,28 @@ namespace BluePrinceArchipelago.Items
                 ItemSanityType.Key => ArchipelagoOptions.KeySanity,
                 _ => false,
             };
+        }
+
+        public void RegisterModel(GameObject gameInstance)
+        {
+            GameModelInstancesWithSwirly.Add(gameInstance);
+        }
+
+        public void DeleteAllSwirlies()
+        {
+            foreach (GameObject gameInstance in GameModelInstancesWithSwirly)
+            {
+                if (gameInstance == null)
+                {
+                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
+                }
+                GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
+                if (swirlyEffect == null)
+                {
+                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
+                }
+                GameObject.Destroy(swirlyEffect);
+            }
         }
     }
 

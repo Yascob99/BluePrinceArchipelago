@@ -142,6 +142,7 @@ namespace BluePrinceArchipelago.Triggers
             {
                 Item.HasBeenFound = true;
                 ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                Item.DeleteAllSwirlies();
                 // Cabinet Key fixes.
                 if (Item.Name == "CABINET KEY 1")
                 {
