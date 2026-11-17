@@ -203,6 +203,7 @@ public class ArchipelagoClient
                 {
                     // Regular Recconnect;
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                    ModInstance.TrunkManager.TrunkChance = ArchipelagoOptions.ExtraTrunkChance;
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
                     // Initialize DeathLinkHandler.
                     DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
@@ -213,6 +214,7 @@ public class ArchipelagoClient
                     State.InitializeReceivedItems();
                     ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
                     ArchipelagoOptions.LoadFromSlotData(ServerData.Options);
+                    ModInstance.TrunkManager.TrunkChance = ArchipelagoOptions.ExtraTrunkChance;
                     // Initialize DeathLinkHandler.
                     DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                     GameRestart();
@@ -224,6 +226,7 @@ public class ArchipelagoClient
             {
                 // Gets the Initial data from the server.
                 ServerData.Options = session.DataStorage.GetSlotData<SlotData>();
+                ModInstance.TrunkManager.TrunkChance = ArchipelagoOptions.ExtraTrunkChance;
                 ServerData.Seed = session.RoomState.Seed;
                 ServerData.Index = 0;
                 // Load options into the static ArchipelagoOptions class
@@ -238,6 +241,7 @@ public class ArchipelagoClient
                 ArchipelagoConsole.LogMessage($"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!");
             }
             session.Items.ItemReceived += OnItemReceived;
+
             Authenticated = true;
             // Receives any Queued Items
             DequeueItems();
@@ -517,7 +521,6 @@ public class ArchipelagoClient
             // Only add new data if the old one is not good.
             if (!ServerData.LocationDict.ContainsKey(location))
             {
-
                 locationName = session.Locations.GetLocationNameFromId(location);
                 ServerData.LocationDict[location] = locationName;
             }
@@ -535,16 +538,22 @@ public class ArchipelagoClient
                     {
                         if (ModInstance.TrunkManager.MaxTrunkCounts[roomName] < count)
                         {
+                            Logging.Log($"Setting Max Trunk Count for {roomName} to {count}", "Trunks");
                             ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
                         }
                     }
                     else {
+                        Logging.Log($"Adding Max Trunk Count for {roomName} to {count}", "Trunks");
                         ModInstance.TrunkManager.MaxTrunkCounts[roomName] = count;
+                        if (!ModInstance.TrunkManager.TrunkCounts.ContainsKey(roomName)) {
+                            ModInstance.TrunkManager.TrunkCounts[roomName] = 0;
+                        }
                     }
                 }
             }
+            
         }
-
+        State.UpdateTrunkCounts();
         Task<Dictionary<long, ScoutedItemInfo>> scoutTask = null;
 
         if (hint)

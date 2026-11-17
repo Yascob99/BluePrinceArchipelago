@@ -743,7 +743,7 @@ namespace BluePrinceArchipelago.Utils
         }
 
         /// <summary>
-        ///     Runs an Action after a delay.
+        ///     Runs an Action after a delay. May not be working correctly.
         /// </summary>
         /// <param name="delay">Delay in miliseconds.</param>
         /// <param name="actionToRun">The action to run.</param>
