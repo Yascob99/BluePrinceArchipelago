@@ -191,7 +191,7 @@ namespace BluePrinceArchipelago.Items
                     if (child.gameObject.name.Contains(youName) && !CheckSimilar(itemName, child))
                     {
                         FoundModels.Add(child);
-                        Transform itemModel = child.FindRecursive(GetItemModelName(itemName), true);
+                        Transform itemModel = child.FindRecursive(ITEM.GetItemModelInNotificationName(itemName), true);
                         if (itemModel != null)
                         {
 
@@ -452,49 +452,6 @@ namespace BluePrinceArchipelago.Items
                     return "Electro Magnet";
                 case "Knights Shield":
                     return "Knight's Shield";
-                default:
-                    return name;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the internally used name of the item model within the item notification.
-        /// </summary>
-        /// <param name="name">The item name.</param>
-        /// <returns>The model name.</returns>
-        private static string GetItemModelName(string name) {
-            switch (name.ToUpper())
-            {
-                case "KEY 8":
-                    return "SILVER KEY";
-                case "WATERING CAN":
-                    return "Watering Can pickup";
-                case "LUNCH BOX":
-                    return "Joya Lunch Box";
-                case "CURSED EFFIGY":
-                    return "cursed effigy- dagger";
-                case "CROWN":
-                    return "crow";
-                case "HALL PASS":
-                    return "hallpass";
-                case "CABINET KEY 1":
-                    return "cabinet key";
-                case "CABINET KEY 2":
-                    return "cabinet key";
-                case "CABINET KEY 3":
-                    return "cabinet key";
-                case "PRISM KEY_0":
-                    return "Prism Key";
-                case "KEY OF ARIES":
-                    return "o Key";
-                case "POWER HAMMER":
-                    return "Power Hammer ";
-                case "ELECTROMAGNET":
-                    return "Powerd Electromagnet";
-                case "TORCH":
-                    return "Self Lighting Torch";
-                case "MORNING STAR":
-                    return "Mornign Star";
                 default:
                     return name;
             }

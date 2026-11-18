@@ -64,5 +64,54 @@ namespace BluePrinceArchipelago
         public const string VAULT_KEY_304 = "VAULT KEY 304";
         public const string VAULT_KEY_370 = "VAULT KEY 370";
         public const string WATERING_CAN = "WATERING CAN";
+
+        /// <summary>
+        ///     Names of the models in the "you found" notifications.
+        ///     You may want to use GetItemModelInNotificationName() to access these.
+        /// </summary>
+        private class MODEL_IN_NOTIFICATION
+        {
+            public const string KEY_8 = "SILVER KEY";
+            public const string WATERING_CAN = "Watering Can pickup";
+            public const string LUNCH_BOX = "Joya Lunch Box";
+            public const string CURSED_EFFIGY = "cursed effigy- dagger";
+            public const string CROWN = "crow";
+            public const string HALL_PASS = "hallpass";
+            public const string CABINET_KEY = "cabinet key";
+            public const string PRISM_KEY = "Prism Key";
+            public const string KEY_OF_ARIES = "o Key";
+            public const string POWER_HAMMER = "Power Hammer ";
+            public const string ELECTROMAGNET = "Powerd Electromagnet";
+            public const string TORCH = "Self Lighting Torch";
+            public const string MORNING_STAR = "Mornign Star";
+        }
+
+        /// <summary>
+        ///     Gets the internally used name of the item model within the item notification.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>The model name.</returns>
+        public static string GetItemModelInNotificationName(string name)
+        {
+            return name switch
+            {
+                KEY_8 => MODEL_IN_NOTIFICATION.KEY_8,
+                WATERING_CAN => MODEL_IN_NOTIFICATION.WATERING_CAN,
+                LUNCH_BOX => MODEL_IN_NOTIFICATION.LUNCH_BOX,
+                CURSED_EFFIGY => MODEL_IN_NOTIFICATION.CURSED_EFFIGY,
+                CROWN => MODEL_IN_NOTIFICATION.CROWN,
+                HALL_PASS => MODEL_IN_NOTIFICATION.HALL_PASS,
+                CABINET_KEY_PATIO => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                CABINET_KEY_LAUNDRY => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                CABINET_KEY_TUNNEL => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                PRISM_KEY => MODEL_IN_NOTIFICATION.PRISM_KEY,
+                KEY_OF_ARIES => MODEL_IN_NOTIFICATION.KEY_OF_ARIES,
+                POWER_HAMMER => MODEL_IN_NOTIFICATION.POWER_HAMMER,
+                ELECTROMAGNET => MODEL_IN_NOTIFICATION.ELECTROMAGNET,
+                TORCH => MODEL_IN_NOTIFICATION.TORCH,
+                MORNING_STAR => MODEL_IN_NOTIFICATION.MORNING_STAR,
+                _ => name,
+            };
+        }
     }
 }
