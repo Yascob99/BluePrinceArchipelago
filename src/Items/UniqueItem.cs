@@ -48,7 +48,7 @@ namespace BluePrinceArchipelago.Items
             set { _SanityType = value; }
         }
 
-        private readonly List<GameObject> GameModelInstancesWithSwirly = [];
+        private readonly List<GameObject> _GameModelInstancesWithSwirly = [];
         
         private static List<string> _ShopTags = new();
 
@@ -233,12 +233,12 @@ namespace BluePrinceArchipelago.Items
 
         public void RegisterModel(GameObject gameInstance)
         {
-            GameModelInstancesWithSwirly.Add(gameInstance);
+            _GameModelInstancesWithSwirly.Add(gameInstance);
         }
 
         public void DeleteAllSwirlies()
         {
-            foreach (GameObject gameInstance in GameModelInstancesWithSwirly)
+            foreach (GameObject gameInstance in _GameModelInstancesWithSwirly)
             {
                 if (gameInstance == null)
                 {
@@ -251,6 +251,7 @@ namespace BluePrinceArchipelago.Items
                 }
                 GameObject.Destroy(swirlyEffect);
             }
+            _GameModelInstancesWithSwirly.Clear();
         }
     }
 
@@ -262,16 +263,16 @@ namespace BluePrinceArchipelago.Items
     {
         public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
-        public bool ModelsReplaced = false;
-
         /// <summary>
         ///     Code to be run on end of day.
         /// </summary>
         public void EndOfDay()
         {
-            //Reset the list of spawned items.
-            SpawnedItems = new List<UniqueItem>();
-            ModelsReplaced = false;
+            foreach (UniqueItem item in SpawnedItems)
+            {
+                item.DeleteAllSwirlies();
+            }
+            SpawnedItems.Clear();
         }
 
         /// <summary>
