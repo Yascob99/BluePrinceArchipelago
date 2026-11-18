@@ -48,8 +48,8 @@ namespace BluePrinceArchipelago.Items
             set { _SanityType = value; }
         }
 
-        public bool ModelReplaced { get; set; }
-
+        private readonly List<GameObject> _GameModelInstancesWithSwirly = [];
+        
         private static List<string> _ShopTags = new();
 
         public bool IsPersistent { get; set; }
@@ -230,6 +230,29 @@ namespace BluePrinceArchipelago.Items
                 _ => false,
             };
         }
+
+        public void RegisterModel(GameObject gameInstance)
+        {
+            _GameModelInstancesWithSwirly.Add(gameInstance);
+        }
+
+        public void DeleteAllSwirlies()
+        {
+            foreach (GameObject gameInstance in _GameModelInstancesWithSwirly)
+            {
+                if (gameInstance == null)
+                {
+                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
+                }
+                GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
+                if (swirlyEffect == null)
+                {
+                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
+                }
+                GameObject.Destroy(swirlyEffect);
+            }
+            _GameModelInstancesWithSwirly.Clear();
+        }
     }
 
 
@@ -240,16 +263,16 @@ namespace BluePrinceArchipelago.Items
     {
         public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
 
-        public bool ModelsReplaced = false;
-
         /// <summary>
         ///     Code to be run on end of day.
         /// </summary>
         public void EndOfDay()
         {
-            //Reset the list of spawned items.
-            SpawnedItems = new List<UniqueItem>();
-            ModelsReplaced = false;
+            foreach (UniqueItem item in SpawnedItems)
+            {
+                item.DeleteAllSwirlies();
+            }
+            SpawnedItems.Clear();
         }
 
         /// <summary>
