@@ -125,7 +125,7 @@ namespace BluePrinceArchipelago
         ///     An enumerator for loading any bundled mod assets.
         /// </summary>
         /// <returns>The current asset.</returns>
-        System.Collections.IEnumerator LoadAllAssets()
+        private System.Collections.IEnumerator LoadAllAssets()
         {
             AssetBundle bundle = Plugin.AssetBundle;
             foreach (string asset in bundle.GetAllAssetNames())
@@ -212,7 +212,7 @@ namespace BluePrinceArchipelago
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
-                ModAudioManager.InitializeClipDict();
+                ModAssetManager.InitializeResourceDicts();
                 //ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools

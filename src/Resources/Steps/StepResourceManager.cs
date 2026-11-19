@@ -53,7 +53,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Handles updating steps incrementally.
         /// </summary>
-        System.Collections.IEnumerator UpdateSteps()
+        private System.Collections.IEnumerator UpdateSteps()
         {
             IsRunning = true;
             targetSteps = GetTargetSteps();
@@ -73,7 +73,7 @@ namespace BluePrinceArchipelago.Resources
         }
 
 
-        System.Collections.IEnumerator WaitUntilUnfrozen() {
+        private System.Collections.IEnumerator WaitUntilUnfrozen() {
             WaitingForUnfreeze = true;
             FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen != null) {

@@ -47,6 +47,12 @@ namespace BluePrinceArchipelago.Resources
             Instance = this; //Set the modInstance for easy access.
         }
 
+        private System.Collections.IEnumerator FlashRed() {
+            TextMeshPro GemTMP = GemTextObject.GetComponent<TextMeshPro>();
+            GemTMP.color = Color.red;
+            yield return null;
+        }
+
         public void RunUpdate()
         {
             GemIconObject.SetActive(true);
@@ -65,7 +71,8 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunUpdateWithSound() {
 
-            //TODO add sound handling
+            // Play GemDown Sound
+            ModAssetManager.PlaySound(PlayerCore, "GemDown", 0.65294117f);
             RunUpdate();
         }
 
@@ -98,10 +105,6 @@ namespace BluePrinceArchipelago.Resources
         private void UpdateText(int total)
         {
             
-        }
-
-        private void PlaySound() { 
-
         }
 
         public void AdjustGems(int amount)
