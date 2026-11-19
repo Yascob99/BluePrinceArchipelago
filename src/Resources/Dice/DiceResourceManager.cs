@@ -30,12 +30,6 @@ namespace BluePrinceArchipelago.Resources
 
         public GameObject DiceTextObject = null;
 
-        public GameObject Player = null;
-
-        public GameObject PlayerCore = null;
-
-        public GameObject DareEngine = null;
-
         public bool Initialized = false;
 
         public DiceResourceManager(IntPtr ptr) : base(ptr)
@@ -83,9 +77,6 @@ namespace BluePrinceArchipelago.Resources
         {
             DiceIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Bones/Bones Icon");
             DiceTextObject = DiceIconObject.FindDescendant("Bone #");
-            Player = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince");
-            PlayerCore = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
-            DareEngine = GameObjectExtensions.FindGameObject("DAY/DARE ENGINE");
             Initialized = false;
         }
 
@@ -107,7 +98,7 @@ namespace BluePrinceArchipelago.Resources
 
         private int SetDiceCount(int amount)
         {
-            return SetIntVariable("Bones", amount);
+            return SetIntVariable("BONES", amount);
         }
 
         private int GetAdjustmentAmount()

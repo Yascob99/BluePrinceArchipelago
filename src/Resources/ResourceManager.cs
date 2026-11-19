@@ -210,62 +210,9 @@ namespace BluePrinceArchipelago.Resources
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public static void AdjustDice(int count)
         {
-            try
+            if (ModInstance.IsInRun)
             {
-                if ( ModInstance.DiceManager.GetIntVariable("Adjustment Amount").Value != 0)
-                {
-                    // Attempt again every second until succesful;
-                    if (ModInstance.IsInRun)
-                    {
-                        Logging.LogWarning("Unable to Adjust Dice, reattempting in 1 second", "Resources");
-                        static void runOnDelay(int count) { AdjustDice(count); }
-                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                    }
-                    return;
-                }
-                GameObject BoneIcon = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
-                GameObject BoneNum = BoneIcon.transform.Find("Bone #").gameObject;
-                TextMeshPro BoneTMP = BoneNum.GetComponent<TextMeshPro>();
-                // Set the Dice Icon's local scale
-                BoneNum.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
-                // Set the Dice text's color
-                BoneTMP.color = new Color(1f, 1f, 1f, 1f);
-                // Set the Dice Icon and text to active 
-                
-
-                int Total = ModInstance.DiceManager.GetIntVariable("BONES").Value;
-                // Int Clamp
-                if (Total + count <= 0)
-                {
-                    // if the set the value to 0 then hide dice UI
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value = 0;
-                    BoneIcon.SetActive(false);
-                    return;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.DiceManager.GetIntVariable("BONES").Value += count;
-                }
-                // Show the Dice UI
-                BoneIcon.SetActive(true);
-                // Set text to the correct amount.
-                BoneTMP.text = ModInstance.DiceManager.GetIntVariable("BONES").Value.ToString();
-                return;
-            }
-            catch
-            {
-                // Attempt again every second until succesful;
-                if (ModInstance.IsInRun)
-                {
-                    Logging.LogWarning("Unable to Adjust Dice, reattempting in 1 second", "Resources");
-                    static void runOnDelay(int count) { AdjustDice(count); }
-                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                }
-                return;
+                DiceManager.AdjustDice(count);
             }
 
         }
@@ -274,7 +221,13 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
 		/// <param name="count">The number to add (positive) or remove (negative).</param>
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
-        public static void AdjustSteps(int count) => StepManager.AdjustSteps(count);
+        public static void AdjustSteps(int count)
+        {
+            if (ModInstance.IsInRun)
+            {
+                StepManager.AdjustSteps(count);
+            }
+        }
        
         /// <summary>
         /// Add or remove Keys from Simon's resources.

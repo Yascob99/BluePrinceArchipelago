@@ -212,6 +212,7 @@ namespace BluePrinceArchipelago
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
+                ModAudioManager.InitializeClipDict();
                 //ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
