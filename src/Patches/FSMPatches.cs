@@ -881,6 +881,8 @@ namespace BluePrinceArchipelago.Patches
         }
 
         public static void DiceManagerOverride() {
+
+            // Update
             FsmState State4 = ModInstance.DiceManager.GetState("State 4");
             State4.RemoveAllActions();
             State4.ChangeTransition("FINISHED", "State 1");
@@ -900,6 +902,52 @@ namespace BluePrinceArchipelago.Patches
             State6.RemoveAllActions();
             State6.ChangeTransition("FINISHED", "State 1");
             State6.AddAction(DiceManager.GetUpdateMethod);
+        }
+
+        public static void GemManagerOverride() {
+
+            // Update
+            FsmState GraphicsTurnOn = ModInstance.GemManager.GetState("The Initial Graphics Turn On");
+            GraphicsTurnOn.RemoveAllActions();
+            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn.AddAction(GemManager.GetUpdateMethod);
+
+            FsmState State2 = ModInstance.GemManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.AddAction(GemManager.GetUpdateMethod);
+
+            // Update 2
+            FsmState GraphicsTurnOn2 = ModInstance.GemManager.GetState("The Initial Graphics Turn On 2");
+            GraphicsTurnOn2.RemoveAllActions();
+            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn2.AddAction(GemManager.GetUpdate2Method);
+
+            FsmState NotEnoughGems = ModInstance.GemManager.GetState("Not Enough Gems");
+            NotEnoughGems.RemoveAllActions();
+            NotEnoughGems.ChangeTransition("FINISHED", "State 1");
+            NotEnoughGems.AddAction(GemManager.GetUpdate2Method);
+
+            // Freeze
+            FsmState State9 = ModInstance.GemManager.GetState("State 9");
+            State9.RemoveAllActions();
+            State9.ChangeTransition("FINISHED", "State 1");
+            State9.AddAction(GemManager.GetFreezeMethod);
+
+            FsmState Quickfreeze = ModInstance.GemManager.GetState("Quickfreeze");
+            Quickfreeze.RemoveAllActions();
+            Quickfreeze.ChangeTransition("FINISHED", "State 1");
+            Quickfreeze.AddAction(GemManager.GetFreezeMethod);
+
+            // Unfreeze
+            FsmState State20 = ModInstance.GemManager.GetState("State 20");
+            State20.RemoveAllActions();
+            State20.ChangeTransition("FINISHED", "State 1");
+            State20.AddAction(GemManager.GetUpdateWithSoundMethod);
+
+            FsmState State19 = ModInstance.GemManager.GetState("State 19");
+            State19.RemoveAllActions();
+            State19.ChangeTransition("FINISHED", "State 1");
+            State19.AddAction(GemManager.GetUpdateWithSoundMethod);
         }
 
     }  

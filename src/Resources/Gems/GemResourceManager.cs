@@ -42,6 +42,8 @@ namespace BluePrinceArchipelago.Resources
 
         public bool Initialized = false;
 
+        private bool _FlashIsRunning = false;
+
         public GemResourceManager(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
@@ -50,61 +52,68 @@ namespace BluePrinceArchipelago.Resources
         private System.Collections.IEnumerator FlashRed() {
             TextMeshPro GemTMP = GemTextObject.GetComponent<TextMeshPro>();
             GemTMP.color = Color.red;
-            yield return null;
+            ModAssetManager.SetMaterial(GemIconObject, "Ui Atlas - RED");
+            yield return new WaitForSeconds(0.1f);
+            GemIconObject.SetActive(false);
+            yield return new WaitForSeconds(0.1f);
+            GemIconObject.SetActive(true);
+            yield return new WaitForSeconds(0.1f);
+            GemIconObject.SetActive(false);
+            yield return new WaitForSeconds(0.1f);
+            GemIconObject.SetActive(true);
+            yield return new WaitForSeconds(0.1f);
+            GemIconObject.SetActive(false);
+            yield return new WaitForSeconds(0.3f);
+            GemIconObject.SetActive(true);
+            GemTMP.color = Color.white;
+            ModAssetManager.SetMaterial(GemIconObject, "Ui Atlas");
+            _FlashIsRunning = false;
         }
 
         public void RunUpdate()
         {
             GemIconObject.SetActive(true);
             if (GetGemLock()) {
-                Event0();
+                SetGems(0);
                 return;
             }
             int Gems = Math.Clamp(GetGemCount() + GetAdjustmentAmount(), 0, 1000000);
             SetGems(Gems);
-            SetAdjustmentAmount(0);
         }
 
-        public void RunUpdate2() { 
-            //TODO add not enough gems handling.
+        public void RunUpdate2() {
+            GemIconObject.SetActive(true);
+            if (!_FlashIsRunning) {
+                _FlashIsRunning = true;
+                Instance.StartCoroutine(Instance.FlashRed());
+            }
         }
 
         public void RunUpdateWithSound() {
 
             // Play GemDown Sound
-            ModAssetManager.PlaySound(PlayerCore, "GemDown", 0.65294117f);
+            ModAssetManager.PlaySound(PlayerCore, "GemUp", 0.65294117f);
             RunUpdate();
         }
 
         public void RunFreeze() {
-            SetGems(0);
+            SetGemCount(0);
             // Play frozen accounts sound
             GoldIconObject.SetActive(true);
             GemIconObject.SetActive(true);
-
         }
 
         public void RunUnFreeze()
         {
-
-        }
-
-        private void Fix() { 
-
-        }
-
-        private void Event0() { 
-
+            int YesterGems = ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value;
+            IceOverlayObject.SetActive(false);
+            SetGems(YesterGems);
         }
 
         public void SetGems(int amount)
         {
-            
-        }
-
-        private void UpdateText(int total)
-        {
-            
+            SetGemCount(amount);
+            GemTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
         }
 
         public void AdjustGems(int amount)
@@ -140,7 +149,7 @@ namespace BluePrinceArchipelago.Resources
             return GetIntVariable("GEMS");
         }
 
-        private int SetDiceCount(int amount)
+        private int SetGemCount(int amount)
         {
             return SetIntVariable("GEMS", amount);
         }
