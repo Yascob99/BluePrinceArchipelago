@@ -635,7 +635,18 @@ namespace BluePrinceArchipelago.Utils
                     state.RemoveAction(i);
                 }
             }
-            //state.SaveActions();
+        }
+
+        /// <summary>
+        ///     Removes all actions of a given from an FsmState.
+        /// </summary>
+        /// <param name="state">The FsmState.</param>
+        public static void RemoveAllActions(this FsmState state) 
+        {
+            for (int i = state.ActionData.ActionNames.Count - 1; i >= 0; i--)
+            {
+                    state.RemoveAction(i);
+            }
         }
         /// <summary>
         ///     Removes the first action of a given type from an FsmState.
@@ -647,7 +658,6 @@ namespace BluePrinceArchipelago.Utils
             int i = Array.FindIndex<FsmStateAction>(state.Actions, a => a is T);
             if (i >= 0) { 
                 state.RemoveAction(i);
-                //state.SaveActions();
             }
         }
         /// <summary>

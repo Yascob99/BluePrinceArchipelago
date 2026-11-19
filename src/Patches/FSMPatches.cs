@@ -3,6 +3,7 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Resources;
+
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -846,43 +847,60 @@ namespace BluePrinceArchipelago.Patches
         {
             // UpdateSteps Event
             FsmState RunningShoesCheck = ModInstance.StepManager.GetState("Running Shoes check");
-            RunningShoesCheck.RemoveAction(0);
-            RunningShoesCheck.RemoveAction(1);
+            RunningShoesCheck.RemoveAllActions();
             RunningShoesCheck.ChangeTransition("FINISHED", "State 5");
             RunningShoesCheck.AddAction(StepManager.GetUpdateStepMethod);
 
             FsmState RunningShoesCheck2 = ModInstance.StepManager.GetState("Running Shoes check 2");
-            RunningShoesCheck2.RemoveAction(0);
+            RunningShoesCheck2.RemoveAllActions();
             RunningShoesCheck2.ChangeTransition("FINISHED", "State 1");
             RunningShoesCheck2.AddAction(StepManager.GetUpdateStepMethod);
 
             // Update Event
             FsmState StepLock = ModInstance.StepManager.GetState("STEP LOCK");
-            StepLock.RemoveAction(0);
-            StepLock.RemoveAction(1);
-            StepLock.ChangeTransition("FINSISHED", "State 5");
+            StepLock.RemoveAllActions();
+            StepLock.ChangeTransition("FINISHED", "State 5");
             StepLock.AddAction(StepManager.GetUpdateMethod);
 
             FsmState StepLock2 = ModInstance.StepManager.GetState("STEP LOCK 2");
-            StepLock2.RemoveAction(0);
-            StepLock2.RemoveAction(1);
-            StepLock2.ChangeTransition("FINSISHED", "State 1");
+            StepLock2.RemoveAllActions();
+            StepLock2.ChangeTransition("FINISHED", "State 1");
             StepLock2.AddAction(StepManager.GetUpdateMethod);
 
             // Event 0
             FsmState State2 = ModInstance.StepManager.GetState("State 2");
-            int numActions = State2.Actions.Count;
-            for (int i = numActions -1; i >= 0; i++) {
-                State2.RemoveAction(i);
-            }
+            State2.RemoveAllActions();
             State2.AddAction(StepManager.GetEvent0);
-            State2.ChangeTransition("FINSISHED", "State 1");
+            State2.ChangeTransition("FINISHED", "State 1");
 
             // Event 10
             FsmState State3 = ModInstance.StepManager.GetState("State 3");
-            State3.RemoveAction(0);
+            State3.RemoveAllActions();
             State3.AddAction(StepManager.GetEvent10);
-            State2.ChangeTransition("FINSISHED", "State 5");
+            State2.ChangeTransition("FINISHED", "State 5");
         }
+
+        public static void DiceManagerOverride() {
+            FsmState State4 = ModInstance.DiceManager.GetState("State 4");
+            State4.RemoveAllActions();
+            State4.ChangeTransition("FINISHED", "State 1");
+            State4.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State5 = ModInstance.DiceManager.GetState("State 5");
+            State5.RemoveAllActions();
+            State5.ChangeTransition("FINISHED", "State 1");
+            State5.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State6 = ModInstance.DiceManager.GetState("State 6");
+            State6.RemoveAllActions();
+            State6.ChangeTransition("FINISHED", "State 1");
+            State6.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State8 = ModInstance.DiceManager.GetState("State 8");
+            State6.RemoveAllActions();
+            State6.ChangeTransition("FINISHED", "State 1");
+            State6.AddAction(DiceManager.GetUpdateMethod);
+        }
+
     }  
 }

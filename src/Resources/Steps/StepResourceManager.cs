@@ -1,11 +1,8 @@
-using BluePrinceArchipelago;
-using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.FsmMethods;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
-
 using System;
-using System.Collections.Generic;
+using UnityEngine;
 #if Bep
 using HutongGames.PlayMaker;
 using TMPro;
@@ -15,7 +12,6 @@ using Il2Cpp;
 using Il2CppTMPro;
 using Il2CppHutongGames.PlayMaker;
 #endif
-using UnityEngine;
 
 namespace BluePrinceArchipelago.Resources
 {
@@ -296,7 +292,7 @@ namespace BluePrinceArchipelago.Resources
 
         private void Start()
         {
-            CustomFsmMethodManager.RegisterMethods();
+
         }
         private int GetIntVariable(string variable)
         {
