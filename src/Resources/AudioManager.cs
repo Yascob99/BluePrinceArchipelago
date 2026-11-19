@@ -46,6 +46,11 @@ namespace BluePrinceArchipelago.Resources
         /// <param name="position">The position relative to the GameObject to play the audio at.</param>
         public static void PlaySound(GameObject go, string clipname, float volume, Vector3 position)
         {
+            if (go == null)
+            {
+                Logging.LogWarning($"Unable to play clip. Provided game object was null.");
+                return;
+            }
             PlaySoundAt(clipname, volume, go.transform.position + position);
         }
 
@@ -67,11 +72,7 @@ namespace BluePrinceArchipelago.Resources
                 Logging.LogWarning($"Unable to play clip. '{clipname}' was null.");
                 return;
             }
-            if (go == null)
-            {
-                Logging.LogWarning($"Unable to play clip. Provided game object was null.");
-                return;
-            }
+            
             AudioSource.PlayClipAtPoint(clip, position, volume);
         }
     }
