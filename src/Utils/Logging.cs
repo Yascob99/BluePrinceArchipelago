@@ -12,8 +12,6 @@ namespace BluePrinceArchipelago
 
         public static Logger Logger { get; } = new Logger();
         public static void Log(object message, [CallerMemberName] string logTag = null) => Logger.Log(message, logTag);
-
-
         public static void LogWarning(object message, [CallerMemberName] string logTag = null) => Logger.LogWarning(message, logTag);
 
         public static void LogError(object message, [CallerMemberName] string logTag = null) => Logger.LogError(message, logTag);

@@ -36,7 +36,7 @@ namespace BluePrinceArchipelago.Items
 
         public bool CheckingForTrunkSpawn = false;
 
-        public int TrunkChance { get; set; } = 100;
+        public int TrunkChance { get; set; } = 0;
 
         public TrunkManager() 
         {
@@ -58,32 +58,29 @@ namespace BluePrinceArchipelago.Items
         public void OnTrunkOpen() {
             string currentRoom = ModInstance.TheGrid.GetStringVariable("CURRENT ROOM").Value;
             currentRoom = ModRoomManager.GetRoomByName(currentRoom).Name;
-            if (!_TrunkCounts.ContainsKey(currentRoom))
-            {
-                _TrunkCounts.Add(currentRoom, 1);
-            }
-            else {
-                _TrunkCounts[currentRoom]++;
-            }
+            _TrunkCounts[currentRoom]++;
             ModInstance.ModEventHandler.OnTrunkOpened(currentRoom, _TrunkCounts[currentRoom]);
             State.UpdateTrunkCounts();
         }
 
         public void TrySpawnTrunk(ModRoom room) {
             CheckingForTrunkSpawn = false; //Set it to false, just in case.
-
+            Logging.Log($"Attempting to Spawn Trunk in {room.Name}.\n\tTrunk Spawned: {TrunkSpawned}\n\tTrunk Location Count: {_TrunkCounts.ContainsKey(room.Name)}\n\tTrunk Location Max: {_MaxTrunkCounts.ContainsKey(room.Name)}", "Trunks");
             // Check if a trunk was spawned by the item code. If not attempt a trunk spawn.
             if (_TrunkCounts.ContainsKey(room.Name) && _MaxTrunkCounts.ContainsKey(room.Name) && !TrunkSpawned) {
-                if (_TrunkCounts[room.Name] < _MaxTrunkCounts[room.Name]) {
+                Logging.Log($"Room has trunk locations.\n\tCurrent Trunks: {_TrunkCounts[room.Name]}\n\tMax Trunks: {_MaxTrunkCounts[room.Name]}", "Trunks");
+                if (_TrunkCounts[room.Name] <= _MaxTrunkCounts[room.Name]) {
 
                     // Check if the player rolled a trunk on the additional trunk chance.
                     System.Random rng = new();
+                   
                     int TrunkRNG = rng.Next(100) + 1;
+                    Logging.Log($"Rolling to spawn trunk with {TrunkChance} and Rolled RNG of {TrunkRNG}", "Trunks");
                     if (TrunkChance >= TrunkRNG)
                     {
                         if (TryInstantiateTrunk(room))
                         {
-                            Logging.LogWarning($"Trunk Spawned Successfully in {room.Name}", "Trunks");
+                            Logging.Log($"Trunk Spawned Successfully in {room.Name}", "Trunks");
                         }
                     }
                 }

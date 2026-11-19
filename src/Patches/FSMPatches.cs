@@ -578,6 +578,11 @@ namespace BluePrinceArchipelago.Patches
             //Entrance Hall Allowance Envelope Hooks
             GameObject AllowanceEnvelope = GameObjectExtensions.FindInHierarchy("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
             AllowanceEnvelope.GetComponent<PlayMakerFSM>().GetState("State 2").AddAction(CustomFsmMethodManager.GetCallMethod("AllowanceEnvelopePickedUp"));
+
+            //Room directory
+            PlayMakerFSM tilehHover4Fsm = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/ROOM INFO").GetComponent<PlayMakerFSM>();
+            FsmState clickState = tilehHover4Fsm.GetState("Info On");
+            clickState.AddAction(CustomFsmMethodManager.GetCallMethod("AddTrackerUI"));
         }
 
         public static void AllowanceEnvelopeSpawnFix() {

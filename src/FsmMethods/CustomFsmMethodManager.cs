@@ -43,6 +43,7 @@ namespace BluePrinceArchipelago.FsmMethods
             { "ZeroStepEnding", new ZeroStepEnding()},
             { "AllowanceEnvelopePickedUp", new AllowanceEnvelopePickedUp()},
             { "MainMenuLoaded", new MainMenuLoaded()},
+            { "AddTrackerUI", new AddTrackerUI()},
         };
 
 
@@ -127,6 +128,12 @@ namespace BluePrinceArchipelago.FsmMethods
             return itemName.ToTitleCase().Replace(" ", "") + "ItemDugUp";
         }
 
+        /// <summary>
+        ///     Adds an FSM event whenever attempting to craft a workshop item.
+        /// </summary>
+        /// <param name="item">Workshop item.</param>
+        /// <param name="currentInstance">Instance number of the workshop room.</param>
+        /// <returns></returns>
         public static RegisteredCustomFsmMethod AddItemOnCraftMethod(UniqueItem item, int currentInstance)
         {
             string CraftedMethodName = GetItemOnCraftMethodName(item.Name, currentInstance);
