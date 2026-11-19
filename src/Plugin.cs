@@ -101,6 +101,8 @@ namespace BluePrinceArchipelago {
             ClassInjector.RegisterTypeInIl2Cpp<CustomFsmMethods>();
             ClassInjector.RegisterTypeInIl2Cpp<StepResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<DiceResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<GemResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<GoldResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
             { 
                 Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])
@@ -114,6 +116,8 @@ namespace BluePrinceArchipelago {
             ModObject.AddComponent<PlayMakerFSM>(); //Add A PlayMakerFSM to be used for Events.
             ModObject.AddComponent<StepResourceManager>();
             ModObject.AddComponent<DiceResourceManager>();
+            ModObject.AddComponent<GemResourceManager>();
+            ModObject.AddComponent<GoldResourceManager>();
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();

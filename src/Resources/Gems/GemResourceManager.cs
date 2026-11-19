@@ -34,13 +34,7 @@ namespace BluePrinceArchipelago.Resources
 
         public GameObject IceOverlayObject = null;
 
-        public GameObject Player = null;
-
         public GameObject PlayerCore = null;
-
-        public GameObject DareEngine = null;
-
-        public bool Initialized = false;
 
         private bool _FlashIsRunning = false;
 
@@ -128,10 +122,7 @@ namespace BluePrinceArchipelago.Resources
             GoldIconObject = GemIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gold/Gold Icon");
             IceOverlayObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/ICE OVERLAY");
             GemTextObject = GemIconObject.FindDescendant("Gem #");
-            Player = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince");
             PlayerCore = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
-            DareEngine = GameObjectExtensions.FindGameObject("DAY/DARE ENGINE");
-            Initialized = false;
         }
 
         private int GetIntVariable(string variable)
@@ -162,14 +153,6 @@ namespace BluePrinceArchipelago.Resources
         private int SetAdjustmentAmount(int amount)
         {
             return SetIntVariable("Adjustment Amount", amount);
-        }
-
-        private int GetKeysCount() {
-            return GetIntVariable("KEYS");
-        }
-        private int SetKeysCount(int amount)
-        {
-            return SetIntVariable("KEYS", amount);
         }
 
         private bool GetGemLock() {

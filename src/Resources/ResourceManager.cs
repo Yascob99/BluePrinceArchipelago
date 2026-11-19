@@ -94,53 +94,8 @@ namespace BluePrinceArchipelago.Resources
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public static void AdjustGems(int count)
 		{
-			try
-			{
-                // Don't set Gems if Gems are locked.
-                if(ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value || ModInstance.GemManager.GetIntVariable("Adjustment Amount").Value != 0)
-                {
-                    // Attempt again every second until succesful while in a run. Otherwise, stop.
-                    if (ModInstance.IsInRun)
-                    {
-                        Logging.LogWarning("Unable to Adjust Gems, reattempting in 1 second", "Resources");
-                        static void runOnDelay(int count) { AdjustGems(count); }
-                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                    }
-                    return;
-                }
-                int gemTotal = ModInstance.GemManager.GetIntVariable("GEMS").Value;
-                
-                // Int Clamp
-                if (gemTotal + count < 0)
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value = 0;
-                }
-                if (gemTotal + count > 1000000)
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.GemManager.GetIntVariable("GEMS").Value += count;
-                }
-                // Set the UI
-                GameObject GemIcon = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
-                GemIcon.transform.Find("Gem #").GetComponent<TextMeshPro>().text = ModInstance.GemManager.GetIntVariable("GEMS").Value.ToString();
-                if (GemIcon.active == false)
-                {
-                    GemIcon.SetActive(true);
-                }
-                return;
-            }
-			catch
-			{
-                if (ModInstance.IsInRun)
-                {
-                    Logging.LogWarning("Unable to Adjust Gems, reattempting in 1 second", "Resources");
-                    static void runOnDelay(int count) { AdjustGems(count); }
-                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                }
-                return;
+            if (ModInstance.IsInRun) {
+                GemManager.AdjustGems(count);
             }
 
         }
@@ -151,57 +106,10 @@ namespace BluePrinceArchipelago.Resources
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public static void AdjustGold(int count)
         {
-            try
+            if (ModInstance.IsInRun)
             {
-                // Don't set Gold if Gold is locked.
-                if (ModInstance.GoldManager.GetBoolVariable("GOLD LOCK").Value || ModInstance.GoldManager.GetIntVariable("Adjustment Amount").Value != 0)
-                {
-                    // Attempt again every second until succesful;
-                    if (ModInstance.IsInRun)
-                    {
-                        Logging.LogWarning("Unable to Adjust Gold, reattempting in 1 second", "Resources");
-                        static void runOnDelay(int count) { AdjustGold(count); }
-                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                    }
-                    return;
-                }
-                int Total = ModInstance.GoldManager.GetIntVariable("GOLD").Value;
-                
-                // Int Clamp
-                if (Total + count < 0)
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value = 0;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.GoldManager.GetIntVariable("GOLD").Value += count;
-                }
-                // Set the UI
-                GameObject GoldIcon = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
-                GoldIcon.transform.Find("Gold #").GetComponent<TextMeshPro>().text = ModInstance.GoldManager.GetIntVariable("GOLD").Value.ToString();
-                if (GoldIcon.active == false)
-                {
-                    GoldIcon.SetActive(true);
-                }
-                
-                return;
+                GoldManager.AdjustGold(count);
             }
-            catch
-            {
-                // Attempt again every second until succesful;
-                if (ModInstance.IsInRun)
-                {
-                    Logging.LogWarning("Unable to Adjust Gold, reattempting in 1 second", "Resources");
-                    static void runOnDelay(int count) { AdjustGold(count); }
-                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                }
-                return;
-            }
-
         }
         /// <summary>
         /// Add or remove Dice from Simon's resources.

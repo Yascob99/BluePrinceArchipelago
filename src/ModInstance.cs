@@ -209,6 +209,9 @@ namespace BluePrinceArchipelago
                 ResourceManagerInstance = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD").AddComponent<StepResourceManager>();
                 ResourceManagerInstance.StartOfDay();
                 FSMPatches.StepManagerOverride();
+                FSMPatches.DiceManagerOverride();
+                FSMPatches.GemManagerOverride();
+                FSMPatches.GoldManagerOverride();
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();

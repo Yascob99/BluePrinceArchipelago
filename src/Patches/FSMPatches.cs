@@ -930,12 +930,12 @@ namespace BluePrinceArchipelago.Patches
             // Freeze
             FsmState State9 = ModInstance.GemManager.GetState("State 9");
             State9.RemoveAllActions();
-            State9.ChangeTransition("FINISHED", "State 1");
+            //State9.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
             State9.AddAction(GemManager.GetFreezeMethod);
 
             FsmState Quickfreeze = ModInstance.GemManager.GetState("Quickfreeze");
             Quickfreeze.RemoveAllActions();
-            Quickfreeze.ChangeTransition("FINISHED", "State 1");
+            //Quickfreeze.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
             Quickfreeze.AddAction(GemManager.GetFreezeMethod);
 
             // Unfreeze
@@ -950,5 +950,41 @@ namespace BluePrinceArchipelago.Patches
             State19.AddAction(GemManager.GetUpdateWithSoundMethod);
         }
 
-    }  
+        public static void GoldManagerOverride()
+        {
+
+            // Update
+            FsmState GraphicsTurnOn = ModInstance.GemManager.GetState("The Initial Graphics Turn On");
+            GraphicsTurnOn.RemoveAllActions();
+            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn.AddAction(GoldManager.GetUpdateMethod);
+
+            FsmState IsSpendingGold = ModInstance.GemManager.GetState("Is spending gold?");
+            IsSpendingGold.RemoveAllActions();
+            IsSpendingGold.ChangeTransition("FINISHED", "State 1");
+            IsSpendingGold.AddAction(GoldManager.GetUpdateMethod);
+
+            // Update 2
+            FsmState GraphicsTurnOn2 = ModInstance.GemManager.GetState("The Initial Graphics Turn On 2");
+            GraphicsTurnOn2.RemoveAllActions();
+            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn2.AddAction(GoldManager.GetUpdate2Method);
+
+            FsmState State2 = ModInstance.GemManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.AddAction(GoldManager.GetUpdate2Method);
+
+            // Freeze
+            FsmState State3 = ModInstance.GemManager.GetState("State 3");
+            State3.RemoveAllActions();
+            State3.AddAction(GoldManager.GetFreezeMethod);
+
+            // UnFreeze
+            FsmState State4 = ModInstance.GemManager.GetState("State 4");
+            State4.RemoveAllActions();
+            State4.ChangeTransition("FINISHED", "State 1");
+            State4.AddAction(GoldManager.GetUnFreezeMethod);
+        }
+
+    }
 }
