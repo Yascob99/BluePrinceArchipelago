@@ -259,7 +259,8 @@ namespace BluePrinceArchipelago.Patches
                     delay = 0f,
                     everyFrame = false
                 });
-                PlayMakerFSM MineUpgradeSpawn = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
+                GameObject MineUpgradeSpawnGO = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16");
+                PlayMakerFSM MineUpgradeSpawn = MineUpgradeSpawnGO.GetComponent<PlayMakerFSM>();
                 if (MineUpgradeSpawn != null)
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
@@ -267,6 +268,19 @@ namespace BluePrinceArchipelago.Patches
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     MineUpgradeSpawn.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key 2");
+                    // Hopefully Prevent respawn on re-enter on same day.
+                    MineUpgradeSpawn.GetState("Spawn Sanctum Key 2").AddAction(new SetFsmBool()
+                    {
+                        fsmName = "FSM",
+                        gameObject = new FsmOwnerDefault()
+                        {
+                            gameObject = MineUpgradeSpawnGO,
+                            ownerOption = OwnerDefaultOption.SpecifyGameObject,
+                        },
+                        variableName = "CanSpawnDisk",
+                        setValue = false,
+                        everyFrame = false,
+                    });
                     //ArrayListContains CheckInInventory = MineUpgradeSpawn.GetState("State 4").GetFirstActionOfType<ArrayListContains>();
                     //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
                     //FsmState CoatCheckCheck = MineUpgradeSpawn.GetState("Coat Check Check 2");

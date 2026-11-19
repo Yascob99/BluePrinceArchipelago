@@ -6,11 +6,15 @@ using System.Linq;
 using UnityEngine;
 #if Bep
 using PathologicalGames;
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 #endif
 
 #if ML
 using Il2Cpp;
 using Il2CppPathologicalGames;
+using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 
 namespace BluePrinceArchipelago.Items
@@ -228,6 +232,11 @@ namespace BluePrinceArchipelago.Items
                 }
             }
 
+        }
+
+        public void SetSpawnFSM(PlayMakerFSM fsm, string state, string endstate, FsmBool boolvar) { 
+            fsm.GetState(state).GetFirstActionOfType<BoolTest>().boolVariable = boolvar;
+            fsm.GetState(state).ChangeTransition("skip", endstate);
         }
 
         /// <summary>

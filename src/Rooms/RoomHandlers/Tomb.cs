@@ -31,7 +31,8 @@ class Tomb : RoomHandler
             roomGameObject = ModRoomManager.GetRoomInstance("Tomb");
             if (roomGameObject != null)
             {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_GAMEPLAY/Sliding Wall A Anchor/Gold Pay Off/3")?.GetComponent<PlayMakerFSM>();
+                GameObject ItemDropGO = roomGameObject.transform.Find("_CULLABLE/_GAMEPLAY/Sliding Wall A Anchor/Gold Pay Off/3").gameObject;
+                PlayMakerFSM ItemDropFSM = ItemDropGO?.GetComponent<PlayMakerFSM>();
                 if (ItemDropFSM != null)
                 {
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("TOMB");
@@ -40,6 +41,19 @@ class Tomb : RoomHandler
                     CanSpawnDisk.Value = found;
                     ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
                     ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key");
+                    // Hopefully Prevent respawn on re-enter.
+                    ItemDropFSM.GetState("Spawn Sanctum Key").AddAction(new SetFsmBool()
+                    {
+                        fsmName = "FSM",
+                        gameObject = new FsmOwnerDefault()
+                        {
+                            gameObject = ItemDropGO,
+                            ownerOption = OwnerDefaultOption.SpecifyGameObject,
+                        },
+                        variableName = "CanSpawnDisk",
+                        setValue = false,
+                        everyFrame = false,
+                    });
                     //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
                     //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
                     //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
