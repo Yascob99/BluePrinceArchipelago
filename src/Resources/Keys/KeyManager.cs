@@ -32,17 +32,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Gets the CallMethod FsmStateAction for Update/Update2/UpdateSubtract
         /// </summary>
-        public static CallMethod GetUpdate2Method => GetCallMethod("RunUpdate2");
-
-        /// <summary>
-        ///     Gets the CallMethod FsmStateAction for Freeze/QuickFreeze
-        /// </summary>
-        public static CallMethod GetFreezeMethod => GetCallMethod("Freeze");
-
-        /// <summary>
-        ///     Gets the CallMethod FsmStateAction for UnFreeze/QuickUnfreeze
-        /// </summary
-        public static CallMethod GetUnFreezeMethod => GetCallMethod("UnFreeze");
+        public static CallMethod GetUpdateWithSoundMethod => GetCallMethod("RunUpdateWithSound");
 
         /// <summary>
         ///     Sets the steps to the amount provided
@@ -56,6 +46,14 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         /// <param name="amount">The int to adjust steps by</param>
         public static void AdjustKeys(int amount) => _ResourceManagerInstance.AdjustKeys(amount);
+
+        public static void StartOfDay()
+        {
+            if (_ResourceManagerInstance != null)
+            {
+                _ResourceManagerInstance.StartOfDay();
+            }
+        }
 
         /// <summary>
         ///     Gets a CallMethod with the given Method name for the MonoBehavior.

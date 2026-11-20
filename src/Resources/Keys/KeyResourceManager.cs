@@ -1,16 +1,11 @@
-using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using System;
 using UnityEngine;
 #if Bep
-using HutongGames.PlayMaker;
 using TMPro;
 #endif
 #if ML
-using Il2Cpp;
 using Il2CppTMPro;
-using Il2CppHutongGames.PlayMaker;
 #endif
 
 namespace BluePrinceArchipelago.Resources
@@ -30,6 +25,10 @@ namespace BluePrinceArchipelago.Resources
 
         public GameObject KeyTextObject = null;
 
+        public GameObject PlayerCore = null;
+
+        public GameObject MonkArtKeys = null;
+
         public KeyResourceManager(IntPtr ptr) : base(ptr)
         {
             Instance = this; //Set the modInstance for easy access.
@@ -37,39 +36,50 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunUpdate()
         {
-            
+            Logging.LogWarning("Updating Keys");
+            KeyIconObject.SetActive(true);
+            int adjust = GetAdjustmentAmount();
+            AdjustKeys(adjust);
+            if (adjust < 0)
+            {
+                int totalspent = GetTotalKeysUsed();
+                SetTotalKeysUsed((adjust / -1) + totalspent);
+            }
+            SetAdjustmentAmount(0);
         }
 
-        public void RunUpdate2()
-        {
-            
+        public void RunEvent2() {
+            SetAdjustmentAmount(2);
+            MonkArtKeys.SetActive(true);
+            RunUpdate();
         }
 
-        public void RunFreeze()
+        public void RunUpdateWithSound()
         {
-            
-        }
-
-        public void RunUnFreeze()
-        {
-           
+            ModAssetManager.PlaySound(PlayerCore, "Key Up 2", 0.65294117f);
+            RunUpdate();
         }
 
         public void SetKeys(int amount)
         {
-            
+            SetKeyCount(amount);
+            Logging.LogWarning(amount);
+            KeyTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
+            SetAdjustmentAmount(0);
         }
 
         public void AdjustKeys(int amount)
         {
-            
+            int Keys = Math.Clamp(GetKeyCount() + amount, 0, 1000000);
+            SetKeys(Keys);
         }
 
         public void StartOfDay()
         {
-            KeyIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Keys/Keys Icon");
-            KeyTextObject = KeyIconObject.FindDescendant("Key #");
-          
+            KeyIconObject = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
+            KeyTextObject = KeyIconObject.GetChild("Key #");
+            PlayerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            MonkArtKeys = GameObject.Find("__SYSTEM/HUD/Keys/Monk Art Keys");
         }
 
         private int GetIntVariable(string variable)
@@ -109,6 +119,16 @@ namespace BluePrinceArchipelago.Resources
         private bool SetKeyLock(bool val)
         {
             return ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value = val;
+        }
+
+        private int GetTotalKeysUsed()
+        {
+            return ModInstance.GlobalPersistentManager.GetIntVariable("TotalKeysUsed").Value;
+        }
+
+        private int SetTotalKeysUsed(int amount)
+        {
+            return ModInstance.GlobalPersistentManager.GetIntVariable("TotalKeysUsed").Value = amount;
         }
     }
 }

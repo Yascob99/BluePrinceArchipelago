@@ -66,6 +66,14 @@ namespace BluePrinceArchipelago.Resources
         /// <param name="amount">The int to adjust gems by</param>
         public static void AdjustGems(int amount) => _ResourceManagerInstance.AdjustGems(amount);
 
+        public static void StartOfDay()
+        {
+            if (_ResourceManagerInstance != null)
+            {
+                _ResourceManagerInstance.StartOfDay();
+            }
+        }
+
         /// <summary>
         ///     Gets a CallMethod with the given Method name for the MonoBehavior.
         /// </summary>

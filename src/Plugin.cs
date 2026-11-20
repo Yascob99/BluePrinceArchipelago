@@ -103,6 +103,7 @@ namespace BluePrinceArchipelago {
             ClassInjector.RegisterTypeInIl2Cpp<DiceResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<GemResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<GoldResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<KeyResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
             { 
                 Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])
@@ -118,10 +119,15 @@ namespace BluePrinceArchipelago {
             ModObject.AddComponent<DiceResourceManager>();
             ModObject.AddComponent<GemResourceManager>();
             ModObject.AddComponent<GoldResourceManager>();
+            ModObject.AddComponent<KeyResourceManager>();
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();
             StepManager.Initialize();
+            DiceManager.Initialize();
+            GemManager.Initialize();
+            GoldManager.Initialize();
+            KeyManager.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             ArchipelagoConsole.UpdateWindow();

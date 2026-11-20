@@ -54,6 +54,13 @@ namespace BluePrinceArchipelago.Resources {
         public static void SetSteps(int amount) => _ResourceManagerInstance.SetSteps(amount);
 
 
+        public static void StartOfDay() {
+            if (_ResourceManagerInstance != null)
+            {
+                _ResourceManagerInstance.StartOfDay();
+            }
+        }
+
         /// <summary>
         ///     Adjusts the number of steps by the amount. This can a be positive or negative.
         /// </summary>

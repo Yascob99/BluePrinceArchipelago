@@ -46,6 +46,14 @@ namespace BluePrinceArchipelago.Resources
         /// <param name="amount">The int to adjust steps by</param>
         public static void AdjustDice(int amount) => _ResourceManagerInstance.AdjustDice(amount);
 
+        public static void StartOfDay()
+        {
+            if (_ResourceManagerInstance != null)
+            {
+                _ResourceManagerInstance.StartOfDay();
+            }
+        }
+
         /// <summary>
         ///     Gets a CallMethod with the given Method name for the MonoBehavior.
         /// </summary>

@@ -66,16 +66,18 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunUpdate()
         {
+            Logging.LogWarning("Updating Gems");
             GemIconObject.SetActive(true);
             if (GetGemLock()) {
-                SetGems(0);
+                AdjustGems(Math.Clamp(GetAdjustmentAmount(), 0, -1000000));
                 return;
             }
-            int Gems = Math.Clamp(GetGemCount() + GetAdjustmentAmount(), 0, 1000000);
-            SetGems(Gems);
+            AdjustGems(GetAdjustmentAmount());
+            SetAdjustmentAmount(0);
         }
 
         public void RunUpdate2() {
+            Logging.LogWarning("Updating Gems");
             GemIconObject.SetActive(true);
             if (!_FlashIsRunning) {
                 _FlashIsRunning = true;
@@ -84,9 +86,9 @@ namespace BluePrinceArchipelago.Resources
         }
 
         public void RunUpdateWithSound() {
-
+            Logging.LogWarning("Updating Gems");
             // Play GemDown Sound
-            ModAssetManager.PlaySound(PlayerCore, "GemUp", 0.65294117f);
+            ModAssetManager.PlaySound(PlayerCore, "GemDown", 0.65294117f);
             RunUpdate();
         }
 
@@ -112,27 +114,27 @@ namespace BluePrinceArchipelago.Resources
 
         public void AdjustGems(int amount)
         {
-            SetAdjustmentAmount(amount);
-            RunUpdate();
+            int Gems = GetGemCount() + amount;
+            SetGems(Gems);
         }
 
         public void StartOfDay()
         {
-            GemIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gems/Gems Icon");
-            GoldIconObject = GemIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gold/Gold Icon");
-            IceOverlayObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/ICE OVERLAY");
-            GemTextObject = GemIconObject.FindDescendant("Gem #");
-            PlayerCore = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            GemIconObject = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
+            GoldIconObject = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
+            IceOverlayObject = GameObject.Find("__SYSTEM/HUD/ICE OVERLAY");
+            GemTextObject = GemIconObject.GetChild("Gem #");
+            PlayerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
         }
 
         private int GetIntVariable(string variable)
         {
-            return ModInstance.DiceManager.GetIntVariable(variable).Value;
+            return ModInstance.GemManager.GetIntVariable(variable).Value;
         }
 
         private int SetIntVariable(string variable, int amount)
         {
-            return ModInstance.DiceManager.GetIntVariable(variable).Value = amount;
+            return ModInstance.GemManager.GetIntVariable(variable).Value = amount;
         }
 
         private int GetGemCount()
@@ -147,20 +149,20 @@ namespace BluePrinceArchipelago.Resources
 
         private int GetAdjustmentAmount()
         {
-            return GetIntVariable("Adjustment Amount");
+            return GetIntVariable("Gem Adjustment Amount");
         }
 
         private int SetAdjustmentAmount(int amount)
         {
-            return SetIntVariable("Adjustment Amount", amount);
+            return SetIntVariable("Gem Adjustment Amount", amount);
         }
 
         private bool GetGemLock() {
-            return ModInstance.DiceManager.GetBoolVariable("GEM LOCK").Value;
+            return ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value;
         }
         private bool SetGemLock(bool val)
         {
-            return ModInstance.DiceManager.GetBoolVariable("GEM LOCK").Value = val;
+            return ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value = val;
         }
     }
 }

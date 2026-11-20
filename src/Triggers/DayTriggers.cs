@@ -26,6 +26,9 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.GemManager.SendEvent("Update");
             ModInstance.KeyManager.SendEvent("Update");
             ModInstance.DiceManager.SendEvent("Update");
+            ModInstance.StepManager.SendEvent("Update");
+            ModInstance.GoldManager.SendEvent("Update");
+
             // Reload the inventories on day start (in case a scene transition happened).
             ModItemManager.LoadInventories();
 

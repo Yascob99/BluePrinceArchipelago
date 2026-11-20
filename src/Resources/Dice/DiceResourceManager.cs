@@ -75,8 +75,8 @@ namespace BluePrinceArchipelago.Resources
 
         public void StartOfDay()
         {
-            DiceIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Bones/Bones Icon");
-            DiceTextObject = DiceIconObject.FindDescendant("Bone #");
+            DiceIconObject = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
+            DiceTextObject = DiceIconObject.GetChild("Bone #");
             Initialized = false;
         }
 

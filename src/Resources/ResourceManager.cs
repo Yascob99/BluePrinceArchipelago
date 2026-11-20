@@ -144,54 +144,9 @@ namespace BluePrinceArchipelago.Resources
         /// <returns>True if the adjstment succeeded, otherwise false.</returns>
         public static void AdjustKeys(int count)
         {
-            try
+            if (ModInstance.IsInRun)
             {
-                // Don't set Keys if Keys are locked.
-                if (ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value || ModInstance.KeyManager.GetIntVariable("Adjustment Amount").Value != 0)
-                {
-                    // Attempt again every second until succesful;
-                    if (ModInstance.IsInRun)
-                    {
-                        Logging.LogWarning("Unable to Adjust Keys, reattempting in 1 second", "Resources");
-                        static void runOnDelay(int count) { AdjustKeys(count); }
-                        GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                    }
-                    return;
-                }
-                int Total = ModInstance.KeyManager.GetIntVariable("KEYS").Value;
-                
-                // Int Clamp
-                if (Total + count < 0)
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value = 0;
-                }
-                if (Total + count > 1000000)
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value = 1000000;
-                }
-                else
-                {
-                    ModInstance.KeyManager.GetIntVariable("KEYS").Value += count;
-                }
-                // Set the UI
-                GameObject KeyIcon = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
-                KeyIcon.transform.Find("Key #").GetComponent<TextMeshPro>().text = ModInstance.KeyManager.GetIntVariable("KEYS").Value.ToString();
-                if (!KeyIcon.active)
-                {
-                    KeyIcon.SetActive(true);
-                }
-                return;
-            }
-            catch
-            {
-                // Attempt again every second until succesful;
-                if (ModInstance.IsInRun)
-                {
-                    Logging.LogWarning("Unable to Adjust Keys, reattempting in 1 second", "Resources");
-                    static void runOnDelay(int count) { AdjustKeys(count); }
-                    GeneralUtils.RunAfterDelay(1000, runOnDelay, count);
-                }
-                return;
+                KeyManager.AdjustKeys(count);
             }
 
         }

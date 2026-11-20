@@ -101,18 +101,18 @@ namespace BluePrinceArchipelago.Resources
             {
                 LabExperiments.GetComponent<PlayMakerFSM>().SendEvent("expiriment check 3");
             }
-            SetGoldCount(amount);
+            SetGoldCount(Gold);
             GoldTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
             SetAdjustmentAmount(0);
         }
 
         public void StartOfDay()
         {
-            GemIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gems/Gems Icon");
-            GoldIconObject = GemIconObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gold/Gold Icon");
-            GoldTextObject = GemIconObject.FindDescendant("Gem #");
-            LabExperiments = GameObjectExtensions.FindGameObject("__SYSTEM/LAB Experiments");
-            CoinPurseTally = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Gold/Coin Purse Gold/Coin Purse Tally");
+            GemIconObject = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
+            GoldIconObject = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
+            GoldTextObject = GoldIconObject.GetChild("Gold #");
+            LabExperiments = GameObject.Find("__SYSTEM/LAB Experiments");
+            CoinPurseTally = GameObject.Find("__SYSTEM/HUD/Gold/Coin Purse Gold/Coin Purse Tally");
         }
 
         private int GetIntVariable(string variable)
@@ -136,11 +136,11 @@ namespace BluePrinceArchipelago.Resources
         }
 
         private int GetTotalCoinsSpent() {
-            return GetIntVariable("TotalCoinsSpent");
+            return ModInstance.GlobalPersistentManager.GetIntVariable("TotalCoinsSpent").Value;
         }
 
         private int SetTotalCoinsSpent(int amount) {
-            return SetIntVariable("TotalCoinsSpent", amount);
+            return ModInstance.GlobalPersistentManager.GetIntVariable("TotalCoinsSpent").Value = amount;
         }
 
         private int GetAdjustmentAmount()

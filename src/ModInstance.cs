@@ -206,12 +206,21 @@ namespace BluePrinceArchipelago
                 ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>(); // Needs to use GameObject.Find();
                 UpgradeDisksObj = GameObjectExtensions.FindInHierarchy("__SYSTEM/Upgrade Disks");
                 RDHelper = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
-                ResourceManagerInstance = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD").AddComponent<StepResourceManager>();
-                ResourceManagerInstance.StartOfDay();
+                
+                // Initialize Resource Managers.
+                Resources.StepManager.StartOfDay();
+                Resources.DiceManager.StartOfDay();
+                Resources.GemManager.StartOfDay();
+                Resources.GoldManager.StartOfDay();
+                Resources.KeyManager.StartOfDay();
+
+                // Override Original Resource Managers.
                 FSMPatches.StepManagerOverride();
                 FSMPatches.DiceManagerOverride();
                 FSMPatches.GemManagerOverride();
                 FSMPatches.GoldManagerOverride();
+                FSMPatches.KeyManagerOverride();
+
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
