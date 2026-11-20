@@ -88,6 +88,17 @@ public class Commissary : RoomHandler
         {
             Logging.LogError($"Could not reach FsmState : '{CommissaryStates[itemName.ToUpper()]}' ", COMMISSARY_LOG_TAG);
         }
+        DisableAddingItemToInventory(purchaseState);
+        RegisterNewOnBoughtMethod(item, itemName, purchaseState);
+    }
+
+    private static void DisableAddingItemToInventory(FsmState purchaseState)
+    {
+        purchaseState.DisableActionsOfType<ArrayListAdd>();
+    }
+
+    private static void RegisterNewOnBoughtMethod(UniqueItem item, string itemName, FsmState purchaseState)
+    {
         CustomFsmMethodManager.AddItemBoughtMethod(item);
         string customMethodName = CustomFsmMethodManager.GetItemBoughtMethodName(itemName);
         purchaseState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));

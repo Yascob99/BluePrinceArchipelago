@@ -1,18 +1,15 @@
 ﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Events;
 using BluePrinceArchipelago.Rooms.RoomHandlers;
 using BluePrinceArchipelago.Utils;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using PathologicalGames;
 #endif
 #if ML
 using Il2Cpp;
 using Il2CppHutongGames.PlayMaker;
 using Il2CppHutongGames.PlayMaker.Actions;
-using Il2CppPathologicalGames;
 #endif
 using System;
 using System.Collections.Generic;
@@ -242,12 +239,14 @@ namespace BluePrinceArchipelago.Items
             {
                 if (gameInstance == null)
                 {
-                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
+                    Logging.LogError($"Game instance is null for {Name}");
+                    continue;
                 }
                 GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
                 if (swirlyEffect == null)
                 {
-                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
+                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}");
+                    continue;
                 }
                 GameObject.Destroy(swirlyEffect);
             }
