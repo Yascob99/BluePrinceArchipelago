@@ -147,7 +147,7 @@ namespace BluePrinceArchipelago
                 ELECTROMAGNET => MODEL_IN_NOTIFICATION.ELECTROMAGNET,
                 TORCH => MODEL_IN_NOTIFICATION.TORCH,
                 MORNING_STAR => MODEL_IN_NOTIFICATION.MORNING_STAR,
-                _ => name.ToTitleCase(),
+                _ => name,
             };
         }
 
@@ -191,7 +191,7 @@ namespace BluePrinceArchipelago
                 JACK_HAMMER => YOU_FOUND_NOTIFICATION_NAME.JACK_HAMMER,
                 ELECTROMAGNET => YOU_FOUND_NOTIFICATION_NAME.ELECTROMAGNET,
                 KNIGHTS_SHIELD => YOU_FOUND_NOTIFICATION_NAME.KNIGHTS_SHIELD,          
-                _ => name,
+                _ => name.ToTitleCase(),
             };
         }
 
