@@ -58,9 +58,12 @@ namespace BluePrinceArchipelago.Items
         public void OnTrunkOpen() {
             string currentRoom = ModInstance.TheGrid.GetStringVariable("CURRENT ROOM").Value;
             currentRoom = ModRoomManager.GetRoomByName(currentRoom).Name;
-            _TrunkCounts[currentRoom]++;
-            ModInstance.ModEventHandler.OnTrunkOpened(currentRoom, _TrunkCounts[currentRoom]);
-            State.UpdateTrunkCounts();
+            if (_TrunkCounts.ContainsKey(currentRoom))
+            {
+                _TrunkCounts[currentRoom]++;
+                ModInstance.ModEventHandler.OnTrunkOpened(currentRoom, _TrunkCounts[currentRoom]);
+                State.UpdateTrunkCounts();
+            }
         }
 
         public void TrySpawnTrunk(ModRoom room) {
