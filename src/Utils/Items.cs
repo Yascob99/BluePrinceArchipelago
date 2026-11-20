@@ -1,3 +1,4 @@
+using BluePrinceArchipelago.Utils;
 namespace BluePrinceArchipelago
 {
     public class ITEM
@@ -86,6 +87,42 @@ namespace BluePrinceArchipelago
             public const string MORNING_STAR = "Mornign Star";
         }
 
+        private class GAME_OBJECT_NAME
+        {
+            public const string CABINET_KEY_TUNNEL = "CABINET KEY 2";
+            public const string ELECTROMAGNET = "POWERED ELECTROMAGNET";
+            public const string PRISM_KEY = "PRISM KEY";
+        }
+
+        private class YOU_FOUND_NOTIFICATION_NAME
+        {
+            public const string MAGNIFYING_GLASS = "Mag Glass";
+            public const string LOCK_PICK_KIT = "Lock Pick";
+            public const string SLEEPING_MASK = "Sleep Mask";
+            public const string PRISM_KEY = "Prism Key";
+            public const string KEY_OF_ARIES = "The Key of Aries";
+            public const string VAULT_KEY_149 = "Key 149";
+            public const string VAULT_KEY_233 = "Key 233";
+            public const string VAULT_KEY_304 = "Key 304";
+            public const string VAULT_KEY_370 = "Key 370";
+            public const string CABINET_KEY_PATIO = "Cabinet Key";
+            public const string CABINET_KEY_LAUNDRY = "Cabinet Key 5";
+            public const string CABINET_KEY_TUNNEL = "Cabinet Key 5";
+            public const string LUCKY_PURSE = "lucky purse";
+            public const string PICK_SOUND_AMPLIFIER = "pick sound amplifier";
+            public const string BURNING_GLASS = "burning glass";
+            public const string DETECTOR_SHOVEL = "detector shovel";
+            public const string POWER_HAMMER = "power hammer";
+            public const string JACK_HAMMER = "jack hammer";
+            public const string ELECTROMAGNET = "Electro Magnet";
+            public const string KNIGHTS_SHIELD = "Knight's Shield";
+        }
+
+        private class PREFAB_NAME
+        {
+            public const string ELECTROMAGNET = "POWERED ELECTROMAGNET";
+        }
+
         /// <summary>
         ///     Gets the internally used name of the item model within the item notification.
         /// </summary>
@@ -110,8 +147,61 @@ namespace BluePrinceArchipelago
                 ELECTROMAGNET => MODEL_IN_NOTIFICATION.ELECTROMAGNET,
                 TORCH => MODEL_IN_NOTIFICATION.TORCH,
                 MORNING_STAR => MODEL_IN_NOTIFICATION.MORNING_STAR,
+                _ => name.ToTitleCase(),
+            };
+        }
+
+        /// <summary>
+        ///     Gets the objectname of items where it doesn't match their name.
+        /// </summary>
+        /// <param name="name">The name of the item.</param>
+        /// <returns></returns>
+        public static string GetGameObjectName(string name)
+        {
+            return name switch
+            {
+                CABINET_KEY_TUNNEL => GAME_OBJECT_NAME.CABINET_KEY_TUNNEL,
+                ELECTROMAGNET => GAME_OBJECT_NAME.ELECTROMAGNET,
+                PRISM_KEY => GAME_OBJECT_NAME.PRISM_KEY,
                 _ => name,
             };
+        }
+
+        public static string GetYouFoundNotificationName(string name)
+        {
+            return name switch
+            {
+                MAGNIFYING_GLASS => YOU_FOUND_NOTIFICATION_NAME.MAGNIFYING_GLASS,
+                LOCK_PICK_KIT => YOU_FOUND_NOTIFICATION_NAME.LOCK_PICK_KIT,
+                SLEEPING_MASK => YOU_FOUND_NOTIFICATION_NAME.SLEEPING_MASK,
+                PRISM_KEY => YOU_FOUND_NOTIFICATION_NAME.PRISM_KEY,
+                KEY_OF_ARIES => YOU_FOUND_NOTIFICATION_NAME.KEY_OF_ARIES,
+                VAULT_KEY_149 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_149,
+                VAULT_KEY_233 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_233,
+                VAULT_KEY_304 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_304,
+                VAULT_KEY_370 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_370,
+                CABINET_KEY_PATIO => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_PATIO,
+                CABINET_KEY_LAUNDRY => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_LAUNDRY,
+                CABINET_KEY_TUNNEL => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_TUNNEL,
+                LUCKY_PURSE => YOU_FOUND_NOTIFICATION_NAME.LUCKY_PURSE,
+                PICK_SOUND_AMPLIFIER => YOU_FOUND_NOTIFICATION_NAME.PICK_SOUND_AMPLIFIER,
+                BURNING_GLASS => YOU_FOUND_NOTIFICATION_NAME.BURNING_GLASS,
+                DETECTOR_SHOVEL => YOU_FOUND_NOTIFICATION_NAME.DETECTOR_SHOVEL,
+                POWER_HAMMER => YOU_FOUND_NOTIFICATION_NAME.POWER_HAMMER,
+                JACK_HAMMER => YOU_FOUND_NOTIFICATION_NAME.JACK_HAMMER,
+                ELECTROMAGNET => YOU_FOUND_NOTIFICATION_NAME.ELECTROMAGNET,
+                KNIGHTS_SHIELD => YOU_FOUND_NOTIFICATION_NAME.KNIGHTS_SHIELD,          
+                _ => name,
+            };
+        }
+
+        public static string GetPrefabName(string name)
+        {
+            if (name == ELECTROMAGNET)
+            {
+                return PREFAB_NAME.ELECTROMAGNET;
+            }
+            return name;
         }
     }
 }

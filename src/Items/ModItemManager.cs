@@ -121,7 +121,7 @@ namespace BluePrinceArchipelago.Items
                 Logging.LogWarning($"Error finding game object for {APitem.Name}.");
                 return;
             }
-            string prefabName = GetPrefabName(APitem);
+            string prefabName = ITEM.GetPrefabName(APitem.Name);
             GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
             if (prefab == null)
             {
@@ -158,15 +158,6 @@ namespace BluePrinceArchipelago.Items
             GameObject.Destroy(APGO);
         }
 
-        private static string GetPrefabName(UniqueItem APitem)
-        {
-            if (APitem.Name.ToUpper() == "ELECTROMAGNET")
-            {
-                return "POWERED ELECTROMAGNET";
-            }
-            return APitem.Name;
-        }
-
         /// <summary>
         ///     Replaces an AP Item's notification with the appropriate item data and the UI model with the AP model.
         /// </summary>
@@ -180,7 +171,7 @@ namespace BluePrinceArchipelago.Items
             {
                 scoutname = itemName;
             }
-            string youName = GetYou___Name(itemName);
+            string youName = ITEM.GetYouFoundNotificationName(itemName);
             GameObject You___Text = GameObject.Find("UI OVERLAY CAM/You Found Text")?.gameObject;
             if (You___Text != null)
             {
@@ -399,61 +390,6 @@ namespace BluePrinceArchipelago.Items
             else
             {
                 Logging.LogWarning($"Unable to find the 'You Found Text' GameObject.");
-            }
-        }
-
-
-        /// <summary>
-        ///     Replaces the name of an item with the internally used name specific to pickup, buying, and dig up notifications.
-        /// </summary>
-        /// <param name="name">The name of the item.</param>
-        /// <returns>The item name for the notification.</returns>
-        private static string GetYou___Name(string name) {
-            name = name.ToTitleCase();
-            switch (name)
-            {
-                case "Magnifying Glass":
-                    return "Mag Glass";
-                case "Lock Pick Kit":
-                    return "Lock Pick";
-                case "Sleeping Mask":
-                    return "Sleep Mask";
-                case "Prism Key_0":
-                    return "Prism Key";
-                case "Key Of Aries":
-                    return "The Key of Aries";
-                case "Vault Key 149":
-                    return "Key 149";
-                case "Vault Key 233":
-                    return "Key 233";
-                case "Vault Key 304":
-                    return "Key 304";
-                case "Vault Key 370":
-                    return "Key 370";
-                case "Cabinet Key 1":
-                    return "Cabinet Key";
-                case "Cabinet Key 2":
-                    return "Cabinet Key 5";
-                case "Cabinet Key 3":
-                    return "Cabinet Key 5";
-                case "Lucky Purse":
-                    return "lucky purse";
-                case "Pick Sound Amplifier":
-                    return "pick sound amplifier";
-                case "Burning Glass":
-                    return "burning glass";
-                case "Detector Shovel":
-                    return "detector shovel";
-                case "Power Hammer":
-                    return "power hammer";
-                case "Jack Hammer":
-                    return "jack hammer";
-                case "Electromagnet":
-                    return "Electro Magnet";
-                case "Knights Shield":
-                    return "Knight's Shield";
-                default:
-                    return name;
             }
         }
 
@@ -1248,34 +1184,13 @@ namespace BluePrinceArchipelago.Items
         {
             foreach (UniqueItem item in ModItemManager.UniqueItemList)
             {
-                string name = GetObjName(item.Name);
+                string name = ITEM.GetGameObjectName(item.Name);
                 GameObject gameObj = GetInventoryItem(name);
                 if (gameObj == null)
                 {
                     gameObj = GameObjectExtensions.FindGameObject(name);
                 }
                 item.GameObj = gameObj;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the objectname of items where it doesn't match their name.
-        /// </summary>
-        /// <param name="name">The name of the item.</param>
-        /// <returns></returns>
-        private static string GetObjName(string name)
-        {
-            switch (name)
-            {
-                case "CABINET KEY 3":
-                    return "CABINET KEY 2";
-                case "ELECTROMAGNET":
-                    return "POWERED ELECTROMAGNET";
-                case "PRISM KEY_0":
-                    return "PRISM KEY";
-
-                default:
-                    return name;
             }
         }
     }
