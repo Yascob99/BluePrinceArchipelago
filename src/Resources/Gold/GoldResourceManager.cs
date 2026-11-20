@@ -54,6 +54,7 @@ namespace BluePrinceArchipelago.Resources
             }
             else if (adjustment > 0) {
                 if (GetGoldLock()) {
+                    AdjustGold(Math.Clamp(GetAdjustmentAmount(), 0, -1000000));
                     return;
                 }
                 RunUpdate2();
@@ -96,13 +97,13 @@ namespace BluePrinceArchipelago.Resources
 
         public void AdjustGold(int amount)
         {
-            int Gold = Math.Clamp(GetGoldCount() + GetAdjustmentAmount(), 0, 1000000);
+            int Gold = Math.Clamp(GetGoldCount() + amount, 0, 1000000);
             if (amount < -3)
             {
                 LabExperiments.GetComponent<PlayMakerFSM>().SendEvent("expiriment check 3");
             }
             SetGoldCount(Gold);
-            GoldTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
+            GoldTextObject.GetComponent<TextMeshPro>().text = Gold.ToString();
             SetAdjustmentAmount(0);
         }
 
