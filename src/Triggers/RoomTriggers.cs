@@ -31,7 +31,12 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.MasterPicker.GetBoolVariable("ForceDraft").Value = false;
 
             // Add ItemCodeCompleteHook
-            AddItemCodeCompleteHook(room);
+            if (room != null)
+            {
+                AddItemCodeCompleteHook(room);
+                return;
+            }
+            Logging.LogWarning("Unable to trigger room after spawn code, room object was null or didn't match existing rooms.");
         }
 
         /// <summary>

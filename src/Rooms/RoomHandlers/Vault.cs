@@ -25,16 +25,24 @@ class Vault : RoomHandler
                 roomGameObject = ModRoomManager.GetRoomInstance("Vault");
                 if (roomGameObject != null)
                 {
-                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 370/370 spwn/6")?.GetComponent<PlayMakerFSM>();
+                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 304/304 Spwn/15")?.GetComponent<PlayMakerFSM>();
                     if (ItemDropFSM != null)
                     {
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("VAULT");
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;
-                        ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                        ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                        CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                        ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+                        ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key 2");
+                        //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
+                        //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                        //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check 2");
+                        //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
+                        //if (!found)
+                        //{
+                        //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
+                        //    KeyIntCheck.equal = KeyIntCheck.lessThan;
+                        //}
                     }
                     else
                     {

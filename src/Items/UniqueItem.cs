@@ -199,7 +199,7 @@ namespace BluePrinceArchipelago.Items
                 GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
                 if (icon != null && InventoryIcons != null)
                 {
-                    ModItemManager.PickedUp.AddIfUnique(GameObj);
+                    ModItemManager.PickedUp?.AddIfUnique(GameObj);
                     InventoryIcons.Add(icon, "GameObject");
                     ModItemManager.PreSpawn.RemoveIfExists(Name);
                     if (Name == "RUNNING SHOES")

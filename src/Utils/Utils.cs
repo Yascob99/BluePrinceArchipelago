@@ -710,7 +710,7 @@ namespace BluePrinceArchipelago.Utils
         #if Bep
         public static object StartCoroutine(this MonoBehaviour mb, IEnumerator routine) => mb.StartCoroutine(routine.WrapToIl2Cpp());
         public static void StopCoroutine(MonoBehaviour mb, object routine) => mb.StopCoroutine((Coroutine)routine);
-#endif
+        #endif
     }
 
     public static class GeneralUtils

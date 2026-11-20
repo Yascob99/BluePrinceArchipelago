@@ -294,10 +294,6 @@ namespace BluePrinceArchipelago.Resources
             Initialized = false;
         }
 
-        private void Start()
-        {
-            CustomFsmMethodManager.RegisterMethods();
-        }
         private int GetIntVariable(string variable)
         {
             return ModInstance.StepManager.GetIntVariable(variable).Value;
