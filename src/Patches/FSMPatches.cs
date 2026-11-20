@@ -2,6 +2,8 @@
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
+
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -840,5 +842,175 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgePierceWest = ModInstance.PlanPicker.transform.Find("EDGEPIERCE WEST").gameObject.GetComponent<PlayMakerFSM>();
             EdgePierceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
         }
+
+        public static void StepManagerOverride()
+        {
+            // UpdateSteps Event
+            FsmState RunningShoesCheck = ModInstance.StepManager.GetState("Running Shoes check");
+            RunningShoesCheck.RemoveAllActions();
+            RunningShoesCheck.ChangeTransition("FINISHED", "State 5");
+            RunningShoesCheck.AddAction(StepManager.GetUpdateStepMethod);
+
+            FsmState RunningShoesCheck2 = ModInstance.StepManager.GetState("Running Shoes check 2");
+            RunningShoesCheck2.RemoveAllActions();
+            RunningShoesCheck2.ChangeTransition("FINISHED", "State 1");
+            RunningShoesCheck2.AddAction(StepManager.GetUpdateStepMethod);
+
+            // Update Event
+            FsmState StepLock = ModInstance.StepManager.GetState("STEP LOCK");
+            StepLock.RemoveAllActions();
+            StepLock.ChangeTransition("FINISHED", "State 5");
+            StepLock.AddAction(StepManager.GetUpdateMethod);
+
+            FsmState StepLock2 = ModInstance.StepManager.GetState("STEP LOCK 2");
+            StepLock2.RemoveAllActions();
+            StepLock2.ChangeTransition("FINISHED", "State 1");
+            StepLock2.AddAction(StepManager.GetUpdateMethod);
+
+            // Event 0
+            FsmState State2 = ModInstance.StepManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.AddAction(StepManager.GetEvent0);
+            State2.ChangeTransition("FINISHED", "State 1");
+
+            // Event 10
+            FsmState State3 = ModInstance.StepManager.GetState("State 3");
+            State3.RemoveAllActions();
+            State3.AddAction(StepManager.GetEvent10);
+            State2.ChangeTransition("FINISHED", "State 5");
+        }
+
+        public static void DiceManagerOverride() {
+
+            // Update
+            FsmState State4 = ModInstance.DiceManager.GetState("State 4");
+            State4.RemoveAllActions();
+            State4.ChangeTransition("FINISHED", "State 1");
+            State4.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State5 = ModInstance.DiceManager.GetState("State 5");
+            State5.RemoveAllActions();
+            State5.ChangeTransition("FINISHED", "State 1");
+            State5.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State6 = ModInstance.DiceManager.GetState("State 6");
+            State6.RemoveAllActions();
+            State6.ChangeTransition("FINISHED", "State 1");
+            State6.AddAction(DiceManager.GetUpdateMethod);
+
+            FsmState State8 = ModInstance.DiceManager.GetState("State 8");
+            State6.RemoveAllActions();
+            State6.ChangeTransition("FINISHED", "State 1");
+            State6.AddAction(DiceManager.GetUpdateMethod);
+        }
+
+        public static void GemManagerOverride() {
+
+            // Update
+            FsmState GraphicsTurnOn = ModInstance.GemManager.GetState("The Initial Graphics Turn On");
+            GraphicsTurnOn.RemoveAllActions();
+            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn.AddAction(GemManager.GetUpdateMethod);
+
+            FsmState State2 = ModInstance.GemManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.AddAction(GemManager.GetUpdateMethod);
+
+            // Update 2
+            FsmState GraphicsTurnOn2 = ModInstance.GemManager.GetState("The Initial Graphics Turn On 2");
+            GraphicsTurnOn2.RemoveAllActions();
+            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn2.AddAction(GemManager.GetUpdate2Method);
+
+            FsmState NotEnoughGems = ModInstance.GemManager.GetState("Not Enough Gems");
+            NotEnoughGems.RemoveAllActions();
+            NotEnoughGems.ChangeTransition("FINISHED", "State 1");
+            NotEnoughGems.AddAction(GemManager.GetUpdate2Method);
+
+            // Freeze
+            FsmState State9 = ModInstance.GemManager.GetState("State 9");
+            State9.RemoveAllActions();
+            //State9.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
+            State9.AddAction(GemManager.GetFreezeMethod);
+
+            FsmState Quickfreeze = ModInstance.GemManager.GetState("Quickfreeze");
+            Quickfreeze.RemoveAllActions();
+            //Quickfreeze.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
+            Quickfreeze.AddAction(GemManager.GetFreezeMethod);
+
+            // Unfreeze
+            FsmState State20 = ModInstance.GemManager.GetState("State 20");
+            State20.RemoveAllActions();
+            State20.ChangeTransition("FINISHED", "State 1");
+            State20.AddAction(GemManager.GetUpdateWithSoundMethod);
+
+            FsmState State19 = ModInstance.GemManager.GetState("State 19");
+            State19.RemoveAllActions();
+            State19.ChangeTransition("FINISHED", "State 1");
+            State19.AddAction(GemManager.GetUpdateWithSoundMethod);
+        }
+
+        public static void GoldManagerOverride()
+        {
+
+            // Update
+            FsmState GraphicsTurnOn = ModInstance.GoldManager.GetState("Initial Graphics Turn On");
+            GraphicsTurnOn.RemoveAllActions();
+            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn.AddAction(GoldManager.GetUpdateMethod);
+
+            FsmState IsSpendingGold = ModInstance.GoldManager.GetState("Is spending gold?");
+            IsSpendingGold.RemoveAllActions();
+            IsSpendingGold.ChangeTransition("FINISHED", "State 1");
+            IsSpendingGold.AddAction(GoldManager.GetUpdateMethod);
+
+            // Update 2
+            FsmState GraphicsTurnOn2 = ModInstance.GoldManager.GetState("Initial Graphics Turn On 2");
+            GraphicsTurnOn2.RemoveAllActions();
+            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn2.AddAction(GoldManager.GetUpdate2Method);
+
+            FsmState State2 = ModInstance.GoldManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.AddAction(GoldManager.GetUpdate2Method);
+
+            // Freeze
+            FsmState State3 = ModInstance.GoldManager.GetState("State 3");
+            State3.RemoveAllActions();
+            State3.AddAction(GoldManager.GetFreezeMethod);
+
+            // UnFreeze
+            FsmState State4 = ModInstance.GoldManager.GetState("State 4");
+            State4.RemoveAllActions();
+            State4.ChangeTransition("FINISHED", "State 1");
+            State4.AddAction(GoldManager.GetUnFreezeMethod);
+        }
+
+        public static void KeyManagerOverride()
+        {
+            // Update
+            FsmState GraphicsTurnOn = ModInstance.KeyManager.GetState("Initial Graphics Turn On");
+            GraphicsTurnOn.RemoveAllActions();
+            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
+            GraphicsTurnOn.AddAction(KeyManager.GetUpdateMethod);
+
+            FsmState State2 = ModInstance.KeyManager.GetState("State 2");
+            State2.RemoveAllActions();
+            State2.ChangeTransition("FINISHED", "State 1");
+            State2.AddAction(KeyManager.GetUpdateMethod);
+
+            // UpdateWithSound
+            FsmState Sound = ModInstance.KeyManager.GetState("Sound");
+            Sound.RemoveAllActions();
+            Sound.ChangeTransition("FINISHED", "State 1");
+            Sound.AddAction(KeyManager.GetUpdateMethod);
+
+            FsmState Sound2 = ModInstance.KeyManager.GetState("Sound 2");
+            Sound2.RemoveAllActions();
+            Sound2.ChangeTransition("FINISHED", "State 1");
+            Sound2.AddAction(KeyManager.GetUpdateMethod);
+
+        }
+
     }
 }

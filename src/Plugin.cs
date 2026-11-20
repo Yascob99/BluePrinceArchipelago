@@ -100,6 +100,10 @@ namespace BluePrinceArchipelago {
             ClassInjector.RegisterTypeInIl2Cpp<ModInstance>();
             ClassInjector.RegisterTypeInIl2Cpp<CustomFsmMethods>();
             ClassInjector.RegisterTypeInIl2Cpp<StepResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<DiceResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<GemResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<GoldResourceManager>();
+            ClassInjector.RegisterTypeInIl2Cpp<KeyResourceManager>();
             ClassInjector.RegisterTypeInIl2Cpp<UITextInput>(new RegisterTypeOptions() 
             { 
                 Interfaces = new Il2CppInterfaceCollection([typeof(ISelectable), typeof(IClickable)])
@@ -111,9 +115,19 @@ namespace BluePrinceArchipelago {
             ModObject.hideFlags = HideFlags.HideAndDontSave; //The mod breaks if this is removed. Unsure if different flags could be used to make this more visible.
             ModObject.AddComponent<ModInstance>();
             ModObject.AddComponent<PlayMakerFSM>(); //Add A PlayMakerFSM to be used for Events.
+            ModObject.AddComponent<StepResourceManager>();
+            ModObject.AddComponent<DiceResourceManager>();
+            ModObject.AddComponent<GemResourceManager>();
+            ModObject.AddComponent<GoldResourceManager>();
+            ModObject.AddComponent<KeyResourceManager>();
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();
+            StepManager.Initialize();
+            DiceManager.Initialize();
+            GemManager.Initialize();
+            GoldManager.Initialize();
+            KeyManager.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             ArchipelagoConsole.UpdateWindow();
