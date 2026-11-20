@@ -239,12 +239,12 @@ namespace BluePrinceArchipelago.Items
             {
                 if (gameInstance == null)
                 {
-                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
+                    Logging.LogError($"Game instance is null for {Name}");
                 }
                 GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
                 if (swirlyEffect == null)
                 {
-                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
+                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}");
                 }
                 GameObject.Destroy(swirlyEffect);
             }
