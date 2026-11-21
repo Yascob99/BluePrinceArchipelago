@@ -80,7 +80,7 @@ namespace BluePrinceArchipelago.Items
                 // If the item has not been found yet.
                 if (!item.HasBeenFound && item.ApplySanity())
                 {
-                    if (item.Name == "MICROCHIP 1")
+                    if (item.Name == ITEM.MICROCHIP_SMALL)
                     {
                         FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
                         FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
@@ -210,15 +210,15 @@ namespace BluePrinceArchipelago.Items
                             GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
                             long locationid = Plugin.ArchipelagoClient.GetLocationFromName($"First Pickup - {scoutname.ToTitleCase()}");
                             // Get the location ID of our first pickup.
-                            if (scoutname == "CABINET KEY 1")
+                            if (scoutname == ITEM.CABINET_KEY_PATIO)
                             {
                                 locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Patio");
                             }
-                            else if (scoutname == "CABINET KEY 2")
+                            else if (scoutname == ITEM.CABINET_KEY_LAUNDRY)
                             {
                                 locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Laundry Room");
                             }
-                            else if (scoutname == "CABINET KEY 3")
+                            else if (scoutname == ITEM.CABINET_KEY_TUNNEL)
                             {
                                 locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                             }

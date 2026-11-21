@@ -41,7 +41,7 @@ namespace BluePrinceArchipelago.Triggers
                     // If the item is not already in the inventory
                     if (item.IsUnlocked)
                     {
-                        if (item.Name == "MICROCHIP 1")
+                        if (item.Name == ITEM.MICROCHIP_SMALL)
                         {
                             FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
                             FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
@@ -144,15 +144,15 @@ namespace BluePrinceArchipelago.Triggers
                 Item.HasBeenFound = true;
                 ModItemManager.RemoveUniqueItemAPSwirly(Item);
                 // Cabinet Key fixes.
-                if (Item.Name == "CABINET KEY 1")
+                if (Item.Name == ITEM.CABINET_KEY_PATIO)
                 {
                     ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Patio");
                 }
-                else if (Item.Name == "CABINET KEY 2")
+                else if (Item.Name == ITEM.CABINET_KEY_LAUNDRY)
                 {
                     ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Laundry Room");
                 }
-                else if (Item.Name == "CABINET KEY 3")
+                else if (Item.Name == ITEM.CABINET_KEY_TUNNEL)
                 {
                     ModInstance.QueueManager.AddLocationToQueue("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
                 }
