@@ -1,5 +1,9 @@
+using BluePrinceArchipelago.Utils;
 namespace BluePrinceArchipelago
 {
+    /// <summary>
+    /// Utils class that stores item names and public methods to get alternative names used in-game.
+    /// </summary>
     public class ITEM
     {
         public const string BASEMENT_KEY = "BASEMENT KEY";
@@ -64,5 +68,169 @@ namespace BluePrinceArchipelago
         public const string VAULT_KEY_304 = "VAULT KEY 304";
         public const string VAULT_KEY_370 = "VAULT KEY 370";
         public const string WATERING_CAN = "WATERING CAN";
+
+        /// <summary>
+        ///     Names of the models in the "you found" notifications.
+        ///     You may want to use GetItemModelInNotificationName() to access these.
+        /// </summary>
+        private class MODEL_IN_NOTIFICATION
+        {
+            public const string KEY_8 = "SILVER KEY";
+            public const string WATERING_CAN = "Watering Can pickup";
+            public const string LUNCH_BOX = "Joya Lunch Box";
+            public const string CURSED_EFFIGY = "cursed effigy- dagger";
+            public const string CROWN = "crow";
+            public const string HALL_PASS = "hallpass";
+            public const string CABINET_KEY = "cabinet key";
+            public const string PRISM_KEY = "Prism Key";
+            public const string KEY_OF_ARIES = "o Key";
+            public const string POWER_HAMMER = "Power Hammer ";
+            public const string ELECTROMAGNET = "Powerd Electromagnet";
+            public const string TORCH = "Self Lighting Torch";
+            public const string MORNING_STAR = "Mornign Star";
+        }
+
+        /// <summary>
+        ///     Names of the game objects associated to an item.
+        ///     You may want to use GetGameObjectName() to access these.
+        /// </summary>
+        private class GAME_OBJECT_NAME
+        {
+            public const string CABINET_KEY_TUNNEL = "CABINET KEY 2";
+            public const string ELECTROMAGNET = "POWERED ELECTROMAGNET";
+            public const string PRISM_KEY = "PRISM KEY";
+        }
+
+        /// <summary>
+        ///     Names of the you found notification objects associated to an item.
+        ///     You may want to use GetYouFoundNotificationName() to access these.
+        /// </summary>
+        private class YOU_FOUND_NOTIFICATION_NAME
+        {
+            public const string MAGNIFYING_GLASS = "Mag Glass";
+            public const string LOCK_PICK_KIT = "Lock Pick";
+            public const string SLEEPING_MASK = "Sleep Mask";
+            public const string PRISM_KEY = "Prism Key";
+            public const string KEY_OF_ARIES = "The Key of Aries";
+            public const string VAULT_KEY_149 = "Key 149";
+            public const string VAULT_KEY_233 = "Key 233";
+            public const string VAULT_KEY_304 = "Key 304";
+            public const string VAULT_KEY_370 = "Key 370";
+            public const string CABINET_KEY_PATIO = "Cabinet Key";
+            public const string CABINET_KEY_LAUNDRY = "Cabinet Key 5";
+            public const string CABINET_KEY_TUNNEL = "Cabinet Key 5";
+            public const string LUCKY_PURSE = "lucky purse";
+            public const string PICK_SOUND_AMPLIFIER = "pick sound amplifier";
+            public const string BURNING_GLASS = "burning glass";
+            public const string DETECTOR_SHOVEL = "detector shovel";
+            public const string POWER_HAMMER = "power hammer";
+            public const string JACK_HAMMER = "jack hammer";
+            public const string ELECTROMAGNET = "Electro Magnet";
+            public const string KNIGHTS_SHIELD = "Knight's Shield";
+        }
+
+        /// <summary>
+        ///     Names of the prefab objects associated to an item.
+        ///     You may want to use GetPrefabName() to access these.
+        /// </summary>
+        private class PREFAB_NAME
+        {
+            public const string ELECTROMAGNET = "POWERED ELECTROMAGNET";
+        }
+
+        /// <summary>
+        ///     Gets the internally used name of the item model within the item notification.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>The model name.</returns>
+        public static string GetItemModelInNotificationName(string name)
+        {
+            return name switch
+            {
+                KEY_8 => MODEL_IN_NOTIFICATION.KEY_8,
+                WATERING_CAN => MODEL_IN_NOTIFICATION.WATERING_CAN,
+                LUNCH_BOX => MODEL_IN_NOTIFICATION.LUNCH_BOX,
+                CURSED_EFFIGY => MODEL_IN_NOTIFICATION.CURSED_EFFIGY,
+                CROWN => MODEL_IN_NOTIFICATION.CROWN,
+                HALL_PASS => MODEL_IN_NOTIFICATION.HALL_PASS,
+                CABINET_KEY_PATIO => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                CABINET_KEY_LAUNDRY => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                CABINET_KEY_TUNNEL => MODEL_IN_NOTIFICATION.CABINET_KEY,
+                PRISM_KEY => MODEL_IN_NOTIFICATION.PRISM_KEY,
+                KEY_OF_ARIES => MODEL_IN_NOTIFICATION.KEY_OF_ARIES,
+                POWER_HAMMER => MODEL_IN_NOTIFICATION.POWER_HAMMER,
+                ELECTROMAGNET => MODEL_IN_NOTIFICATION.ELECTROMAGNET,
+                TORCH => MODEL_IN_NOTIFICATION.TORCH,
+                MORNING_STAR => MODEL_IN_NOTIFICATION.MORNING_STAR,
+                _ => name,
+            };
+        }
+
+        /// <summary>
+        ///     Gets the objectname of items where it doesn't match their name.
+        /// </summary>
+        /// <param name="name">The name of the item.</param>
+        /// <returns></returns>
+        public static string GetGameObjectName(string name)
+        {
+            return name switch
+            {
+                CABINET_KEY_TUNNEL => GAME_OBJECT_NAME.CABINET_KEY_TUNNEL,
+                ELECTROMAGNET => GAME_OBJECT_NAME.ELECTROMAGNET,
+                PRISM_KEY => GAME_OBJECT_NAME.PRISM_KEY,
+                _ => name,
+            };
+        }
+
+        /// <summary>
+        /// Retrieves the corresponding notification name for a given unique item found by the player.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>
+        /// The in-game notification name formatted in Title Case.
+        /// </returns>
+        public static string GetYouFoundNotificationName(string name)
+        {
+            return name switch
+            {
+                MAGNIFYING_GLASS => YOU_FOUND_NOTIFICATION_NAME.MAGNIFYING_GLASS,
+                LOCK_PICK_KIT => YOU_FOUND_NOTIFICATION_NAME.LOCK_PICK_KIT,
+                SLEEPING_MASK => YOU_FOUND_NOTIFICATION_NAME.SLEEPING_MASK,
+                PRISM_KEY => YOU_FOUND_NOTIFICATION_NAME.PRISM_KEY,
+                KEY_OF_ARIES => YOU_FOUND_NOTIFICATION_NAME.KEY_OF_ARIES,
+                VAULT_KEY_149 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_149,
+                VAULT_KEY_233 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_233,
+                VAULT_KEY_304 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_304,
+                VAULT_KEY_370 => YOU_FOUND_NOTIFICATION_NAME.VAULT_KEY_370,
+                CABINET_KEY_PATIO => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_PATIO,
+                CABINET_KEY_LAUNDRY => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_LAUNDRY,
+                CABINET_KEY_TUNNEL => YOU_FOUND_NOTIFICATION_NAME.CABINET_KEY_TUNNEL,
+                LUCKY_PURSE => YOU_FOUND_NOTIFICATION_NAME.LUCKY_PURSE,
+                PICK_SOUND_AMPLIFIER => YOU_FOUND_NOTIFICATION_NAME.PICK_SOUND_AMPLIFIER,
+                BURNING_GLASS => YOU_FOUND_NOTIFICATION_NAME.BURNING_GLASS,
+                DETECTOR_SHOVEL => YOU_FOUND_NOTIFICATION_NAME.DETECTOR_SHOVEL,
+                POWER_HAMMER => YOU_FOUND_NOTIFICATION_NAME.POWER_HAMMER,
+                JACK_HAMMER => YOU_FOUND_NOTIFICATION_NAME.JACK_HAMMER,
+                ELECTROMAGNET => YOU_FOUND_NOTIFICATION_NAME.ELECTROMAGNET,
+                KNIGHTS_SHIELD => YOU_FOUND_NOTIFICATION_NAME.KNIGHTS_SHIELD,          
+                _ => name.ToTitleCase(),
+            };
+        }
+
+        /// <summary>
+        /// Retrieves the corresponding prefab name for a given unique item found by the player.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>
+        /// The prefab name.
+        /// </returns>
+        public static string GetPrefabName(string name)
+        {
+            if (name == ELECTROMAGNET)
+            {
+                return PREFAB_NAME.ELECTROMAGNET;
+            }
+            return name;
+        }
     }
 }

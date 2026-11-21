@@ -202,11 +202,11 @@ namespace BluePrinceArchipelago.Items
                     ModItemManager.PickedUp.AddIfUnique(GameObj);
                     InventoryIcons.Add(icon, "GameObject");
                     ModItemManager.PreSpawn.RemoveIfExists(Name);
-                    if (Name == "RUNNING SHOES")
+                    if (Name == ITEM.RUNNING_SHOES)
                     {
                         ModInstance.RunningEngine.SendEvent("Update");
                     }
-                    if (Name == "STOPWATCH") {
+                    if (Name == ITEM.STOPWATCH) {
                         GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
                     }
                 }
@@ -365,15 +365,15 @@ namespace BluePrinceArchipelago.Items
                     }
                 }
                 // Despawn Microchips if Found but not unlocked (since they don't use the spawn system).
-                if (item.HasBeenFound && item.Name == "MICROCHIP 1" && !item.IsUnlocked) { 
+                if (item.HasBeenFound && item.Name == ITEM.MICROCHIP_SMALL && !item.IsUnlocked) { 
                     GameObject.Find("TERRAIN/_GAMEPLAY (terrain)/New Clue Dig - menu/COUNTERTOP").SetActive(false);
                 }
-                else if (item.HasBeenFound && item.Name == "MICROCHIP 2" && !item.IsUnlocked)
+                else if (item.HasBeenFound && item.Name == ITEM.MICROCHIP_MIDDLE_SIZED && !item.IsUnlocked)
                 {
                     // Despawn the microchip if it has been autospawned.
                     GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2 BROKEN/MICRO 2 SPAWN").SetActive(false);
                 }
-                else if (item.HasBeenFound && item.Name == "MICROCHIP 3" && !item.IsUnlocked) {
+                else if (item.HasBeenFound && item.Name == ITEM.MICROCHIP_LARGE && !item.IsUnlocked) {
                     GameObject.Find("TERRAIN/EAST SECTOR/_GROTTO/_GROTTO GAMEPLAY/Microchip Pillar/Microchip 3").SetActive(false);
                 }
                 
@@ -506,7 +506,7 @@ namespace BluePrinceArchipelago.Items
                     if (transition.EventName.ToLower().Contains(name))
                     {
                         // Treasure Map requires going 1 state deeper
-                        if (name == "treasure map") {
+                        if (name == ITEM.TREASURE_MAP.ToLower()) {
                             ModInstance.GlobalManager.GetBoolVariable("Treasure Already").Value = true;
                             return ModInstance.GlobalManager.GetState("Treasure Map Pickup");
                         } 
