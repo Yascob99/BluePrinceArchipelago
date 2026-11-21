@@ -1,6 +1,9 @@
 using BluePrinceArchipelago.Utils;
 namespace BluePrinceArchipelago
 {
+    /// <summary>
+    /// Utils class that stores item names and public methods to get alternative names used in-game.
+    /// </summary>
     public class ITEM
     {
         public const string BASEMENT_KEY = "BASEMENT KEY";
@@ -87,6 +90,10 @@ namespace BluePrinceArchipelago
             public const string MORNING_STAR = "Mornign Star";
         }
 
+        /// <summary>
+        ///     Names of the game objects associated to an item.
+        ///     You may want to use GetGameObjectName() to access these.
+        /// </summary>
         private class GAME_OBJECT_NAME
         {
             public const string CABINET_KEY_TUNNEL = "CABINET KEY 2";
@@ -94,6 +101,10 @@ namespace BluePrinceArchipelago
             public const string PRISM_KEY = "PRISM KEY";
         }
 
+        /// <summary>
+        ///     Names of the you found notification objects associated to an item.
+        ///     You may want to use GetYouFoundNotificationName() to access these.
+        /// </summary>
         private class YOU_FOUND_NOTIFICATION_NAME
         {
             public const string MAGNIFYING_GLASS = "Mag Glass";
@@ -118,6 +129,10 @@ namespace BluePrinceArchipelago
             public const string KNIGHTS_SHIELD = "Knight's Shield";
         }
 
+        /// <summary>
+        ///     Names of the prefab objects associated to an item.
+        ///     You may want to use GetPrefabName() to access these.
+        /// </summary>
         private class PREFAB_NAME
         {
             public const string ELECTROMAGNET = "POWERED ELECTROMAGNET";
@@ -167,6 +182,13 @@ namespace BluePrinceArchipelago
             };
         }
 
+        /// <summary>
+        /// Retrieves the corresponding notification name for a given unique item found by the player.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>
+        /// The in-game notification name formatted in Title Case.
+        /// </returns>
         public static string GetYouFoundNotificationName(string name)
         {
             return name switch
@@ -195,6 +217,13 @@ namespace BluePrinceArchipelago
             };
         }
 
+        /// <summary>
+        /// Retrieves the corresponding prefab name for a given unique item found by the player.
+        /// </summary>
+        /// <param name="name">The item name.</param>
+        /// <returns>
+        /// The prefab name.
+        /// </returns>
         public static string GetPrefabName(string name)
         {
             if (name == ELECTROMAGNET)
