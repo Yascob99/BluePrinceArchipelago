@@ -21,7 +21,7 @@ namespace BluePrinceArchipelago.Items
             ResourceManager.AdjustResource(_itemType, _resourceAmount);
         }
 
-        public override bool IsPersistant()
+        public override bool IsPermanent()
         {
             return _isPermament;
         }

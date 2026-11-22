@@ -28,7 +28,7 @@ namespace BluePrinceArchipelago.Items
 
         public abstract void AddToWorld();
 
-        public virtual bool IsPersistant()
+        public virtual bool IsPermanent()
         {
             return false;
         }
