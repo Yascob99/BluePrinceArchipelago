@@ -1,13 +1,4 @@
-﻿using BluePrinceArchipelago.Utils;
-using BluePrinceArchipelago.Resources;
-#if Bep
-using HutongGames.PlayMaker;
-#endif
-#if ML
-using Il2Cpp;
-using Il2CppHutongGames.PlayMaker;
-#endif
-using UnityEngine;
+﻿using BluePrinceArchipelago.Resources;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -15,47 +6,24 @@ namespace BluePrinceArchipelago.Items
     ///     A template for creating junk items for the mod. 
     /// </summary>
     /// <param name="name">The name of the item</param>
-    /// <param name="gameObject">The gameobject of the item. Usually Null.</param>
     /// <param name="isUnlocked">If the item is unlocked.</param>
     /// <param name="itemType">The type of the Junk Item.</param>
-    /// <param name="count">The count of the junk item.</param>
-    public class JunkItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked)
+    /// <param name="resourceAmount">The count of the junk item.</param>
+    /// <param name="isPermament"></param>
+    public class ResourceItem(string name, bool isUnlocked, string itemType, int resourceAmount = 1, bool isPermament = false) : ModItem(name, isUnlocked)
     {
+        private readonly string _itemType = itemType;
+        private readonly int _resourceAmount = resourceAmount;
+        private readonly bool _isPermament = isPermament;
 
-        private string _ItemType = itemType;
-        public string Itemtype
+        public override void AddToWorld()
         {
-            get { return _ItemType; }
-            set { _ItemType = value; }
+            ResourceManager.AdjustResource(_itemType, _resourceAmount);
         }
 
-        private int _Count = count;
-        public new int Count
+        public override bool IsPersistant()
         {
-            get { return _Count; }
-            set
-            {
-                if (value > 0)
-                {
-                    _IsTrap = true; //Sets IsTrap dynamically (not sure that it's needed, but it's neat).
-                }
-                else
-                {
-                    _IsTrap = false; //Sets IsTrap dynamically (not sure that it's needed, but it's neat).
-                }
-                _Count = value;
-            }
-        }
-
-        private bool _IsTrap = count < 0;
-        public bool IsTrap
-        {
-            get { return _IsTrap; } //No setter since this is connected to count
-        }
-
-        public override void AddItemToInventory()
-        {
-            ResourceManager.AdjustResource(_ItemType, _Count);
+            return _isPermament;
         }
     }
 }

@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
+    //TODO : Delete this class
     /// <summary>
     ///     A template for creating permanent items (persistent junk items) for the mod.   
     /// </summary>
@@ -18,7 +19,7 @@ namespace BluePrinceArchipelago.Items
     /// <param name="isUnlocked">If the item is unlocked.</param>
     /// <param name="itemType">The type of the Permanent Item.</param>
     /// <param name="count">The count of the permanent item.</param>
-    public class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, gameObject, isUnlocked)
+    public abstract class PermanentItem(string name, GameObject gameObject, bool isUnlocked, string itemType, int count = 1) : ModItem(name, isUnlocked)
     {
         private string _ItemType = itemType;
         public int UnlockedCount = 0;
@@ -37,7 +38,7 @@ namespace BluePrinceArchipelago.Items
                 _Count = value;
             }
         }
-        public override void AddItemToInventory()
+        public override void AddToWorld()
         {
             ResourceManager.AdjustResource(_ItemType, _Count);
         }

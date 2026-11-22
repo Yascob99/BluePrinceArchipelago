@@ -6,44 +6,31 @@ namespace BluePrinceArchipelago.Items
     ///     A class template for handling the item in a mod context.
     /// </summary>
     /// <param name="name">The Name of the item</param>
-    /// <param name="gameObject">The GameObject of the item.</param>
     /// <param name="isUnlocked">If the item is Unlocked.</param>
     /// <param name="count">The number of the item in the pool.</param>
-    public class ModItem(string name, GameObject gameObject, bool isUnlocked, int count = 1)
+    public abstract class ModItem(string name, bool isUnlocked, int count = 1) : IObtainable
     {
-        private string _Name = name;
-        public string Name { get { return _Name; } set { _Name = value; } }
+        private readonly string _name = name;
+        public string Name { get; }
+        protected bool _isUnlocked = isUnlocked;
+        public bool IsUnlocked { get; set; }
+        protected int _count = count;
 
-        private GameObject _GameObj = gameObject;
-        public GameObject GameObj { get { return _GameObj; } set { _GameObj = value; } }
-
-        private bool _IsUnlocked = isUnlocked;
-        public bool IsUnlocked
+        public bool IsUnique()
         {
-            get { return _IsUnlocked; }
-            set { _IsUnlocked = value; }
+            return _count == 1;
         }
 
-        private int _Count = count;
-        public int Count
+        public void StackItem()
         {
-            get { return _Count; }
-            set { _Count = value; }
-        }
-        private bool _IsUnique = false;
-        public bool IsUnique
-        {
-            get { return _IsUnique; }
-            set { _IsUnique = value; }
-        }
+            ++_count;
+        } 
 
-        /// <summary>
-        ///     Handles adding the item to the player inventory.
-        /// </summary>
-        public virtual void AddItemToInventory()
+        public abstract void AddToWorld();
+
+        public virtual bool IsPersistant()
         {
-            // Put out an error if this method was not properly overriden. There should be no base moditems.
-            Logging.LogError("Error: The Base Moditem.AddItemToInventory method should be overriden.");
+            return false;
         }
     }
 }

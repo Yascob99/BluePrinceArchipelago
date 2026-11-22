@@ -907,7 +907,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="itemToAdd">The junk item to add.</param>
         /// <param name="count">The number of that item to add to the pool.</param>
-        public static void AddItem(JunkItem itemToAdd, int count = 1)
+        public static void AddItem(ResourceItem itemToAdd, int count = 1)
         {
             foreach (ModItem item in JunkItemList)
             {
@@ -1058,7 +1058,7 @@ namespace BluePrinceArchipelago.Items
             else if (ItemDict.ContainsKey(itemInfo.ItemName))
             {
                 item = ItemDict[itemInfo.ItemName];
-                item.AddItemToInventory();
+                item.AddToWorld();
                 return;
             }
             else
@@ -1234,40 +1234,40 @@ namespace BluePrinceArchipelago.Items
             AddItem(new UniqueItem("TORCH", GetInventoryItem("TORCH"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
 
             // Permanent Items
-            AddItem(new PermanentItem("1 Permanent Dice", null, false, "Dice", 1));
-            AddItem(new PermanentItem("2 Permanent Dice", null, false, "Dice", 2));
-            AddItem(new PermanentItem("1 Permanent Keys", null, false, "Keys", 1));
-            AddItem(new PermanentItem("2 Permanent Keys", null, false, "Keys", 2));
-            AddItem(new PermanentItem("1 Permanent Steps", null, false, "Steps", 1));
-            AddItem(new PermanentItem("2 Permanent Steps", null, false, "Steps", 2));
-            AddItem(new PermanentItem("5 Permanent Steps", null, false, "Steps", 5));
-            AddItem(new PermanentItem("10 Permanent Steps", null, false, "Steps", 10));
-            AddItem(new PermanentItem("1 Permanent Gems", null, false, "Gems", 1));
-            AddItem(new PermanentItem("2 Permanent Gems", null, false, "Gems", 2));
-            AddItem(new PermanentItem("1 Permanent Luck", null, false, "Luck", 1));
-            AddItem(new PermanentItem("2 Permanent Luck", null, false, "Luck", 2));
+            AddItem(new ResourceItem("1 Permanent Dice", false, "Dice", 1, true));
+            AddItem(new ResourceItem("2 Permanent Dice", false, "Dice", 2, true));
+            AddItem(new ResourceItem("1 Permanent Keys", false, "Keys", 1, true));
+            AddItem(new ResourceItem("2 Permanent Keys", false, "Keys", 2, true));
+            AddItem(new ResourceItem("1 Permanent Steps", false, "Steps", 1, true));
+            AddItem(new ResourceItem("2 Permanent Steps", false, "Steps", 2, true));
+            AddItem(new ResourceItem("5 Permanent Steps", false, "Steps", 5, true));
+            AddItem(new ResourceItem("10 Permanent Steps", false, "Steps", 10, true));
+            AddItem(new ResourceItem("1 Permanent Gems", false, "Gems", 1, true));
+            AddItem(new ResourceItem("2 Permanent Gems", false, "Gems", 2, true));
+            AddItem(new ResourceItem("1 Permanent Luck", false, "Luck", 1, true));
+            AddItem(new ResourceItem("2 Permanent Luck", false, "Luck", 2, true));
 
             // Junk Items
-            AddItem(new JunkItem("1 Allowance", null, false, "Allowance", 1));
-            AddItem(new JunkItem("2 Allowance", null, false, "Allowance", 2));
-            AddItem(new JunkItem("1 Stars", null, false, "Stars", 1));
-            AddItem(new JunkItem("2 Stars", null, false, "Stars", 2));
-            AddItem(new JunkItem("5 Stars", null, false, "Stars", 5));
-            AddItem(new JunkItem("Dug Up Nothing", null, true, "Nothing", 1));
-            AddItem(new JunkItem("1 Gold", null, true, "Gold", 1));
-            AddItem(new JunkItem("2 Gold", null, true, "Gold", 2));
-            AddItem(new JunkItem("5 Gold", null, true, "Gold", 5));
-            AddItem(new JunkItem("1 Dice", null, true, "Dice", 1));
-            AddItem(new JunkItem("2 Dice", null, true, "Dice", 2));
-            AddItem(new JunkItem("4 Dice", null, true, "Dice", 4));
-            AddItem(new JunkItem("1 Gems", null, true, "Gems", 1));
-            AddItem(new JunkItem("2 Gems", null, true, "Gems", 2));
-            AddItem(new JunkItem("1 Keys", null, true, "Keys", 1));
-            AddItem(new JunkItem("2 Keys", null, true, "Keys", 2));
-            AddItem(new JunkItem("3 Keys", null, true, "Keys", 3));
-            AddItem(new JunkItem("1 Steps", null, true, "Steps", 1));
-            AddItem(new JunkItem("2 Steps", null, true, "Steps", 2));
-            AddItem(new JunkItem("5 Steps", null, true, "Steps", 5));
+            AddItem(new ResourceItem("1 Allowance", false, "Allowance", 1));
+            AddItem(new ResourceItem("2 Allowance", false, "Allowance", 2));
+            AddItem(new ResourceItem("1 Stars", false, "Stars", 1));
+            AddItem(new ResourceItem("2 Stars", false, "Stars", 2));
+            AddItem(new ResourceItem("5 Stars", false, "Stars", 5));
+            AddItem(new ResourceItem("Dug Up Nothing", true, "Nothing", 1));
+            AddItem(new ResourceItem("1 Gold", true, "Gold", 1));
+            AddItem(new ResourceItem("2 Gold", true, "Gold", 2));
+            AddItem(new ResourceItem("5 Gold", true, "Gold", 5));
+            AddItem(new ResourceItem("1 Dice", true, "Dice", 1));
+            AddItem(new ResourceItem("2 Dice", true, "Dice", 2));
+            AddItem(new ResourceItem("4 Dice", true, "Dice", 4));
+            AddItem(new ResourceItem("1 Gems", true, "Gems", 1));
+            AddItem(new ResourceItem("2 Gems", true, "Gems", 2));
+            AddItem(new ResourceItem("1 Keys", true, "Keys", 1));
+            AddItem(new ResourceItem("2 Keys", true, "Keys", 2));
+            AddItem(new ResourceItem("3 Keys", true, "Keys", 3));
+            AddItem(new ResourceItem("1 Steps", true, "Steps", 1));
+            AddItem(new ResourceItem("2 Steps", true, "Steps", 2));
+            AddItem(new ResourceItem("5 Steps", true, "Steps", 5));
 
             // Traps
             AddTrap(new LoseTrap("Trap Take Steps 1", "Steps", -1));
