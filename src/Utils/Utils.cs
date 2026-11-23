@@ -325,6 +325,7 @@ namespace BluePrinceArchipelago.Utils
         /// </summary>
         /// <param name="parent">The parent object to search.</param>
         /// <param name="name">The name of the child object to find.</param>
+        /// <param name="caseSensitive">Whether the matching should match case.</param>
         /// <returns>The child GameObject. Null if not found.</returns>
         public static GameObject GetChild(this GameObject parent, string name, bool caseSensitive = false) {
             for (int i = 0; i < parent.transform.childCount; i++)

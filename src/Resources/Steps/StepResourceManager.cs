@@ -450,7 +450,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Sets the "old step" FsmInt in the StepManager to the provided int value.
         /// </summary>
-        /// <param name="value">The value to set the "old step" FsmInt to.<param>
+        /// <param name="value">The value to set the "old step" FsmInt to.</param>
         /// <returns>The int value that the "old step" FsmInt was set to</returns>
         private int SetOldStepCount(int value)
         {
@@ -470,7 +470,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Sets the "Adjustment Amount" FsmInt in the StepManager to the provided int value.
         /// </summary>
-        /// <param name="value">The value to set the "Adjustment Amount" FsmInt to.<param>
+        /// <param name="value">The value to set the "Adjustment Amount" FsmInt to.</param>
         /// <returns>The int value that the "Adjustment Amount" FsmInt was set to</returns>
         private int SetAdjustmentAmount(int value)
         {
@@ -489,7 +489,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Sets the "target steps" FsmInt in the StepManager to the provided int value.
         /// </summary>
-        /// <param name="value">The value to set the "target steps" FsmInt to.<param>
+        /// <param name="value">The value to set the "target steps" FsmInt to.</param>
         /// <returns>The int value that the "target steps" FsmInt was set to</returns>
         private int SetTargetSteps(int value)
         {
@@ -508,7 +508,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Sets the "old steps to compare" FsmInt in the StepManager to the provided int value.
         /// </summary>
-        /// <param name="value">The value to set the "old steps to compare" FsmInt to.<param>
+        /// <param name="value">The value to set the "old steps to compare" FsmInt to.</param>
         /// <returns>The int value that the "old steps to compare" FsmInt was set to</returns>
         private int SetOldStepsToCompare(int value)
         {

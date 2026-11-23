@@ -50,7 +50,7 @@ namespace BluePrinceArchipelago.Resources
 
         /// <summary>
         ///     Gets the CallMethod FsmStateAction for UnFreeze/QuickUnfreeze
-        /// </summary
+        /// </summary>
         public static CallMethod GetUnFreezeMethod => GetCallMethod("UnFreeze");
 
         /// <summary>
