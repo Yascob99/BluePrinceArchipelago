@@ -29,8 +29,8 @@ namespace BluePrinceArchipelago.Items
     public static class ModItemManager
     {
         public static List<PermanentItem> PermanentItemList = [];
-        public static List<UniqueItem> UniqueItemList = new();
-        public static List<JunkItem> JunkItemList = new();
+        public static List<GameUniqueItem> UniqueItemList = new();
+        public static List<ResourceItem> JunkItemList = new();
         public static Dictionary<string, ModItem> ItemDict = new(); //Item name is the key, the type of item is the value.
         public static PlayMakerArrayListProxy PreSpawn = new();
         public static PlayMakerArrayListProxy EstateItems = new();
@@ -98,7 +98,7 @@ namespace BluePrinceArchipelago.Items
                             state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
                         }
                     }
-                    GameObject spawnObj = FindSpawnObject(item.Name) ?? item.GameObj;
+                    GameObject spawnObj = FindSpawnObject(item.Name) ?? item._gameObj;
                     AddSwirly(item, spawnObj);
                 }
                 else {
@@ -532,7 +532,7 @@ namespace BluePrinceArchipelago.Items
             GameObject spawnObj = FindSpawnObject(item.Name);
             if (spawnObj == null)
             {
-                spawnObj = item.GameObj;
+                spawnObj = item._gameObj;
             }
             if (spawnObj == null)
             {
@@ -963,9 +963,9 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the junk item to find.</param>
         /// <returns>The JunkItem or null if not found.</returns>
-        public static JunkItem GetJunkItem(string name)
+        public static ResourceItem GetJunkItem(string name)
         {
-            foreach (JunkItem item in JunkItemList)
+            foreach (ResourceItem item in JunkItemList)
             {
                 
                 if (item.Name.ToLower() == name.ToLower())
@@ -1162,76 +1162,76 @@ namespace BluePrinceArchipelago.Items
         {
             //Unique Items
             //  Keys
-            AddItem(new UniqueItem("CAR KEYS", GetInventoryItem("CAR KEYS"), false, ItemSanityType.Key, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("KEYCARD", GetInventoryItem("KEYCARD"), false, ItemSanityType.Key));
-            AddItem(new UniqueItem("SILVER KEY", GetInventoryItem("SILVER KEY"), false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
-            AddItem(new UniqueItem("KEY 8", GetInventoryItem("KEY 8"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("BASEMENT KEY", GetInventoryItem("BASEMENT KEY"), false, ItemSanityType.Key));
-            AddItem(new UniqueItem("VAULT KEY 149", GetInventoryItem("VAULT KEY 149"), false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 233", GetInventoryItem("VAULT KEY 233"), false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 304", GetInventoryItem("VAULT KEY 304"), false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 370", GetInventoryItem("VAULT KEY 370"), false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("DIARY KEY", GetInventoryItem("DIARY KEY"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("PRISM KEY_0", GetInventoryItem("PRISM KEY"), false, ItemSanityType.Key, false, false, ["Locksmith"]));
-            AddItem(new UniqueItem("KEY of Aries", GetInventoryItem("KEY of Aries"), false, ItemSanityType.Key, false));
-            AddItem(new UniqueItem("SECRET GARDEN KEY", GetInventoryItem("SECRET GARDEN KEY"), false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
-            AddItem(new UniqueItem("MICROCHIP 1", GetInventoryItem("MICROCHIP 1"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("MICROCHIP 2", GetInventoryItem("MICROCHIP 2"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("MICROCHIP 3", GetInventoryItem("MICROCHIP 3"), false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("CABINET KEY 1", GetInventoryItem("CABINET KEY 1"), false, ItemSanityType.Key, true, true)); //Patio
-            AddItem(new UniqueItem("CABINET KEY 2", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true)); //Laundry
-            AddItem(new UniqueItem("CABINET KEY 3", GetInventoryItem("CABINET KEY 2"), false, ItemSanityType.Key, true, true)); //
+            AddItem(new UniqueItem("CAR KEYS", false, ItemSanityType.Key, true, false, ["Locksmith"]));
+            AddItem(new UniqueItem("KEYCARD", false, ItemSanityType.Key));
+            AddItem(new UniqueItem("SILVER KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
+            AddItem(new UniqueItem("KEY 8", false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("BASEMENT KEY", false, ItemSanityType.Key));
+            AddItem(new UniqueItem("VAULT KEY 149", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new UniqueItem("VAULT KEY 233", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new UniqueItem("VAULT KEY 304", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new UniqueItem("VAULT KEY 370", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new UniqueItem("DIARY KEY", false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("PRISM KEY_0", false, ItemSanityType.Key, false, false, ["Locksmith"]));
+            AddItem(new UniqueItem("KEY of Aries", false, ItemSanityType.Key, false));
+            AddItem(new UniqueItem("SECRET GARDEN KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
+            AddItem(new UniqueItem("MICROCHIP 1", false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("MICROCHIP 2", false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("MICROCHIP 3", false, ItemSanityType.Key, true, true));
+            AddItem(new UniqueItem("CABINET KEY 1", false, ItemSanityType.Key, true, true)); //Patio
+            AddItem(new UniqueItem("CABINET KEY 2", false, ItemSanityType.Key, true, true)); //Laundry
+            AddItem(new UniqueItem("CABINET KEY 3", false, ItemSanityType.Key, true, true)); //
 
             //  Standard Items
-            AddItem(new UniqueItem("BATTERY PACK", GetInventoryItem("BATTERY PACK"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("BROKEN LEVER", GetInventoryItem("BROKEN LEVER"), false, ItemSanityType.Standard, true, false, ["Dig"]));
-            AddItem(new UniqueItem("MAGNIFYING GLASS", GetInventoryItem("MAGNIFYING GLASS"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("METAL DETECTOR", GetInventoryItem("METAL DETECTOR"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SHOVEL", GetInventoryItem("SHOVEL"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SLEDGE HAMMER", GetInventoryItem("SLEDGE HAMMER"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("TELESCOPE", GetInventoryItem("TELESCOPE"), false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("RUNNING SHOES", GetInventoryItem("RUNNING SHOES"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SALT SHAKER", GetInventoryItem("SALT SHAKER"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SLEEPING MASK", GetInventoryItem("SLEEPING MASK"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("COIN PURSE", GetInventoryItem("COIN PURSE"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("COUPON BOOK", GetInventoryItem("COUPON BOOK"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("LOCK PICK KIT", GetInventoryItem("LOCK PICK KIT"), false, ItemSanityType.Standard, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", GetInventoryItem("LUCKY RABBIT'S FOOT"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("TREASURE MAP", GetInventoryItem("TREASURE MAP"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("STOPWATCH", GetInventoryItem("STOPWATCH"), false, ItemSanityType.Standard, true, false, ["Dig"]));
-            AddItem(new UniqueItem("REPELLENT", GetInventoryItem("REPELLENT"), false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("WATERING CAN", GetInventoryItem("WATERING CAN"), false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("LUNCH BOX", GetInventoryItem("LUNCH BOX"), false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("CURSED EFFIGY", GetInventoryItem("CURSED EFFIGY"), false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("CROWN", GetInventoryItem("CROWN"), false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("PAPER CROWN", GetInventoryItem("PAPER CROWN"), false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("GEAR WRENCH", GetInventoryItem("GEAR WRENCH"), false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("COMPASS", GetInventoryItem("COMPASS"), false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("HALL PASS", GetInventoryItem("HALL PASS"), false, ItemSanityType.Standard, true, true));
+            AddItem(new UniqueItem("BATTERY PACK", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("BROKEN LEVER", false, ItemSanityType.Standard, true, false, ["Dig"]));
+            AddItem(new UniqueItem("MAGNIFYING GLASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("METAL DETECTOR", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("SHOVEL", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("SLEDGE HAMMER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("TELESCOPE", false, ItemSanityType.Standard, true, true));
+            AddItem(new UniqueItem("RUNNING SHOES", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("SALT SHAKER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("SLEEPING MASK", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("COIN PURSE", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("COUPON BOOK", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("LOCK PICK KIT", false, ItemSanityType.Standard, true, false, ["Locksmith"]));
+            AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("TREASURE MAP", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("STOPWATCH", false, ItemSanityType.Standard, true, false, ["Dig"]));
+            AddItem(new UniqueItem("REPELLENT", false, ItemSanityType.Standard, false, true));
+            AddItem(new UniqueItem("WATERING CAN", false, ItemSanityType.Standard, false, true));
+            AddItem(new UniqueItem("LUNCH BOX", false, ItemSanityType.Standard, false, true));
+            AddItem(new UniqueItem("CURSED EFFIGY", false, ItemSanityType.Standard, false, true));
+            AddItem(new UniqueItem("CROWN", false, ItemSanityType.Standard));
+            AddItem(new UniqueItem("PAPER CROWN", false, ItemSanityType.Standard, true, true));
+            AddItem(new UniqueItem("GEAR WRENCH", false, ItemSanityType.Standard, true, true));
+            AddItem(new UniqueItem("COMPASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new UniqueItem("HALL PASS", false, ItemSanityType.Standard, true, true));
 
             // Workshop Items - TODO
-            AddItem(new UniqueItem("Electromagnet", GetInventoryItem("POWERED ELECTROMAGNET"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Lucky Purse", GetInventoryItem("LUCKY PURSE"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Pick Sound Amplifier", GetInventoryItem("PICK SOUND AMPLIFIER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Burning Glass", GetInventoryItem("BURNING GLASS"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Detector Shovel", GetInventoryItem("DETECTOR SHOVEL"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Dowsing Rod", GetInventoryItem("DOWSING ROD"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Jack Hammer", GetInventoryItem("JACK HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Power Hammer", GetInventoryItem("POWER HAMMER"), false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Electromagnet", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Lucky Purse", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Pick Sound Amplifier", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Burning Glass", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Detector Shovel", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Dowsing Rod", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Jack Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new UniqueItem("Power Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
 
             // Showroom
-            AddItem(new UniqueItem("CHRONOGRAPH", GetInventoryItem("CHRONOGRAPH"), false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("EMERALD BRACELET", GetInventoryItem("EMERALD BRACELET"), false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("MASTER KEY", GetInventoryItem("MASTER KEY"), false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("MOON PENDANT", GetInventoryItem("MOON PENDANT"), false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("ORNATE COMPASS", GetInventoryItem("ORNATE COMPASS"), false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("SILVER SPOON", GetInventoryItem("SLIVER SPOON"), false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new UniqueItem("CHRONOGRAPH", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new UniqueItem("EMERALD BRACELET", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new UniqueItem("MASTER KEY", false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
+            AddItem(new UniqueItem("MOON PENDANT", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new UniqueItem("ORNATE COMPASS", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new UniqueItem("SILVER SPOON", false, ItemSanityType.SpecialShop, true, false));
 
             // Armory - TODO
-            AddItem(new UniqueItem("MORNING STAR", GetInventoryItem("MORNING STAR"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
-            AddItem(new UniqueItem("THE AXE", GetInventoryItem("THE AXE"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
-            AddItem(new UniqueItem("KNIGHTS SHIELD", GetInventoryItem("KNIGHTS SHIELD"), false, ItemSanityType.SpecialShop, true, false, ["Dig", "Armory"]));
-            AddItem(new UniqueItem("TORCH", GetInventoryItem("TORCH"), false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new UniqueItem("MORNING STAR", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new UniqueItem("THE AXE", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new UniqueItem("KNIGHTS SHIELD", false, ItemSanityType.SpecialShop, true, false, ["Dig", "Armory"]));
+            AddItem(new UniqueItem("TORCH", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
 
             // Permanent Items
             AddItem(new ResourceItem("1 Permanent Dice", false, "Dice", 1, true));
@@ -1296,7 +1296,7 @@ namespace BluePrinceArchipelago.Items
                 {
                     gameObj = GameObjectExtensions.FindGameObject(name);
                 }
-                item.GameObj = gameObj;
+                item._gameObj = gameObj;
             }
         }
 

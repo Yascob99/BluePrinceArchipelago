@@ -200,7 +200,7 @@ namespace BluePrinceArchipelago.Patches
                 else if (targetName == "Global Manager" && eventName.Contains("Pickup"))
                 {
                     Logging.Log(eventName, "Events");
-                    UniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
+                    GameUniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
                     if (item != null)
                     {
                         // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.

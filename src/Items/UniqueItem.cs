@@ -21,256 +21,23 @@ using UnityEngine;
 
 
 namespace BluePrinceArchipelago.Items
-{
-
-    /// <summary>
-    ///     The template for Unique items.
-    /// </summary>
-    public class UniqueItem : ModItem
-    {
-
-        private bool _IsUnique = true;
-        public new bool IsUnique
-        {
-            get { return _IsUnique; }
-            set { _IsUnique = value; }
-        }
-        private bool _IsPrespawn;
-
-        public bool IsPrespawn { get; set; }
-
-        private bool _HasBeenFound = false;
-
-        private ItemSanityType _SanityType;
-        public ItemSanityType SanityType
-        {
-            get { return _SanityType; }
-            set { _SanityType = value; }
-        }
-
-        private readonly List<GameObject> _GameModelInstancesWithSwirly = [];
-        
-        private static List<string> _ShopTags = new();
-
-        public bool IsPersistent { get; set; }
-
-        public bool IsCommissary { set; get; } = false;
-
-        public bool IsDig { set; get; } = false;
-
-        public bool IsLocksmith { set; get; } = false;
-
-        public CallMethod CommissaryEvent { get; set; } = null;
-
-        public CallMethod DigEvent { get; set; } = null;
-
-        public CallMethod LocksmithEvent { get; set; } = null;
-
-        public FsmState CommissaryState { get; set; } = null;
-
-        public FsmState DigState { get; set; } = null;
-
-        public FsmState LocksmithState { get; set; } = null;
-
-        public FsmState TradingState { get; set; } = null;
-
-        public bool HasBeenFound
-        {
-            get { return _HasBeenFound; }
-            set
-            {
-                // Send the item found event on the first time it is found.
-                if (!_HasBeenFound && value)
-                {
-                    _HasBeenFound = value;
-                }
-                // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
-            }
-        }
-        /// <summary>
-        ///     Creates a UniqueItem
-        /// </summary>
-        /// <param name="name">The name of the object.</param>
-        /// <param name="gameObject">The GameObject of the item.</param>
-        /// <param name="isUnlocked">If the item is unlocked.</param>
-        /// <param name="sanityType">The Sanitytype of the item. Defaults to none.</param>
-        /// <param name="isPreSpawn">If the item is usually in the prespawn list. Defualts to true.</param>
-        /// <param name="isPersistent">If the item is persists across scene transitions.</param>
-        /// <param name="shopTags">What shops the item can be in.</param>
-        public UniqueItem(string name, GameObject gameObject, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, gameObject, isUnlocked)
-        {
-            _IsPrespawn = isPreSpawn;
-            _SanityType = sanityType;
-            IsPersistent = isPersistent;
-            _ShopTags = shopTags ?? new List<string>();
-            foreach (string tag in _ShopTags) {
-                if (tag == "Commissary")
-                {
-                    IsCommissary = true;
-                }
-                else if (tag == "Dig")
-                {
-                    IsDig = true;
-                }
-                else if (tag == "Locksmith") {
-                    IsLocksmith = true;
-                }
-            }
-
-            CustomFsmMethodManager.AddItemPickedUpMethod(this);
-            if (IsCommissary)
-            {
-                CustomFsmMethodManager.AddItemBoughtMethod(this);
-                CommissaryEvent = CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemBoughtMethodName(name));
-            }
-            if (IsDig)
-            {
-                CustomFsmMethodManager.AddItemDugUpMethod(this);
-                DigEvent = CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemDugUpMethodName(name));
-            }
-            if (IsLocksmith)
-            {
-                CustomFsmMethodManager.AddItemBoughtMethod(this);
-                LocksmithEvent = CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemBoughtMethodName(name));
-            } 
-        }
-
-        /// <summary>
-        ///     Removes the item from the prespawn and estate pool.
-        /// </summary>
-        public void RemoveFromPool()
-        {
-            if (!ApplySanity())
-            {
-                return;
-            }
-            
-            if (HasBeenFound)
-            {
-                // If item has been found and is not unlocked, remove it from the pool. Otherwise Vanilla behavior.
-                if (!IsUnlocked)
-                {
-                    if (ModItemManager.PreSpawn.Contains(GameObj))
-                    {
-                        ModItemManager.PreSpawn.Remove(GameObj, "GameObject");
-                    }
-                    if (ModItemManager.EstateItems.Contains(GameObj))
-                    {
-                        ModItemManager.EstateItems.Remove(GameObj, "GameObject");
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        ///     Handles adding the item to the inventory.
-        /// </summary>
-        public override void AddItemToInventory()
-        {
-            Logging.LogWarning(Name);
-            if (!ApplySanity())
-            {
-                return;
-            }
-            if (!IsUnlocked)
-            {
-                IsUnlocked = true;
-            }
-            if (GameObj == null)
-            {
-                if (_IsPrespawn)
-                {
-                    GameObj = ModItemManager.GetInventoryItem(Name);
-                }
-            }
-            if (GameObj != null)
-            {
-                if (Commissary.CommissaryStates.ContainsKey(Name))
-                {
-                    //Re-enable commissary purchases of the item.
-                    Commissary.CanStock.Add(Name);
-                }
-                // This may not cause it to re-trigger.
-                // Disable this game action so it doesn't try and display 2 UIs.
-                Logging.LogWarning($"Attempting to add {Name} to Inventory");
-                GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-                GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
-                if (icon != null && InventoryIcons != null)
-                {
-                    ModItemManager.PickedUp.AddIfUnique(GameObj);
-                    InventoryIcons.Add(icon, "GameObject");
-                    ModItemManager.PreSpawn.RemoveIfExists(Name);
-                    if (Name == "RUNNING SHOES")
-                    {
-                        ModInstance.RunningEngine.SendEvent("Update");
-                    }
-                    if (Name == "STOPWATCH") {
-                        GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
-                    }
-                }
-               
-            }
-        }
-
-        /// <summary>
-        ///     Checks if the sanity is relevant to the current item.
-        /// </summary>
-        /// <returns></returns>
-        public bool ApplySanity()
-        {
-            return SanityType switch
-            {
-                ItemSanityType.None => false,
-                ItemSanityType.Standard => ArchipelagoOptions.StandardItemSanity,
-                ItemSanityType.Workshop => ArchipelagoOptions.WorkshopSanity,
-                ItemSanityType.UpgradeDisk => ArchipelagoOptions.UpgradeDiskSanity,
-                ItemSanityType.Key => ArchipelagoOptions.KeySanity,
-                _ => false,
-            };
-        }
-
-        public void RegisterModel(GameObject gameInstance)
-        {
-            _GameModelInstancesWithSwirly.Add(gameInstance);
-        }
-
-        public void DeleteAllSwirlies()
-        {
-            foreach (GameObject gameInstance in _GameModelInstancesWithSwirly)
-            {
-                if (gameInstance == null)
-                {
-                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
-                }
-                GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
-                if (swirlyEffect == null)
-                {
-                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
-                }
-                GameObject.Destroy(swirlyEffect);
-            }
-            _GameModelInstancesWithSwirly.Clear();
-        }
-    }
-
-
+{ 
     /// <summary>
     ///     A manager for common operations associated with Unique Items.
     /// </summary>
     public class UniqueItemManager
     {
-        public List<UniqueItem> SpawnedItems = new List<UniqueItem>();
+        public List<GameUniqueItem> SpawnedItems = [];
+        //TODO : Bring UniqueItemList here
 
         /// <summary>
         ///     Code to be run on end of day.
         /// </summary>
         public void EndOfDay()
         {
-            foreach (UniqueItem item in SpawnedItems)
+            foreach (GameUniqueItem item in SpawnedItems)
             {
-                item.DeleteAllSwirlies();
+                item.EndOfDay();
             }
             SpawnedItems.Clear();
         }
@@ -280,103 +47,9 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void StartOfDay()
         {
-            Dictionary<string, string> CommissaryStates = new Dictionary<string, string>()
+            foreach (GameUniqueItem item in ModItemManager.UniqueItemList)
             {
-                {"MAGNIFYING GLASS", "Mag Glass" },
-                {"SHOVEL", "Shovel Purchase"},
-                {"SALT SHAKER", "Salt Shaker Purchase"},
-                {"COMPASS", "Compass Purchase"},
-                {"SLEDGE HAMMER", "Sledge Hammer Purchase"},
-                {"SLEEPING MASK", "Sleep Mask Purchase"},
-                {"RUNNING SHOES", "Running Shoes Purchase"},
-                {"METAL DETECTOR", "MEtal Detector Purchase"}
-            };
-            Dictionary<string, string> DigStates = new Dictionary<string, string>()
-            {
-                {"BROKEN LEVER", "Broken Lever" },
-                {"VAULT KEY 149", "Vault Key 149"},
-                {"VAULT KEY 233", "Vault Key 233"},
-                {"VAULT KEY 304", "Vault Key 304"},
-                {"VAULT KEY 370", "Vault Key 370"},
-                {"SILVER KEY", "Silver Key"},
-                {"SECRET GARDEN KEY", "Secret Garden Key"},
-                {"STOPWATCH", "Stopwatch"},
-                {"KNIGHTS SHIELD", "Knight's Sheild"}
-            };
-            Dictionary<string, string> LocksmithStates = new Dictionary<string, string>()
-            {
-                {"SECRET GARDEN KEY", "Secret Garden Key Purchase"},
-                {"PRISM KEY_0", "Prism Key Purchase"},
-                {"SILVER KEY", "Silver Key Purchase"},
-                {"CAR KEYS", "Car Keys Purchase"},
-                {"MASTER KEY", "Master Key Purchase"},
-                {"LOCK PICK KIT", "Lockpick Kit Purchase"}
-            };
-
-            foreach (UniqueItem item in ModItemManager.UniqueItemList)
-            {
-                // Handles start of Day Item Removal
-                item.RemoveFromPool();
-                // Handles updating the Commissary Menu
-                if (item.IsCommissary)
-                {
-                    FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item.Name.Trim()]);
-                    item.CommissaryState = state;
-                    if (state != null)
-                    {
-                        state.AddAction(item.CommissaryEvent);
-                        //If the item is not unlocked, prevent it from being added to inventory.
-                        if (!item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.DisableActionsOfType<ArrayListAdd>();
-                        }
-                    }
-                }
-                if (item.IsDig) {
-                    FsmState state = ModInstance.DigEngine?.GetState(DigStates[item.Name.Trim()]);
-                    item.DigState = state;
-                    if (state != null)
-                    {
-                        state.InsertAction(item.DigEvent, 6);
-                        //If the item is not unlocked, prevent it from being added to inventory.
-                        if (!item.IsUnlocked && item.ApplySanity())
-                        {
-                            //Disable the actions that add the item to inventory.
-                            state.DisableActionsOfType<ArrayListAdd>();
-                        }
-                    }
-                }
-                if (item.IsLocksmith)
-                {
-                    // Does not load properly unless loaded like so.
-                    FsmState state = GameObject.Find("UI OVERLAY CAM").transform.Find("Locksmith Menu").gameObject.GetComponent<PlayMakerFSM>().GetState(LocksmithStates[item.Name.Trim()]);
-                    item.LocksmithState = state;
-                    if (state != null)
-                    {
-                        state.AddAction(item.LocksmithEvent);
-                        // If the item is not unlocked, prevent it from being added to inventory.
-                        if (!item.IsUnlocked && item.ApplySanity())
-                        {
-                            Logging.LogWarning($"Attempting to add hook for {item.Name} to Locksmith in state: {state.name}");
-                            //Disable the actions that add the item to inventory.
-                            state.DisableActionsOfType<ArrayListAdd>();
-                        }
-                    }
-                }
-                // Despawn Microchips if Found but not unlocked (since they don't use the spawn system).
-                if (item.HasBeenFound && item.Name == "MICROCHIP 1" && !item.IsUnlocked) { 
-                    GameObject.Find("TERRAIN/_GAMEPLAY (terrain)/New Clue Dig - menu/COUNTERTOP").SetActive(false);
-                }
-                else if (item.HasBeenFound && item.Name == "MICROCHIP 2" && !item.IsUnlocked)
-                {
-                    // Despawn the microchip if it has been autospawned.
-                    GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2 BROKEN/MICRO 2 SPAWN").SetActive(false);
-                }
-                else if (item.HasBeenFound && item.Name == "MICROCHIP 3" && !item.IsUnlocked) {
-                    GameObject.Find("TERRAIN/EAST SECTOR/_GROTTO/_GROTTO GAMEPLAY/Microchip Pillar/Microchip 3").SetActive(false);
-                }
-                
+                item.StartOfDay();   
             }
         }
 
@@ -455,14 +128,15 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
+
         /// <summary>
         ///     Checks if the item has been picked up before.
         /// </summary>
         /// <param name="name">the name of the item</param>
         /// <returns>True if item is spawned, false if not.</returns>
-        public UniqueItem GetIfSpawned(string name)
+        public GameUniqueItem GetIfSpawned(string name)
         {
-            foreach (UniqueItem item in SpawnedItems)
+            foreach (GameUniqueItem item in SpawnedItems)
             {
                 string[] nameparts = item.Name.Split(" ");
                 foreach (string part in nameparts)
@@ -477,6 +151,7 @@ namespace BluePrinceArchipelago.Items
             }
             return null;
         }
+
         /// <summary>
         ///     Finds the state in the Global Manager associated with the given item's pickup. Returns null if not found.    
         /// </summary>
@@ -519,18 +194,5 @@ namespace BluePrinceArchipelago.Items
             return null;
         }
 
-    }
-
-    /// <summary>
-    ///     The enum for the Sanity Types.
-    /// </summary>
-    public enum ItemSanityType
-    {
-        None,
-        Standard,
-        Workshop,
-        UpgradeDisk,
-        Key,
-        SpecialShop,
     }
 }

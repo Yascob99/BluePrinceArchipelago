@@ -77,7 +77,7 @@ namespace BluePrinceArchipelago.FsmMethods
         /// </summary>
         /// <param name="item">The Unique Item that is picked up.</param>
         /// <returns></returns>
-        public static RegisteredCustomFsmMethod AddItemPickedUpMethod(UniqueItem item)
+        public static RegisteredCustomFsmMethod AddItemPickedUpMethod(GameUniqueItem item)
         {
             string pickedUpName = GetItemPickedUpMethodName(item.Name);
             RegisteredCustomFsmMethod Method = new ItemPickedUp(item.Name);
@@ -95,7 +95,7 @@ namespace BluePrinceArchipelago.FsmMethods
         /// </summary>
         /// <param name="item">The Unique Item that is picked up.</param>
         /// <returns></returns>
-        public static RegisteredCustomFsmMethod AddItemBoughtMethod(UniqueItem item)
+        public static RegisteredCustomFsmMethod AddItemBoughtMethod(GameUniqueItem item)
         {
             string boughtName = GetItemBoughtMethodName(item.Name);
             RegisteredCustomFsmMethod Method = new ItemBought(item.Name);
@@ -114,7 +114,7 @@ namespace BluePrinceArchipelago.FsmMethods
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static RegisteredCustomFsmMethod AddItemDugUpMethod(UniqueItem item)
+        public static RegisteredCustomFsmMethod AddItemDugUpMethod(GameUniqueItem item)
         {
             string dugUpName = GetItemDugUpMethodName(item.Name);
             RegisteredCustomFsmMethod Method = new ItemDugUp(item.Name);
@@ -134,7 +134,7 @@ namespace BluePrinceArchipelago.FsmMethods
         /// <param name="item">Workshop item.</param>
         /// <param name="currentInstance">Instance number of the workshop room.</param>
         /// <returns></returns>
-        public static RegisteredCustomFsmMethod AddItemOnCraftMethod(UniqueItem item, int currentInstance)
+        public static RegisteredCustomFsmMethod AddItemOnCraftMethod(GameUniqueItem item, int currentInstance)
         {
             string CraftedMethodName = GetItemOnCraftMethodName(item.Name, currentInstance);
             RegisteredCustomFsmMethod Method = new LockContraption(item.Name, currentInstance);
