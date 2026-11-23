@@ -402,7 +402,7 @@ public class ArchipelagoClient
                 string location = ServerData.LocationDict[locationid];
                 if (location.StartsWith("First Pickup - "))
                 {
-                    UniqueItem item = ModItemManager.GetUniqueItem(location.Replace("First Pickup - ", ""));
+                    GameUniqueItem item = GameItemManager.GetInstance().GetGameUniqueItem(location.Replace("First Pickup - ", ""));
                     item.HasBeenFound = true;
                 }
                 else if (location.StartsWith("First Draft - "))
@@ -411,7 +411,7 @@ public class ArchipelagoClient
                     room.IsUnlocked = true;
                 }
                 // Try Upgrade Disks. If that fails, try Permanent Unlocks.
-                else if (!ModItemManager.UpgradeDisks.UnlockLocationIfExists(location))
+                else if (!GameItemManager.UpgradeDisks.UnlockLocationIfExists(location))
                 {
                     PermanentUnlock permSolved = Unlocks.GetPermanentSolveByLocation(location);
                     if (permSolved != null)
@@ -430,20 +430,20 @@ public class ArchipelagoClient
         {
             if (item.ItemName.ToUpper().Contains("UPGRADE DISK")) {
                 string location = item.ItemName.ToUpper().Replace("UPGRADE DISK ", "");
-                if (!ModItemManager.UpgradeDisks.RecievedItems.Contains(location))
+                if (!GameItemManager.UpgradeDisks.RecievedItems.Contains(location))
                 {
-                    ModItemManager.UpgradeDisks.RecievedItems.Add(location);
+                    GameItemManager.UpgradeDisks.RecievedItems.Add(location);
                 }
             }
-            UniqueItem uniqueItem = ModItemManager.GetUniqueItem(item.ItemName);
-            PermanentItem permanentItem = ModItemManager.GetPermanentItem(item.ItemName);
+            ArchipelagoUniqueItem uniqueItem = ModItemManager.GetUniqueItem(item.ItemName);
+            ResourceItem permanentItem = ModItemManager.GetPermanentItem(item.ItemName);
             if (uniqueItem != null)
             {
                 uniqueItem.IsUnlocked = true;
             }
             else if (permanentItem != null) { 
                 permanentItem.IsUnlocked = true;
-                permanentItem.UnlockedCount++;
+                permanentItem.StackItem();
             }
             else
             {
@@ -862,7 +862,7 @@ public class ArchipelagoQueueManager {
                 if (ModInstance.IsInRun)
                 {
                     // Trim the name of the item to remove the upgrade disk part.
-                    ModItemManager.UpgradeDisks.AddItemToInventory(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
+                    GameItemManager.UpgradeDisks.AddToWorld(item.ItemName.ToUpper().Replace("UPGRADE DISK ", ""));
                     return true;
                 }
                 return false;
@@ -926,9 +926,9 @@ public class ArchipelagoQueueManager {
                 
                 // Trim the name of the item to remove the upgrade disk part.
                 string location = item.ItemName.ToUpper().Replace("UPGRADE DISK ", "");
-                if (!ModItemManager.UpgradeDisks.RecievedItems.Contains(location))
+                if (!GameItemManager.UpgradeDisks.RecievedItems.Contains(location))
                 {
-                    ModItemManager.UpgradeDisks.RecievedItems.Add(location);
+                    GameItemManager.UpgradeDisks.RecievedItems.Add(location);
                     return true;
                 }
                 return false;
@@ -947,7 +947,7 @@ public class ArchipelagoQueueManager {
             }
             else if (itemType == "Unique") {
                
-                UniqueItem uItem = ModItemManager.GetUniqueItem(item.ItemName);
+                ArchipelagoUniqueItem uItem = ModItemManager.GetUniqueItem(item.ItemName);
                 if (uItem != null)
                 {
                     uItem.IsUnlocked = true;
@@ -1098,7 +1098,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
     public void ReceiveLocalItem(ItemInfo item, bool ignoreState = false) {
-        ModItemManager.OnItemCheckRecieved(item);
+        ModItemManager.OnItemCheckReceived(item);
         //This may need to be moved to a better place once the item code is better implemented.
     }
     /// <summary>

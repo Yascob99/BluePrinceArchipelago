@@ -255,7 +255,7 @@ namespace BluePrinceArchipelago.Triggers
         /// </summary>
         public static void OnAllowanceEnvelopePickedUp() {
             ResourceManager.RecalculculateStartingItems();
-            ResourceManager.AddStartingItems();
+            //ResourceManager.AddStartingItems();
         }
 
         public static void OnBasementDoorOpened(string location)

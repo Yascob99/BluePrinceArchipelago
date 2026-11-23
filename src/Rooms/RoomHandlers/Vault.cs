@@ -28,7 +28,7 @@ class Vault : RoomHandler
                     PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 370/370 spwn/6")?.GetComponent<PlayMakerFSM>();
                     if (ItemDropFSM != null)
                     {
-                        bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("VAULT");
+                        bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("VAULT");
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;

@@ -30,7 +30,7 @@ namespace BluePrinceArchipelago.Triggers
         /// <param name="spawnedObj">The GameObject for the spawned object.</param>
         public static void OnAfterItemSpawned(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj) 
         {
-            UniqueItem item = ModItemManager.GetUniqueItem(obj.name);
+            GameUniqueItem item = GameItemManager.GetInstance().GetGameUniqueItem(obj.name);
             //Check if Connected in before replacing items.
             if (ArchipelagoClient.Authenticated)
             {
@@ -65,7 +65,7 @@ namespace BluePrinceArchipelago.Triggers
             {
                 string CurrentRoom = GameObject.Find("__SYSTEM/HUD/Room Text").GetComponent<PlayMakerFSM>().GetStringVariable("Current Room").Value;
                 CurrentRoom = CurrentRoom.ToUpper().Replace("'", "").Replace("POST", "POST DYNAMITE"); // HLC, TP Dynamite
-                ModItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
+                GameItemManager.UpgradeDisks.OnSpawn(CurrentRoom, spawnedObj);
             }
             // Check for trunk spawn, and track it.
             if (obj.name.ToLower().Trim().Contains("trunk") && ModInstance.TrunkManager.CheckingForTrunkSpawn && !ModInstance.TrunkManager.TrunkSpawned)
@@ -104,7 +104,7 @@ namespace BluePrinceArchipelago.Triggers
                 }
                 else
                 {
-                    UniqueItem Item = ModItemManager.GetUniqueItem(itemName);
+                    GameUniqueItem Item = GameItemManager.GetInstance().GetGameUniqueItem(itemName);
 
                     if (Item != null)
                     {
@@ -113,21 +113,21 @@ namespace BluePrinceArchipelago.Triggers
 
                             if (Icon != null && InventoryIcons != null)
                             {
-                                ModItemManager.PickedUp.AddIfUnique(OfferedItem);
+                                GameItemManager.PickedUp.AddIfUnique(OfferedItem);
                                 InventoryIcons.Add(Icon, "GameObject");
-                                ModItemManager.PreSpawn.RemoveIfExists(itemName);
+                                GameItemManager.PreSpawn.RemoveIfExists(itemName);
                             }
                         }
                         else
                         {
-                            ModItemManager.PickedUp.RemoveIfExists(itemName);
-                            ModItemManager.PreSpawn.AddIfUnique(OfferedItem);
+                            GameItemManager.PickedUp.RemoveIfExists(itemName);
+                            GameItemManager.PreSpawn.AddIfUnique(OfferedItem);
                         }
                         if (!Item.HasBeenFound)
                         {
                             Item.HasBeenFound = true;
                             ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
-                            ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                            Item.RemoveUniqueItemAPSwirly();
                         }
                     }
                 }
@@ -138,11 +138,11 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers after a Unique Item has been picked up.
         /// </summary>
         /// <param name="Item">the Unique Item of the item that was picked up.</param>
-        public static void OnAfterItemPickup(UniqueItem Item) {
+        public static void OnAfterItemPickup(GameUniqueItem Item) {
             if (!Item.HasBeenFound)
             {
                 Item.HasBeenFound = true;
-                ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                Item.RemoveUniqueItemAPSwirly();
                 Item.DeleteAllSwirlies();
                 // Cabinet Key fixes.
                 if (Item.Name == ITEM.CABINET_KEY_PATIO)
@@ -168,7 +168,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers before a Unique Item has been picked up.
         /// </summary>
         /// <param name="Item">the Unique Item of the item that was picked up.</param>
-        public static void OnBeforeItemPickup(UniqueItem Item) {
+        public static void OnBeforeItemPickup(GameUniqueItem Item) {
             // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
             if (Item.IsUnlocked)
             {
@@ -186,11 +186,11 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on a Unique Item being bought.
         /// </summary>
         /// <param name="Item">the Unique Item of the item that was picked up.</param>
-        public static void OnItemBought(UniqueItem Item) {
+        public static void OnItemBought(GameUniqueItem Item) {
             if (!Item.HasBeenFound)
             {
                 Item.HasBeenFound = true;
-                ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                Item.RemoveUniqueItemAPSwirly();
                 
                 ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
             }
@@ -201,15 +201,12 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on a Unique Item being dug up.
         /// </summary>
         /// <param name="Item">the Unique Item of the item that was picked up.</param>
-        public static void OnItemDugUp(UniqueItem Item) {
-            if (!Item.HasBeenFound)
+        public static void OnItemDugUp(GameUniqueItem Item) {
+            if (!Item.HasBeenFound && !Item.IsUnlocked)
             {
-                if (Item.ApplySanity())
-                {
-                    Item.HasBeenFound = true;
-                    ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
-                }
+                Item.HasBeenFound = true;
+                Item.RemoveUniqueItemAPSwirly();
+                ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
             }
         }
 

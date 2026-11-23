@@ -37,7 +37,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
                     PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_Non Static/AFTER EXPLOSION/2")?.GetComponent<PlayMakerFSM>();
                     if (ItemDropFSM != null)
                     {
-                        bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("TRADING POST DYNAMITE");
+                        bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("TRADING POST DYNAMITE");
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;

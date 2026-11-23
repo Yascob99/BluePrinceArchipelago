@@ -30,7 +30,7 @@ class GreatHall : RoomHandler
 
                     if (ItemDropFSM != null)
                     {
-                        bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GREAT HALL");
+                        bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("GREAT HALL");
                         Logging.LogWarning(found);
                         FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                         CanSpawnDisk.Value = found;

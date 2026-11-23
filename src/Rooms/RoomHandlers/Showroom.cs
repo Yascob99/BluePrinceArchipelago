@@ -124,7 +124,7 @@ public class Showroom : RoomHandler
         {
             string itemName = item.Key;
             string[] stateNames = item.Value;
-            UniqueItem Item = ModItemManager.GetUniqueItem(itemName);
+            GameUniqueItem Item = GameItemManager.GetInstance().GetGameUniqueItem(itemName);
             if (Item != null)
             {
                 if (!Item.IsUnlocked)

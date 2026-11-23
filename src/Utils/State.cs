@@ -181,8 +181,8 @@ namespace BluePrinceArchipelago.Utils
             using (var writer = new StreamWriter(UpgradeDiskStatePath, false))
             {
                 UpgradeDiskData data = new UpgradeDiskData();
-                data.FoundUpgrades = ModItemManager.UpgradeDisks.FoundLocations;
-                data.UsedUpgrades = ModItemManager.UpgradeDisks.UsedLocations;
+                data.FoundUpgrades = GameItemManager.UpgradeDisks.FoundLocations;
+                data.UsedUpgrades = GameItemManager.UpgradeDisks.UsedLocations;
                 writer.Write(JsonConvert.SerializeObject(data));
                 writer.Flush();
             }
@@ -462,8 +462,8 @@ namespace BluePrinceArchipelago.Utils
                     try
                     {
                         UpgradeDiskData data = JsonConvert.DeserializeObject<UpgradeDiskData>(jsonData);
-                        ModItemManager.UpgradeDisks.FoundLocations = data.FoundUpgrades;
-                        ModItemManager.UpgradeDisks.UsedLocations = data.UsedUpgrades;
+                        GameItemManager.UpgradeDisks.FoundLocations = data.FoundUpgrades;
+                        GameItemManager.UpgradeDisks.UsedLocations = data.UsedUpgrades;
 
                     }
                     catch (Exception ex)

@@ -26,7 +26,7 @@ class Mechanarium : RoomHandler
                 PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/11")?.GetComponent<PlayMakerFSM>();
                 if (ItemDropFSM != null)
                 {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("MECHANARIUM");
+                    bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("MECHANARIUM");
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;

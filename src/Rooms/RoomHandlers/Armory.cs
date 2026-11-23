@@ -83,13 +83,13 @@ public class Armory : RoomHandler
                 Logging.Log($"Game instance for {armoryObjectInstanceName} not active, skipping", ARMORY_LOG_TAG);
                 continue;
             }
-            UniqueItem armoryItem = GetArmoryItemFromGameObjectName(armoryObjectInstanceName);
-            ModItemManager.AddSwirly(armoryItem, armoryObjectInstance);
+            GameUniqueItem armoryItem = GetArmoryItemFromGameObjectName(armoryObjectInstanceName);
+            armoryItem.AddSwirly(armoryObjectInstance);
             AddItemBoughtHook(armoryItem);
         }
     }
 
-    private void AddItemBoughtHook(UniqueItem armoryItem)
+    private void AddItemBoughtHook(GameUniqueItem armoryItem)
     {
         PlayMakerFSM buyingArmoryItemFSM = GetFsmForBuyingArmoryItems(armoryItem);
         if (buyingArmoryItemFSM == null)
@@ -108,21 +108,21 @@ public class Armory : RoomHandler
         itemBoughtState.AddAction(CustomFsmMethodManager.GetCallMethod(customMethodName));
     }
 
-    private PlayMakerFSM GetFsmForBuyingArmoryItems(UniqueItem armoryItem)
+    private PlayMakerFSM GetFsmForBuyingArmoryItems(GameUniqueItem armoryItem)
     {
         string armoryShopUiName = GetArmoryShopUiName(armoryItem);
         PlayMakerFSM buyingArmoryItemFSM = _ArmoryMenu.transform.Find(armoryShopUiName)?.transform.Find(POP_UP_GAME_OBJECT)?.transform.Find(BUTTONS_GAME_OBJECT)?.transform.Find(YES_BUTTON_GAME_OBJECT)?.GetComponent<PlayMakerFSM>();
         return buyingArmoryItemFSM;
     }
 
-    private static UniqueItem GetArmoryItemFromGameObjectName(string armoryObjectInstanceName)
+    private static GameUniqueItem GetArmoryItemFromGameObjectName(string armoryObjectInstanceName)
     {
         string uniqueItemName = GetUniqueItemName(armoryObjectInstanceName);
-        UniqueItem armoryItem = ModItemManager.GetUniqueItem(uniqueItemName);
+        GameUniqueItem armoryItem = GameItemManager.GetInstance().GetGameUniqueItem(uniqueItemName);
         return armoryItem;
     }
 
-    private static string GetArmoryShopUiName(UniqueItem armoryItem)
+    private static string GetArmoryShopUiName(GameUniqueItem armoryItem)
     {
         if (armoryItem.Name.ToUpper() == SHIELD_ITEM_NAME_UPPERCASE)
         {

@@ -4,6 +4,7 @@ using BluePrinceArchipelago.Patches;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Triggers
@@ -27,7 +28,7 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.KeyManager.SendEvent("Update");
             ModInstance.DiceManager.SendEvent("Update");
             // Reload the inventories on day start (in case a scene transition happened).
-            ModItemManager.LoadInventories();
+            GameItemManager.LoadInventories();
 
             // Reset room in-house counts and reload arrays — game resets pools at the start of each day
             //ModRoomManager.ResetRoomInHouseCounts();
@@ -41,7 +42,7 @@ namespace BluePrinceArchipelago.Triggers
             }
             else
             {
-                ModItemManager.ReloadGameObjects();
+                GameItemManager.GetInstance().ReloadGameObjects();
             }
 
             // Initialize the Star HUD so it can be properly updated when needed.
@@ -69,8 +70,8 @@ namespace BluePrinceArchipelago.Triggers
                 ModRoomManager.SyncRoomPoolsWithArchipelago();
 
                 // Handle Start of day code for Permanent items (and maybe curses later).
-                ModItemManager.StartOfDay();
-                ModItemManager.ReplaceItemsWithAP();
+                GameItemManager.GetInstance().StartOfDay();
+                GameItemManager.GetInstance().ReplaceItemsWithAP();
                 FSMPatches.RoomForcer();
                 FSMPatches.StaticLocationHooks();
                 FSMPatches.ZeroStepEndingHook();
@@ -96,6 +97,7 @@ namespace BluePrinceArchipelago.Triggers
                 GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
                 AllowanceEnvelope.SetActive(true);
             }
+            ResourceManager.GodMode();
         }
 
 

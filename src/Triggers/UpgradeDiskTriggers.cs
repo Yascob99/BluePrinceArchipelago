@@ -14,7 +14,7 @@ namespace BluePrinceArchipelago.Triggers
         ///     Triggers on the the Trading Post Upgrade Disk being traded for.
         /// </summary>
         public static void OnUpgradeDiskTraded() {
-            ModItemManager.UpgradeDisks.OnTrade();
+            GameItemManager.UpgradeDisks.OnTrade();
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace BluePrinceArchipelago.Triggers
         /// <param name="upgradeId"></param>
         public static void OnUpgradeDiskUsed(int upgradeId)
         {
-            ModItemManager.UpgradeDisks.OnUsed(upgradeId);
+            GameItemManager.UpgradeDisks.OnUsed(upgradeId);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace BluePrinceArchipelago.Triggers
             }
 
             Logging.LogWarning(roomname);
-            ModItemManager.UpgradeDisks.OnFind(roomname);
+            GameItemManager.UpgradeDisks.OnFind(roomname);
         }
     }
 }

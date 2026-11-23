@@ -41,11 +41,11 @@ namespace BluePrinceArchipelago.Triggers
             }
             if (ModInstance.IsInRun && !ModInstance.RanStartOfDay)
             {
-                ModItemManager.LoadInventories();
+                GameItemManager.LoadInventories();
                 GameObject.Find("__SYSTEM/HUD/Stars").SetActiveRecursively(true);
                 // Handle Start of day code for Permanent items (and maybe curses later).
-                ModItemManager.StartOfDay();
-                ModItemManager.ReplaceItemsWithAP();
+                GameItemManager.GetInstance().StartOfDay();
+                GameItemManager.GetInstance().ReplaceItemsWithAP();
                 FSMPatches.RoomForcer();
                 FSMPatches.TradingPostOverrides();
                 FSMPatches.StaticLocationHooks();

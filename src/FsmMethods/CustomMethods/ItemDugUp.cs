@@ -11,13 +11,13 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
     {
         public new string Name { get; set; } = CustomFsmMethodManager.GetItemDugUpMethodName(itemName);
 
-        public UniqueItem Item { get; set; }
+        public GameUniqueItem Item { get; set; }
 
         public string ItemName { get; set; } = itemName;
 
         public override void OnRegister()
         {
-            Item = ModItemManager.GetUniqueItem(ItemName);
+            Item = GameItemManager.GetInstance().GetGameUniqueItem(ItemName);
         }
         public override void OnCalled()
         {
@@ -32,7 +32,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
         }
         public override void Update()
         {
-            Item = ModItemManager.GetUniqueItem(ItemName);
+            Item = GameItemManager.GetInstance().GetGameUniqueItem(ItemName);
         }
     }
 }

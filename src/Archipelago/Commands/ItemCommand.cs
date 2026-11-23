@@ -38,7 +38,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                 string subcommand = Args[0];
                 if (subcommand.ToLower() == "list")
                 {
-                    ArchipelagoConsole.LogMessage($"Item List\n{ModItemManager.ListItems(Args[1])}");
+                    ArchipelagoConsole.LogMessage($"Item List\n{GameItemManager.ListItems(Args[1])}");
                     return;
                 }
                 else if (subcommand.ToLower() == "add")
@@ -51,7 +51,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
 
                     ArchipelagoConsole.LogMessage($"Attemping to add item {itemName}");
 
-                    GameObject item = ModItemManager.GetInventoryItem(itemName);
+                    GameObject item = GameItemManager.GetInventoryItem(itemName);
 
                     //Handle items that don't start in the prespawn pool.
                     if (item == null)
@@ -76,7 +76,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                         if (icon != null && InventoryIcons != null)
                         {
                             InventoryIcons.Add(icon, "GameObject");
-                            ModItemManager.PickedUp.Add(item, "GameObject");
+                            GameItemManager.PickedUp.Add(item, "GameObject");
                             //Send Event 0 to the Global Manager.
                             Inventory.SendEvent("Update");
                             return;
@@ -87,7 +87,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                     else
                     {
                         // Check PreSpawn EstateItems, PickedUp, CoatCheck, UsedItems
-                        if (ModItemManager.IsItemSpawnable(item) || true)
+                        if (GameItemManager.IsItemSpawnable(item) || true)
                         {
                             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
                             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
@@ -95,9 +95,9 @@ namespace BluePrinceArchipelago.Archipelago.Commands
 
                             if (icon != null && InventoryIcons != null)
                             {
-                                ModItemManager.PickedUp.AddIfUnique(item);
+                                GameItemManager.PickedUp.AddIfUnique(item);
                                 InventoryIcons.Add(icon, "GameObject");
-                                ModItemManager.PreSpawn.RemoveIfExists(item.name);
+                                GameItemManager.PreSpawn.RemoveIfExists(item.name);
                                 if (Name == ITEM.RUNNING_SHOES)
                                 {
                                     ModInstance.RunningEngine.SendEvent("Update");
@@ -122,7 +122,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                     {
                         itemName += Args[i];
                     }
-                    GameObject item = ModItemManager.GetPickedUpItem(itemName);
+                    GameObject item = GameItemManager.GetPickedUpItem(itemName);
                     if (item == null)
                     {
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
@@ -138,9 +138,9 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                     Logging.LogWarning(InventoryIcons != null);
                     if (icon != null && InventoryIcons != null)
                     {
-                        if (!ModItemManager.PickedUp.Contains(Name))
+                        if (!GameItemManager.PickedUp.Contains(Name))
                         {
-                            ModItemManager.PickedUp.Add(item, "GameObject");
+                            GameItemManager.PickedUp.Add(item, "GameObject");
                         }
                         InventoryIcons.Add(icon, "GameObject");
 

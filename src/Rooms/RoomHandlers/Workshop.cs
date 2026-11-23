@@ -90,7 +90,7 @@ class Workshop : RoomHandler
 
     private static void AddSwirly(GameObject workshopTable, string contraptionName, string contraptionObjectPath)
     {
-        UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionName);
+        GameUniqueItem contraption = GameItemManager.GetInstance().GetGameUniqueItem(contraptionName);
         if (contraption.HasBeenFound)
         {
             return;
@@ -104,7 +104,7 @@ class Workshop : RoomHandler
         /* Here, swirly effect is added upon creation.
          * No need to remove it if the item has been crafted through another mean because it is impossible in vanilla.
          */
-        ModItemManager.AddSwirly(contraption, contraptionObject);
+        contraption.AddSwirly(contraptionObject);
     }
 
 
@@ -118,7 +118,7 @@ class Workshop : RoomHandler
 
     private static void HookItemIconOnCraft(PlayMakerFSM workshopFSM, string itemName, string stateName)
     {
-        UniqueItem contraption = ModItemManager.GetUniqueItem(itemName);
+        GameUniqueItem contraption = GameItemManager.GetInstance().GetGameUniqueItem(itemName);
         CustomFsmMethodManager.AddItemOnCraftMethod(contraption, currentInstance);
         string customMethodName = CustomFsmMethodManager.GetItemOnCraftMethodName(contraption.Name, currentInstance);
         FsmState state = workshopFSM.GetState(stateName);

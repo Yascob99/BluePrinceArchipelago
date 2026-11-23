@@ -44,7 +44,7 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public override void OnCalled()
         {
-            UniqueItem contraption = ModItemManager.GetUniqueItem(contraptionName);
+            GameUniqueItem contraption = GameItemManager.GetInstance().GetGameUniqueItem(contraptionName);
             if (contraption.HasBeenFound && !contraption.IsUnlocked)
             {
                 LockCraftButton();

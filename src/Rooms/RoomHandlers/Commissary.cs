@@ -75,7 +75,7 @@ public class Commissary : RoomHandler
         ReplaceModelsWithAP();
     }
 
-    private static void SetupBuyingHook(UniqueItem item)
+    private static void SetupBuyingHook(GameUniqueItem item)
     {
         string itemName = item.Name;
         PlayMakerFSM commissaryMenuFsm = GameObjectExtensions.FindInHierarchy("UI OVERLAY CAM/Commissary Menu")?.GetComponent<PlayMakerFSM>();
@@ -99,7 +99,7 @@ public class Commissary : RoomHandler
         {
             // Changes makes it check if the location has been found instead of a different check.
             FsmBool CanSpawnDisk = _ItemsForSaleFsm.GetBoolVariable("CanSpawnDisk");
-            CanSpawnDisk.Value = ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
+            CanSpawnDisk.Value = GameItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
             _ItemsForSaleFsm.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
         }
     }
@@ -122,7 +122,7 @@ public class Commissary : RoomHandler
             {
                 GameObject model = itemType.GetChild(j).gameObject;
                 string itemName = GetItemNameFromCommissaryModelName(model.name);
-                UniqueItem item = ModItemManager.GetUniqueItem(itemName);
+                GameUniqueItem item = GameItemManager.GetInstance().GetGameUniqueItem(itemName);
                 if (item == null)
                 {
                     Logging.LogError($"Error Getting item {itemName}. No such Unique Item", COMMISSARY_LOG_TAG);
@@ -130,7 +130,7 @@ public class Commissary : RoomHandler
                 }
                 if (!item.HasBeenFound)
                 {
-                    ModItemManager.AddSwirly(item, model);
+                    item.AddSwirly(model);
                 }
             }
         }
@@ -180,7 +180,7 @@ public class Commissary : RoomHandler
             {
                 continue;
             }
-            UniqueItem item = ModItemManager.GetUniqueItem(itemName);
+            GameUniqueItem item = GameItemManager.GetInstance().GetGameUniqueItem(itemName);
             if (item == null)
             {
                 Logging.LogError($"Error Getting item {itemName}. No such Unique Item", COMMISSARY_LOG_TAG);
@@ -202,14 +202,14 @@ public class Commissary : RoomHandler
         }
     }
 
-    private static bool RequiresShopTitleUpdate(UniqueItem item, string itemName)
+    private static bool RequiresShopTitleUpdate(GameUniqueItem item, string itemName)
     {
         return (!item.HasBeenFound) || (IsCommissaryUpgradeDisk(itemName) && !CommissaryUpgradeDiskHasBeenFound());
     }
 
     private static bool CommissaryUpgradeDiskHasBeenFound()
     {
-        return ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
+        return GameItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
     }
 
     private static bool IsCommissaryUpgradeDisk(string itemName)

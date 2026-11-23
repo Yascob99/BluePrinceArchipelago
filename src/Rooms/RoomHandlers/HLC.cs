@@ -26,7 +26,7 @@ class HLC : RoomHandler
                 PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/_Pickup Items/10")?.GetComponent<PlayMakerFSM>();
                 if (ItemDropFSM != null)
                 {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("HER LADYSHIP'S CHAMBER");
+                    bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("HER LADYSHIP'S CHAMBER");
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
