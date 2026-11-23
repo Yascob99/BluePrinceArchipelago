@@ -6,7 +6,7 @@ namespace BluePrinceArchipelago.Items
     public abstract class GameItem : IObtainable
     {
 		protected readonly string _name;
-		public string Name { get; }
+		public string Name { get { return _name; } }
 
 		protected bool _archipelagoUnlocked = false;
 

@@ -61,6 +61,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="shopTags">What shops the item can be in.</param>
         public GameUniqueItem(string name, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, GameItemManager.GetInventoryItem(name))
         {
+            Logging.LogWarning($"{name} GameUniqueItem created with {_name} and {Name}", "DEBUG");
             _isPrespawn = isPreSpawn;
             _isPersistent = isPersistent;
             List<string> shopTagList = shopTags ?? [];
@@ -127,7 +128,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public override void AddToWorld()
         {
-            Logging.LogWarning(Name);
+            Logging.LogWarning(_name);
             ArchipelagoUnlocked();
             /* Not sure what this part did
             if (!ApplySanity())
@@ -137,35 +138,35 @@ namespace BluePrinceArchipelago.Items
             */
             if (_inventoryGameObject == null && _isPrespawn)
             {
-                _inventoryGameObject = GameItemManager.GetInventoryItem(Name);
+                _inventoryGameObject = GameItemManager.GetInventoryItem(_name);
             }
 
             if (_inventoryGameObject == null)
             {
-                Logging.LogError($"Could not add {Name} to inventory, game object not found.");
+                Logging.LogError($"Could not add {_name} to inventory, game object not found.");
                 return;
             }
-            if (Commissary.CommissaryStates.ContainsKey(Name))
+            if (Commissary.CommissaryStates.ContainsKey(_name))
             {
                 //Re-enable commissary purchases of the item.
-                Commissary.CanStock.Add(Name);
+                Commissary.CanStock.Add(_name);
             }
             // This may not cause it to re-trigger.
             // Disable this game action so it doesn't try and display 2 UIs.
-            Logging.LogWarning($"Attempting to add {Name} to Inventory");
+            Logging.LogWarning($"Attempting to add {_name} to Inventory");
             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-            GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
+            GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(_name);
             if (icon != null && InventoryIcons != null)
             {
                 GameItemManager.PickedUp.AddIfUnique(_inventoryGameObject);
                 InventoryIcons.Add(icon, "GameObject");
-                GameItemManager.PreSpawn.RemoveIfExists(Name);
-                if (Name == "RUNNING SHOES")
+                GameItemManager.PreSpawn.RemoveIfExists(_name);
+                if (_name == "RUNNING SHOES")
                 {
                     ModInstance.RunningEngine.SendEvent("Update");
                 }
-                if (Name == "STOPWATCH")
+                if (_name == "STOPWATCH")
                 {
                     GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
                 }
@@ -183,12 +184,12 @@ namespace BluePrinceArchipelago.Items
             {
                 if (gameInstance == null)
                 {
-                    Logging.LogError($"Game instance is null for {Name}", "ITEM");
+                    Logging.LogError($"Game instance is null for {_name}", "ITEM");
                 }
                 GameObject swirlyEffect = gameInstance.GetChild("AP Swirlie");
                 if (swirlyEffect == null)
                 {
-                    Logging.LogError($"Swirly effect not found for item {Name} and object {gameInstance.name}", "ITEM");
+                    Logging.LogError($"Swirly effect not found for item {_name} and object {gameInstance.name}", "ITEM");
                 }
                 GameObject.Destroy(swirlyEffect);
             }
@@ -244,18 +245,18 @@ namespace BluePrinceArchipelago.Items
             };
             if (_isCommissary)
             {
-                FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[Name.Trim()]);
+                FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[_name.Trim()]);
                 DisableItemInMenu(state, _commissaryEvent);
             }
             if (_isDig)
             {
-                FsmState state = ModInstance.DigEngine?.GetState(DigStates[Name.Trim()]);
+                FsmState state = ModInstance.DigEngine?.GetState(DigStates[_name.Trim()]);
                 DisableItemInMenu(state, _digEvent);
             }
             if (_isLocksmith)
             {
                 // Does not load properly unless loaded like so.
-                FsmState state = GameObject.Find("UI OVERLAY CAM").transform.Find("Locksmith Menu").gameObject.GetComponent<PlayMakerFSM>().GetState(LocksmithStates[Name.Trim()]);
+                FsmState state = GameObject.Find("UI OVERLAY CAM").transform.Find("Locksmith Menu").gameObject.GetComponent<PlayMakerFSM>().GetState(LocksmithStates[_name.Trim()]);
                 DisableItemInMenu(state, _locksmithEvent);
             }
         }
@@ -264,17 +265,17 @@ namespace BluePrinceArchipelago.Items
         {
             if (_hasBeenFound && !_archipelagoUnlocked)
             {
-                if (Name == ITEM.MICROCHIP_SMALL)
+                if (_name == ITEM.MICROCHIP_SMALL)
                 {
                     GameObject.Find("TERRAIN/_GAMEPLAY (terrain)/New Clue Dig - menu/COUNTERTOP").SetActive(false);
                     return;
                 }
-                if (Name == ITEM.MICROCHIP_MIDDLE_SIZED)
+                if (_name == ITEM.MICROCHIP_MIDDLE_SIZED)
                 {
                     GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/VASES/Vase 2 BROKEN/MICRO 2 SPAWN").SetActive(false);
                     return;
                 }
-                if (Name == ITEM.MICROCHIP_LARGE)
+                if (_name == ITEM.MICROCHIP_LARGE)
                 {
                     GameObject.Find("TERRAIN/EAST SECTOR/_GROTTO/_GROTTO GAMEPLAY/Microchip Pillar/Microchip 3").SetActive(false);
                     return;
@@ -284,7 +285,7 @@ namespace BluePrinceArchipelago.Items
 
         private void DisableItemInMenu(FsmState state, CallMethod replacedAction)
         {
-            //FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item.Name.Trim()]);
+            //FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item._name.Trim()]);
             //_commissaryState = state;
             //if (state != null)
             //{
@@ -303,22 +304,22 @@ namespace BluePrinceArchipelago.Items
             // If the item has not been found yet.
             if (_hasBeenFound && !_archipelagoUnlocked)
             {
-                if (Name == "MICROCHIP 1")
+                if (_name == "MICROCHIP 1")
                 {
                     FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
                     FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
                     state1.DisableActionsOfType<ArrayListAdd>();
-                    state1.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(Name)));
+                    state1.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(_name)));
                     state2.DisableActionsOfType<ArrayListAdd>();
-                    state2.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(Name)));
+                    state2.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(_name)));
                 }
                 else
                 {
-                    FsmState state = Plugin.UniqueItemManager.GetPickupState(Name);
+                    FsmState state = Plugin.UniqueItemManager.GetPickupState(_name);
                     if (state != null)
                     {
                         state.DisableActionsOfType<ArrayListAdd>();
-                        state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(Name)));
+                        state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(_name)));
                     }
                 }
                 GameObject spawnObj = FindSpawnObject() ?? _inventoryGameObject;
@@ -343,9 +344,9 @@ namespace BluePrinceArchipelago.Items
             List<Transform> FoundModels = new();
             if (scoutname == "")
             {
-                scoutname = Name;
+                scoutname = _name;
             }
-            string youName = ITEM.GetYouFoundNotificationName(Name);
+            string youName = ITEM.GetYouFoundNotificationName(_name);
             GameObject You___Text = GameObject.Find("UI OVERLAY CAM/You Found Text")?.gameObject;
             if (You___Text != null)
             {
@@ -353,10 +354,10 @@ namespace BluePrinceArchipelago.Items
                 {
                     Transform child = You___Text.transform.GetChild(t);
                     // Tries to find all related You___Messages"
-                    if (child.gameObject.name.Contains(youName) && !CheckSimilar(Name, child))
+                    if (child.gameObject.name.Contains(youName) && !CheckSimilar(_name, child))
                     {
                         FoundModels.Add(child);
-                        Transform itemModel = child.FindRecursive(ITEM.GetItemModelInNotificationName(Name), true);
+                        Transform itemModel = child.FindRecursive(ITEM.GetItemModelInNotificationName(_name), true);
                         if (itemModel != null)
                         {
 
@@ -365,11 +366,11 @@ namespace BluePrinceArchipelago.Items
                             clone.SetActive(false); //Make sure the clone is not visible.
                             if (youName == "Cabinet Key 5")
                             {
-                                clone.name =  Name.ToTitleCase();
+                                clone.name =  _name.ToTitleCase();
                             }
                             else
                             {
-                                clone.name = child.name;//Make the Name match the original so it can be replaced later.
+                                clone.name = child.name;//Make the name match the original so it can be replaced later.
                             }
 
                             //Instantiate a the AP Object at the original's position
@@ -552,14 +553,14 @@ namespace BluePrinceArchipelago.Items
                         }
                         else
                         {
-                            Logging.LogWarning($"Unable to find the item model for {Name.ToTitleCase()}");
+                            Logging.LogWarning($"Unable to find the item model for {_name.ToTitleCase()}");
                         }
                     }
 
                 }
                 if (FoundModels.Count == 0)
                 {
-                    Logging.LogWarning($"Unable to find a 'You ___' notification for {Name}.");
+                    Logging.LogWarning($"Unable to find a 'You ___' notification for {_name}.");
                 }
             }
             else
@@ -576,14 +577,14 @@ namespace BluePrinceArchipelago.Items
         {
             if (gameInstance == null)
             {
-                Logging.LogWarning($"Error finding game object for {Name}.");
+                Logging.LogWarning($"Error finding game object for {_name}.");
                 return;
             }
-            string prefabName = ITEM.GetPrefabName(Name);
+            string prefabName = ITEM.GetPrefabName(_name);
             GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
             if (prefab == null)
             {
-                Logging.LogWarning($"Unable to find prefab for {Name}. Item is either unimplemented or not present in the assets.");
+                Logging.LogWarning($"Unable to find prefab for {_name}. Item is either unimplemented or not present in the assets.");
                 return;
             }
             //If the Model is not currently already replaced.
@@ -592,7 +593,7 @@ namespace BluePrinceArchipelago.Items
                 // Make sure the notification is changed for persistent items.
                 if (!_isPersistent)
                 {
-                    Logging.LogWarning($"{Name} has already Been Replaced with an AP Item:");
+                    Logging.LogWarning($"{_name} has already Been Replaced with an AP Item:");
                     return;
                 }
                 ReplaceAPItemNotifications(gameInstance);
@@ -604,7 +605,7 @@ namespace BluePrinceArchipelago.Items
             GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
             if (APswirly == null)
             {
-                Logging.LogWarning($"Unable to find APSwirly for {Name}.");
+                Logging.LogWarning($"Unable to find APSwirly for {_name}.");
                 GameObject.Destroy(APGO);
                 return;
             }
@@ -654,7 +655,7 @@ namespace BluePrinceArchipelago.Items
             }
             if (spawnObj == null)
             {
-                Logging.LogWarning($"Unable to change spawn prefab for {Name}, error finding prefab with name: {Name}(Clone)001");
+                Logging.LogWarning($"Unable to change spawn prefab for {_name}, error finding prefab with name: {_name}(Clone)001");
                 return;
             }
             // Delete the AP Swirly SubObject.
@@ -671,7 +672,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The GameObject of the inventory Icon.</returns>
         private GameObject FindSpawnObject()
         {
-            string name = Name.Replace("_0", "");
+            string name = _name.Replace("_0", "");
             string instanceName = name + "(Clone)001";
             GameObject spawnObj = ModInstance.PickupSpawnPool.transform.FindChild(instanceName)?.gameObject;
             if (spawnObj == null)
