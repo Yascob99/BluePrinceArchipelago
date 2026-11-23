@@ -35,10 +35,14 @@ namespace BluePrinceArchipelago.Items
             _sanityType = sanityType;
             if (isUnlocked || !IsSanityLocked())
             {
-                _gameItem.ArchipelagoUnlocked();
+                UnlockHook();
             }
         }
 
+        protected override void UnlockHook()
+        {
+            _gameItem.ArchipelagoUnlocked();
+        }
 
         /// <summary>
         ///     Handles adding the item to the inventory.

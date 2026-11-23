@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace BluePrinceArchipelago.Items
+﻿namespace BluePrinceArchipelago.Items
 {
     /// <summary>
     ///     A class template for handling the item in a mod context.
@@ -11,9 +9,13 @@ namespace BluePrinceArchipelago.Items
     public abstract class ModItem(string name, bool isUnlocked, int count = 1) : IObtainable
     {
         private readonly string _name = name;
-        public string Name { get; }
+        public string Name { get { return _name; } }
         protected bool _isUnlocked = isUnlocked;
-        public bool IsUnlocked { get; set; }
+        public bool IsUnlocked 
+        { 
+            get { return _isUnlocked; }
+            set { _isUnlocked = value; UnlockHook(); }
+        }
         protected int _count = count;
 
         public bool IsUnique()
@@ -27,6 +29,8 @@ namespace BluePrinceArchipelago.Items
         } 
 
         public abstract void AddToWorld();
+
+        protected virtual void UnlockHook() {}
 
         public virtual bool IsPermanent()
         {
