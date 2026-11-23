@@ -1,4 +1,6 @@
 using BluePrinceArchipelago.Archipelago;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -26,11 +28,10 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the object.</param>
         /// <param name="isUnlocked">If the item is unlocked.</param>
-        /// <param name="gameItem"></param>
         /// <param name="sanityType"></param>
-        public ArchipelagoUniqueItem(string name, bool isUnlocked, GameItem gameItem, ItemSanityType sanityType = ItemSanityType.None) : base(name, isUnlocked)
+        public ArchipelagoUniqueItem(string name, ItemSanityType sanityType = ItemSanityType.None, bool isUnlocked = false) : base(name, isUnlocked)
         {
-            _gameItem = gameItem;
+            _gameItem = GameItemManager.GetInstance().GetGameUniqueItem(name);
             _sanityType = sanityType;
             if (isUnlocked || !IsSanityLocked())
             {

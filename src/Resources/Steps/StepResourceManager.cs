@@ -170,7 +170,7 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunUpdateStep()
         {
-            if (ModItemManager.PickedUp.Contains("RUNNING SHOES"))
+            if (GameItemManager.PickedUp.Contains("RUNNING SHOES"))
             {
                 Event10();
             }

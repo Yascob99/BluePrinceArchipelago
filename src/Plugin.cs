@@ -57,7 +57,7 @@ namespace BluePrinceArchipelago {
         public static GameObject ModObject;
 
         public static GameObject FsmMethods;
-        public static UniqueItemManager UniqueItemManager;
+        public static GameItemManager UniqueItemManager;
 #if Bep
         public static HarmonyPatch Harmony { get; } = new HarmonyPatch(PluginGUID);
 #endif
@@ -91,7 +91,6 @@ namespace BluePrinceArchipelago {
 
             // Plugin startup logic
             ArchipelagoClient = new ArchipelagoClient();
-            UniqueItemManager = new UniqueItemManager();
             _instance = this;
             AssetBundle = AssetExtensions.LoadAssetBundleFromAssembly(AssetExtensions.GetResourceNameFromPath("assets/apprefabs"));
             Logging.LogWarning($"Plugin {PluginGUID} is loaded!");

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
 #if Bep
 using PathologicalGames;
 #endif
@@ -67,7 +68,7 @@ namespace BluePrinceArchipelago.Items
                     // Check if the item has been used, and if it has, 
                     if (!UsedLocations.Contains(location.ToUpper()))
                     {
-                        AddItemToInventory(location);
+                        AddToWorld(location);
                     }
                     if (FoundLocations.Contains(location.ToUpper()))
                     {
@@ -79,7 +80,7 @@ namespace BluePrinceArchipelago.Items
                     }
                 }
                 // Despawn Foundation Upgrade Disk
-                if (ModItemManager.UpgradeDisks.FoundLocations.Contains("THE FOUNDATION"))
+                if (GameItemManager.UpgradeDisks.FoundLocations.Contains("THE FOUNDATION"))
                 {
                     Transform FoundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
                     if (FoundationSpawn.childCount > 0)
@@ -198,7 +199,7 @@ namespace BluePrinceArchipelago.Items
         ///     Handles adding an upgrade disk to the inventory.
         /// </summary>
         /// <param name="item">The item name of the Upgrade Disk.</param>
-        public void AddItemToInventory(string item)
+        public void AddToWorld(string item)
         {
             Logging.LogWarning("Attempting To Add Upgrade Disk to Inventory.");
             if (!RecievedItems.Contains(item))
@@ -223,11 +224,17 @@ namespace BluePrinceArchipelago.Items
                 if (!UpgradeDisks.Contains(upgradeid))
                 {
                     UpgradeDisks.Add(upgradeid, "Integer");
-                    ModItemManager.PickedUp.Add(ModItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
+                    GameItemManager.PickedUp.Add(GameItemManager.GetInventoryItem("UPGRADE DISK"), "GameObject");
                     InventoryIcons.Add(icon, "GameObject");
                 }
             }
 
+        }
+
+        public override void AddToWorld()
+        {
+            Logging.LogError("This is not supposed to be triggered - Upgrade Disk AddToWorld()");
+            throw new NotImplementedException();
         }
 
         /// <summary>

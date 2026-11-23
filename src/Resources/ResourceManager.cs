@@ -29,51 +29,18 @@ namespace BluePrinceArchipelago.Resources
         ///     Recalculates the amount of starting items the player should have.
         /// </summary>
         public static void RecalculculateStartingItems() {
-            StartingGems = 0;
-            StartingKeys = 0;
-            StartingDice = 0;
-            StartingSteps = 0;
-            StartingLuck = 0;
             if (ModItemManager.PermanentItemList.Count > 0)
             {
-                foreach (PermanentItem item in ModItemManager.PermanentItemList) {
-                    item.UnlockedCount = 0;
-                }
-                foreach (string itemname in ArchipelagoClient.ServerData.ReceivedItems)
-                {
-                    if (itemname.ToLower().Contains("permanent"))
+                foreach (ResourceItem item in ModItemManager.PermanentItemList) {
+                    if (item.IsUnlocked)
                     {
-                        Logging.LogWarning(itemname);
-                        PermanentItem item = ModItemManager.GetPermanentItem(itemname);
-                        item.UnlockedCount++;
-                    } 
-                }
-                foreach (PermanentItem item in ModItemManager.PermanentItemList)
-                {
-                    switch (item.ItemType)
-                    {
-                        case "Gems":
-                            StartingGems += item.UnlockedCount * item.Count;
-                            break;
-                        case "Keys":
-                            StartingKeys += item.UnlockedCount * item.Count;
-                            break;
-                        case "Dice":
-                            StartingDice += item.UnlockedCount * item.Count;
-                            break;
-                        case "Steps":
-                            StartingSteps += item.UnlockedCount * item.Count;
-                            break;
-                        case "Luck":
-                            StartingLuck += item.UnlockedCount * item.Count;
-                            break;
+                        item.AddToWorld();
                     }
-
                 }
-
             }
         }
 
+        //TODO : Delete this if the above works
         public static void AddStartingItems() {
             Logging.LogWarning($"Gems: {StartingGems}");
             AdjustGems(StartingGems);

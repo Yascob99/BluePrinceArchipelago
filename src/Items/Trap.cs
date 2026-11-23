@@ -39,7 +39,7 @@ namespace BluePrinceArchipelago.Items
     {
         public override void ActivateTrap()
         {
-            ModItemManager.LoseRandomItem();
+            GameItemManager.LoseRandomItem();
         }
     }
     /// <summary>

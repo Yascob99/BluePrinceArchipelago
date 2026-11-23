@@ -52,8 +52,6 @@ namespace BluePrinceArchipelago.Items
         private readonly CallMethod _digEvent = null;
         private readonly CallMethod _locksmithEvent = null;
 
-        private GameObject _gameObj = null;
-
         /// <summary>
         ///     Creates a UniqueItem
         /// </summary>
@@ -61,14 +59,10 @@ namespace BluePrinceArchipelago.Items
         /// <param name="isPreSpawn">If the item is usually in the prespawn list. Defualts to true.</param>
         /// <param name="isPersistent">If the item is persists across scene transitions.</param>
         /// <param name="shopTags">What shops the item can be in.</param>
-        /// 
-        /// 
-        /// 
-        public GameUniqueItem(string name, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(ModItemManager.GetInventoryItem(name))
+        public GameUniqueItem(string name, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, GameItemManager.GetInventoryItem(name))
         {
             _isPrespawn = isPreSpawn;
             _isPersistent = isPersistent;
-            _gameObj = ModItemManager.GetInventoryItem(Name);
             List<string> shopTagList = shopTags ?? [];
             foreach (string tag in shopTagList)
             {
@@ -117,13 +111,13 @@ namespace BluePrinceArchipelago.Items
             if (HasBeenFound && !_archipelagoUnlocked)
             {
                 //TODO Duplication
-                if (ModItemManager.PreSpawn.Contains(_gameObj))
+                if (GameItemManager.PreSpawn.Contains(_inventoryGameObject))
                 {
-                    ModItemManager.PreSpawn.Remove(_gameObj, "GameObject");
+                    GameItemManager.PreSpawn.Remove(_inventoryGameObject, "GameObject");
                 }
-                if (ModItemManager.EstateItems.Contains(_gameObj))
+                if (GameItemManager.EstateItems.Contains(_inventoryGameObject))
                 {
-                    ModItemManager.EstateItems.Remove(_gameObj, "GameObject");
+                    GameItemManager.EstateItems.Remove(_inventoryGameObject, "GameObject");
                 }
             }
         }
@@ -141,12 +135,12 @@ namespace BluePrinceArchipelago.Items
                 return;
             }
             */
-            if (_gameObj == null && _isPrespawn)
+            if (_inventoryGameObject == null && _isPrespawn)
             {
-                _gameObj = ModItemManager.GetInventoryItem(Name);
+                _inventoryGameObject = GameItemManager.GetInventoryItem(Name);
             }
 
-            if (_gameObj == null)
+            if (_inventoryGameObject == null)
             {
                 Logging.LogError($"Could not add {Name} to inventory, game object not found.");
                 return;
@@ -164,9 +158,9 @@ namespace BluePrinceArchipelago.Items
             GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(Name);
             if (icon != null && InventoryIcons != null)
             {
-                ModItemManager.PickedUp.AddIfUnique(_gameObj);
+                GameItemManager.PickedUp.AddIfUnique(_inventoryGameObject);
                 InventoryIcons.Add(icon, "GameObject");
-                ModItemManager.PreSpawn.RemoveIfExists(Name);
+                GameItemManager.PreSpawn.RemoveIfExists(Name);
                 if (Name == "RUNNING SHOES")
                 {
                     ModInstance.RunningEngine.SendEvent("Update");
@@ -327,7 +321,7 @@ namespace BluePrinceArchipelago.Items
                         state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(Name)));
                     }
                 }
-                GameObject spawnObj = FindSpawnObject() ?? _gameObj;
+                GameObject spawnObj = FindSpawnObject() ?? _inventoryGameObject;
                 AddSwirly(spawnObj);
             }
             else
@@ -656,7 +650,7 @@ namespace BluePrinceArchipelago.Items
             GameObject spawnObj = FindSpawnObject();
             if (spawnObj == null)
             {
-                spawnObj = _gameObj;
+                spawnObj = _inventoryGameObject;
             }
             if (spawnObj == null)
             {
@@ -669,6 +663,7 @@ namespace BluePrinceArchipelago.Items
                 GameObject.Destroy(spawnObj.transform.FindChild("AP Swirlie").gameObject);
             }
         }
+
 
         /// <summary>
         ///     Finds the spawned version of an item icon,
@@ -686,9 +681,14 @@ namespace BluePrinceArchipelago.Items
             }
             if (spawnObj == null)
             {
-                ModItemManager.GetInventoryItem(name);
+                GameItemManager.GetInventoryItem(name);
             }
             return spawnObj;
+        }
+
+        public void UpdateGameObject(GameObject newGameObject)
+        {
+            _inventoryGameObject = newGameObject;
         }
     } 
 }

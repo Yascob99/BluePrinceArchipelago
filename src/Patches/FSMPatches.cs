@@ -262,7 +262,7 @@ namespace BluePrinceArchipelago.Patches
                 PlayMakerFSM MineUpgradeSpawn = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16").GetComponent<PlayMakerFSM>();
                 if (MineUpgradeSpawn != null)
                 {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
+                    bool found = GameItemManager.UpgradeDisks.FoundLocations.Contains("ABANDONED MINE");
                     FsmBool CanSpawnDisk = MineUpgradeSpawn.GetBoolVariable("CanSpawnDisk");
                     CanSpawnDisk.Value = found;
                     MineUpgradeSpawn.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
@@ -552,7 +552,7 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM WellDoor2 = GameObjectExtensions.FindInHierarchy("UNDERGROUND/Well Joint/_GAMEPLAY/BASEMENT DOORS/Basement Door 2").GetComponent<PlayMakerFSM>();
             WellDoor2.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
             WellDoor2.GetState("Open Door 2").InsertAction(CustomFsmMethodManager.GetCallMethod("WellBasementDoorOpened"), 0);
-
+            
             // Tunnel
             PlayMakerFSM TunnelDoor = GameObjectExtensions.FindInHierarchy("TERRAIN/SOUTH SECTOR/_CLIFF AREA/_CLIFF TO CULL/DRIVE TUNNEL/BAKE LAYERS/L16  cast recieve/DRIVE TUNNEL 3/ROOM 1/BASEMENT FRAME_1/Basement Door 3").GetComponent<PlayMakerFSM>();
             TunnelDoor.GetState("Open Door").InsertAction(CustomFsmMethodManager.GetCallMethod("TunnelBasementDoorOpened"), 0);
