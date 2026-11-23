@@ -206,7 +206,7 @@ namespace BluePrinceArchipelago.Patches
                         // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
                         if (item.IsUnlocked)
                         {
-                            if (item.Name == "MICROCHIP 1")
+                            if (item.Name == ITEM.MICROCHIP_SMALL)
                             {
                                 FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
                                 FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");

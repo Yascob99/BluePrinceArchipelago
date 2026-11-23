@@ -181,7 +181,7 @@ namespace BluePrinceArchipelago.Items
                     if (transition.EventName.ToLower().Contains(name))
                     {
                         // Treasure Map requires going 1 state deeper
-                        if (name == "treasure map") {
+                        if (name == ITEM.TREASURE_MAP.ToLower()) {
                             ModInstance.GlobalManager.GetBoolVariable("Treasure Already").Value = true;
                             return ModInstance.GlobalManager.GetState("Treasure Map Pickup");
                         } 

@@ -913,34 +913,13 @@ namespace BluePrinceArchipelago.Items
         {
             foreach (UniqueItem item in ModItemManager.UniqueItemList)
             {
-                string name = GetObjName(item.Name);
+                string name = ITEM.GetGameObjectName(item.Name);
                 GameObject gameObj = GetInventoryItem(name);
                 if (gameObj == null)
                 {
                     gameObj = GameObjectExtensions.FindGameObject(name);
                 }
                 item._gameObj = gameObj;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the objectname of items where it doesn't match their name.
-        /// </summary>
-        /// <param name="name">The name of the item.</param>
-        /// <returns></returns>
-        private static string GetObjName(string name)
-        {
-            switch (name)
-            {
-                case "CABINET KEY 3":
-                    return "CABINET KEY 2";
-                case "ELECTROMAGNET":
-                    return "POWERED ELECTROMAGNET";
-                case "PRISM KEY_0":
-                    return "PRISM KEY";
-
-                default:
-                    return name;
             }
         }
     }
