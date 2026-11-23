@@ -29,7 +29,7 @@ namespace BluePrinceArchipelago.Items
     public static class ModItemManager
     {
         public static List<PermanentItem> PermanentItemList = [];
-        public static List<GameUniqueItem> UniqueItemList = new();
+        public static List<ArchipelagoUniqueItem> UniqueItemList = new();
         public static List<ResourceItem> JunkItemList = new();
         public static Dictionary<string, ModItem> ItemDict = new(); //Item name is the key, the type of item is the value.
         public static PlayMakerArrayListProxy PreSpawn = new();
@@ -75,331 +75,21 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public static void ReplaceUniqueItemsWithAP()
         {
-            foreach (UniqueItem item in UniqueItemList)
+            foreach (GameUniqueItem item in UniqueItemList)
             {
-                // If the item has not been found yet.
-                if (!item.HasBeenFound && item.ApplySanity())
-                {
-                    if (item.Name == "MICROCHIP 1")
-                    {
-                        FsmState state1 = ModInstance.GlobalManager.GetState("Microchip Pickup");
-                        FsmState state2 = ModInstance.GlobalManager.GetState("Microchip Pickup 4");
-                        state1.DisableActionsOfType<ArrayListAdd>();
-                        state1.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
-                        state2.DisableActionsOfType<ArrayListAdd>();
-                        state2.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
-                    }
-                    else
-                    {
-                        FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
-                        if (state != null)
-                        {
-                            state.DisableActionsOfType<ArrayListAdd>();
-                            state.AddAction(CustomFsmMethodManager.GetCallMethod(CustomFsmMethodManager.GetItemPickedUpMethodName(item.Name)));
-                        }
-                    }
-                    GameObject spawnObj = FindSpawnObject(item.Name) ?? item._gameObj;
-                    AddSwirly(item, spawnObj);
-                }
-                else {
-                    if (item.IsPersistent) { 
-                        RemoveUniqueItemAPSwirly(item);
-                    }
-                }
+                item.ReplaceUniqueItemWithArchipelagoItem();
             }
         }
 
-        /// <summary>
-        /// Add the swirly effect on an item and replace its pickup notification with the AP item collected.
-        /// </summary>
-        /// <param name="APitem">AP version of the item.</param>
-        /// <param name="gameInstance">In-game object to add the swirly effect on.</param>
-        public static void AddSwirly(UniqueItem APitem, GameObject gameInstance)
-        {
-            if (gameInstance == null)
-            {
-                Logging.LogWarning($"Error finding game object for {APitem.Name}.");
-                return;
-            }
-            string prefabName = GetPrefabName(APitem);
-            GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
-            if (prefab == null)
-            {
-                Logging.LogWarning($"Unable to find prefab for {APitem.Name}. Item is either unimplemented or not present in the assets.");
-                return;
-            }
-            //If the Model is not currently already replaced.
-            if (gameInstance.transform.FindChild("AP Swirlie") != null)
-            {
-                // Make sure the notification is changed for persistent items.
-                if (!APitem.IsPersistent)
-                {
-                    Logging.LogWarning($"{APitem.Name} has already Been Replaced with an AP Item:");
-                    return;
-                }
-                ReplaceAPItemNotifications(APitem.Name, gameInstance);
-                return;
-            }
-            //Instantiate a copy of the game object at the location of the spawn pool game object.
-            GameObject APGO = GameObject.Instantiate(prefab, gameInstance.transform.position, gameInstance.transform.rotation);
-            // Get the APswirly Component of the prefab
-            GameObject APswirly = APGO?.transform?.GetChild(0)?.gameObject;
-            if (APswirly == null)
-            {
-                Logging.LogWarning($"Unable to find APSwirly for {APitem.Name}.");
-                GameObject.Destroy(APGO);
-                return;
-            }
-            // Reparent the the AP Swirly to the Archipelago Mod GameObject.
-            APswirly.transform.parent = gameInstance.transform;
-            APswirly.layer = 10;
-            APitem.RegisterModel(gameInstance);
-            ReplaceAPItemNotifications(APitem.Name, gameInstance);
-            GameObject.Destroy(APGO);
-        }
+        
 
-        private static string GetPrefabName(UniqueItem APitem)
+        private static string GetPrefabName(GameUniqueItem APitem)
         {
             if (APitem.Name.ToUpper() == "ELECTROMAGNET")
             {
                 return "POWERED ELECTROMAGNET";
             }
             return APitem.Name;
-        }
-
-        /// <summary>
-        ///     Replaces an AP Item's notification with the appropriate item data and the UI model with the AP model.
-        /// </summary>
-        /// <param name="itemName">The name of the item</param>
-        /// <param name="item">The GameObject of the item.</param>
-        /// <param name="scoutname">The scoutname of the object if different than it's name.</param>
-        public static void ReplaceAPItemNotifications(string itemName, GameObject item, string scoutname = "")
-        {
-            List<Transform> FoundModels = new();
-            if (scoutname == "")
-            {
-                scoutname = itemName;
-            }
-            string youName = GetYou___Name(itemName);
-            GameObject You___Text = GameObject.Find("UI OVERLAY CAM/You Found Text")?.gameObject;
-            if (You___Text != null)
-            {
-                for (int t = 0; t < You___Text.transform.childCount; t++)
-                {
-                    Transform child = You___Text.transform.GetChild(t);
-                    // Tries to find all related You___Messages"
-                    if (child.gameObject.name.Contains(youName) && !CheckSimilar(itemName, child))
-                    {
-                        FoundModels.Add(child);
-                        Transform itemModel = child.FindRecursive(GetItemModelName(itemName), true);
-                        if (itemModel != null)
-                        {
-
-                            // Make a clone of the original gameObject parented under the ModObject for easy editing/retreival later.
-                            GameObject clone = GameObject.Instantiate(child.gameObject, Plugin.ModObject.transform);
-                            clone.SetActive(false); //Make sure the clone is not visible.
-                            if (youName == "Cabinet Key 5")
-                            {
-                                clone.name = itemName.ToTitleCase();
-                            }
-                            else
-                            {
-                                clone.name = child.name;//Make the Name match the original so it can be replaced later.
-                            }
-
-                            //Instantiate a the AP Object at the original's position
-                            GameObject APGO = GameObject.Instantiate(item, itemModel.position, itemModel.rotation, itemModel.parent);
-                            APGO.transform.localScale = itemModel.localScale;
-                            APGO.name = itemModel.name;
-                            itemModel.gameObject.DestroyAllChildren();
-                            APGO.MoveChildrenTo(itemModel.gameObject);
-                            GameObject.Destroy(APGO);
-
-                            //Import the template Text Prefab.  
-                            GameObject textPrefab = ModInstance.Prefabs.GetChild("You Found Text Template");
-                            long locationid = Plugin.ArchipelagoClient.GetLocationFromName($"First Pickup - {scoutname.ToTitleCase()}");
-                            // Get the location ID of our first pickup.
-                            if (scoutname == "CABINET KEY 1")
-                            {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Patio");
-                            }
-                            else if (scoutname == "CABINET KEY 2")
-                            {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Laundry Room");
-                            }
-                            else if (scoutname == "CABINET KEY 3")
-                            {
-                                locationid = Plugin.ArchipelagoClient.GetLocationFromName("First Pickup - File Cabinet Key - Tunnel Area Past Crates");
-                            }
-                                // Find the the details of the item that will be sent on pickup.
-                                ScoutedItemInfo scout = null;
-                            if (locationid != -1)
-                            {
-                                if (ArchipelagoClient.ServerData.LocationItemMap.ContainsKey(locationid))
-                                {
-                                    scout = ArchipelagoClient.ServerData.LocationItemMap[locationid];
-                                }
-                            }
-                            // Get the variables for creating our custom pickup message.
-                            string playerName = scout?.Player?.Name ?? "";
-                            //Check if item is being used.
-                            if (playerName != "")
-                            {
-                                string scoutItemName = scout?.ItemName ?? "";
-                               
-                                //TODO add logic for the descriptions to be different based on item importance.
-                                string description = "";
-                                string[] itemWords = scoutItemName.Split(" ");
-                                if (itemWords.Length < 4)
-                                {
-                                    scoutItemName = string.Join("\n", itemWords);
-                                }
-                                else
-                                {
-                                    scoutItemName = scoutItemName.Minragged();
-                                }
-                                int FirstLetterCount = 0;
-                                int ItemNameCount = 0;
-                                int DescriptionCount = 0;
-                                // Update all the fonts and words to be correct
-                                Transform textObjects = GameObject.Find($"UI OVERLAY CAM/You Found Text/{child.name}/Text/GameObject")?.transform;
-                                // Fix for an error in the Prism Key You Bought (and potentially others);
-                                if (textObjects == null) { 
-                                    textObjects = GameObject.Find($"UI OVERLAY CAM/You Found Text/{child.name}/GameObject")?.transform;
-                                }
-
-                                GameObject textObject = GameObject.Instantiate(textPrefab, textObjects.position, textObjects.rotation);
-                                Transform FirstFirstLetter = null;
-                                Transform FirstItemName = null;
-                                //Get rid of the original Text.
-                                Transform Prescription = textObject.transform.FindChild("Prescription");
-                                Transform Description = textObject.transform.FindChild($"Description (2)");
-
-                                TextMeshPro text = null;
-                                List<GameObject> toDestroy = new List<GameObject>();
-                                for (int i = 0; i < textObjects.transform.childCount; i++)
-                                {
-
-                                    Transform textChild = textObjects.gameObject.transform.GetChild(i);
-                                    if (textChild.TryGetComponent<TextMeshPro>(out text))
-                                    {
-                                        // Add the name of the player who owns the item being spawned.
-                                        if (textChild.name.Contains("Prescription"))
-                                        {
-                                            textChild.name = "Prescription";
-                                            textChild.SetLocalPositionAndRotation(Prescription.localPosition, Prescription.localRotation);
-                                            textChild.transform.localScale = Prescription.transform.localScale;
-
-                                            // Handle names ending in s with proper apostrophe convention
-                                            if (playerName.ToLower().EndsWith('s'))
-                                            {
-                                                text.text = $"{playerName}'";
-                                            }
-                                            else
-                                            {
-                                                text.text = $"{playerName}'s";
-                                            }
-                                        }
-                                        else
-                                        {
-
-                                            // The first letter of each word in the item name is handled differently.
-                                            if (textChild.name.StartsWith("First Letter"))
-                                            {
-
-                                                if (FirstLetterCount != 0)
-                                                {
-                                                    toDestroy.Add(textChild.gameObject);
-                                                }
-                                                else
-                                                {
-                                                    textChild.name = $"First Letter ({FirstLetterCount + 1})";
-                                                    Transform FirstLetter = textObject.transform.FindChild($"First Letter ({FirstLetterCount + 1})");
-                                                    textChild.SetLocalPositionAndRotation(FirstLetter.localPosition, FirstLetter.localRotation);
-                                                    textChild.transform.localScale = FirstLetter.localScale;
-                                                    FirstFirstLetter = textChild;
-                                                    text.text = scoutItemName.Substring(0, 1);
-                                                    FirstLetterCount++;
-                                                }
-
-                                            }
-                                            // The rest of the word in the item name.
-                                            else if (textChild.name.StartsWith("Item Name"))
-                                            {
-                                                if (ItemNameCount != 0)
-                                                {
-                                                    toDestroy.Add(textChild.gameObject);
-                                                }
-                                                else
-                                                {
-
-                                                    FirstItemName = textChild;
-                                                    textChild.name = $"Item Name ({ItemNameCount + 1})";
-
-                                                    Transform ItemName = textObject.transform.FindChild($"Item Name ({ItemNameCount + 1})");
-                                                    textChild.SetLocalPositionAndRotation(ItemName.localPosition, ItemName.localRotation);
-                                                    textChild.transform.localScale = ItemName.localScale;
-                                                    text.text = scoutItemName.ToUpper().Substring(1);
-                                                    text.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                                                    ItemNameCount++;
-                                                }
-
-                                            }
-                                            // Handle the item description.
-                                            else if (textChild.name.StartsWith("Description"))
-                                            {
-
-                                                textChild.name = "Description";
-                                                textChild.SetLocalPositionAndRotation(Description.transform.localPosition, Description.transform.localRotation);
-                                                textChild.transform.localScale = Description.transform.localScale;
-                                                if (DescriptionCount == 0)
-                                                {
-                                                    text.text = description;
-                                                    text.horizontalAlignment = HorizontalAlignmentOptions.Right;
-                                                }
-                                                else
-                                                {
-                                                    toDestroy.Add(textChild.gameObject);
-                                                }
-                                            }
-                                            //Something else got mixed into the item prefab.
-                                            else
-                                            {
-                                                Logging.Log($"An extra game object was found, removing object \"{textChild.name}\"");
-                                                toDestroy.Add(textChild.gameObject);
-                                            }
-
-                                        }
-                                    }
-                                    else
-                                    {
-                                        toDestroy.Add(textChild.gameObject);
-                                    }
-                                }
-                                //Destroy all the game objects slated to be destroyed.
-                                foreach (GameObject desObj in toDestroy)
-                                {
-                                    GameObject.Destroy(desObj);
-                                }
-                                GameObject.Destroy(textObject);
-                            }
-                        }
-                        else
-                        {
-                            Logging.LogWarning($"Unable to find the item model for {itemName.ToTitleCase()}");
-                        }
-                    }
-
-                }
-                if (FoundModels.Count == 0)
-                {
-                    Logging.LogWarning($"Unable to find a 'You ___' notification for {itemName}.");
-                }
-            }
-            else
-            {
-                Logging.LogWarning($"Unable to find the 'You Found Text' GameObject.");
-            }
         }
 
 
@@ -497,52 +187,6 @@ namespace BluePrinceArchipelago.Items
                     return "Mornign Star";
                 default:
                     return name;
-            }
-        }
-
-        /// <summary>
-        ///     Looks to see if the notification is for a similarly named item.
-        /// </summary>
-        /// <param name="itemName">Item name.</param>
-        /// <param name="child">The item's child transform</param>
-        /// <returns></returns>
-        private static bool CheckSimilar(string itemName, Transform child) {
-
-            if (itemName.ToLower() == "compass")
-            {
-                if (child.gameObject.name.Contains("Ornate Compass"))
-                {
-                    return true;
-                }
-            }
-            else if (itemName.ToLower() == "crown") {
-                if (child.gameObject.name.Contains("Paper Crown"))
-                {
-                    return true;
-                }
-            }
-                return false;
-        }
-
-        /// <summary>
-        ///     Removes the AP Swirlies from Unique items, for use when the swirlies need to be removed mid-day.
-        /// </summary>
-        /// <param name="item">The item to remove swirlies from.</param>
-        public static void RemoveUniqueItemAPSwirly(UniqueItem item) {
-            GameObject spawnObj = FindSpawnObject(item.Name);
-            if (spawnObj == null)
-            {
-                spawnObj = item._gameObj;
-            }
-            if (spawnObj == null)
-            {
-                Logging.LogWarning($"Unable to change spawn prefab for {item.Name}, error finding prefab with name: {item.Name}(Clone)001");
-                return;
-            }
-            // Delete the AP Swirly SubObject.
-            if (spawnObj.transform.FindChild("AP Swirlie") != null)
-            {
-                GameObject.Destroy(spawnObj.transform.FindChild("AP Swirlie").gameObject);
             }
         }
 
@@ -796,31 +440,10 @@ namespace BluePrinceArchipelago.Items
         }
 
         /// <summary>
-        ///     Finds the spawned version of an item icon,
-        /// </summary>
-        /// <param name="name">The name of the item.</param>
-        /// <returns>The GameObject of the inventory Icon.</returns>
-        private static GameObject FindSpawnObject(string name) {
-            name = name.Replace("_0", "");
-            string instanceName = name + "(Clone)001";
-            GameObject spawnObj = ModInstance.PickupSpawnPool.transform.FindChild(instanceName)?.gameObject;
-            if (spawnObj == null)
-            {
-                instanceName = name + " (Clone)001";
-                spawnObj = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/" + instanceName);
-            }
-            if (spawnObj == null)
-            {
-                GetInventoryItem(name);
-            }
-            return spawnObj;
-        }
-
-        /// <summary>
         ///     Adds a Unique item to the Unique item list if it's not already tracked.
         /// </summary>
         /// <param name="item">The item to add.</param>
-        public static void AddItem(UniqueItem item)
+        public static void AddItem(ArchipelagoUniqueItem item)
         {
             bool found = false;
             int counter = -1;
@@ -913,7 +536,7 @@ namespace BluePrinceArchipelago.Items
             {
                 if (item.Name == itemToAdd.Name)
                 {
-                    item.Count += 1;
+                    item.StackItem();
                     return;
                 }
             }
@@ -944,10 +567,10 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the unique item to find.</param>
         /// <returns>The UniqueItem or null if not found.</returns>
-        public static UniqueItem GetUniqueItem(string name)
+        public static ArchipelagoUniqueItem GetUniqueItem(string name)
         {
            
-            foreach (UniqueItem item in UniqueItemList)
+            foreach (ArchipelagoUniqueItem item in UniqueItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {
@@ -1162,76 +785,76 @@ namespace BluePrinceArchipelago.Items
         {
             //Unique Items
             //  Keys
-            AddItem(new UniqueItem("CAR KEYS", false, ItemSanityType.Key, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("KEYCARD", false, ItemSanityType.Key));
-            AddItem(new UniqueItem("SILVER KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
-            AddItem(new UniqueItem("KEY 8", false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("BASEMENT KEY", false, ItemSanityType.Key));
-            AddItem(new UniqueItem("VAULT KEY 149", false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 233", false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 304", false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("VAULT KEY 370", false, ItemSanityType.Key, true, false, ["Dig"]));
-            AddItem(new UniqueItem("DIARY KEY", false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("PRISM KEY_0", false, ItemSanityType.Key, false, false, ["Locksmith"]));
-            AddItem(new UniqueItem("KEY of Aries", false, ItemSanityType.Key, false));
-            AddItem(new UniqueItem("SECRET GARDEN KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
-            AddItem(new UniqueItem("MICROCHIP 1", false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("MICROCHIP 2", false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("MICROCHIP 3", false, ItemSanityType.Key, true, true));
-            AddItem(new UniqueItem("CABINET KEY 1", false, ItemSanityType.Key, true, true)); //Patio
-            AddItem(new UniqueItem("CABINET KEY 2", false, ItemSanityType.Key, true, true)); //Laundry
-            AddItem(new UniqueItem("CABINET KEY 3", false, ItemSanityType.Key, true, true)); //
-
-            //  Standard Items
-            AddItem(new UniqueItem("BATTERY PACK", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("BROKEN LEVER", false, ItemSanityType.Standard, true, false, ["Dig"]));
-            AddItem(new UniqueItem("MAGNIFYING GLASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("METAL DETECTOR", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SHOVEL", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SLEDGE HAMMER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("TELESCOPE", false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("RUNNING SHOES", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SALT SHAKER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("SLEEPING MASK", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("COIN PURSE", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("COUPON BOOK", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("LOCK PICK KIT", false, ItemSanityType.Standard, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("LUCKY RABBIT'S FOOT", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("TREASURE MAP", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("STOPWATCH", false, ItemSanityType.Standard, true, false, ["Dig"]));
-            AddItem(new UniqueItem("REPELLENT", false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("WATERING CAN", false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("LUNCH BOX", false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("CURSED EFFIGY", false, ItemSanityType.Standard, false, true));
-            AddItem(new UniqueItem("CROWN", false, ItemSanityType.Standard));
-            AddItem(new UniqueItem("PAPER CROWN", false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("GEAR WRENCH", false, ItemSanityType.Standard, true, true));
-            AddItem(new UniqueItem("COMPASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
-            AddItem(new UniqueItem("HALL PASS", false, ItemSanityType.Standard, true, true));
-
+            AddItem(new ArchipelagoUniqueItem("CAR KEYS", false, ItemSanityType.Key, true, false, ["Locksmith"]));
+            AddItem(new ArchipelagoUniqueItem("KEYCARD", false, ItemSanityType.Key));
+            AddItem(new ArchipelagoUniqueItem("SILVER KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
+            AddItem(new ArchipelagoUniqueItem("KEY 8", false, ItemSanityType.Key, true, true));
+            AddItem(new ArchipelagoUniqueItem("BASEMENT KEY", false, ItemSanityType.Key));
+            AddItem(new ArchipelagoUniqueItem("VAULT KEY 149", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("VAULT KEY 233", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("VAULT KEY 304", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("VAULT KEY 370", false, ItemSanityType.Key, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("DIARY KEY", false, ItemSanityType.Key, true, true));
+            AddItem(new ArchipelagoUniqueItem("PRISM KEY_0", false, ItemSanityType.Key, false, false, ["Locksmith"]));
+            AddItem(new ArchipelagoUniqueItem("KEY of Aries", false, ItemSanityType.Key, false));
+            AddItem(new ArchipelagoUniqueItem("SECRET GARDEN KEY", false, ItemSanityType.Key, true, false, ["Locksmith", "Dig"]));
+            AddItem(new ArchipelagoUniqueItem("MICROCHIP 1", false, ItemSanityType.Key, true, true));
+            AddItem(new ArchipelagoUniqueItem("MICROCHIP 2", false, ItemSanityType.Key, true, true));
+            AddItem(new ArchipelagoUniqueItem("MICROCHIP 3", false, ItemSanityType.Key, true, true));
+            AddItem(new ArchipelagoUniqueItem("CABINET KEY 1", false, ItemSanityType.Key, true, true)); //Patio
+            AddItem(new ArchipelagoUniqueItem("CABINET KEY 2", false, ItemSanityType.Key, true, true)); //Laundry
+            AddItem(new ArchipelagoUniqueItem("CABINET KEY 3", false, ItemSanityType.Key, true, true)); //
+                        
+            //  StandardArchipelago Items
+            AddItem(new ArchipelagoUniqueItem("BATTERY PACK", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("BROKEN LEVER", false, ItemSanityType.Standard, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("MAGNIFYING GLASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("METAL DETECTOR", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("SHOVEL", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("SLEDGE HAMMER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("TELESCOPE", false, ItemSanityType.Standard, true, true));
+            AddItem(new ArchipelagoUniqueItem("RUNNING SHOES", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("SALT SHAKER", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("SLEEPING MASK", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("COIN PURSE", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("COUPON BOOK", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("LOCK PICK KIT", false, ItemSanityType.Standard, true, false, ["Locksmith"]));
+            AddItem(new ArchipelagoUniqueItem("LUCKY RABBIT'S FOOT", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("TREASURE MAP", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("STOPWATCH", false, ItemSanityType.Standard, true, false, ["Dig"]));
+            AddItem(new ArchipelagoUniqueItem("REPELLENT", false, ItemSanityType.Standard, false, true));
+            AddItem(new ArchipelagoUniqueItem("WATERING CAN", false, ItemSanityType.Standard, false, true));
+            AddItem(new ArchipelagoUniqueItem("LUNCH BOX", false, ItemSanityType.Standard, false, true));
+            AddItem(new ArchipelagoUniqueItem("CURSED EFFIGY", false, ItemSanityType.Standard, false, true));
+            AddItem(new ArchipelagoUniqueItem("CROWN", false, ItemSanityType.Standard));
+            AddItem(new ArchipelagoUniqueItem("PAPER CROWN", false, ItemSanityType.Standard, true, true));
+            AddItem(new ArchipelagoUniqueItem("GEAR WRENCH", false, ItemSanityType.Standard, true, true));
+            AddItem(new ArchipelagoUniqueItem("COMPASS", false, ItemSanityType.Standard, true, false, ["Commissary"]));
+            AddItem(new ArchipelagoUniqueItem("HALL PASS", false, ItemSanityType.Standard, true, true));
+                        
             // Workshop Items - TODO
-            AddItem(new UniqueItem("Electromagnet", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Lucky Purse", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Pick Sound Amplifier", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Burning Glass", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Detector Shovel", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Dowsing Rod", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Jack Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-            AddItem(new UniqueItem("Power Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
-
-            // Showroom
-            AddItem(new UniqueItem("CHRONOGRAPH", false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("EMERALD BRACELET", false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("MASTER KEY", false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
-            AddItem(new UniqueItem("MOON PENDANT", false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("ORNATE COMPASS", false, ItemSanityType.SpecialShop, true, false));
-            AddItem(new UniqueItem("SILVER SPOON", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new ArchipelagoUniqueItem("Electromagnet", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Lucky Purse", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Pick Sound Amplifier", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Burning Glass", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Detector Shovel", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Dowsing Rod", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Jack Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+            AddItem(new ArchipelagoUniqueItem("Power Hammer", false, ItemSanityType.Workshop, true, false, ["Workshop"]));
+                        
+            // Showroom 
+            AddItem(new ArchipelagoUniqueItem("CHRONOGRAPH", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new ArchipelagoUniqueItem("EMERALD BRACELET", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new ArchipelagoUniqueItem("MASTER KEY", false, ItemSanityType.SpecialShop, true, false, ["Locksmith"]));
+            AddItem(new ArchipelagoUniqueItem("MOON PENDANT", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new ArchipelagoUniqueItem("ORNATE COMPASS", false, ItemSanityType.SpecialShop, true, false));
+            AddItem(new ArchipelagoUniqueItem("SILVER SPOON", false, ItemSanityType.SpecialShop, true, false));
 
             // Armory - TODO
-            AddItem(new UniqueItem("MORNING STAR", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
-            AddItem(new UniqueItem("THE AXE", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
-            AddItem(new UniqueItem("KNIGHTS SHIELD", false, ItemSanityType.SpecialShop, true, false, ["Dig", "Armory"]));
-            AddItem(new UniqueItem("TORCH", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new ArchipelagoUniqueItem("MORNING STAR", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new ArchipelagoUniqueItem("THE AXE", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
+            AddItem(new ArchipelagoUniqueItem("KNIGHTS SHIELD", false, ItemSanityType.SpecialShop, true, false, ["Dig", "Armory"]));
+            AddItem(new ArchipelagoUniqueItem("TORCH", false, ItemSanityType.SpecialShop, true, false, ["Armory"]));
 
             // Permanent Items
             AddItem(new ResourceItem("1 Permanent Dice", false, "Dice", 1, true));
