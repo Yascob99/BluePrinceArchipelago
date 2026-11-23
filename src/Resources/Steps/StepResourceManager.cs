@@ -156,7 +156,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Runs the IEnumerator if it meets the correct condition.
         /// </summary>
-        public void RunUpdater()
+        private void RunUpdater()
         {
             // If the MB is initialized
             if (_Initialized)
@@ -177,7 +177,7 @@ namespace BluePrinceArchipelago.Resources
         /// <summary>
         ///     Runs the IEnumerator if it meets the correct conditions.
         /// </summary>
-        public void RunWaitUntilUnfrozen() {
+        private void RunWaitUntilUnfrozen() {
             if (_Initialized)
             {
                 if (!ModInstance.IsInRun)
