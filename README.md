@@ -70,6 +70,7 @@
         <ul>
             <li><a href="#setting-up-unity-editor">Setting Up Unity Editor</a></li>
             <li><a href="#creating-asset-bundles">Creating Asset Bundles</a></li>
+			<li><a href="#name-rules-and-conventions">Name Rules and Conventions</a></li>
         </ul>
       </ul>
     </li>
@@ -502,12 +503,31 @@ public class BuildSubsetAssetBundles
 5. At the bottom of properties select an assetbundle click new. Name it something starting with ap (unless you change the above script to only build assetbundles that start with whatever is relevant to your name). 
 6. Select the menu option Assets > "Build Selected AssetBundles" and the Asset bundle(s) will be build and exported to the ExportedProject\Assets\AssetBundles folder. 
 7. The asset bundle is now ready to import into the mod!
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Name Rules and Conventions
+The Naming rules and conventions for the code in this repo is as follows:
+- Prefer clarity over brevity.
+- Use PascalCase for class names and method names.
+- Use camelCase for method arguments, local variables, and private and internal non-constant fields.
+- Private and internal non-constant instance fields start with an underscore (_).
+- Avoid using abbreviations or acronyms in names, except for widely known and accepted abbreviations. For our repo FSM, GUI, and UI are acceptable. AP should be spelled out as Archipelago.
+- Acronyms should be full caps in all names except for FSM. Which can Be "Fsm" at the start or middle of a name, and should be FSM at the end of a name (to match the conventions of the PlayMaker library ).
+- Avoid using single-letter names, except for simple loop counters.
+- Interface names start with a capital I (Though avoid interfaces when possible, they are clunky to use in IL2CPP).
+- To maintain consistency across all access modifiers, use MACRO_CASE for constant names, both fields and local constants, including private and internal constants.
+- If there are further questions please inquire with Yascob or the present project lead.
+
+- There may be old code that doesn't follow this convention. Please adjust this to the correct convention if you are making large changes to the file that is not currently following this standard.
    
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+Please make sure to check out the name rules and conventions before contributing.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 
