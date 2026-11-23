@@ -15,10 +15,6 @@ namespace BluePrinceArchipelago.FsmMethods.CustomMethods
 
         public string ItemName { get; set; } = itemName;
 
-        public override void OnRegister()
-        {
-            Item = GameItemManager.GetInstance().GetGameUniqueItem(ItemName);
-        }
         public override void OnCalled()
         {
             if (Item != null)
