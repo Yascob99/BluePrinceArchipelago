@@ -133,7 +133,7 @@ namespace BluePrinceArchipelago.Resources
         {
             if (ModInstance.IsInRun)
             {
-                StepManager.AdjustSteps(count);
+                StepResourceManager.AdjustSteps(count);
             }
         }
        
@@ -201,6 +201,7 @@ namespace BluePrinceArchipelago.Resources
             }
             catch
             {
+
                 Logging.LogWarning("Error adjusting Luck", "Resources");
                 return false;
             }
@@ -228,7 +229,7 @@ namespace BluePrinceArchipelago.Resources
             }
             catch
             {
-                Logging.Logger.LogWarning("Error adjusting Allowance");
+                Logging.LogWarning("Error adjusting Allowance");
                 return false;
             }
         }

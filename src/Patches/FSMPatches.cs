@@ -849,34 +849,34 @@ namespace BluePrinceArchipelago.Patches
             FsmState RunningShoesCheck = ModInstance.StepManager.GetState("Running Shoes check");
             RunningShoesCheck.RemoveAllActions();
             RunningShoesCheck.ChangeTransition("FINISHED", "State 5");
-            RunningShoesCheck.AddAction(StepManager.GetUpdateStepMethod);
+            RunningShoesCheck.AddAction(StepResourceManager.GetUpdateStepMethod);
 
             FsmState RunningShoesCheck2 = ModInstance.StepManager.GetState("Running Shoes check 2");
             RunningShoesCheck2.RemoveAllActions();
             RunningShoesCheck2.ChangeTransition("FINISHED", "State 1");
-            RunningShoesCheck2.AddAction(StepManager.GetUpdateStepMethod);
+            RunningShoesCheck2.AddAction(StepResourceManager.GetUpdateStepMethod);
 
             // Update Event
             FsmState StepLock = ModInstance.StepManager.GetState("STEP LOCK");
             StepLock.RemoveAllActions();
             StepLock.ChangeTransition("FINISHED", "State 5");
-            StepLock.AddAction(StepManager.GetUpdateMethod);
+            StepLock.AddAction(StepResourceManager.GetUpdateMethod);
 
             FsmState StepLock2 = ModInstance.StepManager.GetState("STEP LOCK 2");
             StepLock2.RemoveAllActions();
             StepLock2.ChangeTransition("FINISHED", "State 1");
-            StepLock2.AddAction(StepManager.GetUpdateMethod);
+            StepLock2.AddAction(StepResourceManager.GetUpdateMethod);
 
             // Event 0
             FsmState State2 = ModInstance.StepManager.GetState("State 2");
             State2.RemoveAllActions();
-            State2.AddAction(StepManager.GetEvent0);
+            State2.AddAction(StepResourceManager.GetEvent0);
             State2.ChangeTransition("FINISHED", "State 1");
 
             // Event 10
             FsmState State3 = ModInstance.StepManager.GetState("State 3");
             State3.RemoveAllActions();
-            State3.AddAction(StepManager.GetEvent10);
+            State3.AddAction(StepResourceManager.GetEvent10);
             State2.ChangeTransition("FINISHED", "State 5");
         }
 
