@@ -8,19 +8,12 @@ using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Resources;
-#if Bep
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
-#endif
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if ML
 using Il2Cpp;
-using MelonLoader;
-using Il2CppHutongGames.PlayMaker;
-using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using HarmonyPatch = HarmonyLib.Harmony;
 
@@ -72,10 +65,6 @@ namespace BluePrinceArchipelago
 
         // Other
         public static RoomDraftHelper RDHelper = new();
-
-
-        // Custom Resource Manager
-        public static StepResourceManager ResourceManagerInstance = null;
 
         // Transforms
         public static Transform YouFoundText = new();
@@ -146,7 +135,10 @@ namespace BluePrinceArchipelago
             }
             ArchipelagoPrefabsLoaded = true;
         }
-
+        public void LoadPrefabAssets()
+        {
+            Instance.StartCoroutine(Instance.LoadAllAssets());
+        }
 
         /// <summary>
         ///     Called whenver a scene is loaded (triggered by the scene manager).
@@ -161,7 +153,7 @@ namespace BluePrinceArchipelago
                 if (!AppliedHarmony) {
                     Plugin.Harmony.PatchAll(typeof(EventPatches));
                     //Apply event patches on the main menu to get some data that is not accessible later. 
-                    Instance.StartCoroutine(Instance.LoadAllAssets());
+                    ModAssetManager.LoadModPrefabs();
                     AppliedHarmony = true;
                 }
                 //UIManager.InitializeMainMenu();

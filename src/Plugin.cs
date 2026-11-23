@@ -93,7 +93,7 @@ namespace BluePrinceArchipelago {
             ArchipelagoClient = new ArchipelagoClient();
             UniqueItemManager = new UniqueItemManager();
             _instance = this;
-            AssetBundle = AssetExtensions.LoadAssetBundleFromAssembly(AssetExtensions.GetResourceNameFromPath("assets/apprefabs"));
+            ModAssetManager.LoadModAssetBundle();
             Logging.LogWarning($"Plugin {PluginGUID} is loaded!");
 
             //Inject custom Object for Mod Handling
@@ -123,7 +123,6 @@ namespace BluePrinceArchipelago {
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();
-            StepManager.Initialize();
             DiceManager.Initialize();
             GemManager.Initialize();
             GoldManager.Initialize();

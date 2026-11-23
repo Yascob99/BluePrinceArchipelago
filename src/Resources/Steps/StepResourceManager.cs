@@ -2,7 +2,6 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using System;
 using UnityEngine;
-using Il2CppInterop.Runtime;
 #if Bep
 using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;

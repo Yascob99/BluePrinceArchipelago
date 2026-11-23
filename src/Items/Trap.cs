@@ -110,7 +110,7 @@ namespace BluePrinceArchipelago.Items
             if (TrapType == "Steps")
             {
                 // change the adjustment amount.
-                StepManager.SetSteps(Count);
+                StepResourceManager.SetSteps(Count);
             }
         }
     }
