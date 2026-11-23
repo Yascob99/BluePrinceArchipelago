@@ -47,7 +47,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void StartOfDay()
         {
-            foreach (GameUniqueItem item in ModItemManager.UniqueItemList)
+            foreach (GameUniqueItem item in ModItemManager.GameUniqueItemList)
             {
                 item.StartOfDay();   
             }

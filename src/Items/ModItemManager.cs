@@ -31,6 +31,7 @@ namespace BluePrinceArchipelago.Items
         public static List<PermanentItem> PermanentItemList = [];
         public static List<ArchipelagoUniqueItem> UniqueItemList = new();
         public static List<ResourceItem> JunkItemList = new();
+        public static List<GameUniqueItem> GameUniqueItemList = [];
         public static Dictionary<string, ModItem> ItemDict = new(); //Item name is the key, the type of item is the value.
         public static PlayMakerArrayListProxy PreSpawn = new();
         public static PlayMakerArrayListProxy EstateItems = new();
@@ -70,12 +71,92 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        public static void InitializeGameItems()
+        {
+            GameUniqueItemList =
+            [
+                //Keys
+                new GameUniqueItem(ITEM.CAR_KEYS, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.KEYCARD),
+                new GameUniqueItem(ITEM.SILVER_KEY, true, false, ["Locksmith", "Dig"]),
+                new GameUniqueItem(ITEM.KEY_8, true, true),
+                new GameUniqueItem(ITEM.BASEMENT_KEY),
+                new GameUniqueItem(ITEM.VAULT_KEY_149, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_233, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_304, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_370, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.DIARY_KEY, true, true),
+                new GameUniqueItem(ITEM.PRISM_KEY, false, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.KEY_OF_ARIES, false),
+                new GameUniqueItem(ITEM.SECRET_GARDEN_KEY, true, false, ["Locksmith", "Dig"]),
+                new GameUniqueItem(ITEM.MICROCHIP_SMALL, true, true),
+                new GameUniqueItem(ITEM.MICROCHIP_MIDDLE_SIZED, true, true),
+                new GameUniqueItem(ITEM.MICROCHIP_LARGE, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_PATIO, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_LAUNDRY, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_TUNNEL, true, true),
+                
+                //Basic
+                new GameUniqueItem(ITEM.BATTERY_PACK),
+                new GameUniqueItem(ITEM.BROKEN_LEVER, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.MAGNIFYING_GLASS, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.METAL_DETECTOR, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SHOVEL, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SLEDGE_HAMMER, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.TELESCOPE, true, true),
+                new GameUniqueItem(ITEM.RUNNING_SHOES, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SALT_SHAKER, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SLEEPING_MASK, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.COIN_PURSE),
+                new GameUniqueItem(ITEM.COUPON_BOOK),
+                new GameUniqueItem(ITEM.LOCK_PICK_KIT, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.LUCKY_RABBITS_FOOT),
+                new GameUniqueItem(ITEM.TREASURE_MAP),
+                new GameUniqueItem(ITEM.STOPWATCH, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.REPELLENT, false, true),
+                new GameUniqueItem(ITEM.WATERING_CAN, false, true),
+                new GameUniqueItem(ITEM.LUNCH_BOX, false, true),
+                new GameUniqueItem(ITEM.CURSED_EFFIGY, false, true),
+                new GameUniqueItem(ITEM.CROWN),
+                new GameUniqueItem(ITEM.PAPER_CROWN, true, true),
+                new GameUniqueItem(ITEM.GEAR_WRENCH, true, true),
+                new GameUniqueItem(ITEM.COMPASS, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.HALL_PASS, true, true),
+
+                //Workshop
+                new GameUniqueItem(ITEM.ELECTROMAGNET, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.LUCKY_PURSE, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.PICK_SOUND_AMPLIFIER, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.BURNING_GLASS, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.DETECTOR_SHOVEL, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.DOWSING_ROD, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.JACK_HAMMER, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.POWER_HAMMER, true, false, ["Workshop"]),
+                
+                //Showroom
+                new GameUniqueItem(ITEM.CHRONOGRAPH, true, false),
+                new GameUniqueItem(ITEM.EMERALD_BRACELET, true, false),
+                new GameUniqueItem(ITEM.MASTER_KEY, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.MOON_PENDANT, true, false),
+                new GameUniqueItem(ITEM.ORNATE_COMPASS, true, false),
+                new GameUniqueItem(ITEM.SILVER_SPOON, true, false),
+                
+                //Armory
+                new GameUniqueItem(ITEM.MORNING_STAR, true, false, ["Armory"]),
+                new GameUniqueItem(ITEM.THE_AXE, true, false, ["Armory"]),
+                new GameUniqueItem(ITEM.KNIGHTS_SHIELD, true, false, ["Dig", "Armory"]),
+                new GameUniqueItem(ITEM.TORCH, true, false, ["Armory"]),
+
+            ];
+
+        }
+
         /// <summary>
         ///     Replaces Unique items (excluding some special cases) with their AP Version if applicable.
         /// </summary>
         public static void ReplaceUniqueItemsWithAP()
         {
-            foreach (GameUniqueItem item in UniqueItemList)
+            foreach (GameUniqueItem item in GameUniqueItemList)
             {
                 item.ReplaceUniqueItemWithArchipelagoItem();
             }
@@ -90,104 +171,6 @@ namespace BluePrinceArchipelago.Items
                 return "POWERED ELECTROMAGNET";
             }
             return APitem.Name;
-        }
-
-
-        /// <summary>
-        ///     Replaces the name of an item with the internally used name specific to pickup, buying, and dig up notifications.
-        /// </summary>
-        /// <param name="name">The name of the item.</param>
-        /// <returns>The item name for the notification.</returns>
-        private static string GetYou___Name(string name) {
-            name = name.ToTitleCase();
-            switch (name)
-            {
-                case "Magnifying Glass":
-                    return "Mag Glass";
-                case "Lock Pick Kit":
-                    return "Lock Pick";
-                case "Sleeping Mask":
-                    return "Sleep Mask";
-                case "Prism Key_0":
-                    return "Prism Key";
-                case "Key Of Aries":
-                    return "The Key of Aries";
-                case "Vault Key 149":
-                    return "Key 149";
-                case "Vault Key 233":
-                    return "Key 233";
-                case "Vault Key 304":
-                    return "Key 304";
-                case "Vault Key 370":
-                    return "Key 370";
-                case "Cabinet Key 1":
-                    return "Cabinet Key";
-                case "Cabinet Key 2":
-                    return "Cabinet Key 5";
-                case "Cabinet Key 3":
-                    return "Cabinet Key 5";
-                case "Lucky Purse":
-                    return "lucky purse";
-                case "Pick Sound Amplifier":
-                    return "pick sound amplifier";
-                case "Burning Glass":
-                    return "burning glass";
-                case "Detector Shovel":
-                    return "detector shovel";
-                case "Power Hammer":
-                    return "power hammer";
-                case "Jack Hammer":
-                    return "jack hammer";
-                case "Electromagnet":
-                    return "Electro Magnet";
-                case "Knights Shield":
-                    return "Knight's Shield";
-                default:
-                    return name;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the internally used name of the item model within the item notification.
-        /// </summary>
-        /// <param name="name">The item name.</param>
-        /// <returns>The model name.</returns>
-        private static string GetItemModelName(string name) {
-            switch (name.ToUpper())
-            {
-                case "KEY 8":
-                    return "SILVER KEY";
-                case "WATERING CAN":
-                    return "Watering Can pickup";
-                case "LUNCH BOX":
-                    return "Joya Lunch Box";
-                case "CURSED EFFIGY":
-                    return "cursed effigy- dagger";
-                case "CROWN":
-                    return "crow";
-                case "HALL PASS":
-                    return "hallpass";
-                case "CABINET KEY 1":
-                    return "cabinet key";
-                case "CABINET KEY 2":
-                    return "cabinet key";
-                case "CABINET KEY 3":
-                    return "cabinet key";
-                case "PRISM KEY_0":
-                    return "Prism Key";
-                case "KEY OF ARIES":
-                    return "o Key";
-                case "POWER HAMMER":
-                    return "Power Hammer ";
-                case "ELECTROMAGNET":
-                    return "Powerd Electromagnet";
-                case "TORCH":
-                    return "Self Lighting Torch";
-                case "MORNING STAR":
-                    return "Mornign Star";
-                default:
-                    return name;
-            }
         }
 
         /// <summary>
@@ -571,6 +554,19 @@ namespace BluePrinceArchipelago.Items
         {
            
             foreach (ArchipelagoUniqueItem item in UniqueItemList)
+            {
+                if (item.Name.ToLower() == name.ToLower())
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        public static GameUniqueItem GetGameUniqueItem(string name)
+        {
+
+            foreach (GameUniqueItem item in GameUniqueItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {

@@ -15,7 +15,6 @@ using Il2CppHutongGames.PlayMaker.Actions;
 using Il2CppTMPro;
 #endif
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 
@@ -40,7 +39,6 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
-        private readonly ItemSanityType _sanityType;
         private readonly List<GameObject> _gameModelInstancesWithSwirly = [];
 
         private readonly bool _isPersistent = false;
@@ -53,9 +51,6 @@ namespace BluePrinceArchipelago.Items
         private readonly CallMethod _commissaryEvent = null;
         private readonly CallMethod _digEvent = null;
         private readonly CallMethod _locksmithEvent = null;
-        private readonly FsmState _commissaryState = null;
-        private readonly FsmState _digState = null;
-        private readonly FsmState _locksmithState = null;
 
         private GameObject _gameObj = null;
 
@@ -63,16 +58,15 @@ namespace BluePrinceArchipelago.Items
         ///     Creates a UniqueItem
         /// </summary>
         /// <param name="name">The name of the object.</param>
-        /// <param name="isUnlocked">If the item is unlocked.</param>
-        /// <param name="sanityType">The Sanitytype of the item. Defaults to none.</param>
         /// <param name="isPreSpawn">If the item is usually in the prespawn list. Defualts to true.</param>
         /// <param name="isPersistent">If the item is persists across scene transitions.</param>
         /// <param name="shopTags">What shops the item can be in.</param>
         /// 
-        public GameUniqueItem(string name, bool isUnlocked, ItemSanityType sanityType = ItemSanityType.None, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, isUnlocked)
+        /// 
+        /// 
+        public GameUniqueItem(string name, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(ModItemManager.GetInventoryItem(name))
         {
             _isPrespawn = isPreSpawn;
-            _sanityType = sanityType;
             _isPersistent = isPersistent;
             _gameObj = ModItemManager.GetInventoryItem(Name);
             List<string> shopTagList = shopTags ?? [];
@@ -357,7 +351,7 @@ namespace BluePrinceArchipelago.Items
             {
                 scoutname = Name;
             }
-            string youName = GetYou___Name(Name);
+            string youName = ITEM.GetYouFoundNotificationName(Name);
             GameObject You___Text = GameObject.Find("UI OVERLAY CAM/You Found Text")?.gameObject;
             if (You___Text != null)
             {
@@ -368,7 +362,7 @@ namespace BluePrinceArchipelago.Items
                     if (child.gameObject.name.Contains(youName) && !CheckSimilar(Name, child))
                     {
                         FoundModels.Add(child);
-                        Transform itemModel = child.FindRecursive(GetItemModelName(Name), true);
+                        Transform itemModel = child.FindRecursive(ITEM.GetItemModelInNotificationName(Name), true);
                         if (itemModel != null)
                         {
 
@@ -591,7 +585,7 @@ namespace BluePrinceArchipelago.Items
                 Logging.LogWarning($"Error finding game object for {Name}.");
                 return;
             }
-            string prefabName = GetPrefabName(Name);
+            string prefabName = ITEM.GetPrefabName(Name);
             GameObject prefab = ModInstance.Prefabs.GetChild(prefabName);
             if (prefab == null)
             {
@@ -657,7 +651,6 @@ namespace BluePrinceArchipelago.Items
         /// <summary>
         ///     Removes the AP Swirlies from Unique items, for use when the swirlies need to be removed mid-day.
         /// </summary>
-        /// <param name="item">The item to remove swirlies from.</param>
         public void RemoveUniqueItemAPSwirly()
         {
             GameObject spawnObj = FindSpawnObject();
@@ -680,7 +673,6 @@ namespace BluePrinceArchipelago.Items
         /// <summary>
         ///     Finds the spawned version of an item icon,
         /// </summary>
-        /// <param name="name">The name of the item.</param>
         /// <returns>The GameObject of the inventory Icon.</returns>
         private GameObject FindSpawnObject()
         {
