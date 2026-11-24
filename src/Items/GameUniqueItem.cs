@@ -300,7 +300,7 @@ namespace BluePrinceArchipelago.Items
         public void ReplaceUniqueItemWithArchipelagoItem()
         {
             // If the item has not been found yet.
-            if (_hasBeenFound && !_archipelagoUnlocked)
+            if (!_hasBeenFound && !_archipelagoUnlocked)
             {
                 if (_name == "MICROCHIP 1")
                 {
