@@ -436,7 +436,7 @@ public class ArchipelagoClient
                 }
             }
             ArchipelagoUniqueItem uniqueItem = ArchipelagoItemManager.GetUniqueItem(item.ItemName);
-            ResourceItem permanentItem = ArchipelagoItemManager.GetPermanentItem(item.ItemName);
+            ArchipelagoItem permanentItem = ArchipelagoItemManager.GetPermanentItem(item.ItemName);
             if (uniqueItem != null)
             {
                 uniqueItem.IsUnlocked = true;

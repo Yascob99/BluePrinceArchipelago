@@ -1,4 +1,5 @@
 using Archipelago.MultiClient.Net.Models;
+using BluePrinceArchipelago.FsmMethods.CustomMethods;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,9 +11,9 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     public static class ArchipelagoItemManager
     {
-        private static readonly List<ResourceItem> _permanentItemList = [];
+        private static readonly List<ArchipelagoItem> _permanentItemList = [];
         private static readonly List<ArchipelagoUniqueItem> _uniqueItemList = [];
-        private static readonly List<ResourceItem> _junkItemList = [];
+        private static readonly List<ArchipelagoItem> _junkItemList = [];
         private static List<Trap> TrapList = new();
         private static Dictionary<string, ArchipelagoItem> _itemDict = []; //Item name is the key, the type of item is the value.
 
@@ -33,7 +34,6 @@ namespace BluePrinceArchipelago.Items
             _itemDict[itemToAdd.Name] = itemToAdd;
             _uniqueItemList.Add(itemToAdd);
         }
-
 
         /// <summary>
         ///     Adds a trap to the list of traps..
@@ -101,9 +101,9 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the junk item to find.</param>
         /// <returns>The JunkItem or null if not found.</returns>
-        public static ResourceItem GetJunkItem(string name)
+        public static ArchipelagoItem GetJunkItem(string name)
         {
-            foreach (ResourceItem item in _junkItemList)
+            foreach (ArchipelagoItem item in _junkItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {
@@ -119,9 +119,9 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the permanent item to find.</param>
         /// <returns>The PermanentItem or null if not found.</returns>
-        public static ResourceItem GetPermanentItem(string name)
+        public static ArchipelagoItem GetPermanentItem(string name)
         {
-            foreach (ResourceItem item in _permanentItemList)
+            foreach (ArchipelagoItem item in _permanentItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {
@@ -173,9 +173,8 @@ namespace BluePrinceArchipelago.Items
         public static void OnItemCheckReceived(ItemInfo itemInfo)
         {
             Logging.LogWarning(itemInfo.ItemName);
-            ArchipelagoItem item = null;
             //If item exists, retreive it.
-            ResourceItem permanentItem = GetPermanentItem(itemInfo.ItemName);
+            ArchipelagoItem permanentItem = GetPermanentItem(itemInfo.ItemName);
             if (permanentItem != null)
             {
                 permanentItem.IsUnlocked = true;
@@ -183,8 +182,7 @@ namespace BluePrinceArchipelago.Items
             }
             else if (_itemDict.ContainsKey(itemInfo.ItemName))
             {
-                item = _itemDict[itemInfo.ItemName];
-                item.AddToWorld();
+                _itemDict[itemInfo.ItemName].AddToWorld();
                 return;
             }
             else
