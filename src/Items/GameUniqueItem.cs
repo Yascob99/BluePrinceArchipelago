@@ -154,10 +154,6 @@ namespace BluePrinceArchipelago.Items
             // Disable this game action so it doesn't try and display 2 UIs.
             Logging.LogWarning($"Attempting to add {_name} to Inventory");
             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-            if (InventoryGO == null)
-            {
-                Logging.LogError("Inventory GO null", "DEBUG");
-            }
             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
             GameObject icon = GameItemManager.GetIconGameObject(_name);
             if (icon != null && InventoryIcons != null)
@@ -174,7 +170,6 @@ namespace BluePrinceArchipelago.Items
                     GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
                 }
             }
-            Logging.LogError($"icon null {icon == null}, InventoryIcons null : {InventoryIcons == null}", "DEBUG");
         }
 
         public void RegisterModel(GameObject gameInstance)
@@ -289,10 +284,10 @@ namespace BluePrinceArchipelago.Items
 
         private void DisableItemInMenu(FsmState state, CallMethod replacedAction)
         {
-            //FsmState state = ModInstance.CommissaryMenu?.GetState(CommissaryStates[item._name.Trim()]);
-            //_commissaryState = state;
-            //if (state != null)
-            //{
+            if (state == null)
+            {
+                return;
+            }
             state.AddAction(replacedAction);
             //If the item is not unlocked, prevent it from being added to inventory.
             if (!_archipelagoUnlocked)
@@ -300,7 +295,6 @@ namespace BluePrinceArchipelago.Items
                 //Disable the actions that add the item to inventory.
                 state.DisableActionsOfType<ArrayListAdd>();
             }
-            //}
         }
 
         public void ReplaceUniqueItemWithArchipelagoItem()
