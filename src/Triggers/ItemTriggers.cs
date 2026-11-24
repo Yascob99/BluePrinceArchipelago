@@ -30,14 +30,23 @@ namespace BluePrinceArchipelago.Triggers
         /// <param name="spawnedObj">The GameObject for the spawned object.</param>
         public static void OnAfterItemSpawned(GameObject obj, string poolName, GameObject transformObj, GameObject spawnedObj) 
         {
-            GameUniqueItem item = GameItemManager.GetInstance().GetGameUniqueItem(obj.name);
+            GameUniqueItem item;
+            try
+            {
+
+                item = GameItemManager.GetInstance().GetGameUniqueItem(obj.name);
+            }
+            catch (Exception)
+            {
+                item = null;
+            }
             //Check if Connected in before replacing items.
             if (ArchipelagoClient.Authenticated)
             {
                 if (item != null)
                 {
                     Logging.Log($"Item Spawned: {item.Name}.", "Items");
-                    FsmState state = Plugin.UniqueItemManager.GetPickupState(obj.name);
+                    FsmState state = GameItemManager.GetPickupState(obj.name);
                     // If the item is not already in the inventory
                     if (item.IsUnlocked)
                     {
@@ -173,7 +182,7 @@ namespace BluePrinceArchipelago.Triggers
             if (Item.IsUnlocked)
             {
                 // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
-                FsmState state = Plugin.UniqueItemManager.GetPickupState(Item.Name);
+                FsmState state = GameItemManager.GetPickupState(Item.Name);
                 if (state != null)
                 {
                     state.EnableActionsOfType<ArrayListAdd>();

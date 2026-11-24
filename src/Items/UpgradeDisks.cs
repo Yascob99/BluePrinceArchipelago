@@ -214,7 +214,7 @@ namespace BluePrinceArchipelago.Items
             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
             PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-            GameObject icon = Plugin.UniqueItemManager.GetIconGameObject("UPGRADE DISK");
+            GameObject icon = GameItemManager.GetIconGameObject("UPGRADE DISK");
             PlayMakerArrayListProxy UpgradeDisks = GameObject.Find("__SYSTEM/Upgrade Disks").GetArrayListProxy("upgrade disk pickup");
 
             if (icon != null && InventoryIcons != null)

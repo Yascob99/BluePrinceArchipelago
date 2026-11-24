@@ -89,7 +89,7 @@ namespace BluePrinceArchipelago.Triggers
                 Unlocks.AppleOrchard.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
-                Plugin.UniqueItemManager.StartOfDay();
+                GameItemManager.GetInstance().StartOfDay();
                 ModRoomManager.StartOfDay();
                 
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
@@ -109,7 +109,7 @@ namespace BluePrinceArchipelago.Triggers
             ModInstance.IsInRun = false;
             State.UpdateItems(ArchipelagoClient.ServerData.ReceivedItems); // Update Items once a day so it can automatically add any items that should have been added by the crash.
             Plugin.ArchipelagoClient?.DeathLinkHandler?.SendEndOfDayDeathLink();
-            Plugin.UniqueItemManager.EndOfDay();
+            GameItemManager.GetInstance().EndOfDay();
         }
     }
 }

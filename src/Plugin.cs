@@ -57,7 +57,6 @@ namespace BluePrinceArchipelago {
         public static GameObject ModObject;
 
         public static GameObject FsmMethods;
-        public static GameItemManager UniqueItemManager;
 #if Bep
         public static HarmonyPatch Harmony { get; } = new HarmonyPatch(PluginGUID);
 #endif

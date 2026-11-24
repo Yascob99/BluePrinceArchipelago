@@ -67,7 +67,7 @@ namespace BluePrinceArchipelago.Triggers
                 Unlocks.AppleOrchard.PreventDefault();
                 Unlocks.WestGatePath.PreventDefault();
                 Unlocks.SatelliteDish.PreventDefault();
-                Plugin.UniqueItemManager.StartOfDay();
+                GameItemManager.GetInstance().StartOfDay();
                 ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
                 TrapManager.DequeueTraps();

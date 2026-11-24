@@ -210,6 +210,7 @@ namespace BluePrinceArchipelago.Items
 
         public static void RegisterItems()
         {
+            GameItemManager.GetInstance().RegisterItems();
             //Unique Items
             //  Keys
             AddItem(new ArchipelagoUniqueItem(ITEM.CAR_KEYS, ItemSanityType.Key));

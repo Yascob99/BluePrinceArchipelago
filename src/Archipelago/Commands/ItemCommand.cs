@@ -56,7 +56,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                     //Handle items that don't start in the prespawn pool.
                     if (item == null)
                     {
-                        string iconName = Plugin.UniqueItemManager.GetIconName("UPGRADE DISK");
+                        string iconName = GameItemManager.GetIconName("UPGRADE DISK");
                         GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
                         PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                         PlayMakerArrayListProxy iconList = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIcons").GetComponent<PlayMakerArrayListProxy>();
@@ -91,7 +91,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                         {
                             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
                             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-                            GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(item.name);
+                            GameObject icon = GameItemManager.GetIconGameObject(item.name);
 
                             if (icon != null && InventoryIcons != null)
                             {
@@ -128,11 +128,11 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
                         return;
                     }
-                    string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
+                    string iconName = GameItemManager.GetIconName(itemName);
                     GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
                     PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
                     PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-                    GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(iconName);
+                    GameObject icon = GameItemManager.GetIconGameObject(iconName);
 
                     Logging.LogWarning(icon != null);
                     Logging.LogWarning(InventoryIcons != null);

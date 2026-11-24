@@ -61,7 +61,6 @@ namespace BluePrinceArchipelago.Items
         /// <param name="shopTags">What shops the item can be in.</param>
         public GameUniqueItem(string name, bool isPreSpawn = true, bool isPersistent = false, List<string> shopTags = null) : base(name, GameItemManager.GetInventoryItem(name))
         {
-            Logging.LogWarning($"{name} GameUniqueItem created with {_name} and {Name}", "DEBUG");
             _isPrespawn = isPreSpawn;
             _isPersistent = isPersistent;
             List<string> shopTagList = shopTags ?? [];
@@ -155,8 +154,12 @@ namespace BluePrinceArchipelago.Items
             // Disable this game action so it doesn't try and display 2 UIs.
             Logging.LogWarning($"Attempting to add {_name} to Inventory");
             GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+            if (InventoryGO == null)
+            {
+                Logging.LogError("Inventory GO null", "DEBUG");
+            }
             PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-            GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(_name);
+            GameObject icon = GameItemManager.GetIconGameObject(_name);
             if (icon != null && InventoryIcons != null)
             {
                 GameItemManager.PickedUp.AddIfUnique(_inventoryGameObject);
@@ -171,6 +174,7 @@ namespace BluePrinceArchipelago.Items
                     GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
                 }
             }
+            Logging.LogError($"icon null {icon == null}, InventoryIcons null : {InventoryIcons == null}", "DEBUG");
         }
 
         public void RegisterModel(GameObject gameInstance)
@@ -315,7 +319,7 @@ namespace BluePrinceArchipelago.Items
                 }
                 else
                 {
-                    FsmState state = Plugin.UniqueItemManager.GetPickupState(_name);
+                    FsmState state = GameItemManager.GetPickupState(_name);
                     if (state != null)
                     {
                         state.DisableActionsOfType<ArrayListAdd>();

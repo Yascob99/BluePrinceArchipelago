@@ -79,7 +79,7 @@ namespace BluePrinceArchipelago.Patches
         /// <param name="GlobalFSM">The Global FSM</param>
         public static void UpgradeDiskOverride(PlayMakerFSM GlobalFSM) {
             // Disable the Global Manager FSM states to not give this item in inventory
-            FsmState state = Plugin.UniqueItemManager.GetPickupState("Upgrade Disk");
+            FsmState state = GameItemManager.GetPickupState("Upgrade Disk");
             if (state != null)
             {
                 if (GlobalFSM.GetState("State 35").Actions.Length < 3)

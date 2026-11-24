@@ -200,7 +200,7 @@ namespace BluePrinceArchipelago.Patches
                 else if (targetName == "Global Manager" && eventName.Contains("Pickup"))
                 {
                     Logging.Log(eventName, "Events");
-                    GameUniqueItem item = Plugin.UniqueItemManager.GetIfSpawned(eventName);
+                    GameUniqueItem item = GameItemManager.GetInstance().GetIfSpawned(eventName);
                     if (item != null)
                     {
                         // Handle the rare case of the item being spawned and the unlock for that item arriving before it has been picked up.
@@ -216,7 +216,7 @@ namespace BluePrinceArchipelago.Patches
                             else
                             {
                                 // Re-enable the logic that adds the item to inventory. (Will not cause issues if already enabled).
-                                FsmState state = Plugin.UniqueItemManager.GetPickupState(item.Name);
+                                FsmState state = GameItemManager.GetPickupState(item.Name);
                                 if (state != null)
                                 {
                                     state.EnableActionsOfType<ArrayListAdd>();

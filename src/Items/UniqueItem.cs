@@ -25,80 +25,7 @@ namespace BluePrinceArchipelago.Items
     public sealed class GameItemManager
     {
 
-        private readonly List<GameUniqueItem> _gameUniqueItemList =
-            [
-                //Keys
-                new GameUniqueItem(ITEM.CAR_KEYS, true, false, ["Locksmith"]),
-                new GameUniqueItem(ITEM.KEYCARD),
-                new GameUniqueItem(ITEM.SILVER_KEY, true, false, ["Locksmith", "Dig"]),
-                new GameUniqueItem(ITEM.KEY_8, true, true),
-                new GameUniqueItem(ITEM.BASEMENT_KEY),
-                new GameUniqueItem(ITEM.VAULT_KEY_149, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.VAULT_KEY_233, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.VAULT_KEY_304, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.VAULT_KEY_370, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.DIARY_KEY, true, true),
-                new GameUniqueItem(ITEM.PRISM_KEY, false, false, ["Locksmith"]),
-                new GameUniqueItem(ITEM.KEY_OF_ARIES, false),
-                new GameUniqueItem(ITEM.SECRET_GARDEN_KEY, true, false, ["Locksmith", "Dig"]),
-                new GameUniqueItem(ITEM.MICROCHIP_SMALL, true, true),
-                new GameUniqueItem(ITEM.MICROCHIP_MIDDLE_SIZED, true, true),
-                new GameUniqueItem(ITEM.MICROCHIP_LARGE, true, true),
-                new GameUniqueItem(ITEM.CABINET_KEY_PATIO, true, true),
-                new GameUniqueItem(ITEM.CABINET_KEY_LAUNDRY, true, true),
-                new GameUniqueItem(ITEM.CABINET_KEY_TUNNEL, true, true),
-                
-                //Basic
-                new GameUniqueItem(ITEM.BATTERY_PACK),
-                new GameUniqueItem(ITEM.BROKEN_LEVER, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.MAGNIFYING_GLASS, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.METAL_DETECTOR, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.SHOVEL, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.SLEDGE_HAMMER, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.TELESCOPE, true, true),
-                new GameUniqueItem(ITEM.RUNNING_SHOES, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.SALT_SHAKER, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.SLEEPING_MASK, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.COIN_PURSE),
-                new GameUniqueItem(ITEM.COUPON_BOOK),
-                new GameUniqueItem(ITEM.LOCK_PICK_KIT, true, false, ["Locksmith"]),
-                new GameUniqueItem(ITEM.LUCKY_RABBITS_FOOT),
-                new GameUniqueItem(ITEM.TREASURE_MAP),
-                new GameUniqueItem(ITEM.STOPWATCH, true, false, ["Dig"]),
-                new GameUniqueItem(ITEM.REPELLENT, false, true),
-                new GameUniqueItem(ITEM.WATERING_CAN, false, true),
-                new GameUniqueItem(ITEM.LUNCH_BOX, false, true),
-                new GameUniqueItem(ITEM.CURSED_EFFIGY, false, true),
-                new GameUniqueItem(ITEM.CROWN),
-                new GameUniqueItem(ITEM.PAPER_CROWN, true, true),
-                new GameUniqueItem(ITEM.GEAR_WRENCH, true, true),
-                new GameUniqueItem(ITEM.COMPASS, true, false, ["Commissary"]),
-                new GameUniqueItem(ITEM.HALL_PASS, true, true),
-
-                //Workshop
-                new GameUniqueItem(ITEM.ELECTROMAGNET, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.LUCKY_PURSE, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.PICK_SOUND_AMPLIFIER, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.BURNING_GLASS, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.DETECTOR_SHOVEL, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.DOWSING_ROD, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.JACK_HAMMER, true, false, ["Workshop"]),
-                new GameUniqueItem(ITEM.POWER_HAMMER, true, false, ["Workshop"]),
-                
-                //Showroom
-                new GameUniqueItem(ITEM.CHRONOGRAPH, true, false),
-                new GameUniqueItem(ITEM.EMERALD_BRACELET, true, false),
-                new GameUniqueItem(ITEM.MASTER_KEY, true, false, ["Locksmith"]),
-                new GameUniqueItem(ITEM.MOON_PENDANT, true, false),
-                new GameUniqueItem(ITEM.ORNATE_COMPASS, true, false),
-                new GameUniqueItem(ITEM.SILVER_SPOON, true, false),
-                
-                //Armory
-                new GameUniqueItem(ITEM.MORNING_STAR, true, false, ["Armory"]),
-                new GameUniqueItem(ITEM.THE_AXE, true, false, ["Armory"]),
-                new GameUniqueItem(ITEM.KNIGHTS_SHIELD, true, false, ["Dig", "Armory"]),
-                new GameUniqueItem(ITEM.TORCH, true, false, ["Armory"]),
-            ];
+        private List<GameUniqueItem> _gameUniqueItemList = [];
 
         private readonly List<GameUniqueItem> _spawnedItems = [];
         public static PlayMakerArrayListProxy PreSpawn = new();
@@ -225,7 +152,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the item.</param>
         /// <returns>The name of the icon</returns>
-        public string GetIconName(string name) {
+        public static string GetIconName(string name) {
             name = name.ToTitleCase();
             switch (name){
                 case "Cabinet Key 1":
@@ -305,12 +232,90 @@ namespace BluePrinceArchipelago.Items
             return output;
         }
 
+        public void RegisterItems()
+        {
+            _gameUniqueItemList =
+            [
+                //Keys
+                new GameUniqueItem(ITEM.CAR_KEYS, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.KEYCARD),
+                new GameUniqueItem(ITEM.SILVER_KEY, true, false, ["Locksmith", "Dig"]),
+                new GameUniqueItem(ITEM.KEY_8, true, true),
+                new GameUniqueItem(ITEM.BASEMENT_KEY),
+                new GameUniqueItem(ITEM.VAULT_KEY_149, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_233, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_304, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.VAULT_KEY_370, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.DIARY_KEY, true, true),
+                new GameUniqueItem(ITEM.PRISM_KEY, false, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.KEY_OF_ARIES, false),
+                new GameUniqueItem(ITEM.SECRET_GARDEN_KEY, true, false, ["Locksmith", "Dig"]),
+                new GameUniqueItem(ITEM.MICROCHIP_SMALL, true, true),
+                new GameUniqueItem(ITEM.MICROCHIP_MIDDLE_SIZED, true, true),
+                new GameUniqueItem(ITEM.MICROCHIP_LARGE, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_PATIO, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_LAUNDRY, true, true),
+                new GameUniqueItem(ITEM.CABINET_KEY_TUNNEL, true, true),
+                
+                //Basic
+                new GameUniqueItem(ITEM.BATTERY_PACK),
+                new GameUniqueItem(ITEM.BROKEN_LEVER, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.MAGNIFYING_GLASS, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.METAL_DETECTOR, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SHOVEL, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SLEDGE_HAMMER, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.TELESCOPE, true, true),
+                new GameUniqueItem(ITEM.RUNNING_SHOES, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SALT_SHAKER, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.SLEEPING_MASK, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.COIN_PURSE),
+                new GameUniqueItem(ITEM.COUPON_BOOK),
+                new GameUniqueItem(ITEM.LOCK_PICK_KIT, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.LUCKY_RABBITS_FOOT),
+                new GameUniqueItem(ITEM.TREASURE_MAP),
+                new GameUniqueItem(ITEM.STOPWATCH, true, false, ["Dig"]),
+                new GameUniqueItem(ITEM.REPELLENT, false, true),
+                new GameUniqueItem(ITEM.WATERING_CAN, false, true),
+                new GameUniqueItem(ITEM.LUNCH_BOX, false, true),
+                new GameUniqueItem(ITEM.CURSED_EFFIGY, false, true),
+                new GameUniqueItem(ITEM.CROWN),
+                new GameUniqueItem(ITEM.PAPER_CROWN, true, true),
+                new GameUniqueItem(ITEM.GEAR_WRENCH, true, true),
+                new GameUniqueItem(ITEM.COMPASS, true, false, ["Commissary"]),
+                new GameUniqueItem(ITEM.HALL_PASS, true, true),
+
+                //Workshop
+                new GameUniqueItem(ITEM.ELECTROMAGNET, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.LUCKY_PURSE, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.PICK_SOUND_AMPLIFIER, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.BURNING_GLASS, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.DETECTOR_SHOVEL, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.DOWSING_ROD, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.JACK_HAMMER, true, false, ["Workshop"]),
+                new GameUniqueItem(ITEM.POWER_HAMMER, true, false, ["Workshop"]),
+                
+                //Showroom
+                new GameUniqueItem(ITEM.CHRONOGRAPH, true, false),
+                new GameUniqueItem(ITEM.EMERALD_BRACELET, true, false),
+                new GameUniqueItem(ITEM.MASTER_KEY, true, false, ["Locksmith"]),
+                new GameUniqueItem(ITEM.MOON_PENDANT, true, false),
+                new GameUniqueItem(ITEM.ORNATE_COMPASS, true, false),
+                new GameUniqueItem(ITEM.SILVER_SPOON, true, false),
+                
+                //Armory
+                new GameUniqueItem(ITEM.MORNING_STAR, true, false, ["Armory"]),
+                new GameUniqueItem(ITEM.THE_AXE, true, false, ["Armory"]),
+                new GameUniqueItem(ITEM.KNIGHTS_SHIELD, true, false, ["Dig", "Armory"]),
+                new GameUniqueItem(ITEM.TORCH, true, false, ["Armory"]),
+            ];
+        }
+
         /// <summary>
         ///     Gets the game object for the Inventory Icon of of a given Unique Item.
         /// </summary>
         /// <param name="name">The name of the Unique Item</param>
         /// <returns>The GameObject of the icon</returns>
-        public GameObject GetIconGameObject(string name) {
+        public static GameObject GetIconGameObject(string name) {
             name = GetIconName(name);
             PlayMakerArrayListProxy Inventory = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryIconMeshes").GetComponent<PlayMakerArrayListProxy>();
             for (int i=0; i < Inventory.arrayList.Count; i++)
@@ -372,7 +377,7 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         /// <param name="name">The name of the item</param>
         /// <returns>The FsmState of the item's pickup handling.</returns>
-        public FsmState GetPickupState(string name)
+        public static FsmState GetPickupState(string name)
         {
             // Fixes a name differences
             name = name.ToLower().Replace("vault", "saftey deposit").Replace("rabbit's", "rabbbit's").Replace(" kit", "").Replace("_0", "").Replace("lunch", "luch");
