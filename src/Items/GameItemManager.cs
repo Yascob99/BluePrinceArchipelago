@@ -34,7 +34,7 @@ namespace BluePrinceArchipelago.Items
         public static PlayMakerArrayListProxy CoatCheck = new();
         public static PlayMakerArrayListProxy UsedItems = new();
         public static PlayMakerArrayListProxy InventoryItems = new();
-        public static UpgradeDisks UpgradeDisks = new UpgradeDisks(null);
+        public static UpgradeDisks UpgradeDisks = new UpgradeDisks();
 
 
         private GameItemManager() {}
@@ -102,7 +102,7 @@ namespace BluePrinceArchipelago.Items
             CoatCheck = GameObject.Find("__SYSTEM/Inventory/Inventory (CoatCheck)")?.GetArrayListProxy("CoatCheck");
             UsedItems = GameObject.Find("__SYSTEM/Inventory/Inventory (UsedItems)")?.GetArrayListProxy("UsedItems");
             InventoryItems = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory/InventoryGameobjects")?.GetArrayListProxy("InventoryGameobjects");
-            UpgradeDisks.GameObj = GameObject.Find("__SYSTEM/Upgrade Disks");
+            //UpgradeDisks.GameObj = GameObject.Find("__SYSTEM/Upgrade Disks");
         }
 
         /// <summary>

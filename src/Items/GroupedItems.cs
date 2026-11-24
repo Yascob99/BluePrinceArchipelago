@@ -8,20 +8,13 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     /// <param name="name">The item name</param>
     /// <param name="gameObject">The GameObject of the item</param>
-    /// <param name="isUnlocked">If the item is unlocked.</param>
     /// <param name="count">The number of grouped items</param>
     /// <param name="isPreSpawn">If the item is in the prespawn pool.</param>
-    public class GroupedItems(string name, GameObject gameObject, bool isUnlocked, int count = 0, bool isPreSpawn = true) : ModItem(name, gameObject, isUnlocked)
+    /// 
+    public abstract class GroupedItems(string name, GameObject gameObject, int count = 0, bool isPreSpawn = true) : GameItem(name, gameObject)
     {
-        private int _Count = count;
-        public new int Count
-        {
-            get { return _Count; }
-            set
-            {
-                _Count = value;
-            }
-        }
+        private int _count = count;
+
         //If it's in the prespawn list
         public bool IsPreSpawn = isPreSpawn;
         // The names of AP Location.
