@@ -33,10 +33,15 @@ namespace BluePrinceArchipelago.Items
         {
             _gameItem = GameItemManager.GetInstance().GetGameUniqueItem(name);
             _sanityType = sanityType;
-            if (isUnlocked || !IsSanityLocked())
+            if (!InPlay())
             {
-                UnlockHook();
+                _gameItem.NotInMultiworld();
             }
+        }
+
+        private bool InPlay()
+        {
+            return IsSanityLocked();
         }
 
         public override void StackItem()
@@ -54,10 +59,14 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public override void AddToWorld()
         {
-            _gameItem.AddToWorld();
+            if (InPlay())
+            {
+                _gameItem.AddToWorld();
+            }
+            Logging.LogWarning($"Sanity deactivated for {Name}, not giving the item.", "DEBUG");
         }
 
-		public bool IsSanityLocked()
+		private bool IsSanityLocked()
 		{
 			return _sanityType switch
 			{

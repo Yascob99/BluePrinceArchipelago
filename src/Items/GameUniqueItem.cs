@@ -24,20 +24,6 @@ namespace BluePrinceArchipelago.Items
     public class GameUniqueItem : GameItem
     {
         private readonly bool _isPrespawn;
-        private bool _hasBeenFound = false;
-        public bool HasBeenFound
-        {
-            get { return _hasBeenFound; }
-            set
-            {
-                // Send the item found event on the first time it is found.
-                if (!_hasBeenFound && value)
-                {
-                    _hasBeenFound = value;
-                }
-                // No changes to value once the item has been found once, or if someone is trying to set this to false some reason.
-            }
-        }
 
         private readonly List<GameObject> _gameModelInstancesWithSwirly = [];
 

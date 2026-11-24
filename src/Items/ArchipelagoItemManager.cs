@@ -172,7 +172,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="itemInfo">The ItemInfo of the received item.</param>
         public static void OnItemCheckReceived(ItemInfo itemInfo)
         {
-            Logging.LogWarning(itemInfo.ItemName);
+            Logging.Log(itemInfo.ItemName);
             //If item exists, retreive it.
             ArchipelagoItem permanentItem = GetPermanentItem(itemInfo.ItemName);
             if (permanentItem != null)

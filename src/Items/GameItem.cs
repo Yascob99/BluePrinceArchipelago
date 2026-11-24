@@ -1,4 +1,3 @@
-using Il2CppSystem.Runtime.InteropServices;
 using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
@@ -11,6 +10,21 @@ namespace BluePrinceArchipelago.Items
 		protected bool _archipelagoUnlocked = false;
 
         public bool IsUnlocked { get { return _archipelagoUnlocked; } }
+
+        protected bool _hasBeenFound = false;
+        public bool HasBeenFound
+        {
+            get { return _hasBeenFound; }
+            set
+            {
+                if (_hasBeenFound && !value)
+                {
+                    Logging.LogError($"Error trying to set unfound {_name} that has already been found");
+                    return;
+                }
+                _hasBeenFound = value;
+            }
+        }
 
         protected GameObject _inventoryGameObject;
 
@@ -26,5 +40,14 @@ namespace BluePrinceArchipelago.Items
         }
 
         public abstract void AddToWorld();
+
+        /// <summary>
+        ///     Preserve normal behavior for the item.
+        /// </summary>
+        internal void NotInMultiworld()
+        {
+            _archipelagoUnlocked = true;
+            _hasBeenFound = true;
+        }
     }
 }
