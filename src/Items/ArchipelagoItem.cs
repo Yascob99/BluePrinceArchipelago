@@ -23,7 +23,7 @@
             return _count == 1;
         }
 
-        public void StackItem()
+        public virtual void StackItem()
         {
             ++_count;
         } 

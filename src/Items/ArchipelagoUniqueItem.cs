@@ -39,6 +39,11 @@ namespace BluePrinceArchipelago.Items
             }
         }
 
+        public override void StackItem()
+        {
+            Logging.LogError($"Error attempting to stack unique items for : {Name}");
+        }
+
         protected override void UnlockHook()
         {
             _gameItem.ArchipelagoUnlocked();
