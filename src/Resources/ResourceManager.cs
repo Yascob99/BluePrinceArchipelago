@@ -1,7 +1,4 @@
-﻿using Archipelago.MultiClient.Net.MessageLog.Parts;
-using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.Items;
-using BluePrinceArchipelago.Utils;
+﻿using BluePrinceArchipelago.Utils;
 #if ML
 using Il2CppTMPro;
 #endif
@@ -18,41 +15,6 @@ namespace BluePrinceArchipelago.Resources
 	/// </summary>
 	public static class ResourceManager
 	{
-
-        public static int StartingGems = 0;
-        public static int StartingKeys = 0;
-        public static int StartingDice = 0;
-        public static int StartingSteps = 0;
-        public static int StartingLuck = 0;
-
-        /// <summary>
-        ///     Recalculates the amount of starting items the player should have.
-        /// </summary>
-        public static void RecalculculateStartingItems() {
-            if (ArchipelagoItemManager.PermanentItemList.Count > 0)
-            {
-                foreach (ResourceItem item in ArchipelagoItemManager.PermanentItemList) {
-                    if (item.IsUnlocked)
-                    {
-                        item.AddToWorld();
-                    }
-                }
-            }
-        }
-
-        //TODO : Delete this if the above works
-        public static void AddStartingItems() {
-            Logging.LogWarning($"Gems: {StartingGems}");
-            AdjustGems(StartingGems);
-            Logging.LogWarning($"Keys: {StartingKeys}");
-            AdjustKeys(StartingKeys);
-            Logging.LogWarning($"Dice: {StartingDice}");
-            AdjustDice(StartingDice);
-            Logging.LogWarning($"Steps: {StartingSteps}");
-            AdjustSteps(StartingSteps);
-            Logging.LogWarning($"Luck: {StartingLuck}");
-            AdjustLuck(StartingLuck);
-        }
 
         /// <summary>
         /// Add or remove Gems from Simon's resources.

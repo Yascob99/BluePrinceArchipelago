@@ -18,7 +18,8 @@ namespace BluePrinceArchipelago.Items
 
         public override void AddToWorld()
         {
-            ResourceManager.AdjustResource(_itemType, _resourceAmount);
+            Logging.Log($"{Name} gives {_resourceAmount * _count} {_itemType}");
+            ResourceManager.AdjustResource(_itemType, _resourceAmount * _count);
         }
 
         public override bool IsPermanent()

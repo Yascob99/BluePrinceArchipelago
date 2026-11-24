@@ -6,7 +6,7 @@
     /// <param name="name">The Name of the item</param>
     /// <param name="isUnlocked">If the item is Unlocked.</param>
     /// <param name="count">The number of the item in the pool.</param>
-    public abstract class ArchipelagoItem(string name, bool isUnlocked, int count = 1) : IObtainable
+    public abstract class ArchipelagoItem(string name, bool isUnlocked, int count = 0) : IObtainable
     {
         private readonly string _name = name;
         public string Name { get { return _name; } }

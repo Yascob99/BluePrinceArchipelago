@@ -1,24 +1,6 @@
-﻿using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Utils;
-#if Bep
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
-using TMPro;
-#endif
-#if ML
-using Il2Cpp;
-using Il2CppHutongGames.PlayMaker;
-using Il2CppHutongGames.PlayMaker.Actions;
-using Il2CppTMPro;
-#endif
-using Il2CppSystem.Collections;
-using System;
+using Archipelago.MultiClient.Net.Models;
 using System.Collections.Generic;
 using System.Linq;
-
-using UnityEngine;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -28,40 +10,30 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     public static class ArchipelagoItemManager
     {
-        public static List<ResourceItem> PermanentItemList = [];
-        public static List<ArchipelagoUniqueItem> UniqueItemList = new();
-        public static List<ResourceItem> JunkItemList = new();
-        public static List<GameUniqueItem> GameUniqueItemList = [];
-        public static List<Trap> TrapList = new();
-        public static Dictionary<string, ArchipelagoItem> ItemDict = new(); //Item name is the key, the type of item is the value.
+        private static readonly List<ResourceItem> _permanentItemList = [];
+        private static readonly List<ArchipelagoUniqueItem> _uniqueItemList = [];
+        private static readonly List<ResourceItem> _junkItemList = [];
+        private static List<Trap> TrapList = new();
+        private static Dictionary<string, ArchipelagoItem> _itemDict = []; //Item name is the key, the type of item is the value.
 
         /// <summary>
         ///     Adds a Unique item to the Unique item list if it's not already tracked.
         /// </summary>
-        /// <param name="item">The item to add.</param>
-        public static void AddItem(ArchipelagoUniqueItem item)
+        /// <param name="itemToAdd">The item to add.</param>
+        public static void AddItem(ArchipelagoUniqueItem itemToAdd)
         {
-            bool found = false;
-            int counter = -1;
-            // check if item already exists in the pool
-            while (!found && counter < UniqueItemList.Count - 1)
+            foreach (ArchipelagoUniqueItem item in _uniqueItemList)
             {
-                counter++;
-                if (UniqueItemList[counter].Name == item.Name)
+                if (item.Name == itemToAdd.Name)
                 {
-                    found = true;
+                    Logging.LogWarning($"Item {itemToAdd.Name} already added, can't add multiple copies of unique items.");
+                    return;
                 }
             }
-            if (!found)
-            {
-                ItemDict[item.Name] = item;
-                UniqueItemList.Add(item);
-            }
-            else
-            {
-                Logging.Log($"Item {item.Name} already added, can't add multiple copies.");
-            }
+            _itemDict[itemToAdd.Name] = itemToAdd;
+            _uniqueItemList.Add(itemToAdd);
         }
+
 
         /// <summary>
         ///     Adds a trap to the list of traps..
@@ -73,21 +45,36 @@ namespace BluePrinceArchipelago.Items
         }
 
         /// <summary>
-        ///     Adds a Junk Item to the junk item list.
+        ///     Adds a Resource Item to the junk item list.
         /// </summary>
         /// <param name="itemToAdd">The junk item to add.</param>
         public static void AddItem(ResourceItem itemToAdd)
         {
-            foreach (ArchipelagoItem item in JunkItemList)
+            if (itemToAdd.IsPermanent())
             {
-                if (item.Name == itemToAdd.Name)
+                foreach (ArchipelagoItem item in _permanentItemList)
                 {
-                    item.StackItem();
-                    return;
+                    if (item.Name == itemToAdd.Name)
+                    {
+                        item.StackItem();
+                        return;
+                    }
                 }
+                _permanentItemList.Add(itemToAdd);
             }
-            ItemDict[itemToAdd.Name] = itemToAdd;
-            JunkItemList.Add(itemToAdd);
+            else
+            {
+                foreach (ArchipelagoItem item in _junkItemList)
+                {
+                    if (item.Name == itemToAdd.Name)
+                    {
+                        item.StackItem();
+                        return;
+                    }
+                }
+                _junkItemList.Add(itemToAdd);
+            }
+            _itemDict[itemToAdd.Name] = itemToAdd;
         }
 
         /// <summary>
@@ -98,8 +85,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The UniqueItem or null if not found.</returns>
         public static ArchipelagoUniqueItem GetUniqueItem(string name)
         {
-           
-            foreach (ArchipelagoUniqueItem item in UniqueItemList)
+            foreach (ArchipelagoUniqueItem item in _uniqueItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {
@@ -117,9 +103,8 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The JunkItem or null if not found.</returns>
         public static ResourceItem GetJunkItem(string name)
         {
-            foreach (ResourceItem item in JunkItemList)
+            foreach (ResourceItem item in _junkItemList)
             {
-                
                 if (item.Name.ToLower() == name.ToLower())
                 {
                     return item;
@@ -136,7 +121,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The PermanentItem or null if not found.</returns>
         public static ResourceItem GetPermanentItem(string name)
         {
-            foreach (ResourceItem item in PermanentItemList)
+            foreach (ResourceItem item in _permanentItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
                 {
@@ -196,9 +181,9 @@ namespace BluePrinceArchipelago.Items
                 permanentItem.IsUnlocked = true;
                 permanentItem.StackItem();
             }
-            else if (ItemDict.ContainsKey(itemInfo.ItemName))
+            else if (_itemDict.ContainsKey(itemInfo.ItemName))
             {
-                item = ItemDict[itemInfo.ItemName];
+                item = _itemDict[itemInfo.ItemName];
                 item.AddToWorld();
                 return;
             }
@@ -333,6 +318,14 @@ namespace BluePrinceArchipelago.Items
             AddTrap(new EndOfDayTrap("Trap End Day", "EOD"));
             AddTrap(new FreezeTrap("Trap Freeze Items", "Freeze"));
             AddTrap(new LoseItemTrap("Trap Lose Item", "Lose Item"));
+        }
+
+        internal static void GivePermanentItems()
+        {
+            foreach (ArchipelagoItem item in _permanentItemList)
+            {
+                item.AddToWorld();
+            }
         }
     }
 }
