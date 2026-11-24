@@ -135,10 +135,6 @@ namespace BluePrinceArchipelago
             }
             ArchipelagoPrefabsLoaded = true;
         }
-        public void LoadPrefabAssets()
-        {
-            Instance.StartCoroutine(Instance.LoadAllAssets());
-        }
 
         /// <summary>
         ///     Called whenver a scene is loaded (triggered by the scene manager).
@@ -153,7 +149,7 @@ namespace BluePrinceArchipelago
                 if (!AppliedHarmony) {
                     Plugin.Harmony.PatchAll(typeof(EventPatches));
                     //Apply event patches on the main menu to get some data that is not accessible later. 
-                    ModAssetManager.LoadModPrefabs();
+                    Instance.StartCoroutine(Instance.LoadAllAssets());
                     AppliedHarmony = true;
                 }
                 //UIManager.InitializeMainMenu();

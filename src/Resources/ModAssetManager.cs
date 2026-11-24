@@ -199,12 +199,5 @@ namespace BluePrinceArchipelago.Resources
                 _AssetBundle = ModAssetManager.LoadAssetBundleFromAssembly(ModAssetManager.GetResourceNameFromPath("assets/apprefabs"));
             }
         }
-
-        /// <summary>
-        ///     Loads the ModPrefabs for use elsewhere.
-        /// </summary>
-        public static void LoadModPrefabs() {
-            ModInstance.Instance.LoadPrefabAssets();
-        }
     }
 }
