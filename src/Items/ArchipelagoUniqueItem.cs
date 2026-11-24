@@ -17,7 +17,7 @@ namespace BluePrinceArchipelago.Items
 		SpecialShop,
 	}
 
-	public class ArchipelagoUniqueItem : ModItem
+	public class ArchipelagoUniqueItem : ArchipelagoItem
     {
         private readonly ItemSanityType _sanityType;
 

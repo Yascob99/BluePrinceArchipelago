@@ -38,7 +38,7 @@ namespace BluePrinceArchipelago.Triggers
             //ModRoomManager.SyncRoomPoolsWithArchipelago();
             if (ModInstance.FirstLoad)
             {
-                ModItemManager.RegisterItems();
+                ArchipelagoItemManager.RegisterItems();
             }
             else
             {

@@ -83,7 +83,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             ArchipelagoConsole.LogMessage($"=== Received Non-Room Items ({nonRooms.Count}) ===");
             foreach (var item in nonRooms)
             {
-                string type = ModItemManager.GetItemType(item) ?? "Unknown";
+                string type = ArchipelagoItemManager.GetItemType(item) ?? "Unknown";
                 ArchipelagoConsole.LogMessage($"  [{type}] {item}");
             }
         }
@@ -107,7 +107,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                 }
                 else
                 {
-                    string type = ModItemManager.GetItemType(item);
+                    string type = ArchipelagoItemManager.GetItemType(item);
                     if (type == "Permanent") permanentCount++;
                     else if (type == "Junk") junkCount++;
                     else unknownCount++;
@@ -132,7 +132,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
             foreach (var item in receivedItems)
             {
                 bool isRoom = ModRoomManager.GetRoomByName(item.ToUpper()) != null;
-                string type = isRoom ? "Room" : (ModItemManager.GetItemType(item) ?? "Unknown");
+                string type = isRoom ? "Room" : (ArchipelagoItemManager.GetItemType(item) ?? "Unknown");
                 ArchipelagoConsole.LogMessage($"  [{type}] {item}");
             }
         }

@@ -10,7 +10,7 @@ namespace BluePrinceArchipelago.Items
     /// <param name="itemType">The type of the Junk Item.</param>
     /// <param name="resourceAmount">The count of the junk item.</param>
     /// <param name="isPermament"></param>
-    public class ResourceItem(string name, bool isUnlocked, string itemType, int resourceAmount = 1, bool isPermament = false) : ModItem(name, isUnlocked)
+    public class ResourceItem(string name, bool isUnlocked, string itemType, int resourceAmount = 1, bool isPermament = false) : ArchipelagoItem(name, isUnlocked)
     {
         private readonly string _itemType = itemType;
         private readonly int _resourceAmount = resourceAmount;

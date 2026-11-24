@@ -84,7 +84,7 @@ namespace BluePrinceArchipelago.Items
                     {
                         if (type == "EOD")
                         {
-                            Trap eodTrap = ModItemManager.GetTrap(name);
+                            Trap eodTrap = ArchipelagoItemManager.GetTrap(name);
                             try {
                                 eodTrap.ActivateTrap();
                                 TrapQueueTypes.RemoveAt(i);
@@ -110,7 +110,7 @@ namespace BluePrinceArchipelago.Items
                         }
                         else if (type == "Steps" && stepTotal >= 0)
                         {
-                            Trap stepTrap = ModItemManager.GetTrap(name);
+                            Trap stepTrap = ArchipelagoItemManager.GetTrap(name);
                             if (stepTrap != null)
                             {
                                 stepTotal += stepTrap.Count;
@@ -133,7 +133,7 @@ namespace BluePrinceArchipelago.Items
                     {
                             
                     
-                        Trap trap = ModItemManager.GetTrap(name);
+                        Trap trap = ArchipelagoItemManager.GetTrap(name);
                         Logging.LogWarning($"Attempting to Dequeue Trap: {name}");
                         try
                         {
@@ -157,7 +157,7 @@ namespace BluePrinceArchipelago.Items
                 }
                 if (FreezeTrap)
                 {
-                    Trap trap = ModItemManager.GetTrap("Trap Freeze Items");
+                    Trap trap = ArchipelagoItemManager.GetTrap("Trap Freeze Items");
                      try
                         {
                             trap.ActivateTrap();

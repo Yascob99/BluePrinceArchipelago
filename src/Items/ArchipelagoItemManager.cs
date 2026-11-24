@@ -26,14 +26,14 @@ namespace BluePrinceArchipelago.Items
     /// <summary>
     ///     The Manager for the Items the mod manages. 
     /// </summary>
-    public static class ModItemManager
+    public static class ArchipelagoItemManager
     {
         public static List<ResourceItem> PermanentItemList = [];
         public static List<ArchipelagoUniqueItem> UniqueItemList = new();
         public static List<ResourceItem> JunkItemList = new();
         public static List<GameUniqueItem> GameUniqueItemList = [];
         public static List<Trap> TrapList = new();
-        public static Dictionary<string, ModItem> ItemDict = new(); //Item name is the key, the type of item is the value.
+        public static Dictionary<string, ArchipelagoItem> ItemDict = new(); //Item name is the key, the type of item is the value.
 
         /// <summary>
         ///     Adds a Unique item to the Unique item list if it's not already tracked.
@@ -78,7 +78,7 @@ namespace BluePrinceArchipelago.Items
         /// <param name="itemToAdd">The junk item to add.</param>
         public static void AddItem(ResourceItem itemToAdd)
         {
-            foreach (ModItem item in JunkItemList)
+            foreach (ArchipelagoItem item in JunkItemList)
             {
                 if (item.Name == itemToAdd.Name)
                 {
@@ -162,7 +162,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The type of the item as a string.</returns>
         public static string GetItemType(string itemName)
         {
-            ModItem item = GetPermanentItem(itemName);
+            ArchipelagoItem item = GetPermanentItem(itemName);
             itemName = itemName.Trim();
             if (item != null)
             {
@@ -188,7 +188,7 @@ namespace BluePrinceArchipelago.Items
         public static void OnItemCheckReceived(ItemInfo itemInfo)
         {
             Logging.LogWarning(itemInfo.ItemName);
-            ModItem item = null;
+            ArchipelagoItem item = null;
             //If item exists, retreive it.
             ResourceItem permanentItem = GetPermanentItem(itemInfo.ItemName);
             if (permanentItem != null)

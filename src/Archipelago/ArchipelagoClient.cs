@@ -435,8 +435,8 @@ public class ArchipelagoClient
                     GameItemManager.UpgradeDisks.RecievedItems.Add(location);
                 }
             }
-            ArchipelagoUniqueItem uniqueItem = ModItemManager.GetUniqueItem(item.ItemName);
-            ResourceItem permanentItem = ModItemManager.GetPermanentItem(item.ItemName);
+            ArchipelagoUniqueItem uniqueItem = ArchipelagoItemManager.GetUniqueItem(item.ItemName);
+            ResourceItem permanentItem = ArchipelagoItemManager.GetPermanentItem(item.ItemName);
             if (uniqueItem != null)
             {
                 uniqueItem.IsUnlocked = true;
@@ -868,7 +868,7 @@ public class ArchipelagoQueueManager {
                 return false;
             }
             // if not handle it as an Item.
-            string itemType = ModItemManager.GetItemType(item.ItemName);
+            string itemType = ArchipelagoItemManager.GetItemType(item.ItemName);
             if (itemType == null) {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
                 return true;
@@ -934,7 +934,7 @@ public class ArchipelagoQueueManager {
                 return false;
             }
             // if not handle it as an Item.
-            string itemType = ModItemManager.GetItemType(item.ItemName);
+            string itemType = ArchipelagoItemManager.GetItemType(item.ItemName);
             if (itemType == null)
             {
                 Logging.LogWarning($"Error receiving item {item.ItemName}: Item does not exist or is not currently handled by the mod.");
@@ -947,7 +947,7 @@ public class ArchipelagoQueueManager {
             }
             else if (itemType == "Unique") {
                
-                ArchipelagoUniqueItem uItem = ModItemManager.GetUniqueItem(item.ItemName);
+                ArchipelagoUniqueItem uItem = ArchipelagoItemManager.GetUniqueItem(item.ItemName);
                 if (uItem != null)
                 {
                     uItem.IsUnlocked = true;
@@ -1056,7 +1056,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
     public bool ReceiveTrap(ItemInfo item, bool ignoreState = false) {
-        Trap trap = ModItemManager.GetTrap(item.ItemName);
+        Trap trap = ArchipelagoItemManager.GetTrap(item.ItemName);
         if (TrapManager.QueueTrap(trap.Name, trap.TrapType))
         {
             // Only Requeue if traps have been cleared.
@@ -1098,7 +1098,7 @@ public class ArchipelagoQueueManager {
     /// <param name="item">The ItemInfo of the received trap.</param>
     /// <param name="ignoreState">Whether the State should be ignored on receiving the trap.</param>
     public void ReceiveLocalItem(ItemInfo item, bool ignoreState = false) {
-        ModItemManager.OnItemCheckReceived(item);
+        ArchipelagoItemManager.OnItemCheckReceived(item);
         //This may need to be moved to a better place once the item code is better implemented.
     }
     /// <summary>

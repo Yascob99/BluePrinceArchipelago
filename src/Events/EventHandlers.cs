@@ -59,7 +59,7 @@ namespace BluePrinceArchipelago.Events
         ///     The item first found event.
         /// </summary>
         /// <param name="item">The ModItem that was found.</param>
-        public void OnFirstFound(ModItem item) {
+        public void OnFirstFound(ArchipelagoItem item) {
             LocationFound.Invoke(this, new LocationEventArgs($"First Pickup - {item.Name.ToTitleCase()}", "Item First Pickup"));
         }
 

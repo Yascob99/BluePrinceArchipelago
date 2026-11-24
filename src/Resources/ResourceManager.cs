@@ -29,9 +29,9 @@ namespace BluePrinceArchipelago.Resources
         ///     Recalculates the amount of starting items the player should have.
         /// </summary>
         public static void RecalculculateStartingItems() {
-            if (ModItemManager.PermanentItemList.Count > 0)
+            if (ArchipelagoItemManager.PermanentItemList.Count > 0)
             {
-                foreach (ResourceItem item in ModItemManager.PermanentItemList) {
+                foreach (ResourceItem item in ArchipelagoItemManager.PermanentItemList) {
                     if (item.IsUnlocked)
                     {
                         item.AddToWorld();
