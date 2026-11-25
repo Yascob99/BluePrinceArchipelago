@@ -70,7 +70,7 @@ namespace BluePrinceArchipelago.Triggers
                 GameItemManager.GetInstance().StartOfDay();
                 ModRoomManager.StartOfDay();
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer();
-                TrapManager.DequeueTraps();
+                //TrapManager.DequeueTraps();
             }
         }
     }

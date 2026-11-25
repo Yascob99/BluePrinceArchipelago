@@ -62,8 +62,11 @@ namespace BluePrinceArchipelago.Items
             if (InPlay())
             {
                 _gameItem.AddToWorld();
+            } 
+            else
+            {
+                Logging.LogWarning($"Sanity deactivated for {Name}, not giving the item.");
             }
-            Logging.LogWarning($"Sanity deactivated for {Name}, not giving the item.", "DEBUG");
         }
 
 		private bool IsSanityLocked()

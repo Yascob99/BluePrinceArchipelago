@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +87,7 @@ namespace BluePrinceArchipelago.Items
                         {
                             Trap eodTrap = ArchipelagoItemManager.GetTrap(name);
                             try {
-                                eodTrap.ActivateTrap();
+                                eodTrap.AddToWorld();
                                 TrapQueueTypes.RemoveAt(i);
                                 TrapQueue.RemoveAt(i);
                                 EODTrapToday = true;
@@ -138,7 +139,7 @@ namespace BluePrinceArchipelago.Items
                         try
                         {
                         
-                            trap.ActivateTrap();
+                            trap.AddToWorld();
                             TrapQueue.RemoveAt(id);
                             TrapQueueTypes.RemoveAt(id);
                         }
@@ -160,7 +161,7 @@ namespace BluePrinceArchipelago.Items
                     Trap trap = ArchipelagoItemManager.GetTrap("Trap Freeze Items");
                      try
                         {
-                            trap.ActivateTrap();
+                            trap.AddToWorld();
 
                         }
                         catch
@@ -181,3 +182,4 @@ namespace BluePrinceArchipelago.Items
 
     }
 }
+*/

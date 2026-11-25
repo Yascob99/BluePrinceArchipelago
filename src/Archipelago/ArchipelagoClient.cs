@@ -852,7 +852,8 @@ public class ArchipelagoQueueManager {
                 if (ModInstance.IsInRun)
                 {
                     
-                    return ReceiveTrap(item, ignoreState);
+                    ReceiveLocalItem(item, ignoreState);
+                    return true;
                 }
                 return false;
             }
@@ -917,7 +918,8 @@ public class ArchipelagoQueueManager {
                 // If a trap is received while in run receive it.
                 if (ModInstance.IsInRun)
                 {
-                    return ReceiveTrap(item, ignoreState);
+                    ReceiveLocalItem(item, ignoreState);
+                    return true;
                 }
                 return false;
             }
@@ -1050,6 +1052,8 @@ public class ArchipelagoQueueManager {
         room.Handler?.OnRoomUnlocked(room);
         Logging.Log($"Room '{room.Name}' unlocked and added to pool.");
     }
+    
+    /*
     /// <summary>
     ///     Handles receiving a trap. (Doesn't check if it was successfully received).  
     /// </summary>
@@ -1060,13 +1064,16 @@ public class ArchipelagoQueueManager {
         if (TrapManager.QueueTrap(trap.Name, trap.TrapType))
         {
             // Only Requeue if traps have been cleared.
-            if (trapAttempts == 0){
+            if (trapAttempts == 0) {
                 RequeueTraps();
             }
         }
         return false;
     }
+    */
+
     private static int trapAttempts = 0;
+    /*
     private static Action RequeueTrapsEverySecond = new Action(() => RequeueTraps());
     /// <summary>
     ///     A helper function for requeueing traps up to 5 times.
@@ -1091,7 +1098,7 @@ public class ArchipelagoQueueManager {
             trapAttempts = 0;
         }
     }
-
+    */
     /// <summary>
     ///     Handles receiving a local item. (Doesn't check if it was successfully received).
     /// </summary>

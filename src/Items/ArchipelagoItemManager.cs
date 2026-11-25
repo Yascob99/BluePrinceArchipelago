@@ -1,8 +1,5 @@
 using Archipelago.MultiClient.Net.Models;
-using BluePrinceArchipelago.FsmMethods.CustomMethods;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BluePrinceArchipelago.Items
 {
@@ -15,25 +12,10 @@ namespace BluePrinceArchipelago.Items
         private static readonly List<ArchipelagoItem> _permanentItemList = [];
         private static readonly List<ArchipelagoUniqueItem> _uniqueItemList = [];
         private static readonly List<ArchipelagoItem> _junkItemList = [];
-        private static List<Trap> TrapList = new();
-        private static Dictionary<string, ArchipelagoItem> _itemDict = []; //Item name is the key, the type of item is the value.
+        private static readonly List<ArchipelagoItem> _trapList = [];
+        private static readonly Dictionary<string, ArchipelagoItem> _itemDict = []; //Item name is the key, the type of item is the value.
 
-        private static ArchipelagoItem FindItemInList(string name, List<ArchipelagoItem> list)
-        {
-            foreach (ArchipelagoItem listItem in list)
-            {
-                if (name == listItem.Name)
-                {
-                    return listItem;
-                }
-            }
-            throw new KeyNotFoundException($"Item {name} not found in list {list}");
-        }
 
-        private static ArchipelagoItem FindItemInList(ArchipelagoItem item, List<ArchipelagoItem> list)
-        {
-            return FindItemInList(item.Name, list);
-        }
 
         /// <summary>
         ///     Adds a Unique item to the Unique item list if it's not already tracked.
@@ -54,21 +36,11 @@ namespace BluePrinceArchipelago.Items
         }
 
         /// <summary>
-        ///     Adds a trap to the list of traps..
-        /// </summary>
-        /// <param name="trap">The trap to add.</param>
-        public static void AddTrap(Trap trap)
-        {
-            TrapList.Add(trap);
-        }
-
-        /// <summary>
         ///     Adds a Resource Item to the junk item list.
         /// </summary>
         /// <param name="itemToAdd">The junk item to add.</param>
         public static void AddItem(ArchipelagoItem itemToAdd)
         {
-            _itemDict[itemToAdd.Name] = itemToAdd;
             if (itemToAdd.IsPermanent())
             {
                 AddItemInList(itemToAdd, _permanentItemList);
@@ -82,19 +54,6 @@ namespace BluePrinceArchipelago.Items
             AddItemInList(itemToAdd, _junkItemList);
         }
 
-        private static void AddItemInList(ArchipelagoItem itemToAdd, List<ArchipelagoItem> list)
-        {
-            try
-            {
-                ArchipelagoItem itemInList = FindItemInList(itemToAdd, list);
-                itemInList.StackItem();
-            }
-            catch (Exception)
-            {
-                list.Add(itemToAdd);
-            }
-        }
-
         /// <summary>
         ///     Gets a UniqueItem.
         ///     Not case sensitive.
@@ -103,6 +62,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The UniqueItem or null if not found.</returns>
         public static ArchipelagoUniqueItem GetUniqueItem(string name)
         {
+            //TODO : return FindItemInList(name, _uniqueItemList);
             foreach (ArchipelagoUniqueItem item in _uniqueItemList)
             {
                 if (item.Name.ToLower() == name.ToLower())
@@ -121,14 +81,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The JunkItem or null if not found.</returns>
         public static ArchipelagoItem GetJunkItem(string name)
         {
-            foreach (ArchipelagoItem item in _junkItemList)
-            {
-                if (item.Name.ToLower() == name.ToLower())
-                {
-                    return item;
-                }
-            }
-            return null;
+            return FindItemInList(name, _junkItemList);
         }
 
         /// <summary>
@@ -139,23 +92,17 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The PermanentItem or null if not found.</returns>
         public static ArchipelagoItem GetPermanentItem(string name)
         {
-            foreach (ArchipelagoItem item in _permanentItemList)
-            {
-                if (item.Name.ToLower() == name.ToLower())
-                {
-                    return item;
-                }
-            }
-            return null;
+            return FindItemInList(name, _permanentItemList);
         }
+
         /// <summary>
         ///     Gets a trap by name
         /// </summary>
         /// <param name="name">The name of the trap to find.</param>
         /// <returns>The trap if it exists, or null if it doesn't.</returns>
-        public static Trap GetTrap(string name)
+        public static ArchipelagoItem GetTrap(string name)
         {
-            return TrapList.FirstOrDefault(trap => trap.Name.ToLower() == name.ToLower());
+            return FindItemInList(name, _trapList);
         }
 
         /// <summary>
@@ -165,23 +112,24 @@ namespace BluePrinceArchipelago.Items
         /// <returns>The type of the item as a string.</returns>
         public static string GetItemType(string itemName)
         {
-            ArchipelagoItem item = GetPermanentItem(itemName);
-            itemName = itemName.Trim();
-            if (item != null)
+            if (!_itemDict.ContainsKey(itemName))
             {
-                return "Permanent";
+                throw new KeyNotFoundException($"Could not find archipelago item {itemName}");
             }
-            item = GetJunkItem(itemName);
-            if (item != null)
-            {
-                return "Junk";
-            }
-            item = GetUniqueItem(itemName);
-            if (item != null)
+            ArchipelagoItem item = _itemDict[itemName];
+            if (GetUniqueItem(itemName) != null)
             {
                 return "Unique";
             }
-            return null;
+            if (item.IsTrap())
+            {
+                return "Trap";
+            }
+            if (item.IsPermanent())
+            {
+                return "Permanent";
+            }
+            return "Junk";
         }
 
         /// <summary>
@@ -191,21 +139,17 @@ namespace BluePrinceArchipelago.Items
         public static void OnItemCheckReceived(ItemInfo itemInfo)
         {
             Logging.Log(itemInfo.ItemName);
-            //If item exists, retreive it.
-            ArchipelagoItem permanentItem = GetPermanentItem(itemInfo.ItemName);
-            if (permanentItem != null)
+            if (!_itemDict.ContainsKey(itemInfo.ItemName))
             {
-                permanentItem.IsUnlocked = true;
-                permanentItem.StackItem();
-            }
-            else if (_itemDict.ContainsKey(itemInfo.ItemName))
-            {
-                _itemDict[itemInfo.ItemName].AddToWorld();
+                Logging.LogError($"Unable to give {itemInfo.ItemName} to player. The item doesn't exist or isn't currently handled by the mod.");
                 return;
             }
-            else
+            ArchipelagoItem archipelagoItem = _itemDict[itemInfo.ItemName];
+            archipelagoItem.StackItem();
+            if (!archipelagoItem.IsPermanent())
             {
-                Logging.Log($"Unable to give {itemInfo.ItemName} to player. The item doesn't exist or isn't currently handled by the mod.");
+                archipelagoItem.IsUnlocked = true;
+                archipelagoItem.AddToWorld();
             }
         }
 
@@ -323,17 +267,17 @@ namespace BluePrinceArchipelago.Items
             AddItem(new ResourceItem("5 Steps", true, "Steps", 5));
 
             // Traps
-            AddTrap(new LoseTrap("Trap Take Steps 1", "Steps", -1));
-            AddTrap(new LoseTrap("Trap Take Steps 2", "Steps", -2));
-            AddTrap(new LoseTrap("Trap Take Steps 5", "Steps", -5));
-            AddTrap(new LoseTrap("Trap Take Stars 1", "Stars", -1));
-            AddTrap(new LoseTrap("Trap Take Stars 2", "Stars", -2));
-            AddTrap(new LoseTrap("Trap Take Stars 5", "Stars", -5));
-            AddTrap(new SetTrap("Trap Set Steps 1", "Steps", 1));
-            AddTrap(new SetTrap("Trap Set Steps 10", "Steps", 10));
-            AddTrap(new EndOfDayTrap("Trap End Day", "EOD"));
-            AddTrap(new FreezeTrap("Trap Freeze Items", "Freeze"));
-            AddTrap(new LoseItemTrap("Trap Lose Item", "Lose Item"));
+            AddItem(new ResourceItem("Trap Take Steps 1", false, "Steps", -1));
+            AddItem(new ResourceItem("Trap Take Steps 2", false, "Steps", -2));
+            AddItem(new ResourceItem("Trap Take Steps 5", false, "Steps", -5));
+            AddItem(new ResourceItem("Trap Take Stars 1", false, "Stars", -1));
+            AddItem(new ResourceItem("Trap Take Stars 2", false, "Stars", -2));
+            AddItem(new ResourceItem("Trap Take Stars 5", false, "Stars", -5));
+            AddItem(new SetTrap("Trap Set Steps 1", "Steps", 1));
+            AddItem(new SetTrap("Trap Set Steps 10", "Steps", 10));
+            AddItem(new EndOfDayTrap("Trap End Day"));
+            AddItem(new FreezeTrap("Trap Freeze Items"));
+            AddItem(new LoseItemTrap("Trap Lose Item"));
         }
 
         internal static void GivePermanentItems()
@@ -342,6 +286,35 @@ namespace BluePrinceArchipelago.Items
             {
                 item.AddToWorld();
             }
+        }
+
+        private static ArchipelagoItem FindItemInList(string name, List<ArchipelagoItem> list)
+        {
+            foreach (ArchipelagoItem listItem in list)
+            {
+                if (name == listItem.Name)
+                {
+                    return listItem;
+                }
+            }
+            return null;
+        }
+
+        private static ArchipelagoItem FindItemInList(ArchipelagoItem item, List<ArchipelagoItem> list)
+        {
+            return FindItemInList(item.Name, list);
+        }
+
+        private static void AddItemInList(ArchipelagoItem itemToAdd, List<ArchipelagoItem> list)
+        {
+            ArchipelagoItem itemInList = FindItemInList(itemToAdd, list);
+            if (itemInList == null)
+            {
+                list.Add(itemToAdd);
+                _itemDict[itemToAdd.Name] = itemToAdd;
+                return;
+            }
+            itemInList.StackItem();
         }
     }
 }
