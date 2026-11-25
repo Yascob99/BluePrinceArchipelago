@@ -26,5 +26,10 @@ namespace BluePrinceArchipelago.Items
         {
             return _isPermament;
         }
+
+        public override bool IsTrap()
+        {
+            return _resourceAmount < 0;
+        }
     }
 }

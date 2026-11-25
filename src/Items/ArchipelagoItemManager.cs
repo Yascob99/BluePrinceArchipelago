@@ -1,5 +1,6 @@
 using Archipelago.MultiClient.Net.Models;
 using BluePrinceArchipelago.FsmMethods.CustomMethods;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,6 +17,23 @@ namespace BluePrinceArchipelago.Items
         private static readonly List<ArchipelagoItem> _junkItemList = [];
         private static List<Trap> TrapList = new();
         private static Dictionary<string, ArchipelagoItem> _itemDict = []; //Item name is the key, the type of item is the value.
+
+        private static ArchipelagoItem FindItemInList(string name, List<ArchipelagoItem> list)
+        {
+            foreach (ArchipelagoItem listItem in list)
+            {
+                if (name == listItem.Name)
+                {
+                    return listItem;
+                }
+            }
+            throw new KeyNotFoundException($"Item {name} not found in list {list}");
+        }
+
+        private static ArchipelagoItem FindItemInList(ArchipelagoItem item, List<ArchipelagoItem> list)
+        {
+            return FindItemInList(item.Name, list);
+        }
 
         /// <summary>
         ///     Adds a Unique item to the Unique item list if it's not already tracked.
@@ -48,33 +66,33 @@ namespace BluePrinceArchipelago.Items
         ///     Adds a Resource Item to the junk item list.
         /// </summary>
         /// <param name="itemToAdd">The junk item to add.</param>
-        public static void AddItem(ResourceItem itemToAdd)
+        public static void AddItem(ArchipelagoItem itemToAdd)
         {
+            _itemDict[itemToAdd.Name] = itemToAdd;
             if (itemToAdd.IsPermanent())
             {
-                foreach (ArchipelagoItem item in _permanentItemList)
-                {
-                    if (item.Name == itemToAdd.Name)
-                    {
-                        item.StackItem();
-                        return;
-                    }
-                }
-                _permanentItemList.Add(itemToAdd);
+                AddItemInList(itemToAdd, _permanentItemList);
+                return;
             }
-            else
+            if (itemToAdd.IsTrap())
             {
-                foreach (ArchipelagoItem item in _junkItemList)
-                {
-                    if (item.Name == itemToAdd.Name)
-                    {
-                        item.StackItem();
-                        return;
-                    }
-                }
-                _junkItemList.Add(itemToAdd);
+                AddItemInList(itemToAdd, _trapList);
+                return;
             }
-            _itemDict[itemToAdd.Name] = itemToAdd;
+            AddItemInList(itemToAdd, _junkItemList);
+        }
+
+        private static void AddItemInList(ArchipelagoItem itemToAdd, List<ArchipelagoItem> list)
+        {
+            try
+            {
+                ArchipelagoItem itemInList = FindItemInList(itemToAdd, list);
+                itemInList.StackItem();
+            }
+            catch (Exception)
+            {
+                list.Add(itemToAdd);
+            }
         }
 
         /// <summary>

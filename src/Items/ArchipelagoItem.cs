@@ -36,5 +36,10 @@
         {
             return false;
         }
+
+        public virtual bool IsTrap()
+        {
+            return false;
+        }
     }
 }
