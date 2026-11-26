@@ -2,9 +2,13 @@ using BluePrinceArchipelago.Utils;
 using System;
 using UnityEngine;
 #if Bep
+using HutongGames.PlayMaker.Actions;
+using HutongGames.PlayMaker;
 using TMPro;
 #endif
 #if ML
+using Il2CppHutongGames.PlayMaker.Actions;
+using Il2CppHutongGames.PlayMaker;
 using Il2CppTMPro;
 #endif
 
@@ -15,29 +19,41 @@ namespace BluePrinceArchipelago.Resources
     /// </summary>
     internal class KeyResourceManager : MonoBehaviour
     {
-        public static KeyResourceManager Instance;
+        private static KeyResourceManager _instance;
 
-        public int targetSteps = 0;
+        private GameObject _keyIconObject = null;
 
-        public int oldSteps = 0;
+        private GameObject _keyTextObject = null;
 
-        public GameObject KeyIconObject = null;
+        private GameObject _playerCore = null;
 
-        public GameObject KeyTextObject = null;
+        private GameObject _monkArtKeys = null;
 
-        public GameObject PlayerCore = null;
+        public static CallMethod GetUpdateMethod => GetCallMethod("RunUpdate");
 
-        public GameObject MonkArtKeys = null;
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Update/Update2/UpdateSubtract
+        /// </summary>
+        public static CallMethod GetUpdateWithSoundMethod => GetCallMethod("RunUpdateWithSound");
 
+        /// <summary>
+        ///     Initializing the instance. Required for IL2CPP registration.
+        /// </summary>
+        /// <param name="ptr">The ptr for IL2Cpp.</param>
         public KeyResourceManager(IntPtr ptr) : base(ptr)
         {
-            Instance = this; //Set the modInstance for easy access.
+            _instance = this; //Set the modInstance for easy access.
+        }
+
+        public static KeyResourceManager GetInstance()
+        {
+            return _instance;
         }
 
         public void RunUpdate()
         {
             Logging.LogWarning("Updating Keys");
-            KeyIconObject.SetActive(true);
+            _keyIconObject.SetActive(true);
             int adjust = GetAdjustmentAmount();
             AdjustKeys(adjust);
             if (adjust < 0)
@@ -50,36 +66,36 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunEvent2() {
             SetAdjustmentAmount(2);
-            MonkArtKeys.SetActive(true);
+            _monkArtKeys.SetActive(true);
             RunUpdate();
         }
 
         public void RunUpdateWithSound()
         {
-            ModAssetManager.PlaySound(PlayerCore, "Key Up 2", 0.65294117f);
+            ModAssetManager.PlaySound(_playerCore, "Key Up 2", 0.65294117f);
             RunUpdate();
         }
 
-        public void SetKeys(int amount)
+        public static void SetKeys(int amount)
         {
-            SetKeyCount(amount);
+            _instance.SetKeyCount(amount);
             Logging.LogWarning(amount);
-            KeyTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
-            SetAdjustmentAmount(0);
+            _instance._keyTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
+            _instance.SetAdjustmentAmount(0);
         }
 
-        public void AdjustKeys(int amount)
+        public static void AdjustKeys(int amount)
         {
-            int Keys = Math.Clamp(GetKeyCount() + amount, 0, 1000000);
+            int Keys = Math.Clamp(_instance.GetKeyCount() + amount, 0, 1000000);
             SetKeys(Keys);
         }
 
         public void StartOfDay()
         {
-            KeyIconObject = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
-            KeyTextObject = KeyIconObject.GetChild("Key #");
-            PlayerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
-            MonkArtKeys = GameObject.Find("__SYSTEM/HUD/Keys/Monk Art Keys");
+            _keyIconObject = GameObject.Find("__SYSTEM/HUD/Keys/Keys Icon");
+            _keyTextObject = _keyIconObject.GetChild("Key #");
+            _playerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            _monkArtKeys = GameObject.Find("__SYSTEM/HUD/Keys/Monk Art Keys");
         }
 
         private int GetIntVariable(string variable)
@@ -112,15 +128,6 @@ namespace BluePrinceArchipelago.Resources
             return SetIntVariable("Adjustment Amount", amount);
         }
 
-        private bool GetKeyLock()
-        {
-            return ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value;
-        }
-        private bool SetKeyLock(bool val)
-        {
-            return ModInstance.KeyManager.GetBoolVariable("KEY LOCK").Value = val;
-        }
-
         private int GetTotalKeysUsed()
         {
             return ModInstance.GlobalPersistentManager.GetIntVariable("TotalKeysUsed").Value;
@@ -129,6 +136,17 @@ namespace BluePrinceArchipelago.Resources
         private int SetTotalKeysUsed(int amount)
         {
             return ModInstance.GlobalPersistentManager.GetIntVariable("TotalKeysUsed").Value = amount;
+        }
+
+        /// <summary>
+        ///     Gets a CallMethod with the given Method name for the MonoBehavior.
+        /// </summary>
+        /// <param name="methodname"></param>
+        /// <returns></returns>
+        private static CallMethod GetCallMethod(string methodname)
+        {
+            FsmObject StepResourceManagerInstance = new FsmObject() { value = _instance };
+            return new CallMethod() { behaviour = StepResourceManagerInstance, methodName = methodname, parameters = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FsmVar>([]), everyFrame = false };
         }
     }
 }

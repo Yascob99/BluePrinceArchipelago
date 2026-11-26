@@ -846,170 +846,88 @@ namespace BluePrinceArchipelago.Patches
         public static void StepManagerOverride()
         {
             // UpdateSteps Event
-            FsmState RunningShoesCheck = ModInstance.StepManager.GetState("Running Shoes check");
-            RunningShoesCheck.RemoveAllActions();
-            RunningShoesCheck.ChangeTransition("FINISHED", "State 5");
-            RunningShoesCheck.AddAction(StepResourceManager.GetUpdateStepMethod);
-
-            FsmState RunningShoesCheck2 = ModInstance.StepManager.GetState("Running Shoes check 2");
-            RunningShoesCheck2.RemoveAllActions();
-            RunningShoesCheck2.ChangeTransition("FINISHED", "State 1");
-            RunningShoesCheck2.AddAction(StepResourceManager.GetUpdateStepMethod);
+            OverrideResourceEvent("Running Shoes check", ModInstance.StepManager, "State 5", StepResourceManager.GetUpdateStepMethod);
+            OverrideResourceEvent("Running Shoes check 2", ModInstance.StepManager, "State 1", StepResourceManager.GetUpdateStepMethod);
 
             // Update Event
-            FsmState StepLock = ModInstance.StepManager.GetState("STEP LOCK");
-            StepLock.RemoveAllActions();
-            StepLock.ChangeTransition("FINISHED", "State 5");
-            StepLock.AddAction(StepResourceManager.GetUpdateMethod);
-
-            FsmState StepLock2 = ModInstance.StepManager.GetState("STEP LOCK 2");
-            StepLock2.RemoveAllActions();
-            StepLock2.ChangeTransition("FINISHED", "State 1");
-            StepLock2.AddAction(StepResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("STEP LOCK", ModInstance.StepManager, "State 5", StepResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("STEP LOCK 2", ModInstance.StepManager, "State 1", StepResourceManager.GetUpdateMethod);
 
             // Event 0
-            FsmState State2 = ModInstance.StepManager.GetState("State 2");
-            State2.RemoveAllActions();
-            State2.AddAction(StepResourceManager.GetEvent0);
-            State2.ChangeTransition("FINISHED", "State 1");
+            OverrideResourceEvent("State 2", ModInstance.StepManager, "State 1", StepResourceManager.GetEvent0);
 
             // Event 10
-            FsmState State3 = ModInstance.StepManager.GetState("State 3");
-            State3.RemoveAllActions();
-            State3.AddAction(StepResourceManager.GetEvent10);
-            State2.ChangeTransition("FINISHED", "State 5");
+            OverrideResourceEvent("State 3", ModInstance.StepManager, "State 1", StepResourceManager.GetEvent10);
         }
 
         public static void DiceManagerOverride() {
 
             // Update
-            FsmState State4 = ModInstance.DiceManager.GetState("State 4");
-            State4.RemoveAllActions();
-            State4.ChangeTransition("FINISHED", "State 1");
-            State4.AddAction(DiceManager.GetUpdateMethod);
-
-            FsmState State5 = ModInstance.DiceManager.GetState("State 5");
-            State5.RemoveAllActions();
-            State5.ChangeTransition("FINISHED", "State 1");
-            State5.AddAction(DiceManager.GetUpdateMethod);
-
-            FsmState State6 = ModInstance.DiceManager.GetState("State 6");
-            State6.RemoveAllActions();
-            State6.ChangeTransition("FINISHED", "State 1");
-            State6.AddAction(DiceManager.GetUpdateMethod);
-
-            FsmState State8 = ModInstance.DiceManager.GetState("State 8");
-            State6.RemoveAllActions();
-            State6.ChangeTransition("FINISHED", "State 1");
-            State6.AddAction(DiceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 4", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 5", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 6", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 8", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
         }
 
         public static void GemManagerOverride() {
 
             // Update
-            FsmState GraphicsTurnOn = ModInstance.GemManager.GetState("The Initial Graphics Turn On");
-            GraphicsTurnOn.RemoveAllActions();
-            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
-            GraphicsTurnOn.AddAction(GemManager.GetUpdateMethod);
-
-            FsmState State2 = ModInstance.GemManager.GetState("State 2");
-            State2.RemoveAllActions();
-            State2.AddAction(GemManager.GetUpdateMethod);
+            OverrideResourceEvent("The Initial Graphics Turn On", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 2", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateMethod, false);
 
             // Update 2
-            FsmState GraphicsTurnOn2 = ModInstance.GemManager.GetState("The Initial Graphics Turn On 2");
-            GraphicsTurnOn2.RemoveAllActions();
-            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
-            GraphicsTurnOn2.AddAction(GemManager.GetUpdate2Method);
-
-            FsmState NotEnoughGems = ModInstance.GemManager.GetState("Not Enough Gems");
-            NotEnoughGems.RemoveAllActions();
-            NotEnoughGems.ChangeTransition("FINISHED", "State 1");
-            NotEnoughGems.AddAction(GemManager.GetUpdate2Method);
+            OverrideResourceEvent("The Initial Graphics Turn On 2", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdate2Method);
+            OverrideResourceEvent("Not Enough Gems", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdate2Method);
 
             // Freeze
-            FsmState State9 = ModInstance.GemManager.GetState("State 9");
-            State9.RemoveAllActions();
-            //State9.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
-            State9.AddAction(GemManager.GetFreezeMethod);
-
-            FsmState Quickfreeze = ModInstance.GemManager.GetState("Quickfreeze");
-            Quickfreeze.RemoveAllActions();
-            //Quickfreeze.ChangeTransition("FINISHED", "State 1"); // Unsure if needed. Might be how the game prevents the values from changing when frozen.
-            Quickfreeze.AddAction(GemManager.GetFreezeMethod);
+            OverrideResourceEvent("State 9", ModInstance.GemManager, "State 1", GemResourceManager.GetFreezeMethod, false);
+            OverrideResourceEvent("Quickfreeze", ModInstance.GemManager, "State 1", GemResourceManager.GetFreezeMethod, false);
 
             // Unfreeze
-            FsmState State20 = ModInstance.GemManager.GetState("State 20");
-            State20.RemoveAllActions();
-            State20.ChangeTransition("FINISHED", "State 1");
-            State20.AddAction(GemManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("State 4", ModInstance.GemManager, "State 1", GemResourceManager.GetUnFreezeMethod);
 
-            FsmState State19 = ModInstance.GemManager.GetState("State 19");
-            State19.RemoveAllActions();
-            State19.ChangeTransition("FINISHED", "State 1");
-            State19.AddAction(GemManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("State 20", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("State 19", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateWithSoundMethod);
         }
 
         public static void GoldManagerOverride()
         {
 
             // Update
-            FsmState GraphicsTurnOn = ModInstance.GoldManager.GetState("Initial Graphics Turn On");
-            GraphicsTurnOn.RemoveAllActions();
-            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
-            GraphicsTurnOn.AddAction(GoldManager.GetUpdateMethod);
-
-            FsmState IsSpendingGold = ModInstance.GoldManager.GetState("Is spending gold?");
-            IsSpendingGold.RemoveAllActions();
-            IsSpendingGold.ChangeTransition("FINISHED", "State 1");
-            IsSpendingGold.AddAction(GoldManager.GetUpdateMethod);
+            OverrideResourceEvent("Initial Graphics Turn On", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("Is spending gold?", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdateMethod);
 
             // Update 2
-            FsmState GraphicsTurnOn2 = ModInstance.GoldManager.GetState("Initial Graphics Turn On 2");
-            GraphicsTurnOn2.RemoveAllActions();
-            GraphicsTurnOn2.ChangeTransition("FINISHED", "State 1");
-            GraphicsTurnOn2.AddAction(GoldManager.GetUpdate2Method);
-
-            FsmState State2 = ModInstance.GoldManager.GetState("State 2");
-            State2.RemoveAllActions();
-            State2.AddAction(GoldManager.GetUpdate2Method);
+            OverrideResourceEvent("Initial Graphics Turn On 2", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdate2Method);
+            OverrideResourceEvent("Is spending gold?", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdate2Method);
 
             // Freeze
-            FsmState State3 = ModInstance.GoldManager.GetState("State 3");
-            State3.RemoveAllActions();
-            State3.AddAction(GoldManager.GetFreezeMethod);
+            OverrideResourceEvent("State 3", ModInstance.GoldManager, "State 1", GoldResourceManager.GetFreezeMethod, false);
 
             // UnFreeze
-            FsmState State4 = ModInstance.GoldManager.GetState("State 4");
-            State4.RemoveAllActions();
-            State4.ChangeTransition("FINISHED", "State 1");
-            State4.AddAction(GoldManager.GetUnFreezeMethod);
+            OverrideResourceEvent("State 4", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUnFreezeMethod);
         }
 
         public static void KeyManagerOverride()
         {
             // Update
-            FsmState GraphicsTurnOn = ModInstance.KeyManager.GetState("Initial Graphics Turn On");
-            GraphicsTurnOn.RemoveAllActions();
-            GraphicsTurnOn.ChangeTransition("FINISHED", "State 1");
-            GraphicsTurnOn.AddAction(KeyManager.GetUpdateMethod);
-
-            FsmState State2 = ModInstance.KeyManager.GetState("State 2");
-            State2.RemoveAllActions();
-            State2.ChangeTransition("FINISHED", "State 1");
-            State2.AddAction(KeyManager.GetUpdateMethod);
+            OverrideResourceEvent("Initial Graphics Turn On", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 2", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateMethod);
 
             // UpdateWithSound
-            FsmState Sound = ModInstance.KeyManager.GetState("Sound");
-            Sound.RemoveAllActions();
-            Sound.ChangeTransition("FINISHED", "State 1");
-            Sound.AddAction(KeyManager.GetUpdateMethod);
+            OverrideResourceEvent("Sound", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("Sound 2", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateWithSoundMethod);
+        }
 
-            FsmState Sound2 = ModInstance.KeyManager.GetState("Sound 2");
-            Sound2.RemoveAllActions();
-            Sound2.ChangeTransition("FINISHED", "State 1");
-            Sound2.AddAction(KeyManager.GetUpdateMethod);
-
+        private static void OverrideResourceEvent(string statename, PlayMakerFSM fsm, string toState, FsmStateAction action, bool changeTransition = true) {
+            FsmState state = fsm.GetState(statename);
+            state.RemoveAllActions();
+            if (changeTransition)
+            {
+                state.ChangeTransition("FINISHED", toState);
+            }
+           
+            state.AddAction(action);
         }
 
     }

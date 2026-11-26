@@ -14,29 +14,31 @@ namespace BluePrinceArchipelago.Resources
     /// </summary>
     public static class ModAssetManager
     {
-        private static Dictionary<string, AudioClip> _AudioLookup = new Dictionary<string, AudioClip>();
+        private static Dictionary<string, AudioClip> _audioLookup = new Dictionary<string, AudioClip>();
 
-        private static Dictionary<string, Material> _MaterialLookup = new Dictionary<string, Material>();
+        private static Dictionary<string, Material> _materialLookup = new Dictionary<string, Material>();
 
-        private static AssetBundle _AssetBundle = null;
+        private static AssetBundle _assetBundle = null;
+
+        public static AssetBundle assetBundle { get { return _assetBundle; } }
 
         /// <summary>
         ///     Finds all currently loaded AudioClips in the scene and adds them to a dictionary, indexed by name.
         /// </summary>
         public static void InitializeResourceDicts() {
-            _AudioLookup = new Dictionary<string, AudioClip>();
+            _audioLookup = new Dictionary<string, AudioClip>();
             AudioClip[] loadedAudio = UnityEngine.Resources.FindObjectsOfTypeAll<AudioClip>();
             foreach (AudioClip clip in loadedAudio) { 
-                _AudioLookup[clip.name] = clip;
+                _audioLookup[clip.name] = clip;
             }
-            Logging.Log($"Asset Manager Loaded {_AudioLookup.Count} AudioClips.", "Assets");
-            _MaterialLookup = new Dictionary<string, Material>();
+            Logging.Log($"Asset Manager Loaded {_audioLookup.Count} AudioClips.", "Assets");
+            _materialLookup = new Dictionary<string, Material>();
             Material[] loadedMaterials = UnityEngine.Resources.FindObjectsOfTypeAll<Material>();
             foreach (Material mat in loadedMaterials)
             {
-                _MaterialLookup[mat.name] = mat;
+                _materialLookup[mat.name] = mat;
             }
-            Logging.Log($"Asset Manager Loaded {_MaterialLookup.Count} Materials.", "Assets");
+            Logging.Log($"Asset Manager Loaded {_materialLookup.Count} Materials.", "Assets");
         }
 
         /// <summary>
@@ -73,12 +75,12 @@ namespace BluePrinceArchipelago.Resources
         /// <param name="volume">The Volume to play the audio at</param>
         /// <param name="position">The position relative to the GameObject to play the audio at.</param>
         public static void PlaySoundAt(string clipname, float volume, Vector3 position) {
-            if (!_AudioLookup.ContainsKey(clipname))
+            if (!_audioLookup.ContainsKey(clipname))
             {
                 Logging.LogWarning($"Unable to play clip. '{clipname}' is not a valid clip.", "Assets");
                 return;
             }
-            AudioClip clip = _AudioLookup[clipname];
+            AudioClip clip = _audioLookup[clipname];
             if (clip == null)
             {
                 Logging.LogWarning($"Unable to play clip. '{clipname}' was null.", "Assets");
@@ -95,11 +97,11 @@ namespace BluePrinceArchipelago.Resources
         /// <param name="index">The index of the material to set.</param>
         /// <param name="materialname">The name of the material to set.</param>
         public static void SetMaterial(GameObject gameObject, string materialname, int index = 0) {
-            if (!_MaterialLookup.ContainsKey(materialname)) {
+            if (!_materialLookup.ContainsKey(materialname)) {
                 Logging.LogWarning($"Unable to set material. '{materialname}' is not a valid material.", "Assets");
                 return;
             }
-            SetMaterial (gameObject, _MaterialLookup[materialname], index);
+            SetMaterial (gameObject, _materialLookup[materialname], index);
         }
         /// <summary>
         ///     Sets a GameObject with a renderer component to a material with the given name.
@@ -194,9 +196,9 @@ namespace BluePrinceArchipelago.Resources
         ///     Loads the AssetBundle and stores it for later access.
         /// </summary>
         public static void LoadModAssetBundle() {
-            if (_AssetBundle == null)
+            if (_assetBundle == null)
             {
-                _AssetBundle = ModAssetManager.LoadAssetBundleFromAssembly(ModAssetManager.GetResourceNameFromPath("assets/apprefabs"));
+                _assetBundle = ModAssetManager.LoadAssetBundleFromAssembly(ModAssetManager.GetResourceNameFromPath("assets/apprefabs"));
             }
         }
     }

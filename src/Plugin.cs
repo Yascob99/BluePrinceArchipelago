@@ -123,10 +123,6 @@ namespace BluePrinceArchipelago {
             FsmMethods.AddComponent<CustomFsmMethods>();
             FsmMethods.transform.parent = ModObject.transform;
             State.Initialize();
-            DiceManager.Initialize();
-            GemManager.Initialize();
-            GoldManager.Initialize();
-            KeyManager.Initialize();
             ArchipelagoConsole.Awake();
             ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             ArchipelagoConsole.UpdateWindow();

@@ -1,16 +1,15 @@
-using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using System;
 using UnityEngine;
 #if Bep
+using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;
 using TMPro;
 #endif
 #if ML
-using Il2Cpp;
-using Il2CppTMPro;
+using Il2CppHutongGames.PlayMaker.Actions;
 using Il2CppHutongGames.PlayMaker;
+using Il2CppTMPro;
 #endif
 
 namespace BluePrinceArchipelago.Resources
@@ -20,26 +19,34 @@ namespace BluePrinceArchipelago.Resources
     /// </summary>
     internal class DiceResourceManager : MonoBehaviour
     {
-        public static DiceResourceManager Instance;
+        public static DiceResourceManager _instance;
 
-        public int targetSteps = 0;
+        public GameObject _diceIconObject = null;
 
-        public int oldSteps = 0;
+        public GameObject _diceTextObject = null;
 
-        public GameObject DiceIconObject = null;
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Update/Update2/UpdateSubtract
+        /// </summary>
+        public static CallMethod GetUpdateMethod => GetCallMethod("RunUpdate");
 
-        public GameObject DiceTextObject = null;
-
-        public bool Initialized = false;
-
+        /// <summary>
+        ///     Initializing the instance. Required for IL2CPP registration.
+        /// </summary>
+        /// <param name="ptr">The ptr for IL2Cpp.</param>
         public DiceResourceManager(IntPtr ptr) : base(ptr)
         {
-            Instance = this; //Set the modInstance for easy access.
+            _instance = this; //Set the modInstance for easy access.
+        }
+
+        public static DiceResourceManager GetInstance()
+        {
+            return _instance;
         }
 
         public void RunUpdate()
         {
-            DiceIconObject.SetActive(true);
+            _diceIconObject.SetActive(true);
             int total = GetDiceCount();
             total = Math.Clamp(total + GetAdjustmentAmount(), 0, 1000000);
             SetAdjustmentAmount(0);
@@ -47,37 +54,36 @@ namespace BluePrinceArchipelago.Resources
             UpdateText(total);
         }
 
-        public void SetDice(int amount)
+        public static void SetDice(int amount)
         {
-            DiceIconObject.SetActive(true);
+            _instance._diceIconObject.SetActive(true);
             int total = amount;
-            total = Math.Clamp(total + GetAdjustmentAmount(), 0, 1000000);
-            SetDiceCount(total);
-            UpdateText(total);
+            total = Math.Clamp(total + _instance.GetAdjustmentAmount(), 0, 1000000);
+            _instance.SetDiceCount(total);
+            _instance.UpdateText(total);
         }
 
         private void UpdateText(int total) {
-            DiceTextObject.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
-            TextMeshPro TMPDiceText = DiceTextObject.GetComponent<TextMeshPro>();
+            _diceTextObject.transform.localScale = new Vector3(1.3652f, 1.3652f, 1.3652f);
+            TextMeshPro TMPDiceText = _diceTextObject.GetComponent<TextMeshPro>();
             TMPDiceText.color = new Color(1, 1, 1, 1);
             TMPDiceText.text = total.ToString();
             if (total <= 0)
             {
-                DiceIconObject.SetActive(false);
+                _diceIconObject.SetActive(false);
             }
         }
 
-        public void AdjustDice(int amount)
+        public static void AdjustDice(int amount)
         {
-            SetAdjustmentAmount(amount);
-            RunUpdate();
+            _instance.SetAdjustmentAmount(amount);
+            _instance.RunUpdate();
         }
 
         public void StartOfDay()
         {
-            DiceIconObject = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
-            DiceTextObject = DiceIconObject.GetChild("Bone #");
-            Initialized = false;
+            _diceIconObject = GameObject.Find("__SYSTEM/HUD/Bones/Bones Icon");
+            _diceTextObject = _diceIconObject.GetChild("Bone #");
         }
 
         private int GetIntVariable(string variable)
@@ -109,6 +115,12 @@ namespace BluePrinceArchipelago.Resources
         private int SetAdjustmentAmount(int amount)
         {
             return SetIntVariable("Adjustment Amount", amount);
+        }
+
+        private static CallMethod GetCallMethod(string methodname)
+        {
+            FsmObject StepResourceManagerInstance = new FsmObject() { value = _instance };
+            return new CallMethod() { behaviour = StepResourceManagerInstance, methodName = methodname, parameters = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FsmVar>([]), everyFrame = false };
         }
     }
 }

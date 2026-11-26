@@ -1,16 +1,15 @@
-using BluePrinceArchipelago.FsmMethods;
-using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
 using System;
 using UnityEngine;
 #if Bep
+using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;
 using TMPro;
 #endif
 #if ML
-using Il2Cpp;
-using Il2CppTMPro;
+using Il2CppHutongGames.PlayMaker.Actions;
 using Il2CppHutongGames.PlayMaker;
+using Il2CppTMPro;
 #endif
 
 namespace BluePrinceArchipelago.Resources
@@ -20,54 +19,84 @@ namespace BluePrinceArchipelago.Resources
     /// </summary>
     internal class GemResourceManager : MonoBehaviour
     {
-        public static GemResourceManager Instance;
+        private static GemResourceManager _instance;
 
-        public int targetSteps = 0;
+        private GameObject _gemIconObject = null;
 
-        public int oldSteps = 0;
+        private GameObject _goldIconObject = null;
 
-        public GameObject GemIconObject = null;
+        private GameObject _gemTextObject = null;
 
-        public GameObject GoldIconObject = null;
+        private GameObject _iceOverlayObject = null;
 
-        public GameObject GemTextObject = null;
+        private GameObject _playerCore = null;
 
-        public GameObject IceOverlayObject = null;
+        private bool _flashIsRunning = false;
 
-        public GameObject PlayerCore = null;
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Update/UpdateSubtract
+        /// </summary>
+        public static CallMethod GetUpdateMethod => GetCallMethod("RunUpdate");
 
-        private bool _FlashIsRunning = false;
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Update2
+        /// </summary>
+        public static CallMethod GetUpdate2Method => GetCallMethod("RunUpdate2");
 
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for UpdateWithSound
+        /// </summary>
+        public static CallMethod GetUpdateWithSoundMethod => GetCallMethod("RunUpdateWithSound");
+
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Freeze/QuickFreeze
+        /// </summary>
+        public static CallMethod GetFreezeMethod => GetCallMethod("Freeze");
+
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for UnFreeze/QuickUnfreeze
+        /// </summary>
+        public static CallMethod GetUnFreezeMethod => GetCallMethod("UnFreeze");
+
+        /// <summary>
+        ///     Initializing the instance. Required for IL2CPP registration.
+        /// </summary>
+        /// <param name="ptr">The ptr for IL2Cpp.</param>
         public GemResourceManager(IntPtr ptr) : base(ptr)
         {
-            Instance = this; //Set the modInstance for easy access.
+            _instance = this; //Set the modInstance for easy access.
+        }
+
+        public static GemResourceManager GetInstance()
+        {
+            return _instance;
         }
 
         private System.Collections.IEnumerator FlashRed() {
-            TextMeshPro GemTMP = GemTextObject.GetComponent<TextMeshPro>();
+            TextMeshPro GemTMP = _gemTextObject.GetComponent<TextMeshPro>();
             GemTMP.color = Color.red;
-            ModAssetManager.SetMaterial(GemIconObject, "Ui Atlas - RED");
+            ModAssetManager.SetMaterial(_gemIconObject, "Ui Atlas - RED");
             yield return new WaitForSeconds(0.1f);
-            GemIconObject.SetActive(false);
+            _gemIconObject.SetActive(false);
             yield return new WaitForSeconds(0.1f);
-            GemIconObject.SetActive(true);
+            _gemIconObject.SetActive(true);
             yield return new WaitForSeconds(0.1f);
-            GemIconObject.SetActive(false);
+            _gemIconObject.SetActive(false);
             yield return new WaitForSeconds(0.1f);
-            GemIconObject.SetActive(true);
+            _gemIconObject.SetActive(true);
             yield return new WaitForSeconds(0.1f);
-            GemIconObject.SetActive(false);
+            _gemIconObject.SetActive(false);
             yield return new WaitForSeconds(0.3f);
-            GemIconObject.SetActive(true);
+            _gemIconObject.SetActive(true);
             GemTMP.color = Color.white;
-            ModAssetManager.SetMaterial(GemIconObject, "Ui Atlas");
-            _FlashIsRunning = false;
+            ModAssetManager.SetMaterial(_gemIconObject, "Ui Atlas");
+            _flashIsRunning = false;
         }
 
         public void RunUpdate()
         {
             Logging.LogWarning("Updating Gems");
-            GemIconObject.SetActive(true);
+            _gemIconObject.SetActive(true);
             if (GetGemLock()) {
                 AdjustGems(Math.Clamp(GetAdjustmentAmount(), 0, -1000000));
                 return;
@@ -78,53 +107,53 @@ namespace BluePrinceArchipelago.Resources
 
         public void RunUpdate2() {
             Logging.LogWarning("Updating Gems");
-            GemIconObject.SetActive(true);
-            if (!_FlashIsRunning) {
-                _FlashIsRunning = true;
-                Instance.StartCoroutine(Instance.FlashRed());
+            _gemIconObject.SetActive(true);
+            if (!_flashIsRunning) {
+                _flashIsRunning = true;
+                _instance.StartCoroutine(_instance.FlashRed());
             }
         }
 
         public void RunUpdateWithSound() {
             Logging.LogWarning("Updating Gems");
             // Play GemDown Sound
-            ModAssetManager.PlaySound(PlayerCore, "GemDown", 0.65294117f);
+            ModAssetManager.PlaySound(_playerCore, "GemDown", 0.65294117f);
             RunUpdate();
         }
 
         public void RunFreeze() {
             SetGemCount(0);
             // Play frozen accounts sound
-            GoldIconObject.SetActive(true);
-            GemIconObject.SetActive(true);
+            _goldIconObject.SetActive(true);
+            _gemIconObject.SetActive(true);
         }
 
         public void RunUnFreeze()
         {
             int YesterGems = ModInstance.GlobalPersistentManager.GetIntVariable("YesterFreezerGems").Value;
-            IceOverlayObject.SetActive(false);
+            _iceOverlayObject.SetActive(false);
             SetGems(YesterGems);
         }
 
-        public void SetGems(int amount)
+        public static void SetGems(int amount)
         {
-            SetGemCount(amount);
-            GemTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
+            _instance.SetGemCount(amount);
+            _instance._gemTextObject.GetComponent<TextMeshPro>().text = amount.ToString();
         }
 
-        public void AdjustGems(int amount)
+        public static void AdjustGems(int amount)
         {
-            int Gems = GetGemCount() + amount;
+            int Gems = _instance.GetGemCount() + amount;
             SetGems(Gems);
         }
 
         public void StartOfDay()
         {
-            GemIconObject = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
-            GoldIconObject = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
-            IceOverlayObject = GameObject.Find("__SYSTEM/HUD/ICE OVERLAY");
-            GemTextObject = GemIconObject.GetChild("Gem #");
-            PlayerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            _gemIconObject = GameObject.Find("__SYSTEM/HUD/Gems/Gems Icon");
+            _goldIconObject = GameObject.Find("__SYSTEM/HUD/Gold/Gold Icon");
+            _iceOverlayObject = GameObject.Find("__SYSTEM/HUD/ICE OVERLAY");
+            _gemTextObject = _gemIconObject.GetChild("Gem #");
+            _playerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
         }
 
         private int GetIntVariable(string variable)
@@ -160,9 +189,20 @@ namespace BluePrinceArchipelago.Resources
         private bool GetGemLock() {
             return ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value;
         }
-        private bool SetGemLock(bool val)
+        private bool SetGemLock(bool value)
         {
-            return ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value = val;
+            return ModInstance.GemManager.GetBoolVariable("GEM LOCK").Value = value;
+        }
+
+        /// <summary>
+        ///     Gets a CallMethod with the given Method name for the MonoBehavior.
+        /// </summary>
+        /// <param name="methodname"></param>
+        /// <returns></returns>
+        private static CallMethod GetCallMethod(string methodname)
+        {
+            FsmObject StepResourceManagerInstance = new FsmObject() { value = _instance };
+            return new CallMethod() { behaviour = StepResourceManagerInstance, methodName = methodname, parameters = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FsmVar>([]), everyFrame = false };
         }
     }
 }

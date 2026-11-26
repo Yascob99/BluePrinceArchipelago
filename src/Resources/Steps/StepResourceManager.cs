@@ -21,29 +21,29 @@ namespace BluePrinceArchipelago.Resources
     /// </summary>
     internal sealed class StepResourceManager : MonoBehaviour
     {
-        private static StepResourceManager _Instance;
+        private static StepResourceManager _instance;
 
         private int _targetSteps = 0;
 
         private int _oldSteps = 0;
 
-        private GameObject _StepTextObject = null;
+        private GameObject _stepTextObject = null;
 
-        private GameObject _Player = null;
+        private GameObject _player = null;
 
-        private GameObject _PlayerCore = null;
+        private GameObject _playerCore = null;
 
-        private GameObject _BedUISlide = null;
+        private GameObject _bedUISlide = null;
 
-        private GameObject _StepTimeDelete = null;
+        private GameObject _stepTimeDelete = null;
 
-        private GameObject _DareEngine = null;
+        private GameObject _dareEngine = null;
 
-        private bool _IsRunning = false;
+        private bool _isRunning = false;
 
-        private bool _WaitingForUnfreeze = false;
+        private bool _waitingForUnfreeze = false;
 
-        private bool _Initialized = false;
+        private bool _initialized = false;
 
         /// <summary>
         ///     Gets the CallMethod FsmStateAction for UpdateStep
@@ -65,13 +65,17 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         public static CallMethod GetEvent10 => GetCallMethod("Event10");
 
+        /// <summary>
+        ///     Initializing the instance. Required for IL2CPP registration.
+        /// </summary>
+        /// <param name="ptr">The ptr for IL2Cpp.</param>
         public StepResourceManager(IntPtr ptr) : base(ptr)
         {
-            _Instance = this; //Set the modInstance for easy access.
+            _instance = this; //Set the modInstance for easy access.
         }
 
         public static StepResourceManager GetInstance() {
-            return _Instance;
+            return _instance;
         }
 
         /// <summary>
@@ -79,7 +83,7 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         private System.Collections.IEnumerator UpdateSteps()
         {
-            _IsRunning = true;
+            _isRunning = true;
             _targetSteps = GetTargetSteps();
             _oldSteps = GetOldStepCount();
             int stepChange = _targetSteps - _oldSteps;
@@ -93,7 +97,7 @@ namespace BluePrinceArchipelago.Resources
                 waitTime = StepUpdate(stepChange);
                 _targetSteps = GetStepCount();
             }
-            _IsRunning = false; 
+            _isRunning = false; 
         }
 
 
@@ -103,18 +107,18 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         /// <returns></returns>
         private System.Collections.IEnumerator WaitUntilUnfrozen() {
-            _WaitingForUnfreeze = true;
-            FsmBool currentlyFrozen = _Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
+            _waitingForUnfreeze = true;
+            FsmBool currentlyFrozen = _player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen != null) {
                 while (currentlyFrozen.Value && ModInstance.IsInRun) {
                     yield return new WaitForSeconds(0.2f);
                 }
             }
-            _WaitingForUnfreeze = false;
+            _waitingForUnfreeze = false;
             Logging.LogWarning($"Unfrozen, checking steps {GetTargetSteps()}");
             // If the target steps are still at 0;
             string textSteps = Math.Clamp(GetTargetSteps(), 0, int.MaxValue).ToString();
-            _StepTextObject.GetComponent<TextMeshPro>().text = textSteps;
+            _stepTextObject.GetComponent<TextMeshPro>().text = textSteps;
             if (ModInstance.IsInRun && GetTargetSteps() < 1)
             {
                 GameObject.Find("UI OVERLAY CAM").GetChild("ZERO STEP ENDING").SetActive(true);
@@ -147,7 +151,7 @@ namespace BluePrinceArchipelago.Resources
                 _oldSteps--;
             }
             string textSteps = Math.Clamp(_oldSteps, 0, int.MaxValue).ToString();
-            _StepTextObject.GetComponent<TextMeshPro>().text = textSteps;
+            _stepTextObject.GetComponent<TextMeshPro>().text = textSteps;
 
             return waitTime;
         }
@@ -159,16 +163,16 @@ namespace BluePrinceArchipelago.Resources
         private void RunUpdater()
         {
             // If the MB is initialized
-            if (_Initialized)
+            if (_initialized)
             {
                 if (!ModInstance.IsInRun) {
-                    _Initialized = false;
+                    _initialized = false;
                 }
-                else if (!_IsRunning)
+                else if (!_isRunning)
                 {
                     Logging.LogWarning("Starting Step Updater");
-                    _IsRunning = true;
-                    _Instance.StartCoroutine(_Instance.UpdateSteps());
+                    _isRunning = true;
+                    _instance.StartCoroutine(_instance.UpdateSteps());
                 }
             }
         }
@@ -178,16 +182,16 @@ namespace BluePrinceArchipelago.Resources
         ///     Runs the IEnumerator if it meets the correct conditions.
         /// </summary>
         private void RunWaitUntilUnfrozen() {
-            if (_Initialized)
+            if (_initialized)
             {
                 if (!ModInstance.IsInRun)
                 {
-                    _Initialized = false;
+                    _initialized = false;
                 }
-                else if (!_WaitingForUnfreeze)
+                else if (!_waitingForUnfreeze)
                 {
                     Logging.LogWarning("Starting Wait Until Unfrozen");
-                    _Instance.StartCoroutine(_Instance.WaitUntilUnfrozen());
+                    _instance.StartCoroutine(_instance.WaitUntilUnfrozen());
                 }
             }
         }
@@ -219,10 +223,10 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         /// <param name="amount">The number of steps to set the player's steps to.</param>
         public static void SetSteps(int amount) {
-            if (_Instance)
+            if (_instance)
             {
-                _Instance.SetStepCount(amount);
-                _Instance.RunUpdate();
+                _instance.SetStepCount(amount);
+                _instance.RunUpdate();
             }
         }
 
@@ -231,10 +235,10 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         /// <param name="amount">The integer in which to change the step count by.</param>
         public static void AdjustSteps(int amount) {
-            if (_Instance)
+            if (_instance)
             {
-                _Instance.SetAdjustmentAmount(amount);
-                _Instance.RunUpdate();
+                _instance.SetAdjustmentAmount(amount);
+                _instance.RunUpdate();
             }
         }
 
@@ -277,14 +281,14 @@ namespace BluePrinceArchipelago.Resources
                 else if (ModInstance.StepManager.GetBoolVariable("Position Locked").Value)
                 {
                     ModInstance.StepManager.GetBoolVariable("Position Locked").Value = false;
-                    Vector3 SecondPostion = _PlayerCore.transform.position;
+                    Vector3 SecondPostion = _playerCore.transform.position;
                     ModInstance.StepManager.GetVector3Variable("2nd Position").Value = SecondPostion;
                     Vector3 FirstPostion = ModInstance.StepManager.GetVector3Variable("First Position").Value;
                     float Distance = Vector3.Distance(SecondPostion, FirstPostion);
                     if (Distance > 22f)
                     {
-                        PlayMakerFSM BedUISlideFSM = _BedUISlide?.GetComponent<PlayMakerFSM>();
-                        if (_BedUISlide != null)
+                        PlayMakerFSM BedUISlideFSM = _bedUISlide?.GetComponent<PlayMakerFSM>();
+                        if (_bedUISlide != null)
                         {
                             BedUISlideFSM.GetBoolVariable("Running Shoes").Value = true;
                             BedUISlideFSM.SendEvent("Begin");
@@ -297,7 +301,7 @@ namespace BluePrinceArchipelago.Resources
                 }
                 else
                 {
-                    Vector3 FirstPostion = _PlayerCore.transform.position;
+                    Vector3 FirstPostion = _playerCore.transform.position;
                     ModInstance.StepManager.GetVector3Variable("First Position").Value = FirstPostion;
                     ModInstance.StepManager.GetBoolVariable("Postion Locked").Value = true;
                     StepAdjust();
@@ -333,7 +337,7 @@ namespace BluePrinceArchipelago.Resources
             SetTargetSteps(targetSteps);
             SetIntVariable("totalstepsalltime", ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value);
             SetIntVariable("Total Steps Taken Today", GetIntVariable("Total Steps Taken Today") + 1);
-            _StepTimeDelete.GetComponent<PlayMakerFSM>().SendEvent("Update");
+            _stepTimeDelete.GetComponent<PlayMakerFSM>().SendEvent("Update");
             if (targetSteps < 1) {
                 Fix();
                 return;
@@ -344,8 +348,8 @@ namespace BluePrinceArchipelago.Resources
             RunUpdater();
             int steps = GetStepCount();
             if (steps < 20) {
-                _DareEngine.GetComponent<PlayMakerFSM>().GetIntVariable("dare break").Value = 5;
-                _DareEngine.GetComponent<PlayMakerFSM>().SendEvent("Update");
+                _dareEngine.GetComponent<PlayMakerFSM>().GetIntVariable("dare break").Value = 5;
+                _dareEngine.GetComponent<PlayMakerFSM>().SendEvent("Update");
             }
         }
 
@@ -389,13 +393,13 @@ namespace BluePrinceArchipelago.Resources
         /// </summary>
         public void StartOfDay()
         {
-            _StepTextObject = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
-            _Player = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince");
-            _PlayerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
-            _BedUISlide = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/Bed UI Slide");
-            _StepTimeDelete = GameObject.Find("__SYSTEM/HUD/Steps/Step Time delete (and gloabl variable)");
-            _DareEngine = GameObjectExtensions.FindInHierarchy("DAY/DARE ENGINE");
-            _Initialized = true;
+            _stepTextObject = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
+            _player = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince");
+            _playerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            _bedUISlide = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/Bed UI Slide");
+            _stepTimeDelete = GameObject.Find("__SYSTEM/HUD/Steps/Step Time delete (and gloabl variable)");
+            _dareEngine = GameObjectExtensions.FindInHierarchy("DAY/DARE ENGINE");
+            _initialized = true;
         }
 
         /// <summary>
@@ -522,7 +526,7 @@ namespace BluePrinceArchipelago.Resources
         /// <returns></returns>
         private static CallMethod GetCallMethod(string methodname)
         {
-            FsmObject StepResourceManagerInstance = new FsmObject() { value = _Instance };
+            FsmObject StepResourceManagerInstance = new FsmObject() { value = _instance };
             return new CallMethod() { behaviour = StepResourceManagerInstance, methodName = methodname, parameters = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FsmVar>([]), everyFrame = false };
         }
     }

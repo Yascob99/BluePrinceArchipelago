@@ -90,7 +90,7 @@ namespace BluePrinceArchipelago
         public static int LoadCount = 0;
 
         /// <summary>
-        ///     Initializing the instance.
+        ///     Initializing the instance. Required for IL2CPP registration.
         /// </summary>
         /// <param name="ptr">The ptr for IL2Cpp.</param>
         public ModInstance(IntPtr ptr) : base(ptr)
@@ -116,7 +116,7 @@ namespace BluePrinceArchipelago
         /// <returns>The current asset.</returns>
         private System.Collections.IEnumerator LoadAllAssets()
         {
-            AssetBundle bundle = Plugin.AssetBundle;
+            AssetBundle bundle = ModAssetManager.assetBundle;
             foreach (string asset in bundle.GetAllAssetNames())
             {
                 // Only load the prefabs for instantiation.
@@ -195,12 +195,12 @@ namespace BluePrinceArchipelago
                 UpgradeDisksObj = GameObjectExtensions.FindInHierarchy("__SYSTEM/Upgrade Disks");
                 RDHelper = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
 
-                // Initialize Resource Managers.
+                // Initialize set start of day objects for the ResourceManagers.
                 StepResourceManager.GetInstance().StartOfDay();
-                Resources.DiceManager.StartOfDay();
-                Resources.GemManager.StartOfDay();
-                Resources.GoldManager.StartOfDay();
-                Resources.KeyManager.StartOfDay();
+                DiceResourceManager.GetInstance().StartOfDay();
+                GemResourceManager.GetInstance().StartOfDay();
+                GoldResourceManager.GetInstance().StartOfDay();
+                KeyResourceManager.GetInstance().StartOfDay();
 
                 // Override Original Resource Managers.
                 FSMPatches.StepManagerOverride();

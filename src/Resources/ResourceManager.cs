@@ -1,14 +1,6 @@
-﻿using Archipelago.MultiClient.Net.MessageLog.Parts;
-using BluePrinceArchipelago.Archipelago;
+﻿using BluePrinceArchipelago.Archipelago;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
-#if ML
-using Il2CppTMPro;
-#endif
-#if Bep
-using TMPro;
-#endif
-using UnityEngine;
 
 namespace BluePrinceArchipelago.Resources
 {
@@ -95,7 +87,7 @@ namespace BluePrinceArchipelago.Resources
         public static void AdjustGems(int count)
 		{
             if (ModInstance.IsInRun) {
-                GemManager.AdjustGems(count);
+                GemResourceManager.AdjustGems(count);
             }
 
         }
@@ -108,7 +100,7 @@ namespace BluePrinceArchipelago.Resources
         {
             if (ModInstance.IsInRun)
             {
-                GoldManager.AdjustGold(count);
+                GoldResourceManager.AdjustGold(count);
             }
         }
         /// <summary>
@@ -120,7 +112,7 @@ namespace BluePrinceArchipelago.Resources
         {
             if (ModInstance.IsInRun)
             {
-                DiceManager.AdjustDice(count);
+                DiceResourceManager.AdjustDice(count);
             }
 
         }
@@ -146,7 +138,7 @@ namespace BluePrinceArchipelago.Resources
         {
             if (ModInstance.IsInRun)
             {
-                KeyManager.AdjustKeys(count);
+                KeyResourceManager.AdjustKeys(count);
             }
 
         }
