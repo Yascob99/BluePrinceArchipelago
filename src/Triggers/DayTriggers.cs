@@ -21,8 +21,6 @@ namespace BluePrinceArchipelago.Triggers
         public static void OnDayStart(int dayNum)
         {
             ModInstance.IsInRun = true;
-            //TrapManager.EODTrapToday = false;
-            //TrapManager.FrozenToday = false;
             DeathLinkHandler.processingDeathLink = false;
             ModInstance.GemManager.SendEvent("Update");
             ModInstance.KeyManager.SendEvent("Update");
@@ -93,7 +91,6 @@ namespace BluePrinceArchipelago.Triggers
                 ModRoomManager.StartOfDay();
                 
                 Plugin.ArchipelagoClient.DeathLinkHandler.KillPlayer(); // If we have any queued death links, kill the player at the start of the day.
-                //TrapManager.DequeueTraps();
                 GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
                 AllowanceEnvelope.SetActive(true);
             }
