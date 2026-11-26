@@ -919,6 +919,14 @@ namespace BluePrinceArchipelago.Patches
             OverrideResourceEvent("Sound 2", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateWithSoundMethod);
         }
 
+        /// <summary>
+        ///     A helper method for more quickly overriding the FSMs related to 
+        /// </summary>
+        /// <param name="statename">The state name of the FSM that will invoke our function.</param>
+        /// <param name="fsm">The PlayMakerFSM of the appropriate resource manager.</param>
+        /// <param name="toState">The name of the state to transition to when done.</param>
+        /// <param name="action">The CallMethod action to invoke.</param>
+        /// <param name="changeTransition">If the "FINISHED" transition should be hooked to the toState.</param>
         private static void OverrideResourceEvent(string statename, PlayMakerFSM fsm, string toState, FsmStateAction action, bool changeTransition = true) {
             FsmState state = fsm.GetState(statename);
             state.RemoveAllActions();
