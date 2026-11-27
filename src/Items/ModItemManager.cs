@@ -1155,7 +1155,35 @@ namespace BluePrinceArchipelago.Items
             if (count > 0 && ModInstance.IsInRun)
             {
                 int index = UnityEngine.Random.Range(0, count);
-                PickedUp.RemoveAt(index);
+                GameObject item = PickedUp.arrayList[index].TryCast<GameObject>();
+                
+                GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
+                GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(item.name);
+
+                Logging.LogWarning(icon != null);
+                Logging.LogWarning(InventoryIcons != null);
+                if (icon != null && InventoryIcons != null)
+                {
+                    Logging.LogWarning(ModItemManager.PickedUp.Contains(item.name));
+                    if (ModItemManager.PickedUp.Contains(item.name))
+                    {
+                        ModItemManager.PickedUp.Remove(item, "GameObject");
+                    }
+                    InventoryIcons.Remove(icon, "GameObject");
+
+                    if (item.name == "RUNNING SHOES")
+                    {
+                        ModInstance.RunningEngine.SendEvent("Update");
+                    }
+                    /* need to implement timer pause when removing stopwatch from inventory
+                    if (item.name == "STOPWATCH")
+                    {
+                        GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("End"); //not sure what the event is to pause the stopwatch
+                    }
+                    */
+                    return;
+                }
             }
         }
         public static void RegisterItems()
