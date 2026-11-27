@@ -94,7 +94,6 @@ namespace BluePrinceArchipelago.Triggers
                 GameObject AllowanceEnvelope = GameObject.Find("ROOMS/Entrance Hall/_GAMEPLAY/Allowance Envelope");
                 AllowanceEnvelope.SetActive(true);
             }
-            ResourceManager.GodMode();
         }
 
 
