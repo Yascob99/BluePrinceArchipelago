@@ -2,6 +2,7 @@
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
+using BluePrinceArchipelago.Resources;
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
@@ -840,5 +841,101 @@ namespace BluePrinceArchipelago.Patches
             PlayMakerFSM EdgePierceWest = ModInstance.PlanPicker.transform.Find("EDGEPIERCE WEST").gameObject.GetComponent<PlayMakerFSM>();
             EdgePierceWest.GetState("Set Arrays").InsertAction(CustomFsmMethodManager.GetCallMethod("BeforeDraftStart"), 0);
         }
+
+        public static void StepManagerOverride()
+        {
+            // UpdateSteps Event
+            OverrideResourceEvent("Running Shoes check", ModInstance.StepManager, "State 5", StepResourceManager.GetUpdateStepMethod);
+            OverrideResourceEvent("Running Shoes check 2", ModInstance.StepManager, "State 1", StepResourceManager.GetUpdateStepMethod);
+
+            // Update Event
+            OverrideResourceEvent("STEP LOCK", ModInstance.StepManager, "State 5", StepResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("STEP LOCK 2", ModInstance.StepManager, "State 1", StepResourceManager.GetUpdateMethod);
+
+            // Event 0
+            OverrideResourceEvent("State 2", ModInstance.StepManager, "State 1", StepResourceManager.GetEvent0);
+
+            // Event 10
+            OverrideResourceEvent("State 3", ModInstance.StepManager, "State 1", StepResourceManager.GetEvent10);
+        }
+
+        public static void DiceManagerOverride() {
+
+            // Update
+            OverrideResourceEvent("State 4", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 5", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 6", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 8", ModInstance.DiceManager, "State 1", DiceResourceManager.GetUpdateMethod);
+        }
+
+        public static void GemManagerOverride() {
+
+            // Update
+            OverrideResourceEvent("The Initial Graphics Turn On", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 2", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateMethod, false);
+
+            // Update 2
+            OverrideResourceEvent("The Initial Graphics Turn On 2", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdate2Method);
+            OverrideResourceEvent("Not Enough Gems", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdate2Method);
+
+            // Freeze
+            OverrideResourceEvent("State 9", ModInstance.GemManager, "State 1", GemResourceManager.GetFreezeMethod, false);
+            OverrideResourceEvent("Quickfreeze", ModInstance.GemManager, "State 1", GemResourceManager.GetFreezeMethod, false);
+
+            // Unfreeze
+            OverrideResourceEvent("State 4", ModInstance.GemManager, "State 1", GemResourceManager.GetUnFreezeMethod);
+
+            OverrideResourceEvent("State 20", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("State 19", ModInstance.GemManager, "State 1", GemResourceManager.GetUpdateWithSoundMethod);
+        }
+
+        public static void GoldManagerOverride()
+        {
+
+            // Update
+            OverrideResourceEvent("Initial Graphics Turn On", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("Is spending gold?", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdateMethod);
+
+            // Update 2
+            OverrideResourceEvent("Initial Graphics Turn On 2", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdate2Method);
+            OverrideResourceEvent("Is spending gold?", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUpdate2Method);
+
+            // Freeze
+            OverrideResourceEvent("State 3", ModInstance.GoldManager, "State 1", GoldResourceManager.GetFreezeMethod, false);
+
+            // UnFreeze
+            OverrideResourceEvent("State 4", ModInstance.GoldManager, "State 1", GoldResourceManager.GetUnFreezeMethod);
+        }
+
+        public static void KeyManagerOverride()
+        {
+            // Update
+            OverrideResourceEvent("Initial Graphics Turn On", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateMethod);
+            OverrideResourceEvent("State 2", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateMethod);
+
+            // UpdateWithSound
+            OverrideResourceEvent("Sound", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateWithSoundMethod);
+            OverrideResourceEvent("Sound 2", ModInstance.KeyManager, "State 1", KeyResourceManager.GetUpdateWithSoundMethod);
+        }
+
+        /// <summary>
+        ///     A helper method for more quickly overriding the FSMs related to 
+        /// </summary>
+        /// <param name="statename">The state name of the FSM that will invoke our function.</param>
+        /// <param name="fsm">The PlayMakerFSM of the appropriate resource manager.</param>
+        /// <param name="toState">The name of the state to transition to when done.</param>
+        /// <param name="action">The CallMethod action to invoke.</param>
+        /// <param name="changeTransition">If the "FINISHED" transition should be hooked to the toState.</param>
+        private static void OverrideResourceEvent(string statename, PlayMakerFSM fsm, string toState, FsmStateAction action, bool changeTransition = true) {
+            FsmState state = fsm.GetState(statename);
+            state.RemoveAllActions();
+            if (changeTransition)
+            {
+                state.ChangeTransition("FINISHED", toState);
+            }
+           
+            state.AddAction(action);
+        }
+
     }
 }

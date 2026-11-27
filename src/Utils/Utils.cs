@@ -66,55 +66,6 @@ namespace BluePrinceArchipelago.Utils
         }
     }
     /// <summary>
-    ///     A series of utility functions for dealing with unity assets.
-    /// </summary>
-    public static class AssetExtensions {
-
-        /// <summary>
-        ///     Gets the full asset paths of an asset with a given name from a given AssetBundle.
-        ///     Not case sensitive.
-        /// </summary>
-        /// <param name="bundle">The AssetBundle to search.</param>
-        /// <param name="name">The name of the asset to find. Not case sensitive.</param>
-        /// <returns>A list of assets paths of assets that include the given asset name.</returns>
-        public static string GetAssetPath(this AssetBundle bundle, string name) {
-            string[] names = bundle.GetAllAssetNames();
-            for (int i = 0; i < names.Length; i++) {
-                if (names[i].ToLower().Contains("/" + name.ToLower())){
-                    return names[i];
-                }
-            }
-            return "";
-        }
-        /// <summary>
-        ///     Loads an AssetBundle from a given resource path.
-        /// </summary>
-        /// <param name="resourceName">The Resource name of the resource to be loaded as an asset.</param>
-        /// <returns>An AssetBundle.</returns>
-        public static AssetBundle LoadAssetBundleFromAssembly( string resourceName) {
-            // Creates a memory stream.
-            using (MemoryStream ms = new MemoryStream())
-            {
-                // Gets the currently executing mod assembly, loads the resource, and copies it to the memory stream.
-                Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName).CopyTo(ms);
-                // Converts the memory stream into an IL2Cpp memorystream.
-                Il2CppSystem.IO.MemoryStream memoryStream = new Il2CppSystem.IO.MemoryStream(ms.ToArray());
-                // Loads the asset bundle from the stream (since regular loading is mostly stripped).
-                AssetBundle bundle = AssetBundle.LoadFromStream(memoryStream);
-                return bundle;
-            }
-        }
-        /// <summary>
-        ///     Returns the resource path name of any resources that have been added to the executing assembly.
-        /// </summary>
-        /// <param name="filePath">The file path of the given resource.</param>
-        /// <returns>The resource name for the resource.</returns>
-        public static string GetResourceNameFromPath(string filePath) { 
-            return "BluePrinceArchipelago." + filePath.Replace("\\", "/").Replace("/", ".");
-        }
-
-    }
-    /// <summary>
     ///     A series of Transform Extension utilities to assist in common tasks involving Transforms.
     /// </summary>
     public static class TransformExtensions
@@ -374,6 +325,7 @@ namespace BluePrinceArchipelago.Utils
         /// </summary>
         /// <param name="parent">The parent object to search.</param>
         /// <param name="name">The name of the child object to find.</param>
+        /// <param name="caseSensitive">Whether the matching should match case.</param>
         /// <returns>The child GameObject. Null if not found.</returns>
         public static GameObject GetChild(this GameObject parent, string name, bool caseSensitive = false) {
             for (int i = 0; i < parent.transform.childCount; i++)

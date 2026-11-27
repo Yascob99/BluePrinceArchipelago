@@ -1,12 +1,9 @@
-using BluePrinceArchipelago;
-using BluePrinceArchipelago.Archipelago;
-using BluePrinceArchipelago.FsmMethods;
 using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Utils;
-
 using System;
-using System.Collections.Generic;
+using UnityEngine;
 #if Bep
+using HutongGames.PlayMaker.Actions;
 using HutongGames.PlayMaker;
 using TMPro;
 #endif
@@ -14,79 +11,114 @@ using TMPro;
 using Il2Cpp;
 using Il2CppTMPro;
 using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
 #endif
-using UnityEngine;
 
 namespace BluePrinceArchipelago.Resources
 {
     /// <summary>
     ///     A MonoBehaviour for hooking and processing specific Step related updates.
     /// </summary>
-    internal class StepResourceManager : MonoBehaviour
+    internal sealed class StepResourceManager : MonoBehaviour
     {
-        public static StepResourceManager Instance;
+        private static StepResourceManager _instance;
 
-        public int targetSteps = 0;
+        private int _targetSteps = 0;
 
-        public int oldSteps = 0;
+        private int _oldSteps = 0;
 
-        public GameObject StepTextObject = null;
+        private GameObject _stepTextObject = null;
 
-        public GameObject Player = null;
+        private GameObject _player = null;
 
-        public GameObject PlayerCore = null;
+        private GameObject _playerCore = null;
 
-        public GameObject BedUISlide = null;
+        private GameObject _bedUISlide = null;
 
-        public GameObject StepTimeDelete = null;
+        private GameObject _stepTimeDelete = null;
 
-        public GameObject DareEngine = null;
+        private GameObject _dareEngine = null;
 
-        public bool IsRunning = false;
+        private bool _isRunning = false;
 
-        public bool WaitingForUnfreeze = false;
+        private bool _waitingForUnfreeze = false;
 
-        public bool Initialized = false;
+        private bool _initialized = false;
 
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for UpdateStep
+        /// </summary>
+        public static CallMethod GetUpdateStepMethod => GetCallMethod("RunUpdateStep");
+
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Update
+        /// </summary>
+        public static CallMethod GetUpdateMethod => GetCallMethod("RunUpdate");
+
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Event0
+        /// </summary>
+        public static CallMethod GetEvent0 => GetCallMethod("Event0");
+
+        /// <summary>
+        ///     Gets the CallMethod FsmStateAction for Event10
+        /// </summary>
+        public static CallMethod GetEvent10 => GetCallMethod("Event10");
+
+        /// <summary>
+        ///     Initializing the instance. Required for IL2CPP registration.
+        /// </summary>
+        /// <param name="ptr">The ptr for IL2Cpp.</param>
         public StepResourceManager(IntPtr ptr) : base(ptr)
         {
-            Instance = this; //Set the modInstance for easy access.
+            _instance = this; //Set the modInstance for easy access.
         }
 
+        public static StepResourceManager GetInstance() {
+            return _instance;
+        }
 
         /// <summary>
         ///     Handles updating steps incrementally.
         /// </summary>
-        System.Collections.IEnumerator UpdateSteps()
+        private System.Collections.IEnumerator UpdateSteps()
         {
-            IsRunning = true;
-            targetSteps = GetTargetSteps();
-            oldSteps = GetOldStepCount();
-            int stepChange = targetSteps - oldSteps;
+            _isRunning = true;
+            _targetSteps = GetTargetSteps();
+            _oldSteps = GetOldStepCount();
+            int stepChange = _targetSteps - _oldSteps;
             float waitTime = StepUpdate(stepChange);
             yield return new WaitForSeconds(waitTime);
             // Repeat adjusting steps one by one until it matches
             while (stepChange != 0 && ModInstance.IsInRun)
             {
                 yield return new WaitForSeconds(waitTime);
+                stepChange = _targetSteps - _oldSteps;
                 waitTime = StepUpdate(stepChange);
-                targetSteps = GetStepCount();
-                stepChange = targetSteps - oldSteps;
+                _targetSteps = GetStepCount();
             }
-            IsRunning = false;
+            _isRunning = false; 
         }
 
 
-        System.Collections.IEnumerator WaitUntilUnfrozen() {
-            WaitingForUnfreeze = true;
-            FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
+        /// <summary>
+        ///     A IEnumerator for waiting until the player is not in a cutscene or pause screen,
+        ///     then sends the zero step ending if they are not in a cutscene or pause menu
+        /// </summary>
+        /// <returns></returns>
+        private System.Collections.IEnumerator WaitUntilUnfrozen() {
+            _waitingForUnfreeze = true;
+            FsmBool currentlyFrozen = _player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
             if (currentlyFrozen != null) {
                 while (currentlyFrozen.Value && ModInstance.IsInRun) {
                     yield return new WaitForSeconds(0.2f);
                 }
             }
-            WaitingForUnfreeze = false;
+            _waitingForUnfreeze = false;
+            Logging.LogWarning($"Unfrozen, checking steps {GetTargetSteps()}");
             // If the target steps are still at 0;
+            string textSteps = Math.Clamp(GetTargetSteps(), 0, int.MaxValue).ToString();
+            _stepTextObject.GetComponent<TextMeshPro>().text = textSteps;
             if (ModInstance.IsInRun && GetTargetSteps() < 1)
             {
                 GameObject.Find("UI OVERLAY CAM").GetChild("ZERO STEP ENDING").SetActive(true);
@@ -101,49 +133,76 @@ namespace BluePrinceArchipelago.Resources
         private float StepUpdate(int stepChange) {
             
             float waitTime = 0.2f;
-            if (oldSteps < targetSteps)
+            if (stepChange > 0)
             {
-                if (stepChange > 0)
+                if (stepChange < 11)
                 {
-                    if (stepChange < 11)
-                    {
-                        waitTime = (0.2f / stepChange);
-                    }
-                    oldSteps++;
+                    waitTime = (0.2f / stepChange);
                 }
-                else
-                {
-                    if (-stepChange < 11)
-                    {
-                        waitTime = (0.2f / -stepChange);
-                    }
-                    oldSteps--;
-                }
-                string textSteps = Math.Clamp(oldSteps, 0, int.MaxValue).ToString();
-                StepTextObject.GetComponent<TextMeshPro>().text = textSteps;
+                _oldSteps++;
+                
             }
+            else if (stepChange < 0)
+            {
+                if (-stepChange < 11)
+                {
+                    waitTime = (0.2f / -stepChange);
+                }
+                _oldSteps--;
+            }
+            string textSteps = Math.Clamp(_oldSteps, 0, int.MaxValue).ToString();
+            _stepTextObject.GetComponent<TextMeshPro>().text = textSteps;
+
             return waitTime;
         }
 
-        public void RunUpdater()
+
+        /// <summary>
+        ///     Runs the IEnumerator if it meets the correct condition.
+        /// </summary>
+        private void RunUpdater()
         {
             // If the MB is initialized
-            if (Initialized)
+            if (_initialized)
             {
                 if (!ModInstance.IsInRun) {
-                    Initialized = false;
+                    _initialized = false;
                 }
-                else if (!IsRunning)
+                else if (!_isRunning)
                 {
-                    IsRunning = true;
-                    Instance.StartCoroutine(Instance.UpdateSteps());
+                    Logging.LogWarning("Starting Step Updater");
+                    _isRunning = true;
+                    _instance.StartCoroutine(_instance.UpdateSteps());
                 }
             }
         }
 
+
+        /// <summary>
+        ///     Runs the IEnumerator if it meets the correct conditions.
+        /// </summary>
+        private void RunWaitUntilUnfrozen() {
+            if (_initialized)
+            {
+                if (!ModInstance.IsInRun)
+                {
+                    _initialized = false;
+                }
+                else if (!_waitingForUnfreeze)
+                {
+                    Logging.LogWarning("Starting Wait Until Unfrozen");
+                    _instance.StartCoroutine(_instance.WaitUntilUnfrozen());
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Runs the Update Event code for the StepsManager.
+        ///     Needs to be public so it can be invoked directly by the FSM.
+        /// </summary>
         public void RunUpdate()
         {
-            Logging.Log($"Attempting to run update for the resource Steps", "Resources");
+            Logging.LogWarning($"Attempting to run update for the resource Steps", "Resources");
             int targetSteps = GetStepCount() + GetAdjustmentAmount();
             SetTargetSteps(targetSteps);
             SetAdjustmentAmount(0);
@@ -152,22 +211,42 @@ namespace BluePrinceArchipelago.Resources
                 Fix();
                 return;
             }
-            SetOldStepCount(GetOldStepsToCompare());
             SetOldStepCount(GetStepCount());
+            SetOldStepsToCompare(GetOldStepCount());
             SetStepCount(GetTargetSteps());
             RunUpdater();
         }
 
-        public void SetSteps(int amount) {
-            SetStepCount(amount);
-            RunUpdate();
+
+        /// <summary>
+        ///     Sets the player's steps to the provided amount
+        /// </summary>
+        /// <param name="amount">The number of steps to set the player's steps to.</param>
+        public static void SetSteps(int amount) {
+            if (_instance)
+            {
+                _instance.SetStepCount(amount);
+                _instance.RunUpdate();
+            }
         }
 
-        public void AdjustSteps(int amount) {
-            SetAdjustmentAmount(amount);
-            RunUpdate();
+        /// <summary>
+        ///     Increases or decreases the players steps by the provided amount.
+        /// </summary>
+        /// <param name="amount">The integer in which to change the step count by.</param>
+        public static void AdjustSteps(int amount) {
+            if (_instance)
+            {
+                _instance.SetAdjustmentAmount(amount);
+                _instance.RunUpdate();
+            }
         }
 
+
+        /// <summary>
+        ///     Runs the UpdateStep code for the StepManager
+        ///     Has to be public so the FSM can invoke it.
+        /// </summary>
         public void RunUpdateStep()
         {
             if (ModItemManager.PickedUp.Contains("RUNNING SHOES"))
@@ -180,6 +259,11 @@ namespace BluePrinceArchipelago.Resources
                 
             }
         }
+
+        /// <summary>
+        ///     Runs the Event "10" code for the StepManager.
+        ///     Has to be public so the FSM can invoke it.
+        /// </summary>
         public void Event10()
         {
             Logging.Log($"Attempting to run Update Step for Steps", "Resources");
@@ -197,14 +281,14 @@ namespace BluePrinceArchipelago.Resources
                 else if (ModInstance.StepManager.GetBoolVariable("Position Locked").Value)
                 {
                     ModInstance.StepManager.GetBoolVariable("Position Locked").Value = false;
-                    Vector3 SecondPostion = PlayerCore.transform.position;
+                    Vector3 SecondPostion = _playerCore.transform.position;
                     ModInstance.StepManager.GetVector3Variable("2nd Position").Value = SecondPostion;
                     Vector3 FirstPostion = ModInstance.StepManager.GetVector3Variable("First Position").Value;
                     float Distance = Vector3.Distance(SecondPostion, FirstPostion);
                     if (Distance > 22f)
                     {
-                        PlayMakerFSM BedUISlideFSM = BedUISlide?.GetComponent<PlayMakerFSM>();
-                        if (BedUISlide != null)
+                        PlayMakerFSM BedUISlideFSM = _bedUISlide?.GetComponent<PlayMakerFSM>();
+                        if (_bedUISlide != null)
                         {
                             BedUISlideFSM.GetBoolVariable("Running Shoes").Value = true;
                             BedUISlideFSM.SendEvent("Begin");
@@ -217,7 +301,7 @@ namespace BluePrinceArchipelago.Resources
                 }
                 else
                 {
-                    Vector3 FirstPostion = PlayerCore.transform.position;
+                    Vector3 FirstPostion = _playerCore.transform.position;
                     ModInstance.StepManager.GetVector3Variable("First Position").Value = FirstPostion;
                     ModInstance.StepManager.GetBoolVariable("Postion Locked").Value = true;
                     StepAdjust();
@@ -225,45 +309,65 @@ namespace BluePrinceArchipelago.Resources
             }
         }
 
+        /// <summary>
+        ///     Handles the Stop Time path of the code.
+        /// </summary>
         private void StopTime()
         {
             SetIntVariable("Total Steps Taken Today", GetIntVariable("Total Steps Taken Today")+ 1);
         }
+
+        /// <summary>
+        ///     Handles the NoStep Path of the code.
+        /// </summary>
         private void NoStep()
         {
             ModInstance.StepManager.GetBoolVariable("NoStep").Value = false;
         }
 
+        /// <summary>
+        ///     Handles the step adjustment section of the code.
+        ///     This a helper function intended to break apart the logic
+        ///     more bite sized sections of logic.
+        /// </summary>
         private void StepAdjust()
         {
             ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value++;
+            int targetSteps = GetStepCount() -1;
+            SetTargetSteps(targetSteps);
             SetIntVariable("totalstepsalltime", ModInstance.GlobalPersistentManager.GetIntVariable("TotalStepsSpent").Value);
             SetIntVariable("Total Steps Taken Today", GetIntVariable("Total Steps Taken Today") + 1);
-            StepTimeDelete.GetComponent<PlayMakerFSM>().SendEvent("Update");
-            SetTargetSteps(GetStepCount() - 1);
-            if (GetTargetSteps() < 1) {
+            _stepTimeDelete.GetComponent<PlayMakerFSM>().SendEvent("Update");
+            if (targetSteps < 1) {
                 Fix();
                 return;
             }
+            Logging.LogWarning(SetOldStepCount(GetStepCount()));
+            Logging.LogWarning(SetOldStepsToCompare(GetOldStepCount()));
+            Logging.LogWarning(SetStepCount(targetSteps));
             RunUpdater();
             int steps = GetStepCount();
             if (steps < 20) {
-                DareEngine.GetComponent<PlayMakerFSM>().GetIntVariable("dare break").Value = 5;
-                DareEngine.GetComponent<PlayMakerFSM>().SendEvent("Update");
+                _dareEngine.GetComponent<PlayMakerFSM>().GetIntVariable("dare break").Value = 5;
+                _dareEngine.GetComponent<PlayMakerFSM>().SendEvent("Update");
             }
         }
 
+
+        /// <summary>
+        ///     Handles adjusting the StepCount when it is at 0 or below 0.
+        /// </summary>
         private void Fix()
         {
             SetOldStepCount(GetStepCount());
             SetStepCount(GetTargetSteps());
-            FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
-            if (currentlyFrozen.Value) {
-                // Waits until the game is not paused/in a cutscene, then kills the player via 0 step ending;
-                WaitUntilUnfrozen();
-            }
+            RunWaitUntilUnfrozen();
         }
 
+        /// <summary>
+        ///     Handles the Event "0" for the StepManager
+        ///      Has to be public so the FSM can invoke it.
+        /// </summary>
         public void Event0()
         {
             if (!ModInstance.StepManager.GetBoolVariable("StepFreeze").Value)
@@ -283,80 +387,147 @@ namespace BluePrinceArchipelago.Resources
             }
         }
 
+        /// <summary>
+        ///     Handles the Start of Day initialization. 
+        ///     Specifically grabbing the correct instances of the important game objects.
+        /// </summary>
         public void StartOfDay()
         {
-            StepTextObject = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
-            Player = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince");
-            PlayerCore = GameObjectExtensions.FindGameObject("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
-            BedUISlide = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Steps Icon/Bed UI Slide");
-            StepTimeDelete = GameObjectExtensions.FindGameObject("__SYSTEM/HUD/Steps/Step Time delete (and gloabl variable)");
-            DareEngine = GameObjectExtensions.FindGameObject("DAY/DARE ENGINE");
-            Initialized = false;
+            _stepTextObject = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/step rotator/Steps #");
+            _player = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince");
+            _playerCore = GameObject.Find("__SYSTEM/FPS Home/FPSController - Prince/Player Core");
+            _bedUISlide = GameObject.Find("__SYSTEM/HUD/Steps/Steps Icon/Bed UI Slide");
+            _stepTimeDelete = GameObject.Find("__SYSTEM/HUD/Steps/Step Time delete (and gloabl variable)");
+            _dareEngine = GameObjectExtensions.FindInHierarchy("DAY/DARE ENGINE");
+            _initialized = true;
         }
 
-        private void Start()
-        {
-            CustomFsmMethodManager.RegisterMethods();
-        }
+        /// <summary>
+        ///     A helper method to get FsmInt Variables as ints from the StepManager's PlayMaker FSM.
+        /// </summary>
+        /// <param name="variable">The name of the variable to get</param>
+        /// <returns>The Int value of the Int Variable</returns>
         private int GetIntVariable(string variable)
         {
             return ModInstance.StepManager.GetIntVariable(variable).Value;
         }
 
-        private int SetIntVariable(string variable, int amount)
+        /// <summary>
+        ///     A helper function that sets FsmInt Variables in the StepManager's PlayMaker FSM to the provided int value.
+        /// </summary>
+        /// <param name="variable">The name of the variable to get</param>
+        /// <param name="value">The int to set it to.</param>
+        /// <returns>The int value of the FsmInt was set to.</returns>
+        private int SetIntVariable(string variable, int value)
         {
-            return ModInstance.StepManager.GetIntVariable(variable).Value = amount;
+            return ModInstance.StepManager.GetIntVariable(variable).Value = value;
         }
 
-        //Example variable access
+        /// <summary>
+        ///     Gets the "STEPS" FsmInt from the StepManager as an int.
+        /// </summary>
+        /// <returns>Step Count as an int.</returns>
         private int GetStepCount()
         {
-            return GetIntVariable("STEP");
+            return GetIntVariable("STEPS");
         }
 
-        private int SetStepCount(int amount)
+        /// <summary>
+        ///     Sets the "STEPS" FsmInt to the provided int value
+        /// </summary>
+        /// <param name="value">The value to set the "STEPS" FsmInt to.</param>
+        /// <returns>The int value that the "STEPS" FsmInt was set to</returns>
+        private int SetStepCount(int value)
         {
-            return SetIntVariable("STEP", amount);
+            return SetIntVariable("STEPS", value);
         }
 
+        /// <summary>
+        ///     Gets the "old step" FsmInt from the StepManager as an int.
+        /// </summary>
+        /// <returns>The int value of the "old step" FsmInt</returns>
         private int GetOldStepCount()
         {
             return GetIntVariable("old step");
         }
 
-        private int SetOldStepCount(int amount)
+        /// <summary>
+        ///     Sets the "old step" FsmInt in the StepManager to the provided int value.
+        /// </summary>
+        /// <param name="value">The value to set the "old step" FsmInt to.</param>
+        /// <returns>The int value that the "old step" FsmInt was set to</returns>
+        private int SetOldStepCount(int value)
         {
-            return SetIntVariable("old step", amount);
+            return SetIntVariable("old step", value);
         }
 
+        /// <summary>
+        ///     Gets the "Adjustment Amount" FsmInt from the StepManager as an int.
+        /// </summary>
+        /// <returns>The int value of the "Adjustment Amount" FsmInt</returns>
         private int GetAdjustmentAmount()
         {
             return GetIntVariable("Adjustment Amount");
         }
 
-        private int SetAdjustmentAmount(int amount)
+
+        /// <summary>
+        ///     Sets the "Adjustment Amount" FsmInt in the StepManager to the provided int value.
+        /// </summary>
+        /// <param name="value">The value to set the "Adjustment Amount" FsmInt to.</param>
+        /// <returns>The int value that the "Adjustment Amount" FsmInt was set to</returns>
+        private int SetAdjustmentAmount(int value)
         {
-            return SetIntVariable("Adjustment Amount", amount);
+            return SetIntVariable("Adjustment Amount", value);
         }
 
+        /// <summary>
+        ///     Gets the "target steps" FsmInt from the StepManager as an int.
+        /// </summary>
+        /// <returns>The int value of the "target steps" FsmInt</returns>
         private int GetTargetSteps()
         {
             return GetIntVariable("target steps");
         }
 
-        private int SetTargetSteps(int amount)
+        /// <summary>
+        ///     Sets the "target steps" FsmInt in the StepManager to the provided int value.
+        /// </summary>
+        /// <param name="value">The value to set the "target steps" FsmInt to.</param>
+        /// <returns>The int value that the "target steps" FsmInt was set to</returns>
+        private int SetTargetSteps(int value)
         {
-            return SetIntVariable("target steps", amount);
+            return SetIntVariable("target steps", value);
         }
 
+        /// <summary>
+        ///     Gets the "old steps to compare" FsmInt from the StepManager as an int.
+        /// </summary>
+        /// <returns>The int value of the "old steps to compare" FsmInt</returns>
         private int GetOldStepsToCompare()
         {
             return GetIntVariable("old steps to compare");
         }
 
-        private int SetOldStepsToCompare(int amount)
+        /// <summary>
+        ///     Sets the "old steps to compare" FsmInt in the StepManager to the provided int value.
+        /// </summary>
+        /// <param name="value">The value to set the "old steps to compare" FsmInt to.</param>
+        /// <returns>The int value that the "old steps to compare" FsmInt was set to</returns>
+        private int SetOldStepsToCompare(int value)
         {
-            return SetIntVariable("old steps to compare", amount);
+            return SetIntVariable("old steps to compare", value);
+        }
+
+        /// <summary>
+        ///     Gets a CallMethod with the given Method name for the MonoBehavior.
+        /// </summary>
+        /// <param name="methodname"></param>
+        /// <returns></returns>
+        private static CallMethod GetCallMethod(string methodname)
+        {
+            FsmObject StepResourceManagerInstance = new FsmObject() { value = _instance };
+            return new CallMethod() { behaviour = StepResourceManagerInstance, methodName = methodname, parameters = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FsmVar>([]), everyFrame = false };
         }
     }
 }

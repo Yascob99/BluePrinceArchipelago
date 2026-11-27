@@ -8,19 +8,12 @@ using BluePrinceArchipelago.Rooms.Pickers;
 using BluePrinceArchipelago.Triggers;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Resources;
-#if Bep
-using HutongGames.PlayMaker;
-using HutongGames.PlayMaker.Actions;
-#endif
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 #if ML
 using Il2Cpp;
-using MelonLoader;
-using Il2CppHutongGames.PlayMaker;
-using Il2CppHutongGames.PlayMaker.Actions;
 #endif
 using HarmonyPatch = HarmonyLib.Harmony;
 
@@ -73,10 +66,6 @@ namespace BluePrinceArchipelago
         // Other
         public static RoomDraftHelper RDHelper = new();
 
-
-        // Custom Resource Manager
-        public static StepResourceManager ResourceManagerInstance = null;
-
         // Transforms
         public static Transform YouFoundText = new();
 
@@ -101,7 +90,7 @@ namespace BluePrinceArchipelago
         public static int LoadCount = 0;
 
         /// <summary>
-        ///     Initializing the instance.
+        ///     Initializing the instance. Required for IL2CPP registration.
         /// </summary>
         /// <param name="ptr">The ptr for IL2Cpp.</param>
         public ModInstance(IntPtr ptr) : base(ptr)
@@ -125,9 +114,9 @@ namespace BluePrinceArchipelago
         ///     An enumerator for loading any bundled mod assets.
         /// </summary>
         /// <returns>The current asset.</returns>
-        System.Collections.IEnumerator LoadAllAssets()
+        private System.Collections.IEnumerator LoadAllAssets()
         {
-            AssetBundle bundle = Plugin.AssetBundle;
+            AssetBundle bundle = ModAssetManager.assetBundle;
             foreach (string asset in bundle.GetAllAssetNames())
             {
                 // Only load the prefabs for instantiation.
@@ -146,7 +135,6 @@ namespace BluePrinceArchipelago
             }
             ArchipelagoPrefabsLoaded = true;
         }
-
 
         /// <summary>
         ///     Called whenver a scene is loaded (triggered by the scene manager).
@@ -206,11 +194,25 @@ namespace BluePrinceArchipelago
                 ChessKing = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /TEXT/INVENTORY INSPECT/Inventory Descriptions/CHESS KING").GetComponent<PlayMakerFSM>(); // Needs to use GameObject.Find();
                 UpgradeDisksObj = GameObjectExtensions.FindInHierarchy("__SYSTEM/Upgrade Disks");
                 RDHelper = GameObjectExtensions.FindInHierarchy("__SYSTEM/THE DRAFT/Draft Code").GetComponent<RoomDraftHelper>(); //Applies the Room Forcing patch (which also removes the forced Day 1 Draft 1 draft).
-                ResourceManagerInstance = GameObjectExtensions.FindInHierarchy("__SYSTEM/HUD").AddComponent<StepResourceManager>();
-                ResourceManagerInstance.StartOfDay();
+
+                // Initialize set start of day objects for the ResourceManagers.
+                StepResourceManager.GetInstance().StartOfDay();
+                DiceResourceManager.GetInstance().StartOfDay();
+                GemResourceManager.GetInstance().StartOfDay();
+                GoldResourceManager.GetInstance().StartOfDay();
+                KeyResourceManager.GetInstance().StartOfDay();
+
+                // Override Original Resource Managers.
+                FSMPatches.StepManagerOverride();
+                FSMPatches.DiceManagerOverride();
+                FSMPatches.GemManagerOverride();
+                FSMPatches.GoldManagerOverride();
+                FSMPatches.KeyManagerOverride();
+
                 PickerManager.LoadArrays();
                 ModRoomManager.Reset(); // Clear stale room state from any previous scene load
                 ModRoomManager.InitializeRooms();
+                ModAssetManager.InitializeResourceDicts();
                 //ModRoomManager.SetAllVanilla();
                 // If already connected to Archipelago when loading in, sync after a delay
                 // to ensure the game has finished initializing all draft pools
