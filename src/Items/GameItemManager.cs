@@ -502,7 +502,25 @@ namespace BluePrinceArchipelago.Items
             if (count > 0 && ModInstance.IsInRun)
             {
                 int index = UnityEngine.Random.Range(0, count);
-                PickedUp.RemoveAt(index);
+                GameObject item = PickedUp.arrayList[index].TryCast<GameObject>();
+
+                GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
+                GameObject icon = GetIconGameObject(item.name);
+                if (icon != null && InventoryIcons != null)
+                {
+                    if (PickedUp.Contains(item.name))
+                    {
+                        PickedUp.Remove(item, "GameObject");
+                    }
+                    InventoryIcons.Remove(icon, "GameObject");
+                    ArchipelagoConsole.LogMessage($"YOU HAVE LOST YOUR {item.name.ToUpper()}");
+
+                    if (item.name == "RUNNING SHOES")
+                    {
+                        ModInstance.RunningEngine.SendEvent("Update");
+                    }
+                }
             }
         }
 
