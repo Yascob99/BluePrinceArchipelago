@@ -20,33 +20,7 @@ class Mechanarium : RoomHandler
     {
         if (ArchipelagoOptions.UpgradeDiskSanity)
         {
-            roomGameObject = ModRoomManager.GetRoomInstance("Mechanarium");
-            if (roomGameObject != null)
-            {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/11")?.GetComponent<PlayMakerFSM>();
-                if (ItemDropFSM != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("MECHANARIUM");
-                    Logging.LogWarning(found);
-                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("Upgrae Disk").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ItemDropFSM.GetState("Upgrae Disk").ChangeTransition("skip", "Spawn Sanctum Key 2");
-                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check 2");
-                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key 2");
-                    //if (!found)
-                    //{
-                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
-                    //    ItemDropFSM.GetState("State 6").DisableFirstActionOfType<ArrayListContains>();
-                    //    ItemDropFSM.GetState("State 6").ChangeTransition("FINISHED", "Coat Check Check 2");
-                    //}
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Mechanarium Upgrade disk spawn logic.");
-                }
-            }
+            UpgradeDisks.ChangeItemDropFSM("MECHANARIUM", "Upgrae Disk", "skip", "Spawn Sanctum Key 2");
         }
     }
 }

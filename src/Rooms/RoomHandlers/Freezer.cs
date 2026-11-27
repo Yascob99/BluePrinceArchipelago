@@ -20,33 +20,7 @@ class Freezer : RoomHandler
     {
         if (ArchipelagoOptions.UpgradeDiskSanity)
         {
-            roomGameObject = ModRoomManager.GetRoomInstance("Freezer");
-            if (roomGameObject != null)
-            {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/ICE DOORS/Door 20/6")?.GetComponent<PlayMakerFSM>();
-                if (ItemDropFSM != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("FREEZER");
-                    Logging.LogWarning(found);
-                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key");
-                    //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
-                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
-                    //if (!found)
-                    //{
-                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
-                    //}
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Freezer Upgrade disk spawn logic.");
-                }
-            }
+            UpgradeDisks.ChangeItemDropFSM("FREEZER", "State 3", "skip", "Spawn Sanctum Key");
         }
     }
 }

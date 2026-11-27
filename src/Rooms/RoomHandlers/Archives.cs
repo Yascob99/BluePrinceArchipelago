@@ -18,30 +18,6 @@ class Archives: RoomHandler
     public override void OnAfterRoomDrafted(GameObject roomGameObject)
     {
         roomGameObject = ModRoomManager.GetRoomInstance("Archives");
-        if (roomGameObject != null)
-        {
-            PlayMakerFSM ItemDropFSM = roomGameObject.FindDescendant("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1")?.GetComponent<PlayMakerFSM>();
-            if (ItemDropFSM != null)
-            {
-                bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("ARCHIVES");
-                FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                CanSpawnDisk.Value = found;
-                ItemDropFSM.GetState("State").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                ItemDropFSM.GetState("State").ChangeTransition("skip", "Spawn Sanctum Key");
-                //ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                //CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
-                //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
-                //if (!found)
-                //{
-                //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                //    KeyIntCheck.equal = KeyIntCheck.lessThan;
-                //}
-            }
-            else
-            {
-                Logging.LogWarning("Error changing Archives Upgrade disk spawn logic.");
-            }
-        }
+        UpgradeDisks.ChangeItemDropFSM("ARCHIVES", "State", "skip", "Spawn Sanctum Key");
     }
 }

@@ -27,32 +27,7 @@ class Garage : RoomHandler
             PlayMakerFSM GarageCreepFSM = roomGameObject.transform.Find("_NONSTATIC/CREEP/Garage Door Button/Button").GetComponent<PlayMakerFSM>();
             GarageCreepFSM.GetState("Button Press")?.AddFirstAction(CustomFsmMethodManager.GetCallMethod("GarageOpened"));
             GaragePierceFSM.GetState("Button Press")?.AddFirstAction(CustomFsmMethodManager.GetCallMethod("GarageOpened"));
-
-            if (roomGameObject != null)
-            {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7")?.GetComponent<PlayMakerFSM>();
-                if (ItemDropFSM != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
-                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 3").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ItemDropFSM.GetState("State 3").ChangeTransition("skip", "Spawn Sanctum Key");
-                    //FsmState CoatCheckCheck = ItemDropFSM.GetState("Coat Check Check");
-                    //CoatCheckCheck.ChangeTransition("cont", "Spawn Sanctum Key");
-                    //if (!found)
-                    //{
-                    //    IntCompare KeyIntCheck = CoatCheckCheck.GetFirstActionOfType<IntCompare>();
-                    //    KeyIntCheck.equal = KeyIntCheck.lessThan;
-                    //    ItemDropFSM.GetState("State 2").DisableFirstActionOfType<ArrayListContains>();
-                    //    ItemDropFSM.GetState("State 2").ChangeTransition("FINISHED", "Coat Check Check");
-                    //}
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Garage Upgrade disk spawn logic.");
-                }
-            }
+            UpgradeDisks.ChangeItemDropFSM("GARAGE", "State 3", "skip", "Spawn Sanctum Key");
         }
     }
 }

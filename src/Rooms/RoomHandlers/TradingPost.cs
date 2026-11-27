@@ -34,7 +34,7 @@ namespace BluePrinceArchipelago.Rooms.RoomHandlers
                 roomGameObject = ModRoomManager.GetRoomInstance("Trading Post");
                 if (roomGameObject != null)
                 {
-                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_Non Static/AFTER EXPLOSION/2")?.GetComponent<PlayMakerFSM>();
+                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_CULLABLE/_Non Static/AFTER EXPLOSION/2").GetComponent<PlayMakerFSM>();
                     if (ItemDropFSM != null)
                     {
                         bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("TRADING POST DYNAMITE");

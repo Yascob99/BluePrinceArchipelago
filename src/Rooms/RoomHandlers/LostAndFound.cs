@@ -36,6 +36,7 @@ class LostAndFound : RoomHandler
 
                 if (ItemDropFSM != null)
                 {
+
                     bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("LOST & FOUND");
                     Logging.LogWarning(found);
                     FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
