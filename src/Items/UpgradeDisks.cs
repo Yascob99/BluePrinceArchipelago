@@ -4,13 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using BluePrinceArchipelago.Rooms;
 #if Bep
 using PathologicalGames;
+using HutongGames.PlayMaker;
+using HutongGames.PlayMaker.Actions;
 #endif
-
 #if ML
 using Il2Cpp;
 using Il2CppPathologicalGames;
+using Il2CppHutongGames.PlayMaker;
+using Il2CppHutongGames.PlayMaker.Actions;
+using static UnityEngine.UI.Selectable;
 #endif
 
 namespace BluePrinceArchipelago.Items
@@ -22,7 +27,7 @@ namespace BluePrinceArchipelago.Items
     public class UpgradeDisks(GameObject gameObject = null) : GroupedItems("UPGRADE DISK", gameObject, false, 16, true)
     {
         public new List<string> ItemNames = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
-        public new List<string> LocationNames = ["ARCHIVES", "TRADING POST TRADE", "TOMB", "COMMISSARY", "THE FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST & FOUND", "HER LADYSHIP'S CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
+        public new List<string> LocationNames = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "THE FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST & FOUND", "HER LADYSHIP'S CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
         public static List<GameObject> YouFoundObjects = new List<GameObject>();
         public List<EventID> EventNames = [EventID.Upgrade_Disk_Archives_found, EventID.Upgrade_Disk_BootLeg_found, EventID.Upgrade_Disk_Cloister_found, EventID.Upgrade_Disk_Commissary_found, EventID.Upgrade_Disk_Foundation_found, EventID.Upgrade_Disk_Freezer_found, EventID.Upgrade_Disk_Garage_found, EventID.Upgrade_Disk_GreatHall_found, EventID.Upgrade_Disk_LostFound_found, EventID.Upgrade_Disk_MasterBedroom_found, EventID.Upgrade_Disk_Mechanarium_found, EventID.Upgrade_Disk_MorningRoom_found, EventID.Upgrade_Disk_Office_found, EventID.Upgrade_Disk_TradingPost_found, EventID.Upgrade_Disk_Vault_found, EventID.Upgrade_Disk_TorchRoom_found];
         public List<string> UsedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
@@ -160,6 +165,7 @@ namespace BluePrinceArchipelago.Items
                 FoundLocations.Add(location.ToUpper());
                 State.UpdateUpgradeDiskData();
                 ModInstance.ModEventHandler.OnUgradeDiskFound(LocationNames[LocationNames.IndexOf(location.ToUpper())]);
+
             }
             ModInstance.GlobalPersistentManager.GetComponent<PlayMakerFSM>().GetBoolVariable(UsedVariables[LocationNames.IndexOf(location.ToUpper())]).Value = true;
         }
@@ -230,6 +236,11 @@ namespace BluePrinceArchipelago.Items
 
         }
 
+        public void SetSpawnFSM(PlayMakerFSM fsm, string state, string endstate, FsmBool boolvar) { 
+            fsm.GetState(state).GetFirstActionOfType<BoolTest>().boolVariable = boolvar;
+            fsm.GetState(state).ChangeTransition("skip", endstate);
+        }
+
         /// <summary>
         ///     Internal. Initializes the notification UI objects for when Upgrade Disks are bought or purchased.
         /// </summary>
@@ -298,6 +309,95 @@ namespace BluePrinceArchipelago.Items
             AbandonedMineDiskNotification.name = "You Found Upgrade Disk - Abandoned Mine";
 
             YouFoundObjects = [ArchivesDiskNotification, TradingPostDiskNotification, TombDiskNotification, CommissaryDiskNotification, FoundationDiskNotification, FreezerDiskNotification, GarageDiskNotification, GreatHallDiskNotification, LostAndFoundDiskNotification, HLCDiskNotification, MechanariumDiskNotification, MorningRoomDiskNotification, OfficeDiskNotification, null, VaultDiskNotification, AbandonedMineDiskNotification];
+        }
+
+        public static void SetCanSpawnDisk(PlayMakerFSM itemDropFSM, bool value) {
+            FsmBool CanSpawnDisk = itemDropFSM.GetBoolVariable("CanSpawnDisk");
+            CanSpawnDisk.Value = value;
+        }
+
+        public static GameObject GetItemDropObject(string location) {
+            switch (location) {
+                case "ARCHIVES":
+                    return ModRoomManager.GetRoomInstance("Archives").FindDescendant("_GAMEPLAY/Hero Filing Cabinet/Draw 04/Draw 04/1");
+                case "TRADING POST DYNAMITE":
+                    return ModRoomManager.GetRoomInstance("Trading Post").transform.Find("_CULLABLE/_Non Static/AFTER EXPLOSION/2").gameObject;
+                case "TOMB":
+                    return ModRoomManager.GetRoomInstance("Tomb").transform.Find("_CULLABLE/_GAMEPLAY/Sliding Wall A Anchor/Gold Pay Off/3").gameObject;
+                case "COMMISSARY":
+                    return ModRoomManager.GetRoomInstance("Commissary").transform.Find("_GAMEPLAY/ITEMS FOR SALE").gameObject;
+                case "THE FOUNDATION":
+                    return GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5").gameObject;
+                case "FREEZER":
+                    return ModRoomManager.GetRoomInstance("Freezer").transform.Find("_GAMEPLAY/ICE DOORS/Door 20/6").gameObject;
+                case "GARAGE":
+                    return ModRoomManager.GetRoomInstance("Foundation").transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7").gameObject;
+                case "LOST & FOUND":
+                    return ModRoomManager.GetRoomInstance("Lost & Found").transform.Find("_GAMEPLAY/9").gameObject;
+                case "HER LADYSHIP'S CHAMBER":
+                    return ModRoomManager.GetRoomInstance("Her Ladyship's Chamber").transform.Find("_GAMEPLAY/_Pickup Items/10").gameObject;
+                case "MECHANARIUM":
+                    return ModRoomManager.GetRoomInstance("Mechanarium").transform.Find("_GAMEPLAY/11").gameObject;
+                case "MORNING ROOM":
+                    return ModRoomManager.GetRoomInstance("Morning Room").transform.Find("_GAMEPLAY/_Pickup Items/12").gameObject;
+                case "OFFICE":
+                    return ModRoomManager.GetRoomInstance("Office").transform.Find("_GAMEPLAY/_Pickup Items/13").gameObject;
+                case "VAULT":
+                    return ModRoomManager.GetRoomInstance("Vault").transform.Find("_GAMEPLAY/Lockers/Locker 304/304 Spwn/15").gameObject;
+                case "ABANDONED MINE":
+                    return GameObjectExtensions.FindInHierarchy("UNDERGROUND/Candle Room/_CULLABLE - candle room/_GAMEPLAY/Mine Joint Pillar/16");
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        ///     Overrides the Upgrade Disk drop logic for the given location to the correct values. Some need different handling (notably
+        /// </summary>
+        /// <param name="location">The Location of the Upgrade Disk</param>
+        /// <param name="checkState">The Name of the state the check is on.</param>
+        /// <param name="transition">The name of the transition.</param>
+        /// <param name="toState">The name of the final state.</param>
+        public static void ChangeItemDropFSM(string location, string checkState, string transition, string toState) {
+
+            try
+            {
+                GameObject itemDropObject = GetItemDropObject(location);
+                ChangeItemDropFSM(location, itemDropObject, checkState, transition, toState);
+            }
+            catch (Exception e) {
+                Logging.LogError("Error: Unable to Get Room Instance when attempting to change upgrade disk drop logic.", "UpgradeDisks");
+            }
+        }
+        public static void ChangeItemDropFSM(string location, GameObject itemDropObject, string checkState, string transition, string toState)
+        {
+            try
+            {
+                bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains(location);
+
+                PlayMakerFSM itemDropFSM = itemDropObject.GetComponent<PlayMakerFSM>();
+                FsmBool canSpawnDisk = itemDropFSM.GetBoolVariable("CanSpawnDisk");
+                canSpawnDisk.Value = found;
+                itemDropFSM.GetState(checkState).GetFirstActionOfType<BoolTest>().boolVariable = canSpawnDisk;
+                itemDropFSM.GetState(checkState).ChangeTransition(transition, toState);
+                itemDropFSM.GetState(toState).AddAction(
+                new SetFsmBool()
+                {
+                    fsmName = "FSM",
+                    gameObject = new FsmOwnerDefault()
+                    {
+                        gameObject = itemDropObject,
+                        ownerOption = OwnerDefaultOption.SpecifyGameObject,
+                    },
+                    variableName = "CanSpawnDisk",
+                    setValue = false,
+                    everyFrame = false,
+                });
+            }
+            catch (Exception e)
+            {
+                Logging.LogError($"Error while changing upgrade disk logic: {e.Message}", "UpgradeDisks");
+            }
         }
     }
 }

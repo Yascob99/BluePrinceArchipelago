@@ -109,9 +109,7 @@ public class Commissary : RoomHandler
         if (ArchipelagoOptions.UpgradeDiskSanity)
         {
             // Changes makes it check if the location has been found instead of a different check.
-            FsmBool CanSpawnDisk = _ItemsForSaleFsm.GetBoolVariable("CanSpawnDisk");
-            CanSpawnDisk.Value = ModItemManager.UpgradeDisks.FoundLocations.Contains("COMMISSARY");
-            _ItemsForSaleFsm.GetState("State 5").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
+            UpgradeDisks.ChangeItemDropFSM("COMMISSARY", "UPRADE CHECK", "skip", "Spawn Sanctum Key");
         }
     }
 

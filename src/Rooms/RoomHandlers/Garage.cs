@@ -27,24 +27,7 @@ class Garage : RoomHandler
             PlayMakerFSM GarageCreepFSM = roomGameObject.transform.Find("_NONSTATIC/CREEP/Garage Door Button/Button").GetComponent<PlayMakerFSM>();
             GarageCreepFSM.GetState("Button Press")?.AddFirstAction(CustomFsmMethodManager.GetCallMethod("GarageOpened"));
             GaragePierceFSM.GetState("Button Press")?.AddFirstAction(CustomFsmMethodManager.GetCallMethod("GarageOpened"));
-
-            if (roomGameObject != null)
-            {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/TrunkSpawn/1 Spawn/7")?.GetComponent<PlayMakerFSM>();
-                if (ItemDropFSM != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GARAGE");
-                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing Garage Upgrade disk spawn logic.");
-                }
-            }
+            UpgradeDisks.ChangeItemDropFSM("GARAGE", "State 3", "skip", "Spawn Sanctum Key");
         }
     }
 }

@@ -22,25 +22,7 @@ class Vault : RoomHandler
         {
             if (ArchipelagoOptions.UpgradeDiskSanity)
             {
-                roomGameObject = ModRoomManager.GetRoomInstance("Vault");
-                if (roomGameObject != null)
-                {
-                    PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/Lockers/Locker 370/370 spwn/6")?.GetComponent<PlayMakerFSM>();
-                    if (ItemDropFSM != null)
-                    {
-                        bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("VAULT");
-                        Logging.LogWarning(found);
-                        FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                        CanSpawnDisk.Value = found;
-                        ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                        ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                        CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                    }
-                    else
-                    {
-                        Logging.LogWarning("Error changing Vault Upgrade disk spawn logic.");
-                    }
-                }
+                UpgradeDisks.ChangeItemDropFSM("VAULT", "State 3", "skip", "Spawn Sanctum Key 2");
             }
         }
     }

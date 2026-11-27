@@ -24,19 +24,13 @@ class GreatHall : RoomHandler
             roomGameObject = ModRoomManager.GetRoomInstance("Great Hall");
             if (roomGameObject != null)
             {
-                List<PlayMakerFSM> ItemDropFSMs = GetItemDropFSMs(roomGameObject);
-                foreach (PlayMakerFSM ItemDropFSM in ItemDropFSMs)
+                List<GameObject> itemDropGOs = GetItemDropObjects(roomGameObject);
+                foreach (GameObject itemDropGO in itemDropGOs)
                 {
 
-                    if (ItemDropFSM != null)
+                    if (itemDropGO != null)
                     {
-                        bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("GREAT HALL");
-                        Logging.LogWarning(found);
-                        FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                        CanSpawnDisk.Value = found;
-                        ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                        ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                        CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
+                        UpgradeDisks.ChangeItemDropFSM("GREAT HALL", itemDropGO, "State 3", "skip", "Spawn Sanctum Key");
                     }
                     else
                     {
@@ -47,19 +41,30 @@ class GreatHall : RoomHandler
 
         }
     }
-    private List<PlayMakerFSM> GetItemDropFSMs(GameObject roomGameObject)
+    private List<GameObject> GetItemDropObjects(GameObject roomGameObject)
     {
-        List<PlayMakerFSM> ItemDropFSMs = new List<PlayMakerFSM>();
-        Transform SubWalls = roomGameObject.transform.Find("_GAMEPLAY").Find("SubWalls");
-        for (int i = 0; i < SubWalls.childCount; i++) { 
-            Transform Side = SubWalls.GetChild(i).transform;
-            for (int j = 0; j < Side.childCount; j++) {
-                Transform Subwall = Side.GetChild(j);
-                PlayMakerFSM ItemDropFSM = Subwall.Find("Static").Find("Lever Off").GetChild(0).Find("8").gameObject.GetComponent<PlayMakerFSM>();
-                ItemDropFSMs.Add(ItemDropFSM);
+        List<GameObject> ItemDropGOs = new List<GameObject>();
+        Transform SubWalls = roomGameObject.FindDescendant("_GAMEPLAY/SubWalls").transform;
+        if (SubWalls != null)
+        {
+            for (int i = 0; i < SubWalls.childCount; i++)
+            {
+                Transform Side = SubWalls.GetChild(i);
+                if (Side != null)
+                {
+                    for (int j = 0; j < Side.childCount; j++)
+                    {
+                        Transform Subwall = Side.GetChild(j);
+                        GameObject ItemDropGO = Subwall.gameObject.FindChildGameObjectsRecursive("8")[0].gameObject;
+                        if (ItemDropGO != null)
+                        {
+                            ItemDropGOs.Add(ItemDropGO);
+                        }
+                    }
+                }
             }
         }
-        return ItemDropFSMs;
+        return ItemDropGOs;
     }
 }
 

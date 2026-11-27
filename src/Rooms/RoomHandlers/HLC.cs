@@ -20,25 +20,7 @@ class HLC : RoomHandler
     {
         if (ArchipelagoOptions.UpgradeDiskSanity)
         {
-            roomGameObject = ModRoomManager.GetRoomInstance("Her Ladyship's Chamber");
-            if (roomGameObject != null)
-            {
-                PlayMakerFSM ItemDropFSM = roomGameObject.transform.Find("_GAMEPLAY/_Pickup Items/10")?.GetComponent<PlayMakerFSM>();
-                if (ItemDropFSM != null)
-                {
-                    bool found = ModItemManager.UpgradeDisks.FoundLocations.Contains("HER LADYSHIP'S CHAMBER");
-                    Logging.LogWarning(found);
-                    FsmBool CanSpawnDisk = ItemDropFSM.GetBoolVariable("CanSpawnDisk");
-                    CanSpawnDisk.Value = found;
-                    ItemDropFSM.GetState("State 1").GetFirstActionOfType<BoolTest>().boolVariable = CanSpawnDisk;
-                    ArrayListContains CheckInInventory = ItemDropFSM.GetState("State 2").GetFirstActionOfType<ArrayListContains>();
-                    CheckInInventory.isContainedEvent = CheckInInventory.isNotContainedEvent;
-                }
-                else
-                {
-                    Logging.LogWarning("Error changing HLC Upgrade disk spawn logic.");
-                }
-            }
+            UpgradeDisks.ChangeItemDropFSM("HER LADYSHIP'S CHAMBER", "State 1", "skip", "Spawn Sanctum Key");
         }
     }
 }
