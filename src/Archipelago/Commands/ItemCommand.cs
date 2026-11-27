@@ -117,38 +117,48 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                 }
                 else if (subcommand.ToLower() == "remove")
                 {
-                    string itemName = "";
-                    for (int i = 1; i < Args.Count; i++)
+                    string itemName = Args[1];
+                    for (int i = 2; i < Args.Count; i++)
                     {
-                        itemName += Args[i];
+                        itemName += " " + Args[i];
                     }
+
+                    ArchipelagoConsole.LogMessage($"Attemping to remove item {itemName}");
+                    
                     GameObject item = ModItemManager.GetPickedUpItem(itemName);
+                    
                     if (item == null)
                     {
                         ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} is not a valid Item Name or is not in your Inventory");
                         return;
                     }
-                    string iconName = Plugin.UniqueItemManager.GetIconName(itemName);
-                    GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
-                    PlayMakerFSM Inventory = InventoryGO.GetFsm("Inventory Icons");
-                    PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
-                    GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(iconName);
 
-                    Logging.LogWarning(icon != null);
-                    Logging.LogWarning(InventoryIcons != null);
+                    GameObject InventoryGO = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");
+                    PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
+                    GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(item.name);
+
+                    //Logging.LogWarning(icon != null);
+                    //Logging.LogWarning(InventoryIcons != null);
                     if (icon != null && InventoryIcons != null)
                     {
-                        if (!ModItemManager.PickedUp.Contains(Name))
+                        //Logging.LogWarning(ModItemManager.PickedUp.Contains(item.name));
+                        if (ModItemManager.PickedUp.Contains(item.name))
                         {
-                            ModItemManager.PickedUp.Add(item, "GameObject");
+                            ModItemManager.PickedUp.Remove(item, "GameObject");
                         }
-                        InventoryIcons.Add(icon, "GameObject");
+                        InventoryIcons.Remove(icon, "GameObject");
 
-                        if (itemName == "RUNNING SHOES")
+                        if (item.name == "RUNNING SHOES")
                         {
                             ModInstance.RunningEngine.SendEvent("Update");
                         }
-                        //Send Event 0 to the Global Manager.
+                        /* need to implement timer pause when removing stopwatch from inventory
+                        if (item.name == "STOPWATCH")
+                        {
+                            GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("End"); //not sure what the event is to pause the stopwatch
+                        }
+                        */
+                        return;
                     }
 
                     ArchipelagoConsole.LogMessage($"Error Running Command {Name} {subcommand}: {itemName} can't be removed from inventory.");
