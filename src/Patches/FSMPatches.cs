@@ -3,7 +3,6 @@ using BluePrinceArchipelago.Items;
 using BluePrinceArchipelago.Rooms;
 using BluePrinceArchipelago.Utils;
 using BluePrinceArchipelago.Resources;
-
 #if Bep
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
