@@ -17,26 +17,21 @@ namespace BluePrinceArchipelago.Items
     /// </summary>
     public class UpgradeDisksGameItem : GameItem
     {
-        private readonly string _upgradeDiskName;
-        private readonly string _locationName;
-        private readonly string _usedVariableName;
-        private readonly int _index;
-        private bool _received = false;
-        private bool _used = false;
-        private bool _found = false;
-
-
         private static readonly List<string> _itemNames = ["ARCHIVES", "TRADING POST DYNAMITE", "TOMB", "COMMISSARY", "FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST AND FOUND", "HER LADYSHIPS CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
         private static readonly List<string> _locationNames = ["ARCHIVES", "TRADING POST TRADE", "TOMB", "COMMISSARY", "THE FOUNDATION", "FREEZER", "GARAGE", "GREAT HALL", "LOST & FOUND", "HER LADYSHIP'S CHAMBER", "MECHANARIUM", "MORNING ROOM", "OFFICE", "TRADING POST TRADE", "VAULT", "ABANDONED MINE"];
         private static readonly List<string> _usedVariables = ["Upgrade Disc - Archives", "Upgrade Disc - Bootleg", "Upgrade Disc - Cloister", "Upgrade Disc - Commissary", "Upgrade Disc - Foundation", "Upgrade Disc - Freezer", "Upgrade Disc - Garage", "Upgrade Disc - Great Hall", "Upgrade Disc - LostFound", "Upgrade Disc - Master Bedroom", "Upgrade Disc - Mechanarium", "Upgrade Disc - Morning Room", "Upgrade Disc - Office", "Upgrade Disc - Shop", "Upgrade Disc - Tomb", "Upgrade Disc - Torch Room"];
 
-        private static readonly List<string> _foundLocations = [];
+        private readonly int _index;
+        private readonly string _locationName;
+        private readonly string _usedVariableName;
+        private bool _used = false;
+        private bool _found = false;
+
+        //TODO : Move to FSM Patches (with corresponding method)
         public static List<GameObject> YouFoundObjects = [];
 
-
-        public UpgradeDisksGameItem(string upgradeDiskName) : base("UPGRADE DISK", GameObject.Find("__SYSTEM/Upgrade Disks"))
+        public UpgradeDisksGameItem(string upgradeDiskName) : base(upgradeDiskName, GameObject.Find("__SYSTEM/Upgrade Disks"))
         {
-            _upgradeDiskName = upgradeDiskName;
             _index = _itemNames.IndexOf(upgradeDiskName);
             _locationName = _locationNames[_index];
             _usedVariableName = _usedVariables[_index];
@@ -48,6 +43,7 @@ namespace BluePrinceArchipelago.Items
         /// <returns>If the location was unlocked.</returns>
         public bool UnlockLocation()
         {
+            //TODO : The bool might be useless
             if (_found)
             {
                 return false;
@@ -71,7 +67,7 @@ namespace BluePrinceArchipelago.Items
             }
 
             // Logging.LogWarning($"[{UsedLocations.Join(", ")}]");
-            if (_received)
+            if (_archipelagoUnlocked)
             {
                 if (!_used)
                 {
@@ -88,7 +84,7 @@ namespace BluePrinceArchipelago.Items
             }
 
             // Despawn Foundation Upgrade Disk
-            if (_found && _upgradeDiskName.Contains("THE FOUNDATION"))
+            if (_found && _name.Contains("THE FOUNDATION"))
             {
                 Transform foundationSpawn = GameObject.Find("UNDERGROUND").transform.Find("Below Foundation (Cullable)").Find("Below Foundation - Prefab").Find("_GAMEPLAY").Find("5");
                 if (foundationSpawn.childCount > 0)
@@ -132,7 +128,7 @@ namespace BluePrinceArchipelago.Items
                 State.UpdateUpgradeDiskData();
             }
             // Prevent the bool for being set for trading post trade specifically.
-            if (_found && _upgradeDiskName != "TRADING POST TRADE")
+            if (_found && _name != "TRADING POST TRADE")
             {
                 UpgradeDiskUsed();
             }
@@ -147,10 +143,10 @@ namespace BluePrinceArchipelago.Items
         /// </summary>
         public void OnFind()
         {
-            Logging.LogWarning(_upgradeDiskName);
+            Logging.LogWarning(_name);
             if (_found)
             {
-                Logging.LogWarning($"Upgrade disk {_upgradeDiskName} already found");
+                Logging.LogWarning($"Upgrade disk {_name} already found");
                 return;
             }
             _found = true;
@@ -161,7 +157,7 @@ namespace BluePrinceArchipelago.Items
 
         public void OnTrade()
         {
-            if (!_found && _upgradeDiskName.Contains("TRADING POST TRADE"))
+            if (!_found && _name.Contains("TRADING POST TRADE"))
             {
                 _found = true;
                 State.UpdateUpgradeDiskData();
@@ -198,9 +194,9 @@ namespace BluePrinceArchipelago.Items
                 return;
             }
             Logging.LogWarning("Attempting To Add Upgrade Disk to Inventory.");
-            if (!_received)
+            if (!_archipelagoUnlocked)
             {
-                _received = true;
+                _archipelagoUnlocked = true;
             }
             // If UpgradeDiskSanity is off, prevent adding it to inventory.
             GameObject inventoryGameObject = GameObject.Find("UI OVERLAY CAM/MENU/Blue Print /Inventory");

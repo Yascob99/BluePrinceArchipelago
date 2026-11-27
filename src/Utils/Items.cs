@@ -69,6 +69,23 @@ namespace BluePrinceArchipelago
         public const string VAULT_KEY_370 = "VAULT KEY 370";
         public const string WATERING_CAN = "WATERING CAN";
 
+        public const string UPGRADE_DISK_ARCHIVES = "ARCHIVES";
+		public const string UPGRADE_DISK_TRADING_POST_DYNAMITE = "TRADING POST DYNAMITE";
+		public const string UPGRADE_DISK_TOMB = "TOMB";
+		public const string UPGRADE_DISK_COMMISSARY = "COMMISSARY";
+		public const string UPGRADE_DISK_FOUNDATION = "FOUNDATION";
+		public const string UPGRADE_DISK_FREEZER = "FREEZER";
+		public const string UPGRADE_DISK_GARAGE = "GARAGE";
+		public const string UPGRADE_DISK_GREAT_HALL = "GREAT HALL";
+		public const string UPGRADE_DISK_LOST_AND_FOUND = "LOST AND FOUND";
+		public const string UPGRADE_DISK_HER_LADYSHIPS_CHAMBER = "HER LADYSHIPS CHAMBER";
+		public const string UPGRADE_DISK_MECHANARIUM = "MECHANARIUM";
+		public const string UPGRADE_DISK_MORNING_ROOM = "MORNING ROOM";
+		public const string UPGRADE_DISK_OFFICE = "OFFICE";
+		public const string UPGRADE_DISK_TRADING_POST_TRADE = "TRADING POST TRADE";
+		public const string UPGRADE_DISK_VAULT = "VAULT";
+		public const string UPGRADE_DISK_ABANDONED_MINE = "ABANDONED MINE";
+
         /// <summary>
         ///     Names of the models in the "you found" notifications.
         ///     You may want to use GetItemModelInNotificationName() to access these.
