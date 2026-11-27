@@ -98,11 +98,11 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                                 ModItemManager.PickedUp.AddIfUnique(item);
                                 InventoryIcons.Add(icon, "GameObject");
                                 ModItemManager.PreSpawn.RemoveIfExists(item.name);
-                                if (Name == "RUNNING SHOES")
+                                if (Name == ITEM.RUNNING_SHOES)
                                 {
                                     ModInstance.RunningEngine.SendEvent("Update");
                                 }
-                                if (Name == "STOPWATCH")
+                                if (Name == ITEM.STOPWATCH)
                                 {
                                     GameObject.Find("__SYSTEM/STOPWATCH controller").GetComponent<PlayMakerFSM>().SendEvent("Begin");
                                 }
@@ -148,7 +148,7 @@ namespace BluePrinceArchipelago.Archipelago.Commands
                         }
                         InventoryIcons.Remove(icon, "GameObject");
 
-                        if (item.name == "RUNNING SHOES")
+                        if (itemName == ITEM.RUNNING_SHOES)
                         {
                             ModInstance.RunningEngine.SendEvent("Update");
                         }

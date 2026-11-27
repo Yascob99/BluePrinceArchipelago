@@ -1294,7 +1294,7 @@ namespace BluePrinceArchipelago.Rooms
                 return targetRank != 1 && targetRank != 9;
             };
             // Checks if the current chess power is the rook for the armory unlock.
-            Func<ModRoom, bool> chessPowerRook = (room) =>
+            Func<ModRoom, bool> chessPowerKnight = (room) =>
             {
                 if (ModInstance.GlobalPersistentManager?.GetIntVariable("Chess Power")?.Value == 2)
                 {
@@ -1402,7 +1402,7 @@ namespace BluePrinceArchipelago.Rooms
             AddRoom("STUDY", ["FRONT - Tier 1", "FRONTBACK - RARE", "NORTH PIERCE", "CORNER - RARE", "CENTER - Tier 2", "EDGECREEP - RARE", "EDGEPIERCE - RARE", "Center Rare"], true);
             AddRoom("TERRACE", ["EDGEPIERCE EAST", "EDGEPIERCE WEST"], true);
             AddRoom("THE ARMORY", ["CENTER - Tier 1 G", "CORNER - Tier 1 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "NORTH PIERCE G"], false)
-                .AddEarlyDraftDependency(chessPowerRook);
+                .AddEarlyDraftDependency(chessPowerKnight);
             AddRoom("THE FOUNDATION", ["CENTER - Tier 1", "CENTER - Tier 2", "CENTER - Tier 3"], true);
             AddRoom("THE KENNEL", ["FRONT - Tier 1", "EDGECREEP EAST", "EDGECREEP WEST", "CENTER - Tier 1"], false);
             AddRoom("THE POOL", ["FRONTBACK G - RARE", "NORTH PIERCE G", "CENTER - Tier 2 G", "EDGE ADVANCE WESTWING - G", "EDGE ADVANCE EASTWING - G", "EDGE RETREAT WESTWING -  G", "EDGE RETREAT EASTTWING -  G", "EDGEPIERCE G", "Center Rare G"], true);
