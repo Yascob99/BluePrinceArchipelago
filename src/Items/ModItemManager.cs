@@ -1161,16 +1161,17 @@ namespace BluePrinceArchipelago.Items
                 PlayMakerArrayListProxy InventoryIcons = InventoryGO.GetArrayListProxy("Inventory Icons");
                 GameObject icon = Plugin.UniqueItemManager.GetIconGameObject(item.name);
 
-                Logging.LogWarning(icon != null);
-                Logging.LogWarning(InventoryIcons != null);
+                //Logging.LogWarning(icon != null);
+                //Logging.LogWarning(InventoryIcons != null);
                 if (icon != null && InventoryIcons != null)
                 {
-                    Logging.LogWarning(ModItemManager.PickedUp.Contains(item.name));
+                    //Logging.LogWarning(ModItemManager.PickedUp.Contains(item.name));
                     if (ModItemManager.PickedUp.Contains(item.name))
                     {
                         ModItemManager.PickedUp.Remove(item, "GameObject");
                     }
                     InventoryIcons.Remove(icon, "GameObject");
+                    ArchipelagoConsole.LogMessage($"YOU HAVE LOST YOUR {item.name.ToUpper()}");
 
                     if (item.name == "RUNNING SHOES")
                     {
