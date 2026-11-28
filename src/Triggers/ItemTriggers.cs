@@ -204,12 +204,9 @@ namespace BluePrinceArchipelago.Triggers
         public static void OnItemDugUp(UniqueItem Item) {
             if (!Item.HasBeenFound)
             {
-                if (Item.ApplySanity())
-                {
-                    Item.HasBeenFound = true;
-                    ModItemManager.RemoveUniqueItemAPSwirly(Item);
-                    ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
-                }
+                Item.HasBeenFound = true;
+                ModItemManager.RemoveUniqueItemAPSwirly(Item);
+                ModInstance.QueueManager.AddLocationToQueue($"First Pickup - {Item.Name.ToTitleCase()}");
             }
         }
 

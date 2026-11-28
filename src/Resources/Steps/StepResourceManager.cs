@@ -76,7 +76,7 @@ namespace BluePrinceArchipelago.Resources
 
         private System.Collections.IEnumerator WaitUntilUnfrozen() {
             WaitingForUnfreeze = true;
-            FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
+            FsmBool currentlyFrozen = Player.GetComponent<PlayMakerFSM>().GetBoolVariable("currently frozen");
             if (currentlyFrozen != null) {
                 while (currentlyFrozen.Value && ModInstance.IsInRun) {
                     yield return new WaitForSeconds(0.2f);
@@ -258,7 +258,7 @@ namespace BluePrinceArchipelago.Resources
         {
             SetOldStepCount(GetStepCount());
             SetStepCount(GetTargetSteps());
-            FsmBool currentlyFrozen = Player?.GetComponent<PlayMakerFSM>()?.GetBoolVariable("currently frozen");
+            FsmBool currentlyFrozen = Player.GetComponent<PlayMakerFSM>().GetBoolVariable("currently frozen");
             if (currentlyFrozen.Value) {
                 // Waits until the game is not paused/in a cutscene, then kills the player via 0 step ending;
                 WaitUntilUnfrozen();
